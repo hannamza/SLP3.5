@@ -15512,7 +15512,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  {
  	// 1. Input Type
  	// 2. Output Type
- 	// 3. Pump Name
+ 	// 3. Pump Name 
  	// 4. Ps type
  	// 5. Pump type
  	int nSize = 0,i;
