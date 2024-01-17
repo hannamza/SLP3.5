@@ -269,6 +269,10 @@ BOOL CSysLinkerApp::InitInstance()
 
 	EnableTaskbarInteraction();
 
+	//20240118 GBM start - github test
+	int a = 0;
+	//20240118 GBM end
+
 	// RichEdit 컨트롤을 사용하려면  AfxInitRichEdit2()가 있어야 합니다.	
 	// AfxInitRichEdit2();
 
