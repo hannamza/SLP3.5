@@ -31,6 +31,9 @@
     <Filter Include="Verion">
       <UniqueIdentifier>{d537f1b8-6cc2-4e87-9d55-8107dff0e9f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SLP3.5Func">
+      <UniqueIdentifier>{1b854517-b5d0-46d5-9820-da111b263bca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -495,6 +498,24 @@
     <ClInclude Include="..\Common\Control\CBSpeedListCtrl.h">
       <Filter>Common\Control</Filter>
     </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\Defines.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\TSingleton.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\NewInfo.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\NewDBManager.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\Log.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\CommonFunc.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -940,6 +961,18 @@
     </ClCompile>
     <ClCompile Include="..\Common\Control\CBSpeedListCtrl.cpp">
       <Filter>Common\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\NewInfo.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\NewDBManager.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\Log.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\CommonFunc.cpp">
+      <Filter>SLP3.5Func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

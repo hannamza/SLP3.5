@@ -55,6 +55,15 @@ using namespace Gdiplus;
 #include <vector>
 #include <map>
 
+//20240129 GBM start - 추가 기능 헤더
+#include "Defines.h"	
+#include "TSingleton.h"
+#include "CommonFunc.h"
+#include "Log.h"
+#include "NewInfo.h"
+#include "NewDBManager.h"
+//20240129 GBM end
+
 // #ifdef _DEBUG
 // #define new DEBUG_NEW
 // #endif

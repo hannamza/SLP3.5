@@ -741,6 +741,23 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				continue;
 			}
 
+			//20240130 GBM start - 프로젝트 정보, 수신기 / 유닛 타입, CCTV 정보 파싱
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_PROJECT_INFO) == 0)
+			{
+				continue;
+			}
+
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_UNIT) == 0)
+			{
+				continue;
+			}
+
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_CCTV) == 0)
+			{
+				continue;
+			}
+			//20240130 GBM end
+
 			str = strSheetName;
 			strUp1 = str;
 			strUp1.MakeUpper();
@@ -10321,6 +10338,11 @@ int CRelayTableData::LoadProjectDatabase()
 		return 0;
 	}
 
+	//20240202 GBM start - 새 회로 입력 타입 추가
+	CNewDBManager::Instance()->SetDBAccessor(m_pDB);
+	CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
+	//20240202 GBM end
+
 #if _DBLOAD_TIME_
 	dwEnd = GetTickCount();
 	GF_AddDebug(L"시간 체크 : Database 설정 - %d" , dwEnd - dwOrigin);
@@ -10561,8 +10583,6 @@ int CRelayTableData::LoadProjectDatabase()
 		cvt.ConvertRelayID();
 		cvt.ChangeDatabase(m_pDB);
 	}
-	
-	
 
 	return 1;
 }

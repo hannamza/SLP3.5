@@ -338,6 +338,17 @@ BOOL CSysLinkerApp::InitInstance()
 	// 주 창이 초기화되었으므로 이를 표시하고 업데이트합니다.
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
+
+	//20240202 GBM start - 새 기능 클래스 초기화
+	CNewInfo::New();
+	CString strProgramName = _T("");
+	strProgramName = CCommonFunc::GetFileNameOnly(CCommonFunc::GetProgramPath());
+	int nProgramNameLen = -1;
+	nProgramNameLen = strProgramName.GetLength();
+	Log::Setup(strProgramName.Left(nProgramNameLen - 4));
+	CNewDBManager::New();
+	//20240202 GBM end
+
 	OnHomeLogin();
 	return TRUE;
 }
@@ -361,6 +372,13 @@ int CSysLinkerApp::ExitInstance()
 // 		m_pFasSysData = nullptr;
 // 	}
 	//RemoveTemplate();
+
+	//20240202 GBM start - 새 기능 클래스 정리
+	CNewInfo::Delete();
+	CNewDBManager::Delete();
+	Log::Cleanup();
+	//20240202 GBM end
+
 	return CWinAppEx::ExitInstance();
 }
 
@@ -958,14 +976,18 @@ void CSysLinkerApp::OnHomeLogin()
 	if (m_pMainDb == nullptr || m_pMainDb->IsOpen() == FALSE)
 		OpenBaseDatabase();
 
+	//20240119 GBM start - 무의미한 로그인 삭제
+#if 0
 	CDlgProgramLogin dlg(m_pMainDb);
 	if (dlg.DoModal() != IDOK)
 		return; 
-	 
-	m_bProgramLogin = TRUE;
 	m_strProgramLoginUser = dlg.m_strUser;
 	GF_AddLog(L"프로그램 로그인에 성공했습니다.");
 	AfxMessageBox(L"프로그램 로그인에 성공했습니다.");
+#endif
+	//20240119 GBM end
+
+	m_bProgramLogin = TRUE;
 	//OpenBaseDatabase();
 	//m_pMainDb->RestoreDatabase(L"연동", L"D:\\04. Ficon3\\51. Project\\연동", L"연동.bak");
 // 	CDlgLogIn dlg(m_pMainDb);

@@ -231,6 +231,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// 문서 이름이 축소판 그림과 함께 표시되므로 작업 표시줄의 기능성이 개선됩니다.
 	ModifyStyle(0, FWS_PREFIXTITLE);
 	GF_AddLog(L"SLP3 프로그램이 정상 기동됐습니다.");
+
+	//20240129 GBM start - test
+	int nSize = 0;
+	nSize = sizeof(F4APPENDIX_INFO);
+	//20240129 GBM end
 	return 0;
 }
 
