@@ -359,6 +359,14 @@ LRESULT CFormLoadRelayTable::OnProgressEvent(WPARAM wp, LPARAM lp)
 
 void CFormLoadRelayTable::OnBnClickedBtnApply()
 {
+	int nModuleTableCount = 0;
+	nModuleTableCount = m_lbPath.GetCount();
+	if (nModuleTableCount == 0)
+	{
+		AfxMessageBox(L"선택된 중계기 일람표가 없습니다.");
+		return;
+	}
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(CheckUpdateCondition() == FALSE)
 	{
@@ -1489,6 +1497,40 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 	
 	m_pNewRelayTable->ProcessDeviceTableList(this);
 	//m_pNewRelayTable->SendProgStep(this, PROG_RESULT_STEP, nAllCnt, nAllCnt);
+
+	//20240219 GBM start - 기존에 사용하던 테이블을 모두 생성하고 데이터를 입력한 이후 시점에 F4 추가 입력 타입과 테이블을 추가
+	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
+
+	BOOL bRet = FALSE;
+
+	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
+	if (bRet)
+	{
+		Log::Trace("Inserting a new input type of equipment succeeded!");
+	}
+	else
+	{
+		Log::Trace("Inserting a new input type of equipment failed.!");
+	}
+
+	bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
+	if (bRet)
+	{
+		Log::Trace("Inserting new DB table succeeded!");
+	}
+	else
+	{
+		Log::Trace("Inserting new DB table failed!");
+	}
+	//20240219 GBM end
+
+	//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
+	bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
+	if (!bRet)
+	{
+		Log::Trace("F4 DB Table Insertion Failed!");
+	}
+	//20240222 GBM end
 
 	//ChangeNewLoadSystemMapID(pOldTable, m_pNewRelayTable);
 	m_mapTempNewName.clear();

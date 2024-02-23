@@ -347,7 +347,11 @@ BOOL CSysLinkerApp::InitInstance()
 	nProgramNameLen = strProgramName.GetLength();
 	Log::Setup(strProgramName.Left(nProgramNameLen - 4));
 	CNewDBManager::New();
+	CNewExcelManager::New();
 	//20240202 GBM end
+
+	int nSize = 0;
+	nSize = sizeof(double);
 
 	OnHomeLogin();
 	return TRUE;
@@ -376,6 +380,7 @@ int CSysLinkerApp::ExitInstance()
 	//20240202 GBM start - 새 기능 클래스 정리
 	CNewInfo::Delete();
 	CNewDBManager::Delete();
+	CNewExcelManager::Delete();
 	Log::Cleanup();
 	//20240202 GBM end
 
@@ -1238,6 +1243,11 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		GF_AddLog(L"프로젝트를 여는데 실패 했습니다.");
 		return;
 	}
+
+	//20240205 GBM start - 프로젝트 이름 얻기
+	memset(&CNewInfo::Instance()->m_pi.projectName, NULL, PROJCET_NAME_LENGTH);
+	sprintf(CNewInfo::Instance()->m_pi.projectName, CCommonFunc::WCharToChar(dlg.GetOpenProjectName().GetBuffer(0)));
+	//20240205 GBM end
 
 	m_pFasSysData->SetCurrentUser(dlg.GetLogInUser());
 	CMainFrame * pMainWnd = nullptr;
@@ -2584,6 +2594,17 @@ int CSysLinkerApp::CreateProjectDatabase()
 		return 0; 
 	if(m_pFasSysData->InsertPrjBaseData() <= 0)
 		return 0;
+
+	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 F4 추가 테이블에 Data Insert
+	BOOL bRet = FALSE;
+	CNewDBManager::Instance()->SetDBAccessor(m_pFasSysData->m_pDB);
+	bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
+	if (!bRet)
+	{
+		Log::Trace("F4 DB Table Insertion Failed!");
+	}
+	//20240222 GBM end
+
 	return 1;
 }
 // 

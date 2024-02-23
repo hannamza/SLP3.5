@@ -62,6 +62,7 @@ using namespace Gdiplus;
 #include "Log.h"
 #include "NewInfo.h"
 #include "NewDBManager.h"
+#include "NewExcelManager.h"
 //20240129 GBM end
 
 // #ifdef _DEBUG

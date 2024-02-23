@@ -622,6 +622,7 @@
     <ClInclude Include="..\SLP3.5Func\Defines.h" />
     <ClInclude Include="..\SLP3.5Func\Log.h" />
     <ClInclude Include="..\SLP3.5Func\NewDBManager.h" />
+    <ClInclude Include="..\SLP3.5Func\NewExcelManager.h" />
     <ClInclude Include="..\SLP3.5Func\NewInfo.h" />
     <ClInclude Include="..\SLP3.5Func\TSingleton.h" />
     <ClInclude Include="..\Version\Version.h" />
@@ -860,6 +861,7 @@
     <ClCompile Include="..\SLP3.5Func\CommonFunc.cpp" />
     <ClCompile Include="..\SLP3.5Func\Log.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewDBManager.cpp" />
+    <ClCompile Include="..\SLP3.5Func\NewExcelManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewInfo.cpp" />
     <ClCompile Include="AllocRelayIndex.cpp" />
     <ClCompile Include="ChildFrm.cpp" />

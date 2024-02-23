@@ -741,19 +741,48 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				continue;
 			}
 
-			//20240130 GBM start - 프로젝트 정보, 수신기 / 유닛 타입, CCTV 정보 파싱
+			//20240130 GBM start - 프로젝트 정보, 수신기 Type, Unit Type, CCTV 정보 파싱
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_PROJECT_INFO) == 0)
 			{
+				BOOL bRet = FALSE;
+				bRet = CNewExcelManager::Instance()->ParsingProjectInfo(&xls);
+				if (!bRet)
+				{
+					Log::Trace("Project Info Excel Parsing Failed!");
+				}
 				continue;
 			}
 
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_UNIT) == 0)
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
 			{
+				BOOL bRet = FALSE;
+				bRet = CNewExcelManager::Instance()->ParsingFacpType(&xls);
+				if (!bRet)
+				{
+					Log::Trace("FACP Type Info Excel Parsing Failed!");
+				}
+				continue;
+			}
+
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_UNIT_TYPE) == 0)
+			{
+				BOOL bRet = FALSE;
+				bRet = CNewExcelManager::Instance()->ParsingUnitType(&xls);
+				if (!bRet)
+				{
+					Log::Trace("Unit Type Info Excel Parsing Failed!");
+				}
 				continue;
 			}
 
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_CCTV) == 0)
 			{
+				BOOL bRet = FALSE;
+				bRet = CNewExcelManager::Instance()->ParsingCCTVInfo(&xls);
+				if (!bRet)
+				{
+					Log::Trace("CCTV Info Excel Parsing Failed!");
+				}
 				continue;
 			}
 			//20240130 GBM end
@@ -6913,6 +6942,7 @@ int CRelayTableData::InsertPrjBaseData()
 
 	//pump ,ps , link , facpcontact
 	//LoadAutMakeLogic();
+
 	return 1;
 }
 
@@ -10337,11 +10367,6 @@ int CRelayTableData::LoadProjectDatabase()
 		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패 했습니다.");
 		return 0;
 	}
-
-	//20240202 GBM start - 새 회로 입력 타입 추가
-	CNewDBManager::Instance()->SetDBAccessor(m_pDB);
-	CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
-	//20240202 GBM end
 
 #if _DBLOAD_TIME_
 	dwEnd = GetTickCount();

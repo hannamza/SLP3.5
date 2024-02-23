@@ -516,6 +516,9 @@
     <ClInclude Include="..\SLP3.5Func\CommonFunc.h">
       <Filter>SLP3.5Func</Filter>
     </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\NewExcelManager.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -972,6 +975,9 @@
       <Filter>SLP3.5Func</Filter>
     </ClCompile>
     <ClCompile Include="..\SLP3.5Func\CommonFunc.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\NewExcelManager.cpp">
       <Filter>SLP3.5Func</Filter>
     </ClCompile>
   </ItemGroup>
