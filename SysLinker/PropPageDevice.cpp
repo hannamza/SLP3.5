@@ -16,7 +16,6 @@ CPropPageDevice::CPropPageDevice()
 	, m_strPath(_T(""))
 {
 	m_pRefFasSysData = nullptr;
-
 }
 
 CPropPageDevice::~CPropPageDevice()
@@ -130,6 +129,30 @@ void CPropPageDevice::OnBnClickedBtnDel()
 		return;
 	}
 
+	//20240312 GBM start - 삭제할 파일 경로를 가져와서 수신기 번호를 확인 후 수신기 번호를 리스트에서 제거
+	CString strDelFile = _T("");
+	m_lstTable.GetText(nIdx, strDelFile);
+	int nPos = -1;
+	nPos = strDelFile.ReverseFind('.');
+	CString strFACPNum = _T("");
+	strFACPNum = strDelFile.Mid(nPos - 2, 2);
+	int nFACP = -1;
+	nFACP = _wtoi(strFACPNum);
+	
+	POSITION pos = m_FacpNumList.GetHeadPosition();
+	POSITION posTemp;
+	while (pos != NULL)
+	{
+		posTemp = pos;
+		int nItem = m_FacpNumList.GetNext(pos);
+		if (nFACP == nItem)
+		{
+			m_FacpNumList.RemoveAt(posTemp);
+			break;
+		}
+	}
+	//20240312 GBM end
+
 	m_lstTable.DeleteString(nIdx);
 
 	if (m_lstTable.GetCount() > 0)
@@ -218,4 +241,36 @@ int CPropPageDevice::CheckDuplicate(int nValue)
 			return 0;
 	}
 	return 1;
+}
+
+
+BOOL CPropPageDevice::OnInitDialog()
+{
+	CPropertyPage::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+
+	CString str; 
+	CSize sz; 
+	int dx = 0;
+	CDC *pDC = m_lstTable.GetDC();
+
+	for (int i = 0; i < m_lstTable.GetCount(); i++)
+	{
+		m_lstTable.GetText(i, str);
+		sz = pDC->GetTextExtent(str);
+
+		if (sz.cx > dx)
+			dx = sz.cx;
+	}
+	m_lstTable.ReleaseDC(pDC);
+
+	if (m_lstTable.GetHorizontalExtent() < dx)
+	{
+		m_lstTable.SetHorizontalExtent(dx);
+		ASSERT(m_lstTable.GetHorizontalExtent() == dx);
+	}
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }

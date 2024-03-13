@@ -251,10 +251,5 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 	m_pRefFasSysData->SetProjectInfo(m_strPrjName, m_strSiteName, COleDateTime::GetCurrentTime()
 		, m_strMaker, m_strSitePhone, m_strDBName);
 
-	//20240205 GBM start - 프로젝트 이름 얻기
-	memset(&CNewInfo::Instance()->m_pi.projectName, NULL, PROJCET_NAME_LENGTH);
-	sprintf(CNewInfo::Instance()->m_pi.projectName, CCommonFunc::WCharToChar(m_strPrjName.GetBuffer(0)));
-	//20240205 GBM end
-
 	return CPropertyPage::OnWizardNext();
 }

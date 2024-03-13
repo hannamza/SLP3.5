@@ -32,8 +32,6 @@ public:
 
 	CString GetQueryStringCreateUnitTypeTable();
 
-	CString GetQueryStringCreateCCTVInfoTable();
-
 	CString GetQueryStringCreateProjectInfoTable();
 
 	// F4 추가 Table에 데이터 insert
@@ -43,8 +41,6 @@ public:
 
 	BOOL InsertDataIntoUnitTypeTable();
 
-	BOOL InsertDataIntoCCTVInfoTable();
-
 	BOOL InsertDataIntoProjectInfoTable();
 
 	// 기존 프로젝트 열기 시 F4 추가 Table에서 데이터 로드
@@ -53,8 +49,6 @@ public:
 	BOOL GetDataFromFACPTypeTable();
 
 	BOOL GetDataFromUnitTypeTable();
-
-	BOOL GetDataFromCCTVInfoTable();
 
 	BOOL GetDataFromProjectInfoTable();
 };

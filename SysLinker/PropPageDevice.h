@@ -42,4 +42,5 @@ public:
 	virtual LRESULT OnWizardNext();
 	int CheckDuplicate(int nValue);
 	void SetFasSysData(CRelayTableData * pData) { m_pRefFasSysData = pData; }
+	virtual BOOL OnInitDialog();
 };

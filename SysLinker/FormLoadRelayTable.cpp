@@ -644,7 +644,6 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 	// 1.5이전 버전에서 PATTERN ITEM DB에 있는데 RELAY TABLE에 있는건 그대로 유지 - 연동데이터 생성 시 오류 발생[5/16/2022 KHS]
 	// 1.5에서는 DB에 있지만 RELAY TABLE에 없는건 바로 삭제 시킴
 	// 패턴 변경 리스트 - 
-	// 20231124 GBM - 기존에 추가된 수동 패턴은 고려되지 않음
 	MakePtnChangeData(pNewTable, pOldTable, m_ptrPatternUsedDupList);
 #ifdef _DEBUG
 // 	CDataDevice * pDevTemp;
@@ -1498,39 +1497,42 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 	m_pNewRelayTable->ProcessDeviceTableList(this);
 	//m_pNewRelayTable->SendProgStep(this, PROG_RESULT_STEP, nAllCnt, nAllCnt);
 
-	//20240219 GBM start - 기존에 사용하던 테이블을 모두 생성하고 데이터를 입력한 이후 시점에 F4 추가 입력 타입과 테이블을 추가
+	//20240219 GBM start - 기존에 사용하던 테이블을 모두 생성하고 데이터를 입력한 이후 시점에 F4 테이블을 추가
 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
 
 	BOOL bRet = FALSE;
 
-	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
+	// F4추가 테이블의 경우는 변경된 중계기 일람표가 F4 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI;
 	if (bRet)
 	{
-		Log::Trace("Inserting a new input type of equipment succeeded!");
-	}
-	else
-	{
-		Log::Trace("Inserting a new input type of equipment failed.!");
-	}
-
-	bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
-	if (bRet)
-	{
-		Log::Trace("Inserting new DB table succeeded!");
-	}
-	else
-	{
-		Log::Trace("Inserting new DB table failed!");
+		bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
+		if (bRet)
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+			Log::Trace("Inserting new DB table succeeded!");
+		}
+		else
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+			Log::Trace("Inserting new DB table failed!");
+		}
+		
+		//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
+		bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
+		if (bRet)
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+			Log::Trace("F4 DB table insertion succeeded!");
+		}
+		else
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+			Log::Trace("F4 DB table insertion failed!");
+		}
+		//20240222 GBM end
 	}
 	//20240219 GBM end
-
-	//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
-	bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
-	if (!bRet)
-	{
-		Log::Trace("F4 DB Table Insertion Failed!");
-	}
-	//20240222 GBM end
 
 	//ChangeNewLoadSystemMapID(pOldTable, m_pNewRelayTable);
 	m_mapTempNewName.clear();

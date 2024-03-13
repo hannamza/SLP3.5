@@ -1641,3 +1641,37 @@ CString CCommonFunc::GetProgramVersion()
 
 	return strProgramVersion;
 }
+
+std::vector<CString> CCommonFunc::GetFullPathFileListIntheFolder(CString strPath, CString strFind)
+{
+	std::vector<CString> strFileListMap;
+	CString strPathAndAsterisk = strPath + _T("\\*.*");
+	WIN32_FIND_DATA fd;
+	HANDLE hFind = ::FindFirstFile(strPathAndAsterisk, &fd);
+
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do {
+			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+			{
+				CString strFileName = _T("");
+				strFileName.Format(_T("%s"), fd.cFileName);		// 파일명만 있음
+
+				if (!strFind.IsEmpty())
+				{
+					if (strFileName.Find(strFind) != -1)
+					{
+						strFileListMap.push_back(strPath + _T("\\") + strFileName);
+					}
+				}
+				else
+				{
+					strFileListMap.push_back(strPath + _T("\\") + strFileName);
+				}
+		
+			}
+		} while (::FindNextFile(hFind, &fd));
+	}
+
+	return strFileListMap;
+}

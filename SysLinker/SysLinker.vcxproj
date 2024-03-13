@@ -661,6 +661,7 @@
     <ClInclude Include="DkPanePattern.h" />
     <ClInclude Include="DkPanePSwitch.h" />
     <ClInclude Include="DkPanePump.h" />
+    <ClInclude Include="DlgAdminMode.h" />
     <ClInclude Include="DlgChildBasePage.h" />
     <ClInclude Include="DlgChildChangeView.h" />
     <ClInclude Include="DlgChildEditChn.h" />
@@ -898,6 +899,7 @@
     <ClCompile Include="DkPanePattern.cpp" />
     <ClCompile Include="DkPanePSwitch.cpp" />
     <ClCompile Include="DkPanePump.cpp" />
+    <ClCompile Include="DlgAdminMode.cpp" />
     <ClCompile Include="DlgChildBasePage.cpp" />
     <ClCompile Include="DlgChildChangeView.cpp" />
     <ClCompile Include="DlgChildEditChn.cpp" />
@@ -1013,6 +1015,7 @@
     <ResourceCompile Include="SysLinker.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bitmap2.bmp" />
     <Image Include="res\bmp00001.bmp" />
     <Image Include="res\buttons.bmp" />
     <Image Include="res\Cancel1_32x32x16.ico" />
@@ -1052,7 +1055,9 @@
     <Image Include="res\PSWITCHTREEICON.bmp" />
     <Image Include="res\PUMPTREEICON.bmp" />
     <Image Include="res\RB_LINKER_LARGE.bmp" />
+    <Image Include="res\RB_LINKER_LARGE_EDIT.bmp" />
     <Image Include="res\RB_LINKER_SMALL.bmp" />
+    <Image Include="res\RB_LINKER_SMALL_EDIT.bmp" />
     <Image Include="res\RB_SET_LARGE.bmp" />
     <Image Include="res\RB_SET_SMALL.bmp" />
     <Image Include="res\Right2_32x32x16.ico" />

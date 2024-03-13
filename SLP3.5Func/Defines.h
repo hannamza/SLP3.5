@@ -12,12 +12,6 @@
 // 최대 회로 개수
 #define MAX_CIRCUIT_COUNT	252
 
-// 최대 Camera Index : CCTV Type이 NVR인 경우 사용될 Index, 아직 최대 개수가 정해지지 않았으나 일단 정의
-//#define MAX_CAMERA_INDEX_COUNT	1000
-
-// 최대 CCTV 개수 : 정해지지 않았으나 일단 정의
-#define MAX_CCTV_COUNT	1000
-
 // 최대 프로젝트 계정 ID 길이
 //#define MAX_PROJECT_ACCOUNT_ID_LENGTH	12
 
@@ -26,6 +20,12 @@
 
 // 프로젝트 이름 길이
 #define PROJCET_NAME_LENGTH	100
+
+// LCD 회로명 최대 문자 길이 - F3
+#define MAX_LCD_TEXT_LENGTH_F3 40
+
+// LCD 회로명 최대 문자 길이 - F4
+#define MAX_LCD_TEXT_LENGTH_F4 80
 
 // 프로젝트 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_PROJECT_INFO	_T("project")
@@ -38,6 +38,9 @@
 
 // CCTV 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_CCTV	_T("cctv")
+
+// 관리자 모드 (ROM 인증 모드) Password
+#define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!");
 
 // 수신기 타입
 enum {
@@ -57,14 +60,24 @@ enum {
 }UNIT_TYPE;
 
 // F4 추가 입력 타입 
-enum {
-	AN광전교차A = 16,
-	AN광전교차B,
-	AN정온교차A,
-	AN정온교차B,
-	발신기화재,
-	광센서감지기
-}NEW_EQUIPMENT_INPUT_TYPE;
+namespace NEW_EQUIPMENT_INPUT_TYPE {
+	enum {
+		AN정온교차A = 16,
+		AN정온교차B,
+		AN광전교차A,
+		AN광전교차B,
+		발신기화재,
+		광센서감지기,
+		CCTV
+	};
+}
+
+// F4 추가 입력 설비명
+namespace NEW_EQUIPMENT_INPUT_NAME {
+	enum {
+		CCTV = 52
+	};
+}
 
 // 엑셀 ROW, Column Define
 
@@ -75,11 +88,12 @@ namespace EXCEL_ENUM_PROJECT_INFO {
 		ROW_HEADER = 1,
 		ROW_CONSTRUCTION_COMPANY,
 		ROW_SITE_NAME,
-		ROW_SITE_ADDRESS,
-		ROW_BUIL_DING_TYPE,
+		ROW_BUILDING_TYPE,
+		ROW_SITE_ADDRESS,	
 		ROW_RETAIL_STORE,
 		ROW_ACCOUNT,
-		ROW_VERSION
+		ROW_VERSION,
+		ROW_AUTHORIZED
 	}ROWS;
 
 	// Column
@@ -150,34 +164,92 @@ namespace EXCEL_ENUM_CCTV_INFO {
 enum {
 	TB_FACP_TYPE,
 	TB_UNIT_TYPE,
-	TB_CCTV_INFO,
 	TB_PROJECT_INFO
 }NEW_TABLES;
 
-// F4 추가 입력 타입 문자열
+// F4 추가 입력 타입 문자열 
 static const TCHAR* g_lpszNewEquipmentInputType[] = {
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T(""),
-	_T("AN광전교차A"),
-	_T("AN광전교차B"),
-	_T("AN정온교차A"),
-	_T("AN정온교차B"),
-	_T("발신기화재"),
-	_T("광센서감지기"),
+	_T(""),					// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
+	_T(""),					// 1
+	_T(""),					// 2
+	_T(""),					// 3
+	_T(""),					// 4
+	_T(""),					// 5
+	_T(""),					// 6
+	_T(""),					// 7
+	_T(""),					// 8	
+	_T(""),					// 9
+	_T(""),					// 10
+	_T(""),					// 11
+	_T(""),					// 12
+	_T(""),					// 13
+	_T(""),					// 14
+	_T(""),					// 15
+	_T("AN정온교차A"),		// 16	
+	_T("AN정온교차B"),		// 17	
+	_T("AN광전교차A"),		// 18
+	_T("AN광전교차B"),		// 19
+	_T("발신기화재"),		// 20
+	_T("광센서감지기"),		// 21
+	_T("CCTV"),				// 22				
+	NULL
+};
+
+// F4 추가 입력 설비명 문자열
+static const TCHAR* g_lpszNewEquipmentInputName[] = {
+	_T(""),					// 0 없음, 설비명번호는 1베이스, 문자열은 0베이스	
+	_T(""),					// 1
+	_T(""),					// 2
+	_T(""),					// 3
+	_T(""),					// 4
+	_T(""),					// 5
+	_T(""),					// 6
+	_T(""),					// 7
+	_T(""),					// 8	
+	_T(""),					// 9
+	_T(""),					// 10
+	_T(""),					// 11
+	_T(""),					// 12
+	_T(""),					// 13
+	_T(""),					// 14
+	_T(""),					// 15
+	_T(""),					// 16	
+	_T(""),					// 17	
+	_T(""),					// 18
+	_T(""),					// 19
+	_T(""),					// 20
+	_T(""),					// 21
+	_T(""),					// 22	
+	_T(""),					// 23
+	_T(""),					// 24
+	_T(""),					// 25
+	_T(""),					// 26	
+	_T(""),					// 27	
+	_T(""),					// 28
+	_T(""),					// 29
+	_T(""),					// 30
+	_T(""),					// 31
+	_T(""),					// 32	
+	_T(""),					// 33
+	_T(""),					// 34
+	_T(""),					// 35
+	_T(""),					// 36	
+	_T(""),					// 37	
+	_T(""),					// 38
+	_T(""),					// 39
+	_T(""),					// 40
+	_T(""),					// 41
+	_T(""),					// 42	
+	_T(""),					// 43
+	_T(""),					// 44
+	_T(""),					// 45
+	_T(""),					// 46	
+	_T(""),					// 47	
+	_T(""),					// 48
+	_T(""),					// 49
+	_T(""),					// 50
+	_T(""),					// 51
+	_T("CCTV"),				// 52
 	NULL
 };
 
@@ -185,7 +257,6 @@ static const TCHAR* g_lpszNewEquipmentInputType[] = {
 static const TCHAR* g_lpszNewTable[] = {
 	_T("TB_FACP_TYPE"),
 	_T("TB_UNIT_TYPE"),
-	_T("TB_CCTV_INFO"),
 	_T("TB_PROJECT_INFO")
 };
 
@@ -206,9 +277,9 @@ enum {
 
 #pragma pack(push, 1)
 
-// 프로젝트 버전 정보 구조체 -> 프로젝트 버전 정보는 버전 정보 외에 다른 정보도 있으나 ROM 파일 변환 관련 정보는 버전 정보만 필요, 
-// 프로젝트명은 SLP3에서 가져와 로그 남길 때 사용, 
-// Web과 SLP3 프로젝트 명이 일치되어야 한다는 전제 필요, 궁극적으로는 Web에서 작성한 프로젝트명을 SLP3에서 중계기 일람표를 열어서 파싱하면 적용해야 할 것으로 보임
+// 프로젝트 버전 정보 구조체 
+// 프로젝트명은 중계기 일람표 프로젝트 버전 번호 업데이트 시 중계기 일람표 파일명에 프로젝트명으로 정해서 자동으로 찾을 때 이 정보로 찾고폴더 경로 상의 프로젝트 명은 SLP3의 프로젝트명을 따름
+// 추후에 중계기 일람표 상의 프로젝트명과 SLP3의 프로젝트명을 일치시키는 방향으로 진행해야 함
 typedef struct 
 {
 	char projectName[PROJCET_NAME_LENGTH];
@@ -217,27 +288,12 @@ typedef struct
 	bool authorized;
 }PROJECT_INFO;
 
-// CCTV 정보 구조체
-typedef struct 
-{
-	unsigned char cctvType;
-	unsigned char companyType;
-	char ip[16];
-	unsigned short port;
-	char url[2084];					// url 최대 길이
-	unsigned short cameraCount;
-	char id[20];					// 크기 임의로 정함 -> 추후 변경 가능
-	char password[20];				// 크기 임의로 정함 -> 추후 변경 가능
-	double reserved;
-}CCTV_INFO;
-
 // F4APPENDIX 구조체
 typedef struct 
 {
-	bool authorized;
+	PROJECT_INFO projectInfo;
 	unsigned char facpType[MAX_FACP_COUNT];
 	unsigned char unitType[MAX_FACP_COUNT][MAX_UNIT_COUNT];
-	CCTV_INFO cctvInfo[MAX_CCTV_COUNT];
 }F4APPENDIX_INFO;
 
 #pragma pack(pop)

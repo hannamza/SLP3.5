@@ -23,6 +23,8 @@
 #include "RelayTableData.h"
 
 #include "DlgErrorCheck.h"
+
+#include "DlgAdminMode.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -231,12 +233,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// 문서 이름이 축소판 그림과 함께 표시되므로 작업 표시줄의 기능성이 개선됩니다.
 	ModifyStyle(0, FWS_PREFIXTITLE);
 	GF_AddLog(L"SLP3 프로그램이 정상 기동됐습니다.");
-
-	//20240129 GBM start - test
-	int nSize = 0;
-	nSize = sizeof(F4APPENDIX_INFO);
-	//20240129 GBM end
-	return 0;
 }
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
@@ -987,6 +983,46 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
+	//20240306 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
+	
+	//인증 여부 초기화
+	CNewInfo::Instance()->m_fi.projectInfo.authorized = false;
+	if (AfxMessageBox(_T("관리자 모드(ROM 인증 모드)로 진행하시겠습니까?"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+	{
+		CDlgAdminMode dlg;
+		if (dlg.DoModal() == IDOK)
+		{
+			CString strPassword = ADMIN_MODE_PASSWORD;
+			CString strUserInputPassword = _T("");
+			strUserInputPassword = dlg.m_strEditPassword;
+
+			if (strUserInputPassword.Compare(strPassword) == 0)
+			{
+				AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증된 ROM 파일 생성을 진행합니다."));
+				GF_AddLog(L"관리자 모드가 인증되었습니다. 인증된 ROM 파일 생성을 진행합니다.");
+				Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
+				CNewInfo::Instance()->m_fi.projectInfo.authorized = true;
+			}
+			else
+			{
+				AfxMessageBox(_T("잘못된 암호입니다."));
+				return;
+			}
+		}
+		else
+		{
+			GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
+			Log::Trace("Proceed with creating a unauthorized ROM file.");
+		}
+	}
+	else
+	{
+		GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
+		Log::Trace("Proceed with creating a unauthorized ROM file.");
+	}
+
+	//20240306 GBM end
+
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if(AfxMessageBox(L"연동데이터를 현재 상태로 컴파일 합니다.\nYes : 오류검사 후 컴파일\nNo:오류검사 없이 컴파일",MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
@@ -1035,6 +1071,71 @@ int CMainFrame::CreateFacpLink()
 	{
 		GF_AddLog(L"프로젝트를 컴파일 하는데 성공했습니다.(연동데이터 생성 성공)");
 		//	AfxMessageBox(L"프로젝트를 컴파일 하는데 성공했습니다.");
+
+		//20240305 GBM start - 연동데이터 생성이 성공한 시점에 프로젝트 번호 업데이트 및 중계기 일람표 적용
+
+		//수신기 타입 정보에서 F4 타입이 하나도 없으면 아래 행정을 하지 않음 (F3만 있으면 의미가 없기 때문)
+		BOOL bF4TypeExist = FALSE;
+		for (int i = 0; i < MAX_FACP_COUNT; i++)
+		{
+			if (CNewInfo::Instance()->m_fi.facpType[i] == F4)
+			{
+				bF4TypeExist = TRUE;
+				break;
+			}
+		}
+
+		if (bF4TypeExist)
+		{
+			int nModuleTableVerNum = -1;
+			int nLinkedDataVerNum = -1;
+			bool bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+			CString strAuthorized = _T("");
+			if (bAuthorized)
+			{
+				strAuthorized = _T("A");
+			}
+			nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
+			nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+			BOOL bRet = FALSE;
+			CString strMsg = _T("");
+
+			//프로젝트 폴더명
+			CString strWin32AppProjectName = _T("");
+			strWin32AppProjectName = theApp.m_pFasSysData->m_strPrjName;
+
+			bRet = CNewExcelManager::Instance()->UpdateProjectInfo(strWin32AppProjectName);
+			if (bRet)
+			{
+				GF_AddLog(L"중계기 일람표 파일에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+				strMsg.Format(_T("Successfully updated project number in Module Table file.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			}
+			else
+			{
+				GF_AddLog(L"중계기 일람표 파일에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+				strMsg.Format(_T("Failed to update project number in Module Table file.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			}
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+
+			//프로젝트 버전 DB 적용
+			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
+			if (bRet)
+			{
+				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			}
+			else
+			{
+				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			}
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		}
+		else
+		{
+			Log::Trace("There is no F4 type among the FACPs, so project version number will not be updated!");
+		}
+		//20240305 GBM end
 	}
 	else
 	{

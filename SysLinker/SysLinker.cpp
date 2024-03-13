@@ -350,9 +350,6 @@ BOOL CSysLinkerApp::InitInstance()
 	CNewExcelManager::New();
 	//20240202 GBM end
 
-	int nSize = 0;
-	nSize = sizeof(double);
-
 	OnHomeLogin();
 	return TRUE;
 }
@@ -981,7 +978,7 @@ void CSysLinkerApp::OnHomeLogin()
 	if (m_pMainDb == nullptr || m_pMainDb->IsOpen() == FALSE)
 		OpenBaseDatabase();
 
-	//20240119 GBM start - 무의미한 로그인 삭제
+	//20240306 GBM start - 무의미한 로그인 삭제
 #if 0
 	CDlgProgramLogin dlg(m_pMainDb);
 	if (dlg.DoModal() != IDOK)
@@ -990,7 +987,7 @@ void CSysLinkerApp::OnHomeLogin()
 	GF_AddLog(L"프로그램 로그인에 성공했습니다.");
 	AfxMessageBox(L"프로그램 로그인에 성공했습니다.");
 #endif
-	//20240119 GBM end
+	//20240306 GBM end
 
 	m_bProgramLogin = TRUE;
 	//OpenBaseDatabase();
@@ -1243,11 +1240,6 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		GF_AddLog(L"프로젝트를 여는데 실패 했습니다.");
 		return;
 	}
-
-	//20240205 GBM start - 프로젝트 이름 얻기
-	memset(&CNewInfo::Instance()->m_pi.projectName, NULL, PROJCET_NAME_LENGTH);
-	sprintf(CNewInfo::Instance()->m_pi.projectName, CCommonFunc::WCharToChar(dlg.GetOpenProjectName().GetBuffer(0)));
-	//20240205 GBM end
 
 	m_pFasSysData->SetCurrentUser(dlg.GetLogInUser());
 	CMainFrame * pMainWnd = nullptr;
@@ -1841,9 +1833,9 @@ void CSysLinkerApp::OnUpdateBasicSetUsergroup(CCmdUI *pCmdUI)
 void CSysLinkerApp::OnUpdateBasicSetEditLogic(CCmdUI *pCmdUI)
 {
 	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
-#ifdef _DEBUG
-	return; 
-#endif
+// #ifdef _DEBUG
+// 	return; 
+// #endif
 	if (pCmdUI)
 	{
 		if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
@@ -1960,7 +1952,10 @@ void CSysLinkerApp::OnUpdateFacpReverseLink(CCmdUI *pCmdUI)
 {
 	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
 	if (pCmdUI)
-		pCmdUI->Enable(m_bProgramLogin);
+		//20240312 GBM start - 메뉴 비활성화
+		pCmdUI->Enable(FALSE);
+		//pCmdUI->Enable(m_bProgramLogin);
+		//20240312 GBM end
 }
 
 
@@ -2596,12 +2591,40 @@ int CSysLinkerApp::CreateProjectDatabase()
 		return 0;
 
 	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 F4 추가 테이블에 Data Insert
-	BOOL bRet = FALSE;
 	CNewDBManager::Instance()->SetDBAccessor(m_pFasSysData->m_pDB);
-	bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
-	if (!bRet)
+	//F4 추가 입력 타입은 gfs_base에 미리 넣어 프로젝트 DB를 복사하면 적용하고 F4 추가 테이블은 중계기 일람표 상에서 F4 추가 정보가 존재할 때만 F4 추가 테이블을 생성
+	BOOL bRet = FALSE;
+
+	// F4추가 테이블의 경우는 변경된 중계기 일람표가 F4 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI;
+	if (bRet)
 	{
-		Log::Trace("F4 DB Table Insertion Failed!");
+		bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
+		if (bRet)
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+			Log::Trace("Inserting new DB table succeeded!");
+		}
+		else
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+			Log::Trace("Inserting new DB table failed!");
+		}
+
+
+		//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
+		bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
+		if (bRet)
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+			Log::Trace("F4 DB table insertion succeeded!");
+		}
+		else
+		{
+			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+			Log::Trace("F4 DB table insertion failed!");
+		}
+		//20240222 GBM end
 	}
 	//20240222 GBM end
 
@@ -3000,6 +3023,25 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 		GF_AddLog(L"프로젝트 데이터베이스를 여는데 실패 했습니다.");
 		return 0;
 	}
+
+	//20240311 GBM start - DB Open 후 DB에서 데이터를 가져오기 전에 F4 추가 입력 타입을 추가
+	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
+
+	BOOL bRet = FALSE;
+
+	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
+	if (bRet)
+	{
+		GF_AddLog(L"F4 입력 타입 자동 추가에 성공했습니다.");
+		Log::Trace("Inserting a new input type of equipment succeeded!");
+	}
+	else
+	{
+		GF_AddLog(L"F4 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
+		Log::Trace("Inserting a new input type of equipment failed!");
+	}
+	//20240311 GBM end
+
 	if (m_pFasSysData->LoadProjectDatabase() == 0)
 	{
 		GF_AddLog(L"프로젝트를 불러오는데 실패 했습니다.");
@@ -3050,6 +3092,11 @@ int CSysLinkerApp::CloseProject()
 	m_pFasSysData = nullptr;
 
 	//RemoveTemplate();
+
+	//20240307 GBM start - F4 추가 정보 메모리 초기화
+	memset(&CNewInfo::Instance()->m_fi, NULL, sizeof(F4APPENDIX_INFO));
+	//20240307 GBM end
+
 	return 1;
 }
 

@@ -22,7 +22,7 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 	if (m_pDB == nullptr)
 		return FALSE;
 
-	for (int i = AN광전교차A; i <= 광센서감지기; i++)
+	for (int i = NEW_EQUIPMENT_INPUT_TYPE::AN정온교차A; i <= NEW_EQUIPMENT_INPUT_TYPE::CCTV; i++)
 	{
 		CString strEquip = _T("");
 		strEquip.Format(_T("%s"), g_lpszNewEquipmentInputType[i]);
@@ -41,11 +41,94 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 		if (nRow == 0)
 		{
 			strQuery.Format(_T("INSERT INTO TB_EQUIP_MST (EQ_ID, EQ_TYPE, EQ_NAME, EQ_DESC, EQ_SYMBOL, ADD_USER) VALUES (%d, 1, \'%s\', \'%s\', \'basic.bmp\', \'admin\')"), i, strEquip, strEquip);
-			if (!m_pDB->ExecuteSql(strQuery))
+			if (m_pDB->ExecuteSql(strQuery))
+			{
+				Log::Trace("TB_EQUIP_MST INSERT QUERY Succeeded! Input Type : %s", CCommonFunc::WCharToChar(strEquip.GetBuffer(0)));
+			}
+			else
 			{
 				Log::Trace("TB_EQUIP_MST INSERT QUERY Failed! - Input Type : %s", CCommonFunc::WCharToChar(strEquip.GetBuffer(0)));
 				return FALSE;
 			}
+		}
+		else if (nRow == 1)	// 만약 존재하면 업데이트하고 로그 남김
+		{
+			strQuery.Format(_T("UPDATE TB_EQUIP_MST SET EQ_NAME = \'%s\', EQ_DESC = \'%s\' WHERE EQ_TYPE = 1 AND EQ_ID = %d"), strEquip, strEquip, i);
+			if (m_pDB->ExecuteSql(strQuery))
+			{
+				Log::Trace("TB_EQUIP_MST UPDATE QUERY Succeeded! - Input Type : %s", CCommonFunc::WCharToChar(strEquip.GetBuffer(0)));
+			}
+			else
+			{
+				Log::Trace("TB_EQUIP_MST UPDATE QUERY Failed! - Input Type : %s", CCommonFunc::WCharToChar(strEquip.GetBuffer(0)));
+				return FALSE;
+			}
+		}
+		else
+		{
+			Log::Trace("There is more than one row ! - Input Type : %s Please Check TB_EQUIP_MST table out", CCommonFunc::WCharToChar(strEquip.GetBuffer(0)));
+			return FALSE;
+		}
+	}
+
+	//입력 설비명 CCTV 추가 - 기본 DB (gfs_base)에는 52번으로 넣지만 기존 DB로드 시 CCTV 이름을 추가할 경우 기존에 없으면 맨 마지막 번으로 넣음
+	for (int j = NEW_EQUIPMENT_INPUT_NAME::CCTV; j <= NEW_EQUIPMENT_INPUT_NAME::CCTV; j++)
+	{
+		CString strName = _T("");
+		strName.Format(_T("%s"), g_lpszNewEquipmentInputName[j]);
+
+		CString strQuery = _T("");
+		strQuery.Format(_T("SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=2 AND EQ_NAME=\'%s\' AND EQ_DESC=\'%s\'"), strName, strName);
+
+		if (!m_pDB->OpenQuery(strQuery))
+		{
+			Log::Trace("TB_EQUIP_MST SELECT QUERY Failed! - Input Name : %s", CCommonFunc::WCharToChar(strName.GetBuffer(0)));
+			return FALSE;
+		}
+
+		int nRow = -1;
+		nRow = m_pDB->GetRecordCount();
+		if (nRow == 0)
+		{
+			//기존에 입력명이 몇 개 있는지 확인
+			strQuery.Format(_T("SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=2"));
+
+			if (!m_pDB->OpenQuery(strQuery))
+			{
+				Log::Trace("TB_EQUIP_MST SELECT QUERY (EQ_TYPE=2 COUNT) Failed! - Input Name : %s", CCommonFunc::WCharToChar(strName.GetBuffer(0)));
+				return FALSE;
+			}
+
+			nRow = m_pDB->GetRecordCount();
+
+			strQuery.Format(_T("INSERT INTO TB_EQUIP_MST (EQ_ID, EQ_TYPE, EQ_NAME, EQ_DESC, EQ_SYMBOL, ADD_USER) VALUES (%d, 2, \'%s\', \'%s\', \'basic.bmp\', \'admin\')"), nRow + 1, strName, strName);
+			if (!m_pDB->ExecuteSql(strQuery))
+			{
+				Log::Trace("TB_EQUIP_MST INSERT QUERY Failed! - Input Name : %s", CCommonFunc::WCharToChar(strName.GetBuffer(0)));
+				return FALSE;
+			}
+		}
+		else if (nRow == 1)	// 만약 존재하면 아무 것도 안함
+		{
+// 			int nEQID = -1;
+// 			m_pDB->GetFieldValue(_T("EQ_ID"), nEQID);
+// 			ASSERT(nEQID > 0);
+// 
+// 			strQuery.Format(_T("UPDATE TB_EQUIP_MST SET EQ_NAME = \'%s\', EQ_DESC = \'%s\' WHERE EQ_TYPE = 2 AND EQ_ID = %d"), strName, strName, nEQID);
+// 			if (m_pDB->ExecuteSql(strQuery))
+// 			{
+// 				Log::Trace("TB_EQUIP_MST UPDATE QUERY Succeeded! - Input Name : %s", CCommonFunc::WCharToChar(strName.GetBuffer(0)));
+// 			}
+// 			else
+// 			{
+// 				Log::Trace("TB_EQUIP_MST UPDATE QUERY Failed! - Input Name : %s", CCommonFunc::WCharToChar(strName.GetBuffer(0)));
+// 				return FALSE;
+// 			}
+		}
+		else
+		{
+			Log::Trace("There is more than one row ! - Input Name : %s Please check TB_EQUIP_MST table out", CCommonFunc::WCharToChar(strName.GetBuffer(0)));
+			return FALSE;
 		}
 	}
 
@@ -77,11 +160,6 @@ BOOL CNewDBManager::CheckAndCreateF4DBTables()
 			case TB_UNIT_TYPE:
 			{
 				strQuery = GetQueryStringCreateUnitTypeTable();
-				break;
-			}
-			case TB_CCTV_INFO:
-			{
-				strQuery = GetQueryStringCreateCCTVInfoTable();
 				break;
 			}
 			case TB_PROJECT_INFO:
@@ -157,25 +235,6 @@ CString CNewDBManager::GetQueryStringCreateUnitTypeTable()
 	return strQuery;
 }
 
-CString CNewDBManager::GetQueryStringCreateCCTVInfoTable()
-{
-	CString strQuery = _T("");
-
-	strQuery = _T("CREATE TABLE [dbo].[TB_CCTV_INFO]( ");
-	strQuery += _T("[NO] int NOT NULL PRIMARY KEY, ");
-	strQuery += _T("[CCTV_TYPE] tinyint NOT NULL, ");
-	strQuery += _T("[COMPANY_TYPE] tinyint NOT NULL, ");
-	strQuery += _T("[IP] varchar(16), ");
-	strQuery += _T("[PORT] int, ");
-	strQuery += _T("[URL] varchar(2084), ");
-	strQuery += _T("[CAMERA_COUNT] int, ");
-	strQuery += _T("[ID] varchar(20), ");
-	strQuery += _T("[PASSWORD] varchar(20), ");
-	strQuery += _T("[RESERVED] bigint )");
-
-	return strQuery;
-}
-
 CString CNewDBManager::GetQueryStringCreateProjectInfoTable()
 {
 	CString strQuery = _T("");
@@ -196,9 +255,6 @@ BOOL CNewDBManager::InsertDatasIntoF4DBTables()
 		return FALSE;
 
 	if (!InsertDataIntoUnitTypeTable())
-		return FALSE;
-
-	if (!InsertDataIntoCCTVInfoTable())
 		return FALSE;
 
 	if (!InsertDataIntoProjectInfoTable())
@@ -285,88 +341,34 @@ BOOL CNewDBManager::InsertDataIntoUnitTypeTable()
 	return TRUE;
 }
 
-BOOL CNewDBManager::InsertDataIntoCCTVInfoTable()
-{
-	CString strQuery = _T("DELETE FROM [dbo].[TB_CCTV_INFO]");
-	if (!m_pDB->ExecuteSql(strQuery))
-	{
-		Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
-	}
-
-	for (int i = 0; i < MAX_CCTV_COUNT; i++)
-	{
-		int nNum = -1;
-		int nCCTVType = 0;
-		int nCompanyType = 0;
-		CString strIP = _T("");
-		int nPort = -1;
-		CString strURL = _T("");
-		int nCameraCount = -1;
-		CString strID = _T("");
-		CString strPassword = _T("");
-		double nReserved = 0;
-
-		//번호는 1베이스
-		nNum = i + 1;
-
-		nCCTVType = CNewInfo::Instance()->m_fi.cctvInfo[i].cctvType;
-		if(nCCTVType == 0)
-		{
-			Log::Trace("The total number of inserted CCTV information is %d", i);
-			break;
-		}
-
-		nCompanyType = CNewInfo::Instance()->m_fi.cctvInfo[i].companyType;
-
-		strIP = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.cctvInfo[i].ip);
-
-		nPort = CNewInfo::Instance()->m_fi.cctvInfo[i].port;
-
-		strURL = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.cctvInfo[i].url);
-
-		nCameraCount = CNewInfo::Instance()->m_fi.cctvInfo[i].cameraCount;
-
-		strID = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.cctvInfo[i].id);
-
-		strPassword = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.cctvInfo[i].password);
-
-		nReserved = CNewInfo::Instance()->m_fi.cctvInfo[i].reserved;
-
-		strQuery.Format(_T("INSERT INTO TB_CCTV_INFO (NO, CCTV_TYPE, COMPANY_TYPE, IP, PORT, URL, CAMERA_COUNT, ID, PASSWORD, RESERVED) VALUES (%d, %d, %d, \'%s\', %d, \'%s\', %d, \'%s\', \'%s\', %d)"), 
-			nNum, nCCTVType, nCompanyType, strIP, nPort, strURL, nCameraCount, strID, strPassword, nReserved);
-
-		if (!m_pDB->ExecuteSql(strQuery))
-		{
-			Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
-			return FALSE;
-		}
-	}
-
-	return TRUE;
-}
-
 BOOL CNewDBManager::InsertDataIntoProjectInfoTable()
 {
+	//만약 모든 수신기가 F3라서 프로젝트명이 존재하지 않으면 DB Insert를 진행하지 않음
+	CString strProjectName = _T("");
+	strProjectName = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName);
+	if(strProjectName.IsEmpty())
+	{ 
+		Log::Trace("There in no project information!");
+		return TRUE;
+	}
+
 	CString strQuery = _T("DELETE FROM [dbo].[TB_PROJECT_INFO]");
 	if (!m_pDB->ExecuteSql(strQuery))
 	{
 		Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
 	}
 
-	CString strProjectName = _T("");
 	int nModuleTableVerNum = -1;
 	int nLinkedDataVerNum = -1;
 	int bAuthorized = -1;
 
-	strProjectName = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_pi.projectName);
-
-	nModuleTableVerNum = CNewInfo::Instance()->m_pi.moduleTableVerNum;
+	nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
 	ASSERT(nModuleTableVerNum != -1);
 
-	nLinkedDataVerNum = CNewInfo::Instance()->m_pi.linkedDataVerNum;
+	nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
 	ASSERT(nLinkedDataVerNum != -1);
 
-	bAuthorized = CNewInfo::Instance()->m_pi.authorized;
+	bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
 	ASSERT(bAuthorized != -1);
 
 	strQuery.Format(_T("INSERT INTO TB_PROJECT_INFO (PROJECT_NAME, MODULE_TABLE_VER_NUM, LINKED_DATA_VER_NUM, AUTHORIZED) VALUES (\'%s\', %d, %d, %d)"),
@@ -377,6 +379,8 @@ BOOL CNewDBManager::InsertDataIntoProjectInfoTable()
 		Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
 		return FALSE;
 	}
+
+	return TRUE;
 }
 
 BOOL CNewDBManager::GetDataFromF4DBTables()
@@ -385,9 +389,6 @@ BOOL CNewDBManager::GetDataFromF4DBTables()
 		return FALSE;
 
 	if (!GetDataFromUnitTypeTable())
-		return FALSE;
-
-	if (!GetDataFromCCTVInfoTable())
 		return FALSE;
 
 	if (!GetDataFromProjectInfoTable())
@@ -428,8 +429,8 @@ BOOL CNewDBManager::GetDataFromFACPTypeTable()
 	}
 	else
 	{
-		Log::Trace("The number of records in the TB_FACP_TYPE table is 0.");
-		return FALSE;
+// 		Log::Trace("The number of records in the TB_FACP_TYPE table is 0.");
+// 		return FALSE;
 	}
 
 	return TRUE;
@@ -470,67 +471,8 @@ BOOL CNewDBManager::GetDataFromUnitTypeTable()
 	}
 	else
 	{
-		Log::Trace("The number of records in the TB_UNIT_TYPE table is 0.");
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-BOOL CNewDBManager::GetDataFromCCTVInfoTable()
-{
-	CString strQuery = _T("SELECT * FROM [dbo].[TB_CCTV_INFO]");
-
-	if (!m_pDB->OpenQuery(strQuery))
-	{
-		Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
-		return FALSE;
-	}
-
-	int nRecordCount = -1;
-	nRecordCount = m_pDB->GetRecordCount();
-	if (nRecordCount > 0)	// CCTV는 없을 수도 있음
-	{
-		for (int i = 0; i < nRecordCount; i++)
-		{
-			int nNum = -1;
-			int nCCTVType = 0;
-			int nCompanyType = 0;
-			CString strIP = _T("");
-			int nPort = 0;
-			CString strURL = _T("");
-			int nCameraCount = 0;
-			CString strID = _T("");
-			CString strPassword = _T("");
-			double nReserved = 0;
-
-			m_pDB->GetFieldValue(_T("NO"), nNum);
-			ASSERT(nNum > -1);
-			m_pDB->GetFieldValue(_T("CCTV_TYPE"), nCCTVType);
-			m_pDB->GetFieldValue(_T("COMPANY_TYPE"), nCompanyType);
-			m_pDB->GetFieldValue(_T("IP"), strIP);
-			m_pDB->GetFieldValue(_T("PORT"), nPort);
-			m_pDB->GetFieldValue(_T("URL"), strURL);
-			m_pDB->GetFieldValue(_T("CAMERA_COUNT"), nCameraCount);
-			m_pDB->GetFieldValue(_T("ID"), strID);
-			m_pDB->GetFieldValue(_T("PASSWORD"), strPassword);
-			m_pDB->GetFieldValue(_T("RESERVED"), nReserved);
-
-
-			ASSERT(nNum > 0);
-			nNum -= 1;	// 번호는 1베이스, 인덱스는 0베이스
-			CNewInfo::Instance()->m_fi.cctvInfo[nNum].cctvType = nCCTVType;
-			CNewInfo::Instance()->m_fi.cctvInfo[nNum].companyType = nCompanyType;
-			strcpy_s(CNewInfo::Instance()->m_fi.cctvInfo[nNum].ip, CCommonFunc::WCharToChar(strIP.GetBuffer(0)));
-			CNewInfo::Instance()->m_fi.cctvInfo[nNum].port = nPort;
-			strcpy_s(CNewInfo::Instance()->m_fi.cctvInfo[nNum].url, CCommonFunc::WCharToChar(strURL.GetBuffer(0)));
-			CNewInfo::Instance()->m_fi.cctvInfo[nNum].cameraCount = nCameraCount;
-			strcpy_s(CNewInfo::Instance()->m_fi.cctvInfo[nNum].id, CCommonFunc::WCharToChar(strID.GetBuffer(0)));
-			strcpy_s(CNewInfo::Instance()->m_fi.cctvInfo[nNum].password, CCommonFunc::WCharToChar(strPassword.GetBuffer(0)));
-			CNewInfo::Instance()->m_fi.cctvInfo[nNum].reserved = nReserved;
-
-			m_pDB->MoveNext();
-		}
+// 		Log::Trace("The number of records in the TB_UNIT_TYPE table is 0.");
+// 		return FALSE;
 	}
 
 	return TRUE;
@@ -565,15 +507,15 @@ BOOL CNewDBManager::GetDataFromProjectInfoTable()
 		ASSERT(nLinkedDataVerNum > -1);
 		ASSERT(nAuthorized > -1);
 
-		strcpy_s(CNewInfo::Instance()->m_pi.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
-		CNewInfo::Instance()->m_pi.moduleTableVerNum = nModuleTableVerNum;
-		CNewInfo::Instance()->m_pi.linkedDataVerNum = nLinkedDataVerNum;
-		CNewInfo::Instance()->m_pi.authorized = nAuthorized;
+		strcpy_s(CNewInfo::Instance()->m_fi.projectInfo.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
+		CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum = nModuleTableVerNum;
+		CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum = nLinkedDataVerNum;
+		CNewInfo::Instance()->m_fi.projectInfo.authorized = nAuthorized;
 	}
 	else
 	{
-		Log::Trace("The number of records in the TB_PROJECT_INFO table is 0.");
-		return FALSE;
+// 		Log::Trace("The number of records in the TB_PROJECT_INFO table is 0.");
+// 		return FALSE;
 	}
 
 	return TRUE;

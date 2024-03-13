@@ -13,20 +13,54 @@ CNewExcelManager::~CNewExcelManager()
 
 BOOL CNewExcelManager::ParsingProjectInfo(CExcelWrapper* xls)
 {
-	// 현재는 버전 정보만 필요
 	CString strTemp = _T("");
+	CString strProjectName = _T("");
 	CString strModuleTableVer = _T("");
 	CString strRomVer = _T("");
-	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_VERSION, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	CString strAuthorized = _T("");
 
-	if (strTemp.IsEmpty() || strTemp.GetLength() > 5)
-		return FALSE;
+	// 건설사/발주사, 현장명, 건물종류, 현장주소, 대리점 문자열을 조합해서 프로젝트명 생성 후 저장
+
+	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_CONSTRUCTION_COMPANY, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	ASSERT(!strTemp.IsEmpty());
+	strProjectName = strTemp + _T("_");
+
+	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_SITE_NAME, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	ASSERT(!strTemp.IsEmpty());
+	strProjectName += strTemp;
+
+	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_BUILDING_TYPE, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	strProjectName += _T(" ") + strTemp;
+
+	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_SITE_ADDRESS, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	ASSERT(!strTemp.IsEmpty());
+	strProjectName += _T("(") + strTemp + _T(")");
+
+	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_RETAIL_STORE, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	ASSERT(!strTemp.IsEmpty());
+	strProjectName += _T("_") + strTemp;
+
+	strcpy_s(CNewInfo::Instance()->m_fi.projectInfo.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
+
+	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_VERSION, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+	ASSERT(!strTemp.IsEmpty());
 
 	AfxExtractSubString(strModuleTableVer, strTemp, 0, '.');
 	AfxExtractSubString(strRomVer, strTemp, 1, '.');
 
-	CNewInfo::Instance()->m_pi.moduleTableVerNum = _wtoi(strModuleTableVer);
-	CNewInfo::Instance()->m_pi.linkedDataVerNum = _wtoi(strRomVer);
+	strAuthorized = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_AUTHORIZED, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
+
+	CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum = _wtoi(strModuleTableVer);
+	CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum = _wtoi(strRomVer);
+
+	if (strAuthorized.Compare(_T("YES")) == 0)
+	{
+		CNewInfo::Instance()->m_fi.projectInfo.authorized = true;
+	}
+	else
+	{
+		CNewInfo::Instance()->m_fi.projectInfo.authorized = false;
+	}
 
 	return TRUE;
 }
@@ -88,71 +122,93 @@ BOOL CNewExcelManager::ParsingUnitType(CExcelWrapper* xls)
 	return TRUE;
 }
 
-BOOL CNewExcelManager::ParsingCCTVInfo(CExcelWrapper* xls)
+BOOL CNewExcelManager::UpdateProjectInfo(CString strWin32AppProjectName)
 {
-	int nNum = 0;
-	int nCCTVType = 0;
-	int nCompany = 0;
-	int nPort = 0;
-	int nCameraCount = 0;
+	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
+	CString strProjectName;
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
 
-	CString strIP = _T("");	
-	CString strUrl = _T("");	
-	CString strID = _T("");
-	CString strPassword = _T("");
+	CString strModuleTablePath;
+	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
-	CString strTemp = _T("");
-	int nRoopCount = MAX_CCTV_COUNT;
-	for (int i = EXCEL_ENUM_CCTV_INFO::ROW_LIST_START; i < nRoopCount + EXCEL_ENUM_CCTV_INFO::ROW_LIST_START; i++)
+	//중계기 일람표 리스트 얻음
+	std::vector<CString> strModuleTableFileList;
+	strModuleTableFileList =  CCommonFunc::GetFullPathFileListIntheFolder(strModuleTablePath, strProjectName);
+
+	int nModuleTableCount = -1;
+	nModuleTableCount = strModuleTableFileList.size();
+
+	if (nModuleTableCount == 0)
 	{
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_NUM);
-		nNum = _wtoi(strTemp) - 1;	// 번호는 1, 메모리 인덱스는 제로 베이스
-		
-		//엑셀 템플릿에 1000번까지 인덱스를 넣으면 필요없지만 사용하는 인덱스까지만 표시한다면 이 코드를 넣어서 번호가 더 이상 없으면 루프 종료하도록 함, 번호가 없으면 0 - 1 = -1
-		if (nNum == -1)
-		{
-			Log::Trace("There is no more camera information. (Total Camera Info Count : %d)", i - EXCEL_ENUM_CCTV_INFO::ROW_LIST_START);
-			return TRUE;
-		}
+		Log::Trace("There is no Module Table file in the [%s] folder.", CCommonFunc::WCharToChar(strModuleTablePath.GetBuffer(0)));
+		return FALSE;
+	}
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_CCTV_TYPE);
-		nCCTVType = _wtoi(strTemp);
-		if (nCCTVType < CCTV && nCCTVType > NVR)
+	for (int i = 0; i < nModuleTableCount; i++)
+	{
+		CString strModuleTableFile;
+		strModuleTableFile = strModuleTableFileList[i];
+
+		CExcelWrapper xls;
+		if (xls.Open(strModuleTableFile) == false)
 		{
-			Log::Trace("Wrong CCTV Type");
+			Log::Trace("Failed to open file [%s].", CCommonFunc::WCharToChar(strModuleTableFile.GetBuffer(0)));
 			return FALSE;
 		}
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_COMPANY);
-		nCompany = _wtoi(strTemp);
+		int nSheetCount = 0;
+		nSheetCount = xls.GetSheetCount();
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_IP);
-		strIP = strTemp;
+		for (int j = 0; j < nSheetCount; j++)
+		{
+			if (xls.SetWorkSheetChange(j + 1) == FALSE)
+				continue;
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_PORT);
-		nPort = _wtoi(strTemp);
+			CString strSheetName = _T("");
+			strSheetName = xls.GetSheetName(j + 1);
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_URL);
-		strUrl = strTemp;
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_PROJECT_INFO) == 0)
+			{
+				//
+				//리스트 개수만큼 루프돌면서 프로젝트 번호 업데이트
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_CAMERA_COUNT);
-		nCameraCount = _wtoi(strTemp);
+				int nModuleTableVerNum = -1;
+				int nLinkedDataVerNum = -1;
+				bool bAuthorized = false;
+				CString strProjectVerNum = _T("");
+				CString strAuthorized = _T("");
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_ID);
-		strID = strTemp;
+				nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
+				nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+				bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
 
-		strTemp = xls->GetItemText(i, EXCEL_ENUM_CCTV_INFO::COLUMN_PASSWORD);
-		strPassword = strTemp;
+				strProjectVerNum.Format(_T("%02d.%02d"), nModuleTableVerNum, nLinkedDataVerNum);
+				if (bAuthorized)
+				{
+					strAuthorized = _T("YES");
+				}
+				else
+				{
+					strAuthorized = _T("NO");
+				}
 
-		CNewInfo::Instance()->m_fi.cctvInfo[nNum].cctvType = nCCTVType;
-		CNewInfo::Instance()->m_fi.cctvInfo[nNum].companyType = nCompany;
-		sprintf(CNewInfo::Instance()->m_fi.cctvInfo[nNum].ip, CCommonFunc::WCharToChar(strIP.GetBuffer(0)));
-		CNewInfo::Instance()->m_fi.cctvInfo[nNum].port = nPort;
-		sprintf(CNewInfo::Instance()->m_fi.cctvInfo[nNum].url, CCommonFunc::WCharToChar(strUrl.GetBuffer(0)));
-		CNewInfo::Instance()->m_fi.cctvInfo[nNum].cameraCount = nCameraCount;
-		sprintf(CNewInfo::Instance()->m_fi.cctvInfo[nNum].id, CCommonFunc::WCharToChar(strID.GetBuffer(0)));
-		sprintf(CNewInfo::Instance()->m_fi.cctvInfo[nNum].password, CCommonFunc::WCharToChar(strPassword.GetBuffer(0)));
+				xls.SetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_VERSION, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT, strProjectVerNum);
+				xls.SetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_AUTHORIZED, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT, strAuthorized);
+				//
+
+				break;
+			}
+
+			//모든 Sheet를 검색했는데 project Sheet를 못찾았다면 프로젝트 버전 번호 갱신 실패
+			if (j == nSheetCount - 1)
+			{
+				CString strLog = _T("Failed to update the project number in file [%s] because it failed to find the [%s] sheet.", strModuleTableFile, EXCEL_SHEET_PROJECT_INFO);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strLog.GetBuffer(0)));
+			}
+		}
+		xls.SavaAs(strModuleTableFile);
+		xls.Close();
+
 	}
-
 	return TRUE;
 }

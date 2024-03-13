@@ -158,4 +158,6 @@ public:
 	static CString GetFileNameOnly(CString strPath);
 
 	static CString GetProgramVersion();
+
+	static std::vector<CString> GetFullPathFileListIntheFolder(CString strPath, CString strFind = _T(""));	//폴더 경로, 파일 명 내의 매칭 문자열
 };

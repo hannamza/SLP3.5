@@ -182,6 +182,10 @@ IDR_CONTACTFACP         BITMAP                  "res\\bmp00001.bmp"
 
 IDR_CONT_FACP           BITMAP                  "res\\mainfram.bmp"
 
+IDB_BMP_RB_LINK_LARGE_EDIT BITMAP                  "res\\RB_LINKER_LARGE_EDIT.bmp"
+
+IDB_BMP_RB_LINK_SMALL_EDIT BITMAP                  "res\\RB_LINKER_SMALL_EDIT.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -590,7 +594,7 @@ BEGIN
     PUSHBUTTON      "...",IDC_BTN_BROWSER,322,7,36,14
     PUSHBUTTON      "추가",IDC_BTN_ADD,321,21,36,14,NOT WS_VISIBLE
     PUSHBUTTON      "삭제",IDC_BTN_DEL,357,7,36,14
-    LISTBOX         IDC_LST_TABLE,7,25,386,171,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LST_TABLE,7,25,386,171,LBS_SORT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
     LTEXT           "파일 선택",IDC_STATIC,7,9,32,8
 END
 
@@ -1828,6 +1832,17 @@ BEGIN
     CONTROL         "",IDC_DEVICE_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,173,7,91,186
 END
 
+IDD_DIALOG_ADMIN_MODE DIALOGEX 0, 0, 172, 115
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "관리자 모드 암호 입력"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,28,94,50,14
+    PUSHBUTTON      "취소",IDCANCEL,96,94,50,14
+    LTEXT           "관리자 모드 암호를 입력하세요.",IDC_STATIC,40,33,98,11
+    EDITTEXT        IDC_EDIT_PASSWORD,29,54,116,14,ES_PASSWORD | ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2468,6 +2483,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 193
     END
+
+    IDD_DIALOG_ADMIN_MODE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 165
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 108
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2846,6 +2869,11 @@ BEGIN
 END
 
 IDD_FORMLOCATION_OLD AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG_ADMIN_MODE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

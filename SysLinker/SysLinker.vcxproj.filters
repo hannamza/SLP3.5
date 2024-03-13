@@ -519,6 +519,9 @@
     <ClInclude Include="..\SLP3.5Func\NewExcelManager.h">
       <Filter>SLP3.5Func</Filter>
     </ClInclude>
+    <ClInclude Include="DlgAdminMode.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -980,6 +983,9 @@
     <ClCompile Include="..\SLP3.5Func\NewExcelManager.cpp">
       <Filter>SLP3.5Func</Filter>
     </ClCompile>
+    <ClCompile Include="DlgAdminMode.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SysLinker.rc">
@@ -1150,6 +1156,15 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="res\Right2_32x32x16.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\RB_LINKER_LARGE_EDIT.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\bitmap2.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\RB_LINKER_SMALL_EDIT.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

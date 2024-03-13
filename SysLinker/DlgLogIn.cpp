@@ -636,7 +636,7 @@ int CDlgLogIn::DisplayPrjInfo(ST_TEMP_PRJINFO * pInfo)
 	m_strPrjName = pInfo->strName;
 	m_strCreateDate = pInfo->strDateCreate;
 	m_strMaker = pInfo->strCreator;
-	m_strPrjVersion.Format(L"%d.%d" , pInfo->wMajor , pInfo->wMinor);
+	//m_strPrjVersion.Format(L"%d.%d" , pInfo->wMajor , pInfo->wMinor);		//20240306 GBM - 표시되는 버전이 항상 1.0이므로 의미가 없어 표시를 안하게 함
 	m_strModifyDate = pInfo->strDateModify;
 	m_strModifier = pInfo->strDateModify;
 	UpdateData(FALSE);

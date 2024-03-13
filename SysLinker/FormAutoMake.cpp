@@ -3537,9 +3537,6 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	nInType = nOutType = nEqName = nCont = -1;
 	nLinkType = nLgID = nLgType = nTFid = nTUid = nTCid = nTRid = -1;
 	SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_TIMER_START);
-	
-	//20231110 GBM start - test
-#if 1
 
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
@@ -3617,8 +3614,6 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	GF_AddDebug(L"   - SP_DELETE_TEMPLINK_PTNITEM 종료: %d",dwEnd - dwTemp);
 	dwTemp = dwEnd;
 #endif
-#endif
-	//20231110 GBM end
 
 	nProgOffset += g_stConfig.dwTimeOut;
 	SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_TIMER_END);
@@ -3631,19 +3626,14 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	dwTemp = dwEnd;
 #endif
 
-	//20231113 GBM start - 주석
-	//Stored Procedure로 얻어진 두 테이블 TB_TEMP_SAVED_LINK(패턴에 속하지 않은 연동 출력 정보), TB_TEMP_USED_PTN (연동 출력 중 패턴에 속하는 정보)를 합쳐
-	//메모리에 적용하기 위한 쿼리 
 	strSql = L"SELECT 2 AS LTYPE , SRC_FACP , SRC_UNIT , SRC_CHN, SRC_RLY , TGT_FACP,TGT_UNIT , TGT_CHN, TGT_RLY , LG_ID,INPUT_ID,OUTPUT_ID,OUTCONT_ID,EQNAME_ID ";
 	strSql += L", SRC_BD_NAME, SRC_BTYPE_NAME, SRC_STAIR_NAME, SRC_FL_NAME, SRC_RM_NAME, TGT_BD_NAME, TGT_BTYPE_NAME, TGT_STAIR_NAME, TGT_FL_NAME, TGT_RM_NAME ";
 	strSql += L"FROM TB_TEMP_SAVED_LINK A ";
 	strSql += L"UNION ";
-	//출력이 패턴인 경우 PT_ID값을 TGT_FACP에 적용
 	strSql += L"SELECT 1 AS LTYPE , SRC_FACP, SRC_UNIT, SRC_CHN, SRC_RLY, PT_ID AS TGT_FACP, 0 AS TGT_UNIT, 0 AS TGT_CHN, 0 AS TGT_RLY, 1000 AS LG_ID, 0 AS INPUT_ID, 0 AS OUTPUT_ID, 0 AS OUTCONT_ID, 0 AS EQNAME_ID ";
 	strSql += L", '' AS SRC_BD_NAME, '' AS SRC_BTYPE_NAME, '' AS SRC_STAIR_NAME, '' AS SRC_FL_NAME, '' AS SRC_RM_NAME, '' AS TGT_BD_NAME, '' AS TGT_BTYPE_NAME, '' AS TGT_STAIR_NAME, '' AS TGT_FL_NAME, '' AS TGT_RM_NAME ";
 	strSql += L"FROM TB_TEMP_USED_PTN B ";
 	strSql += L"ORDER BY SRC_FACP, SRC_UNIT, SRC_CHN, SRC_RLY, TGT_FACP, TGT_UNIT, TGT_CHN, TGT_RLY ";
-	//20231113 GBM end
 
 	if (pDBUtil->OpenQuery(strSql) == false)
 	{

@@ -668,6 +668,11 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 	// Num To ID 변경을 위해
 	m_MapFacpNum[nFNum] = pFacp;
 
+	//20240308 GBM start - F4 Sheet 존재 여부 확인
+	CNewExcelManager::Instance()->bExistFT = FALSE;
+	CNewExcelManager::Instance()->bExistUT = FALSE;
+	CNewExcelManager::Instance()->bExistPI = FALSE;
+	//20240308 GBM end
 
 	try
 	{
@@ -741,51 +746,53 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				continue;
 			}
 
-			//20240130 GBM start - 프로젝트 정보, 수신기 Type, Unit Type, CCTV 정보 파싱
+			//20240312 GBM start - 프로젝트 정보, 수신기 Type, Unit Type 파싱
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_PROJECT_INFO) == 0)
 			{
-				BOOL bRet = FALSE;
-				bRet = CNewExcelManager::Instance()->ParsingProjectInfo(&xls);
-				if (!bRet)
+				if (CNewExcelManager::Instance()->bExistPI == FALSE)
 				{
-					Log::Trace("Project Info Excel Parsing Failed!");
+					CNewExcelManager::Instance()->bExistPI = TRUE;
+					BOOL bRet = FALSE;
+					bRet = CNewExcelManager::Instance()->ParsingProjectInfo(&xls);
+					if (!bRet)
+					{
+						Log::Trace("Project Info Excel Parsing Failed!");
+					}
+					continue;
 				}
-				continue;
 			}
 
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
 			{
-				BOOL bRet = FALSE;
-				bRet = CNewExcelManager::Instance()->ParsingFacpType(&xls);
-				if (!bRet)
+				if (CNewExcelManager::Instance()->bExistFT == FALSE)
 				{
-					Log::Trace("FACP Type Info Excel Parsing Failed!");
+					CNewExcelManager::Instance()->bExistFT = TRUE;
+					BOOL bRet = FALSE;
+					bRet = CNewExcelManager::Instance()->ParsingFacpType(&xls);
+					if (!bRet)
+					{
+						Log::Trace("FACP Type Info Excel Parsing Failed!");
+					}
+					continue;
 				}
-				continue;
 			}
 
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_UNIT_TYPE) == 0)
 			{
-				BOOL bRet = FALSE;
-				bRet = CNewExcelManager::Instance()->ParsingUnitType(&xls);
-				if (!bRet)
+				if (CNewExcelManager::Instance()->bExistUT == FALSE)
 				{
-					Log::Trace("Unit Type Info Excel Parsing Failed!");
+					CNewExcelManager::Instance()->bExistUT = TRUE;
+					BOOL bRet = FALSE;
+					bRet = CNewExcelManager::Instance()->ParsingUnitType(&xls);
+					if (!bRet)
+					{
+						Log::Trace("Unit Type Info Excel Parsing Failed!");
+					}
+					continue;
 				}
-				continue;
 			}
 
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_CCTV) == 0)
-			{
-				BOOL bRet = FALSE;
-				bRet = CNewExcelManager::Instance()->ParsingCCTVInfo(&xls);
-				if (!bRet)
-				{
-					Log::Trace("CCTV Info Excel Parsing Failed!");
-				}
-				continue;
-			}
-			//20240130 GBM end
+			//20240312 GBM end
 
 			str = strSheetName;
 			strUp1 = str;
@@ -9557,6 +9564,8 @@ int CRelayTableData::CheckColumn(CString strTable, CString strColumn, BOOL bCrea
 	}
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
+		DWORD dw;
+		dw = GetLastError();
 		USERLOG(L"table : tb_facp open failed");
 		return 0;
 	}
@@ -10608,6 +10617,43 @@ int CRelayTableData::LoadProjectDatabase()
 		cvt.ConvertRelayID();
 		cvt.ChangeDatabase(m_pDB);
 	}
+
+	//20240305 GBM start - 전체 테이블 로드가 모드 성공한 이후 시점에 F4 추가 기능 테이블 정보를 로드
+	BOOL bRet = TRUE;
+	CNewDBManager::Instance()->SetDBAccessor(m_pDB);
+
+	//최초부터 F4 프로젝트인지 혹은 중계기 일람표 변경으로 인해 F4 프로젝트가 되었는지에 따라 F4 추가 테이블이 존재하면 Select를 해서 정보를 가져오고 그렇지 않으면 가져오지 않음
+	for (int i = TB_FACP_TYPE; i <= TB_PROJECT_INFO; i++)
+	{
+		CString strTable = _T(""); 
+		strTable = g_lpszNewTable[i];
+		bRet = CNewDBManager::Instance()->CheckDBTableExist(strTable);
+		if (!bRet)
+		{
+			CString strMsg = _T("");
+			strMsg.Format(_T("Table [%s] does not exist in the database"), strTable);
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+			GF_AddLog(L"F4 추가정보 테이블이 DB에 존재하지 않습니다. F4 추가정보를 처리하지 않습니다.", strTable);
+			break;
+		}
+	}
+
+	if (bRet)
+	{
+		bRet = CNewDBManager::Instance()->GetDataFromF4DBTables();
+		if (bRet)
+		{
+			GF_AddLog(L"데이터베이스에서 F4 추가정보를 가져오는 데에 성공했습니다.");
+			Log::Trace("Successfully retrieved F4 additional information from database.");
+		}
+		else
+		{
+			GF_AddLog(L"데이터베이스에서 F4 추가정보를 가져오는 데에 실패했습니다.");
+			Log::Trace("Failed to retrieve F4 additional information from database.");
+			return 0;
+		}
+	}
+	//20240305 GBM end
 
 	return 1;
 }
@@ -14033,10 +14079,49 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			if (nRet != 0)
 				nRet = nTempRet;
 
+			//20240229 GBM start - 수신기 Type에 따른 ROM 파일명 생성
+#if 1
+			int nFacpType = -1;
+			CString strProjectVersionNum;
+			nFacpType = CNewInfo::Instance()->m_fi.facpType[nLastFacp];
+			if (nFacpType == F3)
+			{
+				strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
+				strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
+				strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
+			}
+			else if (nFacpType == F4)
+			{
+				int nModuleTableVerNum = -1;
+				int nLinkedDataVerNum = -1;
+				bool bAuthorized = false;
+				CString strAuthorized = _T("");
+
+				nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
+				nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+				bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+				if (bAuthorized)
+					strAuthorized = _T("A");
+
+				strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+				strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+				strEmergency.Format(L"%sEMER%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+			}
+			else
+			{
+				strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
+				strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
+				strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
+			}
+			strRomLoc.Format(L"%sLOCAL%02d.ROM", strPath, nLastFacp);
+#else
 			strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
 			strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
 			strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
 			strRomLoc.Format(L"%sLOCAL%02d.ROM", strPath, nLastFacp);
+#endif
+			//20240229 GBM end
+
 			// 4. ROM 파일 생성 - ROM File Size 설정
 			uTemp = uRomOffset / 256;
 			uRest = uRomOffset % 256;
@@ -14311,10 +14396,49 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		if (nRet != 0)
 			nRet = nTempRet;
 
+		//20240229 GBM start - 수신기 Type에 따른 ROM 파일명 생성
+#if 1
+		int nFacpType = -1;
+		CString strProjectVersionNum;
+		nFacpType = CNewInfo::Instance()->m_fi.facpType[nLastFacp];
+		if (nFacpType == F3)
+		{
+			strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
+			strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
+			strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
+		}
+		else if (nFacpType == F4)
+		{
+			int nModuleTableVerNum = -1;
+			int nLinkedDataVerNum = -1;
+			bool bAuthorized = false;
+			CString strAuthorized = _T("");
+
+			nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
+			nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+			bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+			if (bAuthorized)
+				strAuthorized = _T("A");
+
+			strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+			strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+			strEmergency.Format(L"%sEMER%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+		}
+		else
+		{
+			strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
+			strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
+			strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
+		}
+		strRomLoc.Format(L"%sLOCAL%02d.ROM", strPath, nLastFacp);
+#else
 		strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
 		strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
 		strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
 		strRomLoc.Format(L"%sLOCAL%02d.ROM", strPath, nLastFacp);
+#endif
+		//20240229 GBM end
+
 		// 4. ROM 파일 생성
 		uTemp = uRomOffset / 256;
 		uRest = uRomOffset % 256;
@@ -14378,6 +14502,51 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 	MakeRvPatternInfo(strPath);
 	MakeRvContactInfo(strPath);
 	MakeManualOutput(strPath);
+
+	//20240305 GBM start - F4APPENDIX.ROM 생성
+
+	//F4 Type 수신기가 하나도 없다면 아래 행정을 진행하지 않음, F3만 있다면 의미가 없기 때문
+	BOOL bF4TypeExist = FALSE;
+	for (int i = 0; i < MAX_FACP_COUNT; i++)
+	{
+		if (CNewInfo::Instance()->m_fi.facpType[i] == F4)
+		{
+			bF4TypeExist = TRUE;
+			break;
+		}
+	}
+
+	if (bF4TypeExist)
+	{
+		CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
+
+		int nModuleTableVerNum = -1;
+		int nLinkedDataVerNum = -1;
+		bool bAuthorized = false;
+		CString strAuthorized = _T("");
+
+		nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
+		nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+		bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+		if (bAuthorized)
+			strAuthorized = _T("A");
+
+		CFile fF4Appendix;
+		CString strFilePath;
+		strFilePath.Format(_T("%sF4APPENDIX_v%02d-%02d%s.ROM"), strPath, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+
+		if (!fF4Appendix.Open(strFilePath, CFile::modeCreate | CFile::modeWrite))
+		{
+			GF_AddLog(L"F4APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
+			Log::Trace("Failed to open F4APPENDIX.ROM file");
+			return 0;
+		}
+
+		fF4Appendix.Write(&CNewInfo::Instance()->m_fi, sizeof(F4APPENDIX_INFO));
+		fF4Appendix.Close();
+		//20240305 GBM end
+	}
+
 	return nRet;
 }
 
@@ -15224,6 +15393,48 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	strName.ReleaseBuffer();
 	nSize += 1;
 	//sizeof(szStrBuff);
+
+	//20240228 GBM start - 수신기 종류에 따라 문자열 제한 개수 분기 처리
+#if 1
+	int nFacpType = -1;
+	int nMaxSize;
+	CString strFacpType;
+	nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacpNum];
+	if (nFacpType == F3)
+	{
+		nMaxSize = MAX_LCD_TEXT_LENGTH_F3;
+		strFacpType = _T("F3");
+	}
+	else if (nFacpType == F4)
+	{
+		nMaxSize = MAX_LCD_TEXT_LENGTH_F4;
+		strFacpType = _T("F4");
+	}
+	else
+	{
+		nMaxSize = MAX_LCD_TEXT_LENGTH_F3;
+		strFacpType = _T("F3");
+	}
+
+	if (nSize > nMaxSize)
+	{
+		CString strMsg = _T("");
+		if (nRelay == 0)
+		{
+			GF_AddLog(L"수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.(%s)", strFacpType, nMaxSize, nSize, strName);			
+			strMsg.Format(_T("수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.(%s)"), strFacpType, nMaxSize, nSize, strName);
+		}
+		else
+		{
+			GF_AddLog(L"수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[주소:%02d%02d-%d%03d](이름:%s)", strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+			strMsg.Format(_T("수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[주소:%02d%02d-%d%03d](이름:%s)"), strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+		}
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+
+		nSize = nMaxSize;
+		szStrBuff[nSize - 1] = 0;
+	}
+#else
 	if (nSize > 40)
 	{
 		if(nRelay == 0)
@@ -15237,6 +15448,8 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		nSize = 40;
 		szStrBuff[39] = 0;
 	}
+#endif
+	//20240228 GBM end
 
 	// ROM BUFFER : 3 byte : Message Address
 	stTemp.bt65536Divid = uMsgOffset / 0x10000;;
@@ -15570,13 +15783,15 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	char szStrBuff[256] = { 0 };
  	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
  
+	//20240305 GBM start - 입력타입 개수 증설 (17 -> 57)
+#if 1
  	/************************************************************************/
- 	/* 입력타입    0~ 16 : 17개 글자수 32                                                          */
+ 	/* 입력타입    0~ 56 : 57개 글자수 32                                                          */
  	/************************************************************************/
  	spRefManager = m_spRefInputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
- 	memset(pMsgBuff + uMsgOffset,0,(32 * 17));
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * 57));
  
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
@@ -15597,7 +15812,38 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos ,szStrBuff,32);
  		strName.ReleaseBuffer();
  	}
- 	uMsgOffset += (32 * 17);
+ 	uMsgOffset += (32 * 57);
+#else
+	/************************************************************************/
+	/* 입력타입    0~ 16 : 17개 글자수 32                                                          */
+	/************************************************************************/
+	spRefManager = m_spRefInputEquipManager;
+	if (spRefManager == nullptr)
+		return 0;
+	memset(pMsgBuff + uMsgOffset, 0, (32 * 17));
+
+	pos = spRefManager->GetHeadPosition();
+	while (pos)
+	{
+		pEquip = spRefManager->GetNext(pos);
+		if (pEquip == nullptr)
+			continue;
+		strName = pEquip->GetEquipName();
+		memset(szStrBuff, 0, 256);
+		nSize = GF_Unicode2ASCII(strName.GetBuffer(), szStrBuff, 256);
+		nSize += 1;
+		if (nSize >= 32)
+		{
+			nSize = 32;
+			szStrBuff[31] = 0;
+		}
+		nCopyPos = pEquip->GetEquipID() * 32;
+		memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
+		strName.ReleaseBuffer();
+	}
+	uMsgOffset += (32 * 17);
+#endif
+	//20240305 GBM end
  
  	/************************************************************************/
  	/* 출력타입 - 연동정지 0~ 56 : 57개 글자수 32                                                             */
