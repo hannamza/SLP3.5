@@ -14,8 +14,10 @@ IMPLEMENT_DYNAMIC(CPropPageDevice, CPropertyPage)
 CPropPageDevice::CPropPageDevice()
 	: CPropertyPage(IDD_PROP_PAGE_DEVICETABLE)
 	, m_strPath(_T(""))
+	, m_strEditPath(_T(""))
 {
 	m_pRefFasSysData = nullptr;
+	m_nListCtrlSelIndex = -1;
 }
 
 CPropPageDevice::~CPropPageDevice()
@@ -25,8 +27,8 @@ CPropPageDevice::~CPropPageDevice()
 void CPropPageDevice::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LST_TABLE, m_lstTable);
-	DDX_Text(pDX, IDC_ED_PATH, m_strPath);
+	DDX_Control(pDX, IDC_LIST1, m_ctrlListCtrl);
+	DDX_Text(pDX, IDC_ED_PATH, m_strEditPath);
 }
 
 
@@ -36,6 +38,8 @@ BEGIN_MESSAGE_MAP(CPropPageDevice, CPropertyPage)
 	ON_BN_CLICKED(IDC_BTN_DEL, &CPropPageDevice::OnBnClickedBtnDel)
 	ON_BN_CLICKED(IDC_BTN_ADD, &CPropPageDevice::OnBnClickedBtnAdd)
 	ON_BN_CLICKED(IDC_BTN_BROWSER, &CPropPageDevice::OnBnClickedBtnBrowser)
+	ON_NOTIFY(NM_CLICK, IDC_LIST1, &CPropPageDevice::OnClickList1)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CPropPageDevice::OnItemchangedList1)
 END_MESSAGE_MAP()
 
 
@@ -61,7 +65,7 @@ BOOL CPropPageDevice::OnSetActive()
 	CPropertySheet * pSheet = reinterpret_cast<CPropertySheet*>(GetParent());
 	
 	pSheet->SetWizardButtons(PSWIZB_BACK);
-	int nCnt = m_lstTable.GetCount();
+	int nCnt = m_ctrlListCtrl.GetItemCount();
 	if (nCnt > 0)
 		pSheet->SetWizardButtons(PSWIZB_NEXT | PSWIZB_BACK);
 
@@ -121,45 +125,94 @@ void CPropPageDevice::OnBnClickedBtnAdd()
 void CPropPageDevice::OnBnClickedBtnDel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	int nIdx = m_lstTable.GetCurSel();
-	if (nIdx < 0)
+	BOOL bMultiSelected = FALSE;
+	UINT nSelectedCount = m_ctrlListCtrl.GetSelectedCount();
+	if (nSelectedCount > 1)
 	{
-		AfxMessageBox(L"선택된 일람표가 없습니다.");
-		return;
+		bMultiSelected = TRUE;
 	}
-
-	//20240312 GBM start - 삭제할 파일 경로를 가져와서 수신기 번호를 확인 후 수신기 번호를 리스트에서 제거
-	CString strDelFile = _T("");
-	m_lstTable.GetText(nIdx, strDelFile);
-	int nPos = -1;
-	nPos = strDelFile.ReverseFind('.');
-	CString strFACPNum = _T("");
-	strFACPNum = strDelFile.Mid(nPos - 2, 2);
-	int nFACP = -1;
-	nFACP = _wtoi(strFACPNum);
 	
-	POSITION pos = m_FacpNumList.GetHeadPosition();
-	POSITION posTemp;
-	while (pos != NULL)
+	if (bMultiSelected)
 	{
-		posTemp = pos;
-		int nItem = m_FacpNumList.GetNext(pos);
-		if (nFACP == nItem)
+		POSITION pos = m_ctrlListCtrl.GetFirstSelectedItemPosition();
+		std::vector<int> selectedItemsVec;
+
+		while (pos)
 		{
-			m_FacpNumList.RemoveAt(posTemp);
-			break;
+			int nSelected = m_ctrlListCtrl.GetNextSelectedItem(pos);
+			selectedItemsVec.push_back(nSelected);
+
+			POSITION posFacpNum = m_FacpNumList.GetHeadPosition();
+			POSITION posDelete;
+			while (posFacpNum)
+			{
+				posDelete = posFacpNum;
+				int nFacp = -1;
+				nFacp = m_FacpNumList.GetNext(posFacpNum);
+				if (nSelected == nFacp)
+				{
+					m_FacpNumList.RemoveAt(posDelete);
+					break;
+				}
+			}
+		}
+
+		for (int i = selectedItemsVec.size() - 1; i >= 0; i--)
+		{
+			int nIndex = selectedItemsVec[i];
+			m_ctrlListCtrl.DeleteItem(nIndex);
 		}
 	}
-	//20240312 GBM end
+	else
+	{
+		if (m_nListCtrlSelIndex < 0)
+		{
+			AfxMessageBox(L"선택된 일람표가 없습니다.");
+			return;
+		}
 
-	m_lstTable.DeleteString(nIdx);
+		CString strDelFile = _T("");
+		strDelFile = m_ctrlListCtrl.GetItemText(m_nListCtrlSelIndex, 0);
+		int nPos = -1;
+		nPos = strDelFile.ReverseFind('.');
+		CString strFACPNum = _T("");
+		strFACPNum = strDelFile.Mid(nPos - 2, 2);
+		int nFACP = -1;
+		nFACP = _wtoi(strFACPNum);
 
-	if (m_lstTable.GetCount() > 0)
+		POSITION pos = m_FacpNumList.GetHeadPosition();
+		POSITION posTemp;
+		while (pos != NULL)
+		{
+			posTemp = pos;
+			int nItem = m_FacpNumList.GetNext(pos);
+			if (nFACP == nItem)
+			{
+				m_FacpNumList.RemoveAt(posTemp);
+				break;
+			}
+		}
+
+		m_ctrlListCtrl.DeleteItem(m_nListCtrlSelIndex);
+	}
+
+	int nListIndex = -1;
+	nListIndex = m_ctrlListCtrl.GetItemCount();
+	if (nListIndex > 0)
 	{
 		CPropertySheet * pSheet = reinterpret_cast<CPropertySheet*>(GetParent());
 		pSheet->SetWizardButtons(PSWIZB_NEXT | PSWIZB_BACK);
 	}
+	else
+	{
+		CPropertySheet * pSheet = reinterpret_cast<CPropertySheet*>(GetParent());
+		pSheet->SetWizardButtons(PSWIZB_BACK);
+	}
+
+	m_strEditPath = _T("");
+	UpdateData(FALSE);
+
+	m_nListCtrlSelIndex = -1;
 }
 
 
@@ -172,6 +225,7 @@ void CPropPageDevice::OnBnClickedBtnBrowser()
 
 	CString str,strPath,strFacp;
 	int nIdx,nValue;
+	int nListIndex = -1;
 
 	int nMaxFiles = 256;
 	int nBufferSz = nMaxFiles * 256 * sizeof(TCHAR) + sizeof(TCHAR);
@@ -199,21 +253,30 @@ void CPropPageDevice::OnBnClickedBtnBrowser()
 			continue;
 		}
 
-		m_strPath = strPath;
+		m_strEditPath = strPath;
 		if(CheckDuplicate(nValue) == 0)
 		{
 			AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
 			return;
 		}
 		m_FacpNumList.AddTail(nValue);
-		m_lstTable.AddString(strPath);
+		nListIndex = m_ctrlListCtrl.GetItemCount();
+
+		m_ctrlListCtrl.InsertItem(nListIndex, strPath);
 	}
 
-	if(m_lstTable.GetCount() > 0)
+	nListIndex = m_ctrlListCtrl.GetItemCount();
+	if (nListIndex > 0)
 	{
 		CPropertySheet * pSheet = reinterpret_cast<CPropertySheet*>(GetParent());
 		pSheet->SetWizardButtons(PSWIZB_NEXT | PSWIZB_BACK);
 	}
+	else
+	{
+		CPropertySheet * pSheet = reinterpret_cast<CPropertySheet*>(GetParent());
+		pSheet->SetWizardButtons(PSWIZB_BACK);
+	}
+
 	UpdateData(FALSE);
 }
 
@@ -249,28 +312,34 @@ BOOL CPropPageDevice::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
-
-	CString str; 
-	CSize sz; 
-	int dx = 0;
-	CDC *pDC = m_lstTable.GetDC();
-
-	for (int i = 0; i < m_lstTable.GetCount(); i++)
-	{
-		m_lstTable.GetText(i, str);
-		sz = pDC->GetTextExtent(str);
-
-		if (sz.cx > dx)
-			dx = sz.cx;
-	}
-	m_lstTable.ReleaseDC(pDC);
-
-	if (m_lstTable.GetHorizontalExtent() < dx)
-	{
-		m_lstTable.SetHorizontalExtent(dx);
-		ASSERT(m_lstTable.GetHorizontalExtent() == dx);
-	}
+	m_ctrlListCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_ctrlListCtrl.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+	m_ctrlListCtrl.InsertColumn(1, _T("파일 경로"), LVCFMT_LEFT, 2000);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+
+void CPropPageDevice::OnClickList1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	NM_LISTVIEW* pNMView = (NM_LISTVIEW*)pNMHDR;
+	m_nListCtrlSelIndex = pNMView->iItem;
+
+	CString strPath = m_ctrlListCtrl.GetItemText(m_nListCtrlSelIndex, 0);
+	m_strEditPath = strPath;
+	UpdateData(FALSE);
+
+	*pResult = 0;
+}
+
+
+void CPropPageDevice::OnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
 }

@@ -1,4 +1,4 @@
-// DlgAdminMod.cpp : 구현 파일입니다.
+// DlgAdminMode.cpp : 구현 파일입니다.
 //
 
 #include "stdafx.h"
@@ -6,7 +6,7 @@
 #include "afxdialogex.h"
 #include "SysLinker.h"
 
-// CDlgAdminMod 대화 상자입니다.
+// CDlgAdminMode 대화 상자입니다.
 
 IMPLEMENT_DYNAMIC(CDlgAdminMode, CDialogEx)
 
@@ -33,7 +33,7 @@ BEGIN_MESSAGE_MAP(CDlgAdminMode, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CDlgAdminMod 메시지 처리기입니다.
+// CDlgAdminMode 메시지 처리기입니다.
 
 
 void CDlgAdminMode::OnBnClickedOk()

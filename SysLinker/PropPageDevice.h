@@ -1,6 +1,7 @@
 #pragma once
 #include "afxeditbrowsectrl.h"
 #include "afxwin.h"
+#include "afxcmn.h"
 
 
 // CPropPageDevice 대화 상자입니다.
@@ -30,6 +31,9 @@ public:
 
 	CRelayTableData		*		m_pRefFasSysData; /// 중계기 일람표의 모든데이터
 
+	CListCtrl m_ctrlListCtrl;
+	int m_nListCtrlSelIndex;
+	CString m_strEditPath;
 
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
@@ -43,4 +47,6 @@ public:
 	int CheckDuplicate(int nValue);
 	void SetFasSysData(CRelayTableData * pData) { m_pRefFasSysData = pData; }
 	virtual BOOL OnInitDialog();
+	afx_msg void OnClickList1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 };

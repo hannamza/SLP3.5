@@ -1,6 +1,6 @@
 #pragma once
 
-// CDlgAdminMod 대화 상자입니다.
+// CDlgAdminMode 대화 상자입니다.
 
 class CDlgAdminMode : public CDialogEx
 {
