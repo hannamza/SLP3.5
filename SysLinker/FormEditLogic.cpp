@@ -936,7 +936,12 @@ void CFormEditLogic::OnSize(UINT nType, int cx, int cy)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	CRect rc;
 	rc.left = 4;
-	rc.top = 270;
+
+	//20240318 GBM start - 컨트롤 겹쳐서 표현되는 오류 수정
+	rc.top = 420;
+	//rc.top = 270;
+	//20240318 GBM end
+
 	rc.right = cx - 4;
 	rc.bottom = cy - 4;
 

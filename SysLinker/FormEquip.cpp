@@ -172,12 +172,17 @@ void CFormEquip::OnSize(UINT nType, int cx, int cy)
 	rcTree.left = 5;
 	rcTree.top = 5;
 	rcTree.bottom = cy - 5;
-	rcTree.right = 300;
+	rcTree.right = 350;
 	m_ctrlTree.MoveWindow(&rcTree);
 
 	rcImage.left = rcTree.right + 5;
 	rcImage.right = cx - 5;
-	rcImage.top = 180;
+
+	//20240318 GBM start - 컨트롤이 가려지는 오류 수정
+	rcImage.top = 280;
+	//rcImage.top = 180;
+	//20240318 GBM end
+
 	rcImage.bottom = cy - 5;
 	m_ctrlPreview.MoveWindow(&rcImage);
 }

@@ -57,10 +57,10 @@ int CPropSheetNewProject::ProcessDeviceTable()
 
 	int nCnt, i; 
 	CString str;
-	nCnt = m_pgDevice.m_lstTable.GetCount();
+	nCnt = m_pgDevice.m_ctrlListCtrl.GetItemCount();
 	for (i = 0; i < nCnt; i++)
 	{
-		m_pgDevice.m_lstTable.GetText(i, str);
+		str = m_pgDevice.m_ctrlListCtrl.GetItemText(i, 0);
 		m_pFasSysData->AddDeviceTable(str);
 	}
 	m_pFasSysData->ProcessDeviceTableList();

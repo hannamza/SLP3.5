@@ -202,7 +202,12 @@ void CFormLoadRelayTable::SetTabPos()
 
 	CRect rc, rcTab , rcPrg;
 	GetClientRect(&rc);
-	rc.DeflateRect(4, 135, 4, 4);
+
+	//20240318 GBM start - 컨트롤 가려지는 오류 수정
+	rc.DeflateRect(4, 205, 4, 4);
+	//rc.DeflateRect(4, 135, 4, 4);
+	//20240318 GBM end
+
 	m_ctrlTab.MoveWindow(&rc);
 	rcTab = rc;
 	rcTab = CRect(0, 22, rc.Width()-8, rc.Height() -4);
@@ -1497,7 +1502,7 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 	m_pNewRelayTable->ProcessDeviceTableList(this);
 	//m_pNewRelayTable->SendProgStep(this, PROG_RESULT_STEP, nAllCnt, nAllCnt);
 
-	//20240219 GBM start - 기존에 사용하던 테이블을 모두 생성하고 데이터를 입력한 이후 시점에 F4 테이블을 추가
+	//20240319 GBM start - 기존에 사용하던 테이블을 모두 생성하고 데이터를 입력한 이후 시점에 F4 테이블을 추가
 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
 
 	BOOL bRet = FALSE;
@@ -1518,7 +1523,6 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 			Log::Trace("Inserting new DB table failed!");
 		}
 		
-		//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
 		bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
 		if (bRet)
 		{
@@ -1530,9 +1534,8 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
 			Log::Trace("F4 DB table insertion failed!");
 		}
-		//20240222 GBM end
 	}
-	//20240219 GBM end
+	//20240319 GBM end
 
 	//ChangeNewLoadSystemMapID(pOldTable, m_pNewRelayTable);
 	m_mapTempNewName.clear();

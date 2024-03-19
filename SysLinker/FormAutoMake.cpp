@@ -203,18 +203,21 @@ void CFormAutoMake::OnSize(UINT nType, int cx, int cy)
 	rc.right = cx - 4;
 	rc.bottom = cy - 4;
 	rcCtrl = rc;
+
+	//20240318 GBM start - 컨트롤 가리는 오류 수정
+#if 1
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	if (GetDlgItem(IDC_ST_MESSAGE)->GetSafeHwnd())
 	{
-		rcCtrl.top = 33;
-		rcCtrl.bottom = 48;
+		rcCtrl.top = 53;
+		rcCtrl.bottom = 78;
 		GetDlgItem(IDC_ST_MESSAGE)->MoveWindow(rcCtrl);
 	}
 
 	if (m_ctrlProg.GetSafeHwnd())
 	{
-		rcCtrl.top = 52;
-		rcCtrl.bottom = 62;
+		rcCtrl.top = 92;
+		rcCtrl.bottom = 102;
 		m_ctrlProg.MoveWindow(rcCtrl);
 	}
 	
@@ -231,12 +234,50 @@ void CFormAutoMake::OnSize(UINT nType, int cx, int cy)
 // 		m_ctrlList.MoveWindow(rcRight);
 // 	}
 
+	rcRight = CRect(4, 105, cx - 4, cy - 4);
+
+	if (m_SpMain.GetSafeHwnd())
+	{
+		m_SpMain.MoveWindow(rcRight);
+	}
+#else
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	if (GetDlgItem(IDC_ST_MESSAGE)->GetSafeHwnd())
+	{
+		rcCtrl.top = 33;
+		rcCtrl.bottom = 48;
+		GetDlgItem(IDC_ST_MESSAGE)->MoveWindow(rcCtrl);
+	}
+
+	if (m_ctrlProg.GetSafeHwnd())
+	{
+		rcCtrl.top = 52;
+		rcCtrl.bottom = 62;
+		m_ctrlProg.MoveWindow(rcCtrl);
+	}
+
+	// 	rcLeft = CRect(4, 65, cx / 4 - 4 - 2, cy - 4);
+	// 	rcRight = CRect(rcLeft.right + 4, 65, cx - 4, cy - 4);
+	// 
+	// 	if (m_ctrlTree.GetSafeHwnd())
+	// 	{
+	// 		m_ctrlTree.MoveWindow(rcLeft);
+	// 	}
+	// 
+	// 	if (m_ctrlList.GetSafeHwnd())
+	// 	{
+	// 		m_ctrlList.MoveWindow(rcRight);
+	// 	}
+
 	rcRight = CRect(4, 65, cx - 4, cy - 4);
 
 	if (m_SpMain.GetSafeHwnd())
 	{
 		m_SpMain.MoveWindow(rcRight);
 	}
+#endif
+
+	//20242318 GBM end
 }
 
 void CFormAutoMake::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)

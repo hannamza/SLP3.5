@@ -230,7 +230,11 @@ void CDlgErrorCheck::SetPosition()
 
 	if(m_ctrlReport.GetSafeHwnd() != nullptr)
 	{
-		rcwin.top = 100;
+		//20240318 GBM start - 컨트롤이 가려지는 오류 수정
+		rcwin.top = 130;
+		//rcwin.top = 100;
+		//20240318 GBM end
+
 		rcwin.left = 10;
 		rcwin.right = rc.right - 10;
 		rcwin.bottom = rc.bottom - 10;

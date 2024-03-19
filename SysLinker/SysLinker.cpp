@@ -593,6 +593,15 @@ int CSysLinkerApp::DocumentTemplateInit()
 		return FALSE;
 
 	AddDocTemplate(m_pTempleUnit);
+
+	//20240318 GBM start - 누락 코드 반영
+	AddDocTemplate(m_pTempleRelayEdit);
+	AddDocTemplate(m_pTempleAutoMake);
+	AddDocTemplate(m_pTempleLogicEdit);
+	AddDocTemplate(m_pTempleLoadRealy);
+	AddDocTemplate(m_pTempleErrorCheck);
+	//20240318 GBM end
+
 	return 0;
 }
 
@@ -1112,6 +1121,9 @@ void CSysLinkerApp::OnHomeProjectClose()
 		return;
 
 	CloseProject();
+
+	GF_AddLog(L"프로젝트를 닫았습니다.");
+	Log::Trace("Project Closed!");
 }
 
 void CSysLinkerApp::OnHomeProjectNew()
@@ -1124,6 +1136,9 @@ void CSysLinkerApp::OnHomeProjectNew()
 		if (AfxMessageBox(L"새 프로젝트를 생성하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
 		CloseProject();
+
+		GF_AddLog(L"프로젝트를 닫았습니다.");
+		Log::Trace("Project Closed!");
 	}
 
 	CPropSheetNewProject psNewProject(L"New Project");
@@ -1210,6 +1225,9 @@ void CSysLinkerApp::OnHomeProjectNew()
 	strName.Format(L"프로젝트명 - %s", m_pFasSysData->GetPrjName());
 	AfxGetMainWnd()->SetWindowTextW(strName);
 
+	GF_AddLog(L"[%s] 프로젝트를 생성했습니다.", m_pFasSysData->GetPrjName());
+	Log::Trace("[%s] Project Created!", CCommonFunc::WCharToChar(m_pFasSysData->GetPrjName().GetBuffer(0)));
+
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
 }
 
@@ -1222,6 +1240,9 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		if (AfxMessageBox(L"프로젝트 열기를 하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
 		CloseProject();
+
+		GF_AddLog(L"프로젝트를 닫았습니다.");
+		Log::Trace("Project Closed!");
 	}
 
 	CDlgLogIn dlg(m_pMainDb);
@@ -1237,7 +1258,7 @@ void CSysLinkerApp::OnHomeProjectOpen()
 	if (OpenProject(dlg.GetOpenProjectName(), dlg.GetOpenProjectPath()
 		, dlg.GetOpenProjectVersion(), dlg.IsSelectedVersionTemp()) <= 0)
 	{
-		GF_AddLog(L"프로젝트를 여는데 실패 했습니다.");
+		GF_AddLog(L"[%s] 프로젝트를 여는데 실패 했습니다.", dlg.GetOpenProjectName());
 		return;
 	}
 
@@ -1253,7 +1274,8 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		pMakLinkView->SetRelayTableData(m_pFasSysData);
 
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_OPEN, 0);
-	GF_AddLog(L"프로젝트를 여는데 성공 했습니다.");
+	GF_AddLog(L"[%s] 프로젝트를 여는데 성공 했습니다.", dlg.GetOpenProjectName());
+	Log::Trace("[%s] Project Opened!", CCommonFunc::WCharToChar(dlg.GetOpenProjectName().GetBuffer(0)));
 	dwEnd = GetTickCount();
 	GF_AddDebug(L"OnHomeProjectOpen : %d", dwEnd - dwStart);
 	dtCur = COleDateTime::GetCurrentTime();
@@ -3090,8 +3112,6 @@ int CSysLinkerApp::CloseProject()
 	m_pMainDb->DetachMSDB(m_pFasSysData->GetDBName());
 	delete m_pFasSysData;
 	m_pFasSysData = nullptr;
-
-	//RemoveTemplate();
 
 	//20240307 GBM start - F4 추가 정보 메모리 초기화
 	memset(&CNewInfo::Instance()->m_fi, NULL, sizeof(F4APPENDIX_INFO));

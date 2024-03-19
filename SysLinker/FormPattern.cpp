@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(CFormPattern, CFormView)
 	ON_COMMAND(ID_ITEM_SELECT_ITEM, &CFormPattern::OnItemSelectItem)
 	ON_BN_CLICKED(IDC_RD_MANAUL_MAKE,&CFormPattern::OnBnClickedRdManaulMake)
 	ON_BN_CLICKED(IDC_RD_TABLE_MAKE,&CFormPattern::OnBnClickedRdTableMake)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -166,7 +167,12 @@ void CFormPattern::OnSize(UINT nType, int cx, int cy)
 	rcTree.right = rc.left + 300;
 
 	rcList = rc;
-	rcList.top = 142;
+
+	//20240318 GBM start - 컨트롤 가려지는 오류 수정
+	rcList.top = 242;
+	//rcList.top = 142;
+	//20240318 GBM end
+
 	rcList.left = rcTree.right + 5;
 	if (m_ctrlPtnTree.GetSafeHwnd())
 		m_ctrlPtnTree.MoveWindow(&rcTree);
@@ -471,7 +477,7 @@ BOOL CFormPattern::PreCreateWindow(CREATESTRUCT& cs)
 void CFormPattern::OnClose()
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	RemoveAllTreeData();
+	//RemoveAllTreeData();
 	if (AfxGetMainWnd())
 	{
 		// WPARAM : ADD/DEL , LPARAM : WINDOW
@@ -482,6 +488,7 @@ void CFormPattern::OnClose()
 // 		AfxGetMainWnd()->SendMessage(UWM_REG_PSWITCHVIEW_DROPWND, DROP_WND_DEL, (LPARAM)&m_ctrlRelayList);
 		m_pRefFasSysData = theApp.GetRelayTableData();
 	}
+
 	CFormView::OnClose();
 }
 
@@ -1700,3 +1707,13 @@ void CFormPattern::OnBnClickedRdTableMake()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nManualMakeStatus = 0;
 }
+
+//20240319 GBM start - 패턴 편집 창 메모리 누수 오류 처리
+void CFormPattern::OnDestroy()
+{
+	CFormView::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	RemoveAllTreeData();
+}
+//20240319 GBM end

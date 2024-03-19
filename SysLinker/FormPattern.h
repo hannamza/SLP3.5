@@ -96,6 +96,7 @@ public:
 	int m_nPtnCount;
 	afx_msg void OnBnClickedRdManaulMake();
 	afx_msg void OnBnClickedRdTableMake();
+	afx_msg void OnDestroy();
 };
 
 
