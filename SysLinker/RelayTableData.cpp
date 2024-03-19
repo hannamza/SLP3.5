@@ -526,8 +526,6 @@ CRelayTableData::~CRelayTableData()
 {
 	RemoveAllData();
 
-
-
 	m_pDB = nullptr;
 }
 

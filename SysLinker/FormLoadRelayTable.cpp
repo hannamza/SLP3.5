@@ -690,7 +690,7 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 0, 0, 95);
 	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
 #endif
-	
+
 	return 1;
 }
 
@@ -2266,6 +2266,14 @@ void CFormLoadRelayTable::RemoveAllData()
 		delete pLink;
 		pLink = nullptr;
 	}
+
+	//20240319 GBM start - 메모리 누수 오류 수정
+	if (m_pNewRelayTable != nullptr)
+	{
+		delete m_pNewRelayTable;
+		m_pNewRelayTable = nullptr;
+	}
+	//20240319 GBM end
 }
 
 
@@ -2279,6 +2287,7 @@ void CFormLoadRelayTable::RemoveCompareResult()
 		pItem = m_vtIntersection[i];
 		if (pItem == nullptr)
 			continue; 
+
 		delete pItem;
 		pItem = nullptr;
 	}
@@ -2290,6 +2299,7 @@ void CFormLoadRelayTable::RemoveCompareResult()
 		pItem = m_vtOnlyOld[i];
 		if (pItem == nullptr)
 			continue;
+
 		delete pItem;
 		pItem = nullptr;
 	}
@@ -2301,6 +2311,7 @@ void CFormLoadRelayTable::RemoveCompareResult()
 		pItem = m_vtOnlyNew[i];
 		if (pItem == nullptr)
 			continue;
+
 		delete pItem;
 		pItem = nullptr;
 	}
