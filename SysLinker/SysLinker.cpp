@@ -1122,6 +1122,9 @@ void CSysLinkerApp::OnHomeProjectClose()
 
 	CloseProject();
 
+	CString strName = _T("");
+	AfxGetMainWnd()->SetWindowTextW(strName);
+
 	GF_AddLog(L"프로젝트를 닫았습니다.");
 	Log::Trace("Project Closed!");
 }
@@ -1137,6 +1140,8 @@ void CSysLinkerApp::OnHomeProjectNew()
 			return;
 		CloseProject();
 
+		CString strName = _T("");
+		AfxGetMainWnd()->SetWindowTextW(strName);
 		GF_AddLog(L"프로젝트를 닫았습니다.");
 		Log::Trace("Project Closed!");
 	}
@@ -1241,6 +1246,8 @@ void CSysLinkerApp::OnHomeProjectOpen()
 			return;
 		CloseProject();
 
+		CString strName = _T("");
+		AfxGetMainWnd()->SetWindowTextW(strName);
 		GF_AddLog(L"프로젝트를 닫았습니다.");
 		Log::Trace("Project Closed!");
 	}

@@ -498,11 +498,30 @@ int CDlgErrorCheck::ProcErrorCheck()
 		strName.ReleaseBuffer();
 		nSize += 1;
 		//sizeof(szStrBuff);
-		if(nSize > 40)
+
+		//20240320 GBM start - 수신기 타입에 따른 글자수 제한 처리
+		int nFacpNum = pDev->GetFacpNum();
+		ASSERT(nFacpNum > -1);
+		int nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacpNum];
+		int nLimit;
+		CString strFacpType;
+		if (nFacpType == F4)
+		{
+			nLimit = 80;
+			strFacpType = _T("[F4 수신기]");
+		}
+		else
+		{
+			nLimit = 40;
+			strFacpType = _T("[F3 수신기]");
+		}			
+		//20240320 GBM end
+
+		if(nSize > nLimit)
 		{
 			
-			strDesc.Format(L"\"%s\" 글자수 초과(%d) "
-				,pDev->GetInputFullName(),nSize);
+			strDesc.Format(L"[%s] \"%s\" 글자수 초과(%d) "
+				,strFacpType ,pDev->GetInputFullName(),nSize);
 			
 			InsertErrorList(CHK_TEXT_CNT,nSize,pDev,strDesc);
 		}
@@ -683,7 +702,7 @@ void CDlgErrorCheck::RemoveAllError()
 	while(!m_ptrErrorList.IsEmpty())
 	{
 		pData = (ST_ERRCHECK *)m_ptrErrorList.RemoveHead();
-		if(pData != nullptr)
+		if(pData == nullptr)	//20240320 GBM - 메모리 누수 발생 수정 ( != -> == )
 			continue; 
 		delete pData;
 		pData = nullptr;
