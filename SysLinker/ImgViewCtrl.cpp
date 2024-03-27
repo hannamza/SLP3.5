@@ -28,7 +28,7 @@ CImgViewCtrl::~CImgViewCtrl()
 	}
 	if (m_pDimensionID)
 	{
-		delete m_pDimensionID;
+		delete[] m_pDimensionID;
 		m_pDimensionID = NULL;
 	}
 }
@@ -53,6 +53,15 @@ void CImgViewCtrl::SetImageFile(LPCTSTR stSourceName)
 		delete m_pImage;
 		m_pImage = NULL;
 	}
+
+	//20240325 GBM start - 메모리 누수 오류 수정
+	if (m_pDimensionID)
+	{
+		delete[] m_pDimensionID;
+		m_pDimensionID = NULL;
+	}
+	//20240325 GBM end
+
 	m_stFullName = stSourceName;
 
 #ifdef _UNICODE
@@ -65,7 +74,7 @@ void CImgViewCtrl::SetImageFile(LPCTSTR stSourceName)
 	m_GUIDCount = m_pImage->GetFrameDimensionsCount();
 	m_pDimensionID = new GUID[m_GUIDCount];
 	m_pImage->GetFrameDimensionsList(m_pDimensionID, m_GUIDCount);
-	if (m_pImage->GetFrameCount(&m_pDimensionID[0])>1)
+	if (m_pImage->GetFrameCount(&m_pDimensionID[0]) > 1)
 	{
 		m_uCurrentFrame = 0;
 		SetTimer(IDD_ANIMATION_TIMER, 200, NULL);

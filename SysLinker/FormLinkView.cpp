@@ -258,19 +258,11 @@ void CFormLinkView::OnSize(UINT nType, int cx, int cy)
 	rc.DeflateRect(5, 8, 5, 5);
 	rcTree = rc;
 
-	//20240318 GBM start - 컨트롤 가려지는 오류 수정
-	rcTree.top = 60;
-	//rcTree.top = 30;
-	//20240318 GBM end
-
+	rcTree.top = 30;
 	rcTree.right = rc.left + 300;
 
 	rcList = rc;
-
-	//20240318 GBM start - 컨트롤 가려지는 오류 수정
-	rcList.top = 60;
-	//rcList.top = 30;
-	//20240318 GBM end
+	rcList.top = 30;
 
 	rcList.left = rcTree.right + 5;
 	if (m_ctrlTree.GetSafeHwnd())

@@ -167,12 +167,7 @@ void CFormPattern::OnSize(UINT nType, int cx, int cy)
 	rcTree.right = rc.left + 300;
 
 	rcList = rc;
-
-	//20240318 GBM start - 컨트롤 가려지는 오류 수정
-	rcList.top = 242;
-	//rcList.top = 142;
-	//20240318 GBM end
-
+	rcList.top = 142;
 	rcList.left = rcTree.right + 5;
 	if (m_ctrlPtnTree.GetSafeHwnd())
 		m_ctrlPtnTree.MoveWindow(&rcTree);

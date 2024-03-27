@@ -202,11 +202,7 @@ void CFormLoadRelayTable::SetTabPos()
 
 	CRect rc, rcTab , rcPrg;
 	GetClientRect(&rc);
-
-	//20240318 GBM start - 컨트롤 가려지는 오류 수정
-	rc.DeflateRect(4, 205, 4, 4);
-	//rc.DeflateRect(4, 135, 4, 4);
-	//20240318 GBM end
+	rc.DeflateRect(4, 135, 4, 4);
 
 	m_ctrlTab.MoveWindow(&rc);
 	rcTab = rc;
@@ -1475,6 +1471,7 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 
 	CRelayTableData * pOldTable;
 	m_pNewRelayTable = new CRelayTableData;
+	m_pNewRelayTable->SetIsComparedData(TRUE);		//20240326 GBM - 메모리 누수 오류 수정
 	pOldTable = theApp.GetRelayTableData();
 	if (pOldTable == nullptr)
 		return nullptr;
@@ -2017,7 +2014,7 @@ BOOL CFormLoadRelayTable::SetNewIDSysData(CRelayTableData * pNewTable, CDataSyst
 			nId = pNewTable->GetWholeUnitID(pNewUnit->GetFacpNum() , pNewUnit->GetUnitNum());
 			if (nId <= 0)
 				return FALSE;
-			pNewUnit->SetFacpID(nId);
+			//pNewUnit->SetFacpID(nId);		//20240325 KHS - [유닛 추가 시 추가된 유닛의 수신기 아이디가 유닛 아이디로 입력됨] 오류 수정
 			pNewUnit->SetUnitID(nId);
 			strIDKey = GF_GetIDSysDataKey(SE_UNIT, pNewUnit->GetFacpID(), pNewUnit->GetUnitID());
 			pNewTable->SetIDSystem(strIDKey, pNewSys);
@@ -2268,6 +2265,16 @@ void CFormLoadRelayTable::RemoveAllData()
 	}
 
 	//20240319 GBM start - 메모리 누수 오류 수정
+	CTempPtn* pPtn;
+	while (!m_ptrTempNewPatternData.IsEmpty())
+	{
+		pPtn = (CTempPtn*)m_ptrTempNewPatternData.RemoveHead();
+		if(pPtn == nullptr)
+			continue;
+		delete pPtn;
+		pPtn = nullptr;
+	}
+
 	if (m_pNewRelayTable != nullptr)
 	{
 		delete m_pNewRelayTable;

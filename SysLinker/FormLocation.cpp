@@ -262,24 +262,9 @@ void CFormLocation::OnSize(UINT nType, int cx, int cy)
 
 	rcList.left = rcTree.right + 5;
 	rcList.right = cx - 5;
-
-	//20240318 GBM start - 컨트롤이 가려지는 오류 수정
-	rcList.top = 65;
-	//rcList.top = 45;
-	//20240318 GBM end
-
+	rcList.top = 45;
 	rcList.bottom = cy - 5;
 	m_ctrlDeviceList.MoveWindow(&rcList);
-
-	//20240318 GBM start - 컨트롤이 가려지는 오류 수정
-	CRect rcBtn;
-	CButton* pBtn = (CButton*)GetDlgItem(IDC_BTN_SAVE);
-	rcBtn.top = 10;
-	rcBtn.left = rcList.left;
-	rcBtn.right = rcList.left + 120;
-	rcBtn.bottom = rcBtn.top + 40;
-	pBtn->MoveWindow(rcBtn);
-	//20240318 GBM end
 }
 
 

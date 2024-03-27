@@ -286,6 +286,31 @@ void CFormPump::OnSize(UINT nType, int cx, int cy)
 
 void CFormPump::RemoveAllData()
 {
+	//20240321 GBM start - 메모리 누수 오류 수정
+	if (m_pDlgLeftTopTreePane != nullptr)
+	{	
+		delete m_pDlgLeftTopTreePane;
+		m_pDlgLeftTopTreePane = nullptr;
+	}
+
+	if (m_pDlgRightTopPumpInfo != nullptr)
+	{
+		delete m_pDlgRightTopPumpInfo;
+		m_pDlgRightTopPumpInfo = nullptr;
+	}
+
+	if (m_pChangeData != nullptr)
+	{
+		delete m_pChangeData;
+		m_pChangeData = nullptr;
+	}
+
+	if (m_pCurrentData != nullptr)
+	{
+		delete m_pCurrentData;
+		m_pCurrentData = nullptr;
+	}
+	//20240321 GBM end
 }
 // 
 // 
@@ -1115,7 +1140,7 @@ int CFormPump::DataSave(CDataPump * pData)
 	{
 		CDataPump * pNewData = new CDataPump;
 		pNewData->CopyData(pData);
-		if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) > 0)
+		if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)	//20240321 GBM - ">" -> "<="로 변경
 		{
 			AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
 			return 0;

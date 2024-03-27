@@ -379,6 +379,8 @@ int CSysLinkerApp::ExitInstance()
 	CNewDBManager::Delete();
 	CNewExcelManager::Delete();
 	Log::Cleanup();
+
+	//_CrtDumpMemoryLeaks();
 	//20240202 GBM end
 
 	return CWinAppEx::ExitInstance();

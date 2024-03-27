@@ -53,6 +53,8 @@ public:
 	SIMPLE_FUNC_IMPL(BOOL, ProjectChanged, m_bChangeFlag);
 	SIMPLE_FUNC_IMPL(int, LastRelayIndex, m_nLastRelayIndex);
 
+	SIMPLE_FUNC_IMPL(BOOL, IsComparedData, m_bIsComparedData);	//20240326 GBM - 메모리 누수 오류 수정
+
 	CStringList* GetRelayTableList() { return &m_strFileNameList; }
 
 	// [KHS 2021-1-11 18:24:48] 
@@ -121,6 +123,8 @@ public:
 
 	BOOL		m_bChangeFlag;//< 프로젝트 변경 Flag
 	BOOL		m_bOpened; //< Project Opened 
+
+	BOOL	m_bIsComparedData;	//20240326 GBM - 메모리 누수 오류 수정
 protected:
 	//CMapLocation							m_MapLocation;
 	std::shared_ptr<CManagerLocation>	m_spLocation;

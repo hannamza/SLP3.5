@@ -520,6 +520,8 @@ CRelayTableData::CRelayTableData()
 	m_bOpened = FALSE;
 	m_nLastRelayIndex = 0;
 	m_nAllocRelayIndexType = 0;
+
+	m_bIsComparedData = FALSE;	//20240326 GBM - 메모리 누수 오류 수정
 }
 
 CRelayTableData::~CRelayTableData()
@@ -9317,8 +9319,12 @@ int CRelayTableData::GetWholeChnID(int nFacpNum, int nUnitNum , int nChnNum)
 
 		pChn = (CDataChannel *)pData->GetSysData();
 		nID = pChn->GetChnID();
-		if (nID == pChn->GetChnNum())
+		//20240325 KHS start - [채널 추가 시 추가된 채널의 아이디가 잘못들어감] 오류 수정 
+// 		if (nID == pChn->GetChnNum())
+// 			return pChn->GetChnID();
+		if (nChnNum == pChn->GetChnNum())
 			return pChn->GetChnID();
+		//20240325 KHS end
 		if (nID > nMaxID)
 			nMaxID = nID;
 	}
@@ -12480,16 +12486,22 @@ int CRelayTableData::ReduceDatabase()
 
 int CRelayTableData::RemoveAllData()
 {
-	if (m_pDB != nullptr)
+	//20240326 GBM start - 메모리 누수 오류 수정 : 비교 데이터가 아닐 때 DB 관련 메모리 해제
+	if (!m_bIsComparedData)
 	{
-		if (m_pDB->IsRSOpen())
-			m_pDB->RSClose();
+		if (m_pDB != nullptr)
+		{
+			if (m_pDB->IsRSOpen())
+				m_pDB->RSClose();
 
-		if (m_pDB->IsOpen())
-			m_pDB->DBClose();
-		delete m_pDB;
-		m_pDB = nullptr;
+			if (m_pDB->IsOpen())
+				m_pDB->DBClose();
+			delete m_pDB;
+			m_pDB = nullptr;
+		}
 	}
+	//20240326 GBM end
+
 	RemoveAutoLogic();
 	RemoveLocation();
 	RemovePs();

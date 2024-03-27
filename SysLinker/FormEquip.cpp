@@ -26,6 +26,7 @@ CFormEquip::CFormEquip()
 
 CFormEquip::~CFormEquip()
 {
+	m_pCurrentData = nullptr;
 }
 
 void CFormEquip::DoDataExchange(CDataExchange* pDX)
@@ -173,21 +174,16 @@ void CFormEquip::OnSize(UINT nType, int cx, int cy)
 	rcTree.top = 5;
 	rcTree.bottom = cy - 5;
 
-	//20240318 GBM start - 컨트롤이 가려지는 오류 수정
+	//20240325 GBM start - 컨트롤이 가려지는 오류 수정
 	rcTree.right = 250;
 	//rcTree.right = 350;
-	//20240318 GBM end
+	//20240325 GBM end
 
 	m_ctrlTree.MoveWindow(&rcTree);
 
 	rcImage.left = rcTree.right + 5;
 	rcImage.right = cx - 5;
-
-	//20240318 GBM start - 컨트롤이 가려지는 오류 수정
-	rcImage.top = 280;
-	//rcImage.top = 180;
-	//20240318 GBM end
-
+	rcImage.top = 180;
 	rcImage.bottom = cy - 5;
 	m_ctrlPreview.MoveWindow(&rcImage);
 }
@@ -376,13 +372,14 @@ void CFormEquip::AddCancel()
 
 int CFormEquip::DisplayEquip(HTREEITEM hItem)
 {
-	CDataEquip * pEq;
+	CDataEquip * pEq = nullptr;
 
 	if (hItem == nullptr)
 		return 0;
 	pEq = (CDataEquip*)m_ctrlTree.GetItemData(hItem);
 	if (pEq == nullptr)
 		return 0; 
+	
 	m_pCurrentData = pEq;
 	m_nNum = (int)pEq->GetEquipID();
 	m_strName = pEq->GetEquipName();
@@ -407,11 +404,11 @@ int CFormEquip::DataDelete()
 
 	pEq = m_pCurrentData;
 	strSql.Format(L"SELECT * FROM TB_EQUIP_MST WHERE EQ_ID=%d AND EQ_TYPE=%d"
-		,pEq->GetEquipID() ,pEq->GetEquipType()
+		, pEq->GetEquipID(), pEq->GetEquipType()
 	);
 
 	if (pDB->OpenQuery(strSql) == FALSE)
-		return 0; 
+		return 0;
 
 	nCnt = pDB->GetRecordCount();
 	pDB->RSClose();
@@ -419,18 +416,18 @@ int CFormEquip::DataDelete()
 		return 2;
 
 	strSql.Format(L"DELETE TB_EQUIP_MST WHERE  EQ_ID=%d AND EQ_TYPE=%d"
-		,pEq->GetEquipID(),pEq->GetEquipType()
+		, pEq->GetEquipID(), pEq->GetEquipType()
 	);
-	
-	if (pDB->ExecuteSql(strSql) == FALSE)
-		return 0; 
 
-	
+	if (pDB->ExecuteSql(strSql) == FALSE)
+		return 0;
+
+
 	// tree 삭제
 	std::shared_ptr <CManagerEquip> spManager = nullptr;
 	spManager = m_pRefFasSysData->GetEquipManager(pEq->GetEquipType());
 	if (spManager == nullptr)
-		return 0; 
+		return 0;
 
 	spManager->RemoveEquip(pEq->GetEquipID());
 	//spManager->RemoveAt(m_pCurrentData->GetEquipID());
@@ -444,6 +441,9 @@ int CFormEquip::DataDelete()
 
 	delete pEq;
 	pEq = nullptr;
+
+	m_pCurrentData = nullptr;
+
 	return 1;
 }
 
@@ -475,6 +475,7 @@ int CFormEquip::DataAdd()
 		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
 		return 0;
 	}
+
 	m_pCurrentData = new CDataEquip;
 	m_pCurrentData->SetData(nID, nType, m_strName, L"", m_strSymbol);
 	std::shared_ptr <CManagerEquip> spManager = nullptr;
@@ -485,8 +486,8 @@ int CFormEquip::DataAdd()
 
 	//HTREEITEM hItem = GF_FindTreeByText(&m_ctrlTree, TVI_ROOT, g_strEquipTypeString[nType]);
 	// [KHS 2020-2-7 16:41:14] 
-			// GetRootItem --> TVI_ROOT 변환
-			// HTREEITEM hItem = GF_FindTreeByText(&m_ctrlTree, m_ctrlTree.GetRootItem(), g_strEquipTypeString[nType]);
+	// GetRootItem --> TVI_ROOT 변환
+	// HTREEITEM hItem = GF_FindTreeByText(&m_ctrlTree, m_ctrlTree.GetRootItem(), g_strEquipTypeString[nType]);
 	HTREEITEM hItem = GF_FindTreeByText(&m_ctrlTree, m_ctrlTree.GetRootItem(), g_strEquipTypeString[nType]);
 	if (hItem == nullptr)
 		return 0;
@@ -494,6 +495,7 @@ int CFormEquip::DataAdd()
 	m_ctrlTree.SetItemData(htemp, (DWORD_PTR)m_pCurrentData);
 	m_ctrlTree.SelectItem(htemp);
 	m_bAdd = TRUE;
+
 	return 1;
 }
 
@@ -506,7 +508,7 @@ int CFormEquip::DataSave()
 
 	int nCnt;
 	CString strSql;
-	int nID, nType,nSel;
+	int nID, nType, nSel;
 	UpdateData();
 	if (m_pCurrentData == nullptr)
 	{
@@ -523,7 +525,7 @@ int CFormEquip::DataSave()
 	}
 
 	strSql.Format(L"SELECT * FROM TB_EQUIP_MST WHERE EQ_ID=%d AND EQ_TYPE=%d "
-		, nID,nType 
+		, nID, nType
 	);
 
 	if (pDB->OpenQuery(strSql) == FALSE)
@@ -533,7 +535,7 @@ int CFormEquip::DataSave()
 	pDB->RSClose();
 	if (nCnt <= 0)
 	{
-		if(m_bAdd == FALSE)
+		if (m_bAdd == FALSE)
 		{
 			if (AfxMessageBox(L"기존 데이터가 없습니다. 새로 추가하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 				return 0;
@@ -568,28 +570,29 @@ int CFormEquip::DataSave()
 		, m_strName, m_strSymbol
 		, nID, nType
 	);
-	
+
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
 		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
 		return 0;
 	}
-	
+
 	HTREEITEM hItem = m_ctrlTree.GetSelectedItem();
 	if (hItem == nullptr)
-		return 0; 
+		return 0;
 	if (m_pCurrentData->GetEquipName().CompareNoCase(m_strName) != 0)
 	{
 		m_pCurrentData->SetEquipName(m_strName);
 		if (m_pRefFasSysData)
-			m_pRefFasSysData->ChangeDevName( m_pCurrentData->GetEquipType(), m_pCurrentData->GetEquipID());
-	
+			m_pRefFasSysData->ChangeDevName(m_pCurrentData->GetEquipType(), m_pCurrentData->GetEquipID());
+
 		if (AfxGetApp())
 			((CSysLinkerApp*)AfxGetApp())->PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_REFESH, 0);
 	}
 	m_pCurrentData->SetEquipName(m_strName);
 	m_pCurrentData->SetFileName(m_strSymbol);
 	m_ctrlTree.SetItemText(hItem, m_pCurrentData->GetEquipName());
+
 	return 1;
 }
 

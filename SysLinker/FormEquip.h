@@ -3,7 +3,6 @@
 #include "afxwin.h"
 #include "ImgViewCtrl.h"
 
-
 // CFormEquip Æû ºäÀÔ´Ï´Ù.
 class CRelayTableData;
 class CDataEquip;
@@ -66,7 +65,6 @@ public:
 	int DataSave();
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg void OnCbnSelchangeCmbEquiptype();
-
 };
 
 

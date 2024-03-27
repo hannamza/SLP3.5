@@ -114,12 +114,7 @@ void CFormEmergency::OnSize(UINT nType, int cx, int cy)
 	rc.DeflateRect(5, 8, 5, 5);
 
 	rcList = rc;
-
-	//20240318 GBM start - 컨트롤 가리는 오류 수정
-	rcList.top = 270;
-	//rcList.top = 180;
-	//20240318 GBM end
-
+	rcList.top = 180;
 	rcList.left = 5;
 
 	if (m_ctrlList.GetSafeHwnd())

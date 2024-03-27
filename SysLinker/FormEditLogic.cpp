@@ -854,7 +854,12 @@ int CFormEditLogic::InitForm()
  		if (pData == nullptr)
  			continue;
  		strEqName = strInType = strOutType = strCont = L"";
- 		str.Format(L"%d", pData->GetLgId());
+
+		//20240325 GBM start - 순번 정렬 시 제대로 정렬하도록 수정
+ 		str.Format(L"%03d", pData->GetLgId());
+		//str.Format(L"%d", pData->GetLgId());
+		//20240325 GBM end
+
  		pEq = pRelayTable->GetEquipData(ET_INPUTTYPE, pData->GetInType());
  		if (pEq)
  			strInType = pEq->GetEquipName();
@@ -936,12 +941,7 @@ void CFormEditLogic::OnSize(UINT nType, int cx, int cy)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	CRect rc;
 	rc.left = 4;
-
-	//20240318 GBM start - 컨트롤 겹쳐서 표현되는 오류 수정
-	rc.top = 420;
-	//rc.top = 270;
-	//20240318 GBM end
-
+	rc.top = 270;
 	rc.right = cx - 4;
 	rc.bottom = cy - 4;
 
