@@ -27,6 +27,12 @@
 // LCD 회로명 최대 문자 길이 - F4
 #define MAX_LCD_TEXT_LENGTH_F4 80
 
+// 설비 정의 문자 길이
+#define MAX_EQUIP_INFO_TEXT_LENGTH	50
+
+// 설비 정의 최대 개수
+#define MAX_EQUIP_INFO_ITEM_COUNT	100
+
 // 프로젝트 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_PROJECT_INFO	_T("project")
 
@@ -38,6 +44,9 @@
 
 // CCTV 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_CCTV	_T("cctv")
+
+// 설비 회로 정의 (입력타입, 설비명, 출력타입, 출력회로) 정보 Excel Sheet -> 추후 변경 예정
+#define EXCEL_SHEET_EQUIPMENT_INFO	_T("equipment")
 
 // 관리자 모드 (ROM 인증 모드) Password
 #define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!");
@@ -160,6 +169,29 @@ namespace EXCEL_ENUM_CCTV_INFO {
 	}COLUMNS;
 }
 
+// 설비 정의 Excel Cell 위치 정의
+namespace EXCEL_ENUM_EQUIPMENT_INFO {
+	// Row
+	enum 
+	{
+		ROW_HEADER = 1,
+		ROW_LIST_START
+	}ROWS;
+
+	// Column
+	enum 
+	{
+		COLUMN_NUMBER = 1,
+		COLUMN_INPUT_TYPE,
+		COLUMN_EQUIPMENT_NAME,
+		COLUMN_OUTPUT_TYPE,
+		COLUMN_OUTPUT_CIRCUIT,
+// 		COLUMN_PUMP_EQUIPMENT,
+// 		COLUMN_PS_SWITCH_EQUIPMENT,
+// 		COLUMN_PUMP_MODULE
+	}COLUMNS;
+}
+
 // F4 추가 테이블
 enum {
 	TB_FACP_TYPE,
@@ -185,10 +217,10 @@ static const TCHAR* g_lpszNewEquipmentInputType[] = {
 	_T(""),					// 13
 	_T(""),					// 14
 	_T(""),					// 15
-	_T("AN정온교차A"),		// 16	
-	_T("AN정온교차B"),		// 17	
-	_T("AN광전교차A"),		// 18
-	_T("AN광전교차B"),		// 19
+	_T("AN열식교차A"),		// 16	
+	_T("AN열식교차B"),		// 17	
+	_T("AN연식교차A"),		// 18
+	_T("AN연식교차B"),		// 19
 	_T("발신기화재"),		// 20
 	_T("광센서감지기"),		// 21
 	_T("CCTV"),				// 22				
@@ -261,19 +293,19 @@ static const TCHAR* g_lpszNewTable[] = {
 };
 
 // CCTV 타입
-enum {
-	CCTV = 1,
-	NVR,
-	DVR,
-	MVR
-}CCTV_TYPE;
+// enum {
+// 	CCTV = 1,
+// 	NVR,
+// 	DVR,
+// 	MVR
+// }CCTV_TYPE;
 
 // 업체 타입 : 정해진 게 없음
-enum {
-	UNKNOWN,
-	LG,
-	HIKVISION
-}COMPANY_TYPE;
+// enum {
+// 	UNKNOWN,
+// 	LG,
+// 	HIKVISION
+// }COMPANY_TYPE;
 
 #pragma pack(push, 1)
 
@@ -295,5 +327,14 @@ typedef struct
 	unsigned char facpType[MAX_FACP_COUNT];
 	unsigned char unitType[MAX_FACP_COUNT][MAX_UNIT_COUNT];
 }F4APPENDIX_INFO;
+
+// 설비 정의 데이터
+typedef struct 
+{
+	char inputType[MAX_EQUIP_INFO_ITEM_COUNT][MAX_EQUIP_INFO_TEXT_LENGTH];
+	char equipmentName[MAX_EQUIP_INFO_ITEM_COUNT][MAX_EQUIP_INFO_TEXT_LENGTH];
+	char outputType[MAX_EQUIP_INFO_ITEM_COUNT][MAX_EQUIP_INFO_TEXT_LENGTH];
+	char outputCircuit[MAX_EQUIP_INFO_ITEM_COUNT][MAX_EQUIP_INFO_TEXT_LENGTH];
+}EQUIPMENT_INFO;
 
 #pragma pack(pop)

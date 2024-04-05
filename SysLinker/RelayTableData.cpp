@@ -546,6 +546,14 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	INT_PTR nCnt,i;
 	int	nRelayIdx = 0;
 	i = 0;
+
+	//20240308 GBM start - F4 Sheet 존재 여부 확인, 중계기 일람표 파일이 여러 개일 경우 한번만 처리
+	CNewExcelManager::Instance()->bExistFT = FALSE;
+	CNewExcelManager::Instance()->bExistUT = FALSE;
+	CNewExcelManager::Instance()->bExistPI = FALSE;
+	CNewExcelManager::Instance()->bExistEI = FALSE;
+	//20240308 GBM end
+
 	nCnt = m_strFileNameList.GetCount();
 	pos = m_strFileNameList.GetHeadPosition();
 	//SendProgressStep(pPrgTagetWnd, PROG_RESULT_STEP, nCnt, 0, 0, 0);
@@ -668,12 +676,6 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 	// Num To ID 변경을 위해
 	m_MapFacpNum[nFNum] = pFacp;
 
-	//20240308 GBM start - F4 Sheet 존재 여부 확인
-	CNewExcelManager::Instance()->bExistFT = FALSE;
-	CNewExcelManager::Instance()->bExistUT = FALSE;
-	CNewExcelManager::Instance()->bExistPI = FALSE;
-	//20240308 GBM end
-
 	try
 	{
 		// 유닛 입력
@@ -698,8 +700,78 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		if (xls.Open(strPath) == false)
 			return 0;
 
-
 		nSheetCnt = xls.GetSheetCount();
+
+		//20240328 GBM start - 중계기 일람표를 열면 가장 먼저 설비 정의를 찾아서 먼저 파싱 후 기본 DB에 넣은 후 메모리 적용을 먼저한 후에 아래에서 설비 정의에 따른 회로 정보 처리가 이루어지도록 함
+		for (int nSheet = 0; nSheet < nSheetCnt; nSheet++)
+		{
+			if (xls.SetWorkSheetChange(nSheet + 1) == FALSE)
+				continue;
+			strSheetName = xls.GetSheetName(nSheet + 1);
+
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_EQUIPMENT_INFO) == 0)
+			{
+				if (CNewExcelManager::Instance()->bExistEI == FALSE)
+				{
+					CNewExcelManager::Instance()->bExistEI = TRUE;
+					BOOL bRet = FALSE;
+					bRet = CNewExcelManager::Instance()->ParsingEquipmentInfo(&xls);
+					if (!bRet)
+					{
+						Log::Trace("Equipment Info Excel Parsing Failed!");
+					}
+				}
+				
+				//중계기 일람표 변경에 의한 비교 데이터라면 DB에 적용하는 행정은 하지 않음
+				if (!m_bIsComparedData)
+				{
+					CNewDBManager::Instance()->SetDBAccessor(theApp.m_pMainDb);
+					BOOL bRet = FALSE;
+					bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
+					if (bRet)
+					{
+						GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
+						Log::Trace("Equipment information was successfully entered into the DB!");
+					}
+					else
+					{
+						GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
+						Log::Trace("Failed to input facility information into DB!");
+					}
+				}
+
+				break;
+			}
+		}
+
+		//
+		if (!m_bIsComparedData)
+		{
+			if (theApp.m_spInputEquipManager)
+				theApp.m_spInputEquipManager->RemoveAllEquip();
+			if (theApp.m_spEqNameManager)
+				theApp.m_spEqNameManager->RemoveAllEquip();
+			if (theApp.m_spOutputEquipManager)
+				theApp.m_spOutputEquipManager->RemoveAllEquip();
+			if (theApp.m_spContentsEquipManager)
+				theApp.m_spContentsEquipManager->RemoveAllEquip();
+			if (theApp.m_spPumpEquipManager)
+				theApp.m_spPumpEquipManager->RemoveAllEquip();
+			if (theApp.m_spPSEquipManager)
+				theApp.m_spPSEquipManager->RemoveAllEquip();
+			if (theApp.m_spPmpNameEquipManager)
+				theApp.m_spPmpNameEquipManager->RemoveAllEquip();
+			//
+
+			theApp.LoadEquipBaseData();
+			theApp.m_pFasSysData->InitFasSysData(theApp.m_spInputEquipManager, theApp.m_spEqNameManager
+				, theApp.m_spOutputEquipManager, theApp.m_spContentsEquipManager
+				, theApp.m_spPumpEquipManager, theApp.m_spPSEquipManager
+				, theApp.m_spPmpNameEquipManager
+			);
+		}
+		//20240328 GBM end
+
 		nDetailAll = nSheetCnt * 4;
 		// [KHS 2020-9-28 08:28:54] 
 		// Table Sheet 추가 - Table Sheet 부터 처리
@@ -1119,6 +1191,32 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	pEq = new CDataEquip;
 	pEq->SetData(nWholeID, nType, strEquipName, strEquipName, L"Basic.bmp");
 	spManager->AddTail(pEq);
+
+	//20240328 GBM start - 중계기 일람표 갱신일 경우 DB를 변경하지 않았기 때문에 중계기 일람표 설비 정의와 기존 프로젝트 DB의 설비 정의가 차이가 날 경우 추가, 중계기 일람표 설비 정의가 있을 경우에만 의미가 있음
+	if (m_bIsComparedData && CNewExcelManager::Instance()->bExistEI)
+	{
+		CString strMsg = _T("");
+		CString strType = _T("");
+		BOOL bRet = FALSE;
+		ASSERT(nWholeID >= 1);
+		int nIndex = nWholeID - 1;	// ID는 1베이스, 메모리는 0베이스
+		bRet = CNewExcelManager::Instance()->AddEquipment(nType, nIndex, strEquipName);
+		strType = g_strEquipTypeString[nType];
+
+		if (bRet)
+		{
+			strMsg.Format(_T("[%s ID - %d: %s] already exists"), strType, nWholeID, strEquipName);
+		}
+		else
+		{
+			strMsg.Format(_T("[%s ID - %d: %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
+		}
+
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		GF_AddLog(strMsg);
+	}
+	//20240328 GBM end
+
 	return pEq;
 }
 
@@ -14089,7 +14187,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			if (nRet != 0)
 				nRet = nTempRet;
 
-			//20240229 GBM start - 수신기 Type에 따른 ROM 파일명 생성
+			//20240329 GBM start - 수신기 Type에 따른 ROM 파일명 생성
 #if 1
 			int nFacpType = -1;
 			CString strProjectVersionNum;
@@ -14130,7 +14228,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
 			strRomLoc.Format(L"%sLOCAL%02d.ROM", strPath, nLastFacp);
 #endif
-			//20240229 GBM end
+			//20240329 GBM end
 
 			// 4. ROM 파일 생성 - ROM File Size 설정
 			uTemp = uRomOffset / 256;
@@ -14406,7 +14504,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		if (nRet != 0)
 			nRet = nTempRet;
 
-		//20240229 GBM start - 수신기 Type에 따른 ROM 파일명 생성
+		//20240329 GBM start - 수신기 Type에 따른 ROM 파일명 생성
 #if 1
 		int nFacpType = -1;
 		CString strProjectVersionNum;
@@ -14447,7 +14545,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
 		strRomLoc.Format(L"%sLOCAL%02d.ROM", strPath, nLastFacp);
 #endif
-		//20240229 GBM end
+		//20240329 GBM end
 
 		// 4. ROM 파일 생성
 		uTemp = uRomOffset / 256;
@@ -14513,7 +14611,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 	MakeRvContactInfo(strPath);
 	MakeManualOutput(strPath);
 
-	//20240305 GBM start - F4APPENDIX.ROM 생성
+	//20240329 GBM start - F4APPENDIX.ROM 생성
 
 	//F4 Type 수신기가 하나도 없다면 아래 행정을 진행하지 않음, F3만 있다면 의미가 없기 때문
 	BOOL bF4TypeExist = FALSE;
@@ -14554,7 +14652,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 
 		fF4Appendix.Write(&CNewInfo::Instance()->m_fi, sizeof(F4APPENDIX_INFO));
 		fF4Appendix.Close();
-		//20240305 GBM end
+		//20240329 GBM end
 	}
 
 	return nRet;
@@ -15793,15 +15891,15 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	char szStrBuff[256] = { 0 };
  	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
  
-	//20240305 GBM start - 입력타입 개수 증설 (17 -> 57)
+	//20240305 GBM start - 입력타입 개수 증설 (17 -> 100)
 #if 1
  	/************************************************************************/
- 	/* 입력타입    0~ 56 : 57개 글자수 32                                                          */
+ 	/* 입력타입    0~ 99 : 100개 글자수 32                                                          */
  	/************************************************************************/
  	spRefManager = m_spRefInputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
- 	memset(pMsgBuff + uMsgOffset,0,(32 * 57));
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * MAX_EQUIP_INFO_ITEM_COUNT));
  
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
@@ -15822,7 +15920,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos ,szStrBuff,32);
  		strName.ReleaseBuffer();
  	}
- 	uMsgOffset += (32 * 57);
+ 	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
 #else
 	/************************************************************************/
 	/* 입력타입    0~ 16 : 17개 글자수 32                                                          */
@@ -15856,13 +15954,13 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 	//20240305 GBM end
  
  	/************************************************************************/
- 	/* 출력타입 - 연동정지 0~ 56 : 57개 글자수 32                                                             */
+ 	/* 출력타입 - 연동정지 0~ 99 : 100개 글자수 32                                                             */
  	/************************************************************************/
  	spRefManager = m_spRefOutputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
  
- 	memset(pMsgBuff + uMsgOffset,0,(32 * 57));
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * MAX_EQUIP_INFO_ITEM_COUNT));
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
@@ -15884,7 +15982,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
  		strName.ReleaseBuffer();
  	}
- 	uMsgOffset += (32 * 57);
+ 	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
  
  	if(m_spPump == nullptr)
  		return 0;

@@ -1839,7 +1839,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "확인",IDOK,28,94,50,14
     PUSHBUTTON      "취소",IDCANCEL,96,94,50,14
-    LTEXT           "관리자 모드 암호를 입력하세요.",IDC_STATIC,40,33,98,11
+    LTEXT           "관리자 모드 암호를 입력하세요.",IDC_STATIC,33,33,118,11
     EDITTEXT        IDC_EDIT_PASSWORD,29,54,116,14,ES_PASSWORD | ES_AUTOHSCROLL
 END
 

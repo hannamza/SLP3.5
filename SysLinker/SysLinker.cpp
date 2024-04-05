@@ -596,7 +596,7 @@ int CSysLinkerApp::DocumentTemplateInit()
 
 	AddDocTemplate(m_pTempleUnit);
 
-	//20240318 GBM start - 누락 코드 반영
+	//20240318 GBM start - 메모리 누수 오류 수정 : 누락 코드 반영
 	AddDocTemplate(m_pTempleRelayEdit);
 	AddDocTemplate(m_pTempleAutoMake);
 	AddDocTemplate(m_pTempleLogicEdit);
@@ -1154,6 +1154,8 @@ void CSysLinkerApp::OnHomeProjectNew()
 		m_pFasSysData = new CRelayTableData;
 	}
 
+	//20240328 GBM start - 여기서는 아래를 진행하지 않고 중계기 일람표 경로가 확정되어 파일을 열어 설비 정의를 기본 DB에 적용 후 거기서 아래 내용을 진행해 적용하도록 함
+#if 0
 	if (m_spInputEquipManager)
 		m_spInputEquipManager->RemoveAllEquip();
 	if (m_spEqNameManager)
@@ -1169,9 +1171,9 @@ void CSysLinkerApp::OnHomeProjectNew()
 	if (m_spPmpNameEquipManager)
 		m_spPmpNameEquipManager->RemoveAllEquip();
 
-// 	if (m_spInputEquipManager == nullptr && m_spOutputEquipManager == nullptr
-// 		&& m_spContentsEquipManager == nullptr && m_spPumpEquipManager == nullptr
-// 		&& m_spPSEquipManager == nullptr && m_spEqNameManager == nullptr)
+	if (m_spInputEquipManager == nullptr && m_spOutputEquipManager == nullptr
+		&& m_spContentsEquipManager == nullptr && m_spPumpEquipManager == nullptr
+		&& m_spPSEquipManager == nullptr && m_spEqNameManager == nullptr)
 	{
 		LoadEquipBaseData();
 	}
@@ -1180,6 +1182,9 @@ void CSysLinkerApp::OnHomeProjectNew()
 		, m_spPumpEquipManager, m_spPSEquipManager
 		, m_spPmpNameEquipManager
 	);
+#endif
+	//20240328 GBM end
+
 	psNewProject.SetFasSysData(m_pFasSysData);
 	psNewProject.InitPage();
 
@@ -2627,7 +2632,7 @@ int CSysLinkerApp::CreateProjectDatabase()
 	BOOL bRet = FALSE;
 
 	// F4추가 테이블의 경우는 변경된 중계기 일람표가 F4 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
-	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI;
+	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
 	if (bRet)
 	{
 		bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
@@ -3055,23 +3060,25 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 		return 0;
 	}
 
-	//20240311 GBM start - DB Open 후 DB에서 데이터를 가져오기 전에 F4 추가 입력 타입을 추가
-	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
+	//20240327 GBM start - DB Open 후 DB에서 데이터를 가져오기 전에 F4 추가 입력 타입을 추가 -> 중계기 일람표(WEB)에서 회로 관련 설비 정의를 가지고 오기 때문에 이 행정을 하지 않음
 
-	BOOL bRet = FALSE;
+// 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
+// 
+// 	BOOL bRet = FALSE;
+// 
+// 	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
+// 	if (bRet)
+// 	{
+// 		GF_AddLog(L"F4 입력 타입 자동 추가에 성공했습니다.");
+// 		Log::Trace("Inserting a new input type of equipment succeeded!");
+// 	}
+// 	else
+// 	{
+// 		GF_AddLog(L"F4 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
+// 		Log::Trace("Inserting a new input type of equipment failed!");
+// 	}
 
-	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
-	if (bRet)
-	{
-		GF_AddLog(L"F4 입력 타입 자동 추가에 성공했습니다.");
-		Log::Trace("Inserting a new input type of equipment succeeded!");
-	}
-	else
-	{
-		GF_AddLog(L"F4 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
-		Log::Trace("Inserting a new input type of equipment failed!");
-	}
-	//20240311 GBM end
+	//20240327 GBM end
 
 	if (m_pFasSysData->LoadProjectDatabase() == 0)
 	{
@@ -3124,6 +3131,7 @@ int CSysLinkerApp::CloseProject()
 
 	//20240307 GBM start - F4 추가 정보 메모리 초기화
 	memset(&CNewInfo::Instance()->m_fi, NULL, sizeof(F4APPENDIX_INFO));
+	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
 	//20240307 GBM end
 
 	return 1;

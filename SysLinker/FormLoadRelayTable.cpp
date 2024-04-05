@@ -360,6 +360,14 @@ LRESULT CFormLoadRelayTable::OnProgressEvent(WPARAM wp, LPARAM lp)
 
 void CFormLoadRelayTable::OnBnClickedBtnApply()
 {
+	//20240404 GBM start - 새 중계기 일람표 적용 시 프로그램 자동 종료
+	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트를 성공하면 자동으로 프로그램이 종료됩니다.\n"
+		L"진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+	{
+		return;
+	}
+	//20240404 GBM end
+
 	int nModuleTableCount = 0;
 	nModuleTableCount = m_lbPath.GetCount();
 	if (nModuleTableCount == 0)
@@ -489,20 +497,38 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 		if (me->IsDiffMake() == TRUE)
 			nRet = me->MakeDiffDataProc();
 		else
-		{
+		{	
+			//20240404 GBM start - 중계기 일람표 갱신 시 프로그램을 종료하라는 메세지 대신 자동으로 종료하도록 함
+#if 1
 			nRet = me->ApplyDiffDataProc();
 			if (nRet > 0)
 			{
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 성공했습니다.\n"
-				L"프로그램을 종료 후 다시 실행해 주십시요");
+					L"프로그램이 자동으로 종료되면 다시 실행해 주시기 바랍니다.");
+
+				Log::Trace("The new module file has been successfully applied and this program ends!");
+
+				theApp.m_pMainWnd->SendMessage(WM_CLOSE);
+			}
+			else
+			{
+				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 실패했습니다.\n");
+				Log::Trace("Applying the new module file failed!");
+			}
+#else
+			nRet = me->ApplyDiffDataProc();
+			if (nRet > 0)
+			{
+				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 성공했습니다.\n"
+					L"프로그램을 종료 후 다시 실행해 주십시요");
 			}
 			else
 			{
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 실패했습니다.\n");
 			}
+#endif
+			//20240404 GBM end
 		}
-
-		
 	}
 	catch (...)
 	{
@@ -514,6 +540,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 	/*
 	*  Thread가 종료 하였음을 설정.
 	*/
+
 	return 0;
 }
 
@@ -726,6 +753,113 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		pNewTable = m_pNewRelayTable;
 		m_nJobIndex = m_lbPath.GetCount();
 	}
+
+	//20240328 GBM start - 새 중계기 일람표의 설비 정보를 저장, 중계기 일람표 상에 설비 정의가 있으면 DB에 넣으면 되고 없으면 기존에는 설비 정의 DB 저장 기능이 없으므로 넣으면 됨
+	if (CNewExcelManager::Instance()->bExistEI == FALSE)
+	{
+		POSITION pos;
+		std::shared_ptr <CManagerEquip> spManager;
+		CDataEquip * pEq;
+		int nID;
+		CString strTemp;
+		for (int i = ET_INPUTTYPE; i <= ET_OUTCONTENTS; i++)
+		{
+			spManager = m_pNewRelayTable->GetEquipManager(i);
+			if (spManager == nullptr)
+				return -1;
+
+			pos = spManager->GetHeadPosition();
+			while (pos)
+			{
+				nID = -1;
+				strTemp = _T("");
+				pEq = spManager->GetNext(pos);
+				if (pEq == nullptr)
+					continue;
+
+				nID = pEq->GetEquipID();
+				ASSERT(nID > 0);
+				nID--;	//번호는 1베이스 인덱스는 0베이스
+				strTemp = pEq->GetEquipName();
+				strTemp.Remove(' ');
+				strTemp.MakeUpper();
+
+				switch (i)
+				{
+				case ET_INPUTTYPE:
+				{
+					sprintf_s(CNewInfo::Instance()->m_ei.inputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+					break;
+				}
+				case ET_EQNAME:
+				{
+					sprintf_s(CNewInfo::Instance()->m_ei.equipmentName[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+					break;
+				}
+				case ET_OUTPUTTYPE:
+				{
+					sprintf_s(CNewInfo::Instance()->m_ei.outputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+					break;
+				}
+				case ET_OUTCONTENTS:
+				{
+					sprintf_s(CNewInfo::Instance()->m_ei.outputCircuit[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+					break;
+				}
+				default:
+					break;
+				}
+
+			}
+
+		}
+	}
+
+	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
+	BOOL bRet = FALSE;
+	bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
+	if (bRet)
+	{
+		GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
+		Log::Trace("Equipment information was successfully entered into the DB!");
+	}
+	else
+	{
+		GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다.");
+		Log::Trace("Failed to input facility information into DB!");
+	}
+
+	//새로 적용된 중계기 일람표를 프로젝트 폴더에 복사하고 설비 정의를 WRITE함
+	bRet = CNewExcelManager::Instance()->CopyModuleTable(pNewTable->GetRelayTableList(), theApp.m_pFasSysData->GetPrjName());
+	if (bRet)
+	{
+		GF_AddLog(L"새 중계기 일람표를 복사하는 데에 성공했습니다.");
+		Log::Trace("Successfully copied new module table file!");
+
+		if (CNewExcelManager::Instance()->bExistEI == TRUE)
+		{
+			bRet = CNewExcelManager::Instance()->UpdateEquipmentInfo(theApp.m_pFasSysData->GetPrjName());
+			if (bRet)
+			{
+				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 성공했습니다.");
+				Log::Trace("Successfully saved equipment information to new module table file!");
+			}
+			else
+			{
+				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 실패했습니다.");
+				Log::Trace("Failed to save equipment information to new module table file!");
+			}
+
+			// DB와 중계기 일람표 상의 설비 정의가 불일치 (정확하게는 DB에는 있으나 중계기 일람표에는 없는 경우)할 경우 DB를 읽어서 새 중계기 일람표에 추가할 지는
+			// 추후 WEB 연동 테스트 후 결정 -> 기존 F3 프로젝트를 F4로 바꿀 때 생길 가능성이 있다고 보임
+		}
+	}
+	else
+	{
+		GF_AddLog(L"새 중계기 일람표를 복사하는 데에 실패했습니다.");
+		Log::Trace("Failed to copy new module table file!");
+	}
+	//20240328 GBM end
 
 	if (m_bPreview == FALSE)
 	{
@@ -1485,7 +1619,6 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 		, pOldTable->GetEquipManager(ET_PMPNAME)
 	);
 
-	
 	nSize = m_arrPath.GetSize();
 	for (i = 0; i < nSize; i++)
 	{
@@ -1495,7 +1628,6 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 		m_pNewRelayTable->AddDeviceTable(str);
 	}
 
-	
 	m_pNewRelayTable->ProcessDeviceTableList(this);
 	//m_pNewRelayTable->SendProgStep(this, PROG_RESULT_STEP, nAllCnt, nAllCnt);
 
@@ -1505,7 +1637,7 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 	BOOL bRet = FALSE;
 
 	// F4추가 테이블의 경우는 변경된 중계기 일람표가 F4 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
-	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI;
+	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
 	if (bRet)
 	{
 		bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
@@ -1531,6 +1663,7 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
 			Log::Trace("F4 DB table insertion failed!");
 		}
+
 	}
 	//20240319 GBM end
 

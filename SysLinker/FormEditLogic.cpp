@@ -855,10 +855,10 @@ int CFormEditLogic::InitForm()
  			continue;
  		strEqName = strInType = strOutType = strCont = L"";
 
-		//20240325 GBM start - 순번 정렬 시 제대로 정렬하도록 수정
+		//20240402 GBM start - 순번 정렬 시 제대로 정렬하도록 수정
  		str.Format(L"%03d", pData->GetLgId());
 		//str.Format(L"%d", pData->GetLgId());
-		//20240325 GBM end
+		//20240402 GBM end
 
  		pEq = pRelayTable->GetEquipData(ET_INPUTTYPE, pData->GetInType());
  		if (pEq)

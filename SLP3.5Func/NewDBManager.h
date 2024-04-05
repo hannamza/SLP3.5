@@ -23,6 +23,9 @@ public:
 	// 새 입력 타입 Table에 존재 여부 확인 후 없으면 Insert
 	BOOL CheckAndInsertEquipmentNewInputType();
 
+	// 설비 정의 데이터 insert
+	BOOL InsertDataIntoEquipmentInfoTable();
+
 	// F4 추가 Table 존재 여부 확인 후 없으면 Create
 	BOOL CheckAndCreateF4DBTables();
 

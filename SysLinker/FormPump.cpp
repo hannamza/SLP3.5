@@ -1140,7 +1140,7 @@ int CFormPump::DataSave(CDataPump * pData)
 	{
 		CDataPump * pNewData = new CDataPump;
 		pNewData->CopyData(pData);
-		if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)	//20240321 GBM - ">" -> "<="로 변경
+		if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)	//20240402 GBM - ">" -> "<="로 변경
 		{
 			AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
 			return 0;

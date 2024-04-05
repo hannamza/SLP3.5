@@ -135,6 +135,84 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 	return TRUE;
 }
 
+BOOL CNewDBManager::InsertDataIntoEquipmentInfoTable()
+{	
+	for (int i = EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_INPUT_TYPE; i <= EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_OUTPUT_CIRCUIT; i++)
+	{
+		int nType = i - EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_NUMBER;
+
+		for (int j = 0; j < MAX_EQUIP_INFO_ITEM_COUNT; j++)
+		{
+			CString strTemp = _T("");
+			CString strQuery = _T("");
+			CString strMsg = _T("");
+			int nRowCount = -1;
+
+			switch (i)
+			{
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_INPUT_TYPE:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.inputType[j]));
+				break;
+			}
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_EQUIPMENT_NAME:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.equipmentName[j]));
+				break;
+			}
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_OUTPUT_TYPE:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.outputType[j]));
+				break;
+			}
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_OUTPUT_CIRCUIT:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.outputCircuit[j]));
+				break;
+			}
+			default:
+				break;
+			}
+			
+			if (strTemp.IsEmpty())
+				continue;
+
+			strQuery.Format(_T("SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=%d AND EQ_ID=%d"), nType, j + 1);	// EQ_ID는 1베이스
+			if (!m_pDB->OpenQuery(strQuery))
+			{
+				strMsg.Format(_T("TB_EQUIP_MST SELECT QUERY (EQ_TYPE = %d, EQ_ID = %d COUNT) Failed! - Input Type : %s"), nType, j + 1, strTemp);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+				return FALSE;
+			}
+
+			nRowCount = m_pDB->GetRecordCount();
+
+			if (nRowCount > 0)
+			{
+				strQuery.Format(_T("UPDATE TB_EQUIP_MST SET EQ_NAME = \'%s\', EQ_DESC = \'%s\' WHERE EQ_TYPE = %d AND EQ_ID = %d"), strTemp, strTemp, nType, j + 1);
+			}
+			else
+			{
+				strQuery.Format(_T("INSERT INTO TB_EQUIP_MST (EQ_ID, EQ_TYPE, EQ_NAME, EQ_DESC, EQ_SYMBOL, ADD_USER) VALUES (%d, %d, \'%s\', \'%s\', \'basic.bmp\', \'admin\')"), j + 1, nType, strTemp, strTemp);
+			}
+
+			if (m_pDB->ExecuteSql(strQuery))
+			{
+				strMsg.Format(_T("TB_EQUIP_MST INSERT / UPDATE QUERY(EQ_TYPE = %d EQ_ID = %d COUNT) Succeeded!- Input Type : %s"), nType, j + 1, strTemp);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+			}
+			else
+			{
+				strMsg.Format(_T("TB_EQUIP_MST INSERT / UPDATE QUERY(EQ_TYPE = %d EQ_ID = %d COUNT) Failed!- Input Type : %s"), nType, j + 1, strTemp);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+				return FALSE;
+			}
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL CNewDBManager::CheckAndCreateF4DBTables()
 {
 	for (int nTable = TB_FACP_TYPE; nTable <= TB_PROJECT_INFO; nTable++)
