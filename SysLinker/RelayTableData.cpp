@@ -558,16 +558,25 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	pos = m_strFileNameList.GetHeadPosition();
 	//SendProgressStep(pPrgTagetWnd, PROG_RESULT_STEP, nCnt, 0, 0, 0);
 	//SendProgStep(pPrgTagetWnd, PROG_RESULT_STEP, nCnt, 0, 0, 0);
+
+	//20240408 GBM start - 설비 정의 메모리/DB 초기화 부분을 중계기 일람표가 여러개 있더라도 한번만 실행
+	BOOL bEIInit = FALSE;
+
 	while (pos)
 	{
 		strPath = m_strFileNameList.GetNext(pos);
 		if (strPath.GetLength() <= 0)
 			continue; 
-		ProcessDeviceTable(strPath, nRelayIdx, nCnt,i , pPrgTagetWnd);
+		ProcessDeviceTable(strPath, nRelayIdx, nCnt,i , bEIInit, pPrgTagetWnd);
 		i++;
 		//SendProgressStep(pPrgTagetWnd, PROG_RESULT_STEP, nCnt, i,0,0);
 		SendProgStep(pPrgTagetWnd, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
+
+		if (bEIInit == FALSE)
+			bEIInit = TRUE;
 	}
+	//20240408 GBM end
+
 	m_nLastRelayIndex = nRelayIdx;
 	//SendProgressStep(pPrgTagetWnd, PROG_RESULT_FINISH, nCnt, nCnt,0,0);
 
@@ -623,7 +632,7 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 
 
 
-int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int nAllCnt, int nAllStep,CWnd *pPrgTagetWnd /*= NULL*/)
+int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int nAllCnt, int nAllStep, BOOL bEIInit, CWnd *pPrgTagetWnd /*= NULL*/)
 {
 	CExcelWrapper xls;
 	CString strValue , strKey , strIDKey,strLocKey;
@@ -702,7 +711,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 
 		nSheetCnt = xls.GetSheetCount();
 
-		//20240328 GBM start - 중계기 일람표를 열면 가장 먼저 설비 정의를 찾아서 먼저 파싱 후 기본 DB에 넣은 후 메모리 적용을 먼저한 후에 아래에서 설비 정의에 따른 회로 정보 처리가 이루어지도록 함
+		//20240408 GBM start - 중계기 일람표를 열면 가장 먼저 설비 정의를 찾아서 먼저 파싱 후 기본 DB에 넣은 후 메모리 적용을 먼저한 후에 아래에서 설비 정의에 따른 회로 정보 처리가 이루어지도록 함
 		for (int nSheet = 0; nSheet < nSheetCnt; nSheet++)
 		{
 			if (xls.SetWorkSheetChange(nSheet + 1) == FALSE)
@@ -745,7 +754,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		}
 
 		//
-		if (!m_bIsComparedData)
+		if (!m_bIsComparedData && !bEIInit)
 		{
 			if (theApp.m_spInputEquipManager)
 				theApp.m_spInputEquipManager->RemoveAllEquip();
@@ -770,7 +779,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				, theApp.m_spPmpNameEquipManager
 			);
 		}
-		//20240328 GBM end
+		//20240408 GBM end
 
 		nDetailAll = nSheetCnt * 4;
 		// [KHS 2020-9-28 08:28:54] 
@@ -830,8 +839,8 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 					{
 						Log::Trace("Project Info Excel Parsing Failed!");
 					}
-					continue;
 				}
+				continue;
 			}
 
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
@@ -845,8 +854,8 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 					{
 						Log::Trace("FACP Type Info Excel Parsing Failed!");
 					}
-					continue;
 				}
+				continue;
 			}
 
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_UNIT_TYPE) == 0)
@@ -860,8 +869,8 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 					{
 						Log::Trace("Unit Type Info Excel Parsing Failed!");
 					}
-					continue;
 				}
+				continue;
 			}
 
 			//20240312 GBM end
@@ -1192,7 +1201,14 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	pEq->SetData(nWholeID, nType, strEquipName, strEquipName, L"Basic.bmp");
 	spManager->AddTail(pEq);
 
-	//20240328 GBM start - 중계기 일람표 갱신일 경우 DB를 변경하지 않았기 때문에 중계기 일람표 설비 정의와 기존 프로젝트 DB의 설비 정의가 차이가 날 경우 추가, 중계기 일람표 설비 정의가 있을 경우에만 의미가 있음
+	//20240408 GBM start - test
+	int nTest = -1;
+	nTest = _wtoi(strEquipName);
+	if (nTest > 0 && nTest < 10)
+		int a = 0;
+	//20240408 GBM end
+
+	//20240408 GBM start - 중계기 일람표 갱신일 경우 DB를 변경하지 않았기 때문에 중계기 일람표 설비 정의와 기존 프로젝트 DB의 설비 정의가 차이가 날 경우 추가, 중계기 일람표 설비 정의가 있을 경우에만 의미가 있음
 	if (m_bIsComparedData && CNewExcelManager::Instance()->bExistEI)
 	{
 		CString strMsg = _T("");
@@ -1215,7 +1231,7 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
 		GF_AddLog(strMsg);
 	}
-	//20240328 GBM end
+	//20240408 GBM end
 
 	return pEq;
 }

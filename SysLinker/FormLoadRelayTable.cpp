@@ -360,13 +360,13 @@ LRESULT CFormLoadRelayTable::OnProgressEvent(WPARAM wp, LPARAM lp)
 
 void CFormLoadRelayTable::OnBnClickedBtnApply()
 {
-	//20240404 GBM start - 새 중계기 일람표 적용 시 프로그램 자동 종료
+	//20240408 GBM start - 새 중계기 일람표 적용 시 프로그램 자동 종료
 	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트를 성공하면 자동으로 프로그램이 종료됩니다.\n"
 		L"진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 	{
 		return;
 	}
-	//20240404 GBM end
+	//20240408 GBM end
 
 	int nModuleTableCount = 0;
 	nModuleTableCount = m_lbPath.GetCount();
@@ -498,7 +498,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			nRet = me->MakeDiffDataProc();
 		else
 		{	
-			//20240404 GBM start - 중계기 일람표 갱신 시 프로그램을 종료하라는 메세지 대신 자동으로 종료하도록 함
+			//20240408 GBM start - 중계기 일람표 갱신 시 프로그램을 종료하라는 메세지 대신 자동으로 종료하도록 함
 #if 1
 			nRet = me->ApplyDiffDataProc();
 			if (nRet > 0)
@@ -527,7 +527,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 실패했습니다.\n");
 			}
 #endif
-			//20240404 GBM end
+			//20240408 GBM end
 		}
 	}
 	catch (...)
@@ -754,7 +754,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		m_nJobIndex = m_lbPath.GetCount();
 	}
 
-	//20240328 GBM start - 새 중계기 일람표의 설비 정보를 저장, 중계기 일람표 상에 설비 정의가 있으면 DB에 넣으면 되고 없으면 기존에는 설비 정의 DB 저장 기능이 없으므로 넣으면 됨
+	//20240408 GBM start - 새 중계기 일람표의 설비 정보를 저장, 중계기 일람표 상에 설비 정의가 있으면 DB에 넣으면 되고 없으면 기존에는 설비 정의 DB 저장 기능이 없으므로 넣으면 됨
 	if (CNewExcelManager::Instance()->bExistEI == FALSE)
 	{
 		POSITION pos;
@@ -859,7 +859,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		GF_AddLog(L"새 중계기 일람표를 복사하는 데에 실패했습니다.");
 		Log::Trace("Failed to copy new module table file!");
 	}
-	//20240328 GBM end
+	//20240408 GBM end
 
 	if (m_bPreview == FALSE)
 	{

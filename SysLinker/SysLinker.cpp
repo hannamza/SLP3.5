@@ -1154,7 +1154,7 @@ void CSysLinkerApp::OnHomeProjectNew()
 		m_pFasSysData = new CRelayTableData;
 	}
 
-	//20240328 GBM start - 여기서는 아래를 진행하지 않고 중계기 일람표 경로가 확정되어 파일을 열어 설비 정의를 기본 DB에 적용 후 거기서 아래 내용을 진행해 적용하도록 함
+	//20240408 GBM start - 여기서는 아래를 진행하지 않고 중계기 일람표 경로가 확정되어 파일을 열어 설비 정의를 기본 DB에 적용 후 거기서 아래 내용을 진행해 적용하도록 함
 #if 0
 	if (m_spInputEquipManager)
 		m_spInputEquipManager->RemoveAllEquip();
@@ -1183,7 +1183,7 @@ void CSysLinkerApp::OnHomeProjectNew()
 		, m_spPmpNameEquipManager
 	);
 #endif
-	//20240328 GBM end
+	//20240408 GBM end
 
 	psNewProject.SetFasSysData(m_pFasSysData);
 	psNewProject.InitPage();

@@ -151,7 +151,7 @@ public:
 	BOOL GetChangeFlag() { return m_bChangeFlag; }
 	void SetPrjVersion(WORD wMajor, WORD wMinor) { m_dwPrjVersion = MAKELPARAM(wMinor, wMajor); m_wPrjMinorNum = wMinor; m_wPrjMajorNum = wMajor; }
 	int ProcessDeviceTableList(CWnd *pPrgTagetWnd = NULL);
-	int ProcessDeviceTable(CString strPath,int &nRelayIndex , int nAllCnt , int nAllStep,CWnd *pPrgTagetWnd = NULL);
+	int ProcessDeviceTable(CString strPath,int &nRelayIndex , int nAllCnt , int nAllStep, BOOL bEIInit, CWnd *pPrgTagetWnd = NULL);
 	void VersionUp(BOOL bMajor = FALSE) { if (bMajor) m_wPrjMajorNum++; else m_wPrjMinorNum++; }
 	//////////////////////////////////////////////////////////////////////////
 	// Add Data : 

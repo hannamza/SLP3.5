@@ -193,7 +193,7 @@ void CFormEquip::OnBnClickedBtnAdd()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//20240320 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
+	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
 	int nType = ET_NONE;
 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
@@ -201,7 +201,7 @@ void CFormEquip::OnBnClickedBtnAdd()
 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
 		return;
 	}
-	//20240320 GBM end
+	//20240408 GBM end
 
 	AddInit();
 }
@@ -211,7 +211,7 @@ void CFormEquip::OnBnClickedBtnSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//20240320 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
+	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
 	int nType = ET_NONE;
 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
@@ -219,7 +219,7 @@ void CFormEquip::OnBnClickedBtnSave()
 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
 		return;
 	}
-	//20240320 GBM end
+	//20240408 GBM end
 
 	if (m_bAdd)
 		DataAdd();
@@ -232,7 +232,7 @@ void CFormEquip::OnBnClickedBtnDel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//20240320 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
+	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
 	int nType = ET_NONE;
 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
@@ -240,7 +240,7 @@ void CFormEquip::OnBnClickedBtnDel()
 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
 		return;
 	}
-	//20240320 GBM end
+	//20240408 GBM end
 
 	if (m_pCurrentData == nullptr)
 	{
