@@ -1201,17 +1201,11 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	pEq->SetData(nWholeID, nType, strEquipName, strEquipName, L"Basic.bmp");
 	spManager->AddTail(pEq);
 
-	//20240408 GBM start - test
-	int nTest = -1;
-	nTest = _wtoi(strEquipName);
-	if (nTest > 0 && nTest < 10)
-		int a = 0;
-	//20240408 GBM end
-
 	//20240408 GBM start - 중계기 일람표 갱신일 경우 DB를 변경하지 않았기 때문에 중계기 일람표 설비 정의와 기존 프로젝트 DB의 설비 정의가 차이가 날 경우 추가, 중계기 일람표 설비 정의가 있을 경우에만 의미가 있음
 	if (m_bIsComparedData && CNewExcelManager::Instance()->bExistEI)
 	{
-		CString strMsg = _T("");
+		CString strMsg1 = _T("");
+		CString strMsg2 = _T("");
 		CString strType = _T("");
 		BOOL bRet = FALSE;
 		ASSERT(nWholeID >= 1);
@@ -1221,15 +1215,17 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 
 		if (bRet)
 		{
-			strMsg.Format(_T("[%s ID - %d: %s] already exists"), strType, nWholeID, strEquipName);
+			strMsg1.Format(_T("[%s ID - %d: %s] already exists"), strType, nWholeID, strEquipName);
+			strMsg2.Format(_T("[%s ID - %d: %s] 이미 존재합니다."), strType, nWholeID, strEquipName);
 		}
 		else
 		{
-			strMsg.Format(_T("[%s ID - %d: %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
+			strMsg1.Format(_T("[%s ID - %d: %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
+			strMsg2.Format(_T("[%s ID - %d: %s] 설비 정의에 존재하지 않습니다. 설비 정의에 추가합니다."), strType, nWholeID, strEquipName);
 		}
 
-		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
-		GF_AddLog(strMsg);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+		GF_AddLog(strMsg2);
 	}
 	//20240408 GBM end
 
