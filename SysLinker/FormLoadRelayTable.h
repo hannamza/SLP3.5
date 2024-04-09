@@ -100,7 +100,7 @@ public:
 	CTabCtrl m_ctrlTab;
 	CProgressCtrl m_ctrlProgAll;
 	CProgressCtrl m_ctrlProgDetail;
-	CListBox m_lbPath;
+	CListCtrl m_ctrlList;
 	CString m_strPath;
 	_EM_COMP_TYPE					m_nCompareType;
 
@@ -133,6 +133,12 @@ public:
 // 	CMapSystemData					m_mapOnlyOld;
 // 	CMapSystemData					m_mapOnlyNew;
 
+	//20240408 GBM start - 편집 기능 추가
+	int m_nListCtrlSelIndex;
+	CList<int> m_FacpNumList;
+	BOOL CheckDuplicate(int nValue);
+	void SetButtonState();
+	//20240408 GBM end
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
@@ -297,6 +303,8 @@ public:
 								// 1.Pattern중에 수동/자동 생성이 설정되지 않은 패턴이 있는지 확인
 
 	int InsertNewEmBroadcast(YAdoDatabase * pDb,CRelayTableData * pNewTable);
+	afx_msg void OnBnClickedBtnDelete();
+	afx_msg void OnClickListNewModuleTable(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 

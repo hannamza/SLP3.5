@@ -517,6 +517,8 @@
 #define IDC_ST_VERSION                  1160
 #define IDC_LIST_REPORT                 1163
 #define IDC_EDIT_PASSWORD               1166
+#define IDC_LIST_NEW_MODULE_TABLE       1167
+#define IDC_BTN_DELETE                  1168
 #define ID_WRITE_PASTEASHYPERLINK       32770
 #define ID_HOME_PROJECT_NEW             32772
 #define ID_HOME_PROJECT_OPEN            32773
@@ -600,7 +602,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        445
 #define _APS_NEXT_COMMAND_VALUE         32855
-#define _APS_NEXT_CONTROL_VALUE         1167
+#define _APS_NEXT_CONTROL_VALUE         1169
 #define _APS_NEXT_SYMED_VALUE           371
 #endif
 #endif

@@ -79,6 +79,7 @@ CFormLoadRelayTable::CFormLoadRelayTable()
 	m_bNewFileLoaded = FALSE;
 	m_nProgJobCount = 0; 
 	m_nJobIndex = 0; 
+	m_nListCtrlSelIndex = -1;
 }
 
 CFormLoadRelayTable::~CFormLoadRelayTable()
@@ -108,7 +109,7 @@ void CFormLoadRelayTable::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TAB, m_ctrlTab);
 	DDX_Control(pDX, IDC_PROGRESS, m_ctrlProgAll);
 	DDX_Text(pDX, IDC_ED_TABLE, m_strPath);
-	DDX_Control(pDX, IDC_LB_PATH, m_lbPath);
+	DDX_Control(pDX, IDC_LIST_NEW_MODULE_TABLE, m_ctrlList);
 	DDX_Control(pDX, IDC_PROG_STEP, m_ctrlProgDetail);
 }
 
@@ -123,6 +124,8 @@ BEGIN_MESSAGE_MAP(CFormLoadRelayTable, CFormView)
 	ON_BN_CLICKED(IDC_BTN_BROWSER, &CFormLoadRelayTable::OnBnClickedBtnBrowser)
 	ON_BN_CLICKED(IDC_BTN_STOP, &CFormLoadRelayTable::OnBnClickedBtnStop)
 	ON_MESSAGE(CSWM_PROGRESS_STEP, OnProgressEvent)
+	ON_BN_CLICKED(IDC_BTN_DELETE, &CFormLoadRelayTable::OnBnClickedBtnDelete)
+	ON_NOTIFY(NM_CLICK, IDC_LIST_NEW_MODULE_TABLE, &CFormLoadRelayTable::OnClickListNewModuleTable)
 END_MESSAGE_MAP()
 
 
@@ -178,6 +181,12 @@ void CFormLoadRelayTable::OnInitialUpdate()
 
 	m_ctrlProgAll.SetPos(0);
 	m_ctrlProgDetail.SetPos(0);
+
+	m_ctrlList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_ctrlList.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+	m_ctrlList.InsertColumn(1, _T("파일 경로"), LVCFMT_LEFT, 2000);
+
+	SetButtonState();
 }
 
 
@@ -263,11 +272,11 @@ void CFormLoadRelayTable::OnBnClickedBtnPreview()
 
 	int i;
 	CString str;
-	int nCnt = m_lbPath.GetCount();
+	int nCnt = m_ctrlList.GetItemCount();
 	m_arrPath.RemoveAll();
 	for (i = 0; i < nCnt; i++)
 	{
-		m_lbPath.GetText(i, str);
+		str = m_ctrlList.GetItemText(i, 0);
 		if (str.GetLength() <= 0)
 			continue; 
 		m_arrPath.Add(str);
@@ -369,7 +378,7 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 	//20240408 GBM end
 
 	int nModuleTableCount = 0;
-	nModuleTableCount = m_lbPath.GetCount();
+	nModuleTableCount = m_ctrlList.GetItemCount();
 	if (nModuleTableCount == 0)
 	{
 		AfxMessageBox(L"선택된 중계기 일람표가 없습니다.");
@@ -448,7 +457,10 @@ void CFormLoadRelayTable::OnBnClickedBtnBrowser()
 	TCHAR buffer[4096] = { 0 }; //버퍼
 	FileDialog.m_ofn.lpstrFile = buffer; //버퍼 포인터
 	FileDialog.m_ofn.nMaxFile = 4096; //버퍼 크기 
-
+	int nListIndex = -1;
+	int nDotPos = -1;
+	CString strFacp;
+	int nFacp;
 
 	if (FileDialog.DoModal() != IDOK)
 		return;
@@ -459,15 +471,68 @@ void CFormLoadRelayTable::OnBnClickedBtnBrowser()
 		POSITION Pos = FileDialog.GetStartPosition();
 		while(Pos != NULL)
 		{
+			//중계기 일람표 수신기 번호 체크 기능 추가
 			strPath = FileDialog.GetNextPathName(Pos);
-			m_lbPath.AddString(strPath);
+			nDotPos = strPath.ReverseFind('.');
+			if(nDotPos < 0)
+				continue;
+
+			strFacp = strPath.Mid(nDotPos - 2, 2);
+			try
+			{
+				nFacp = _wtoi(strFacp);
+			}
+			catch (...)
+			{
+				AfxMessageBox(L"중계기 일람표에서 수신기 번호를 가져오는데 실패했습니다.");
+				continue;
+			}
+
+			if (CheckDuplicate(nFacp) == 0)
+			{
+				AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
+				return;
+			}
+
+			nListIndex = m_ctrlList.GetItemCount();
+			m_ctrlList.InsertItem(nListIndex, strPath);
+			m_FacpNumList.AddTail(nFacp);
+			m_strPath = strPath;
 		}
 	}
 	else // Single Selection
 	{
 		strPath = FileDialog.GetPathName();
-		m_lbPath.AddString(strPath);
+		nDotPos = strPath.ReverseFind('.');
+		if (nDotPos < 0)
+		{
+			return;
+		}
+
+		strFacp = strPath.Mid(nDotPos - 2, 2);
+		try
+		{
+			nFacp = _wtoi(strFacp);
+		}
+		catch (...)
+		{
+			AfxMessageBox(L"중계기 일람표에서 수신기 번호를 가져오는데 실패했습니다.");
+			return;
+		}
+
+		if (CheckDuplicate(nFacp) == 0)
+		{
+			AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
+			return;
+		}
+
+		nListIndex = m_ctrlList.GetItemCount();
+		m_ctrlList.InsertItem(nListIndex, strPath);
+		m_FacpNumList.AddTail(nFacp);
+		m_strPath = strPath;
 	}
+
+	SetButtonState();
 
 	m_bPreview = FALSE;
 	m_bNewFileLoaded = FALSE;
@@ -572,7 +637,7 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 	// 8. Display - output
 	// 9. Display - pattern
 
-	m_nProgJobCount = m_lbPath.GetCount() + 9; // 
+	m_nProgJobCount = m_ctrlList.GetItemCount() + 9; // 
 	m_nJobIndex = 0;
 
 	if (m_bNewFileLoaded == FALSE)
@@ -587,7 +652,7 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 	else
 	{
 		pNewTable = m_pNewRelayTable;
-		m_nJobIndex = m_lbPath.GetCount();
+		m_nJobIndex = m_ctrlList.GetItemCount();
 	}
 	RemoveCompareResult();
 	if (m_nCompareType == CMP_NAME) // 이름이 동일 할때 중복으로 표시
@@ -737,7 +802,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	// 10.
 	// 11.
 	// 12. 비상방송 입력
-	m_nProgJobCount = m_lbPath.GetCount() + 12;
+	m_nProgJobCount = m_ctrlList.GetItemCount() + 12;
 	if (m_bNewFileLoaded == FALSE)
 	{
 		pNewTable = LoadNewRelayTable();
@@ -751,7 +816,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	else
 	{
 		pNewTable = m_pNewRelayTable;
-		m_nJobIndex = m_lbPath.GetCount();
+		m_nJobIndex = m_ctrlList.GetItemCount();
 	}
 
 	//20240408 GBM start - 새 중계기 일람표의 설비 정보를 저장, 중계기 일람표 상에 설비 정의가 있으면 DB에 넣으면 되고 없으면 기존에는 설비 정의 DB 저장 기능이 없으므로 넣으면 됨
@@ -1614,11 +1679,11 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 	int i = 0,nSize;
 	BOOL bSuc = FALSE;
 	CString str;
-	int nCnt = m_lbPath.GetCount();
+	int nCnt = m_ctrlList.GetItemCount();
 	m_arrPath.RemoveAll();
 	for(i = 0; i < nCnt; i++)
 	{
-		m_lbPath.GetText(i,str);
+		str = m_ctrlList.GetItemText(i,0);
 		if(str.GetLength() <= 0)
 			continue;
 		m_arrPath.Add(str);
@@ -1918,7 +1983,7 @@ BOOL CFormLoadRelayTable::CompareByAddress(CRelayTableData * pOld, CRelayTableDa
 	int nAddRIdx = 1;
 	//CRelayTableData * pOldTable;
 	int nAllCnt = 0;
-	nAllCnt = m_lbPath.GetCount();
+	nAllCnt = m_ctrlList.GetItemCount();
 
 	//pOldTable = theApp.GetRelayTableData();
 	pOldMap = pOld->GetSystemData();
@@ -4533,4 +4598,145 @@ int CFormLoadRelayTable::InsertNewEmBroadcast(YAdoDatabase * pDB,CRelayTableData
 	}
 
 	return 1;
+}
+
+
+void CFormLoadRelayTable::OnBnClickedBtnDelete()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	BOOL bMultiSelected = FALSE;
+	UINT nSelectedCount = m_ctrlList.GetSelectedCount();
+	if (nSelectedCount > 1)
+	{
+		bMultiSelected = TRUE;
+	}
+
+	if (bMultiSelected)
+	{
+		POSITION pos = m_ctrlList.GetFirstSelectedItemPosition();
+		std::vector<int> selectedItemsVec;
+
+		while (pos)
+		{
+			int nSelected = m_ctrlList.GetNextSelectedItem(pos);
+			selectedItemsVec.push_back(nSelected);
+
+			CString strDelFile = _T("");
+			strDelFile = m_ctrlList.GetItemText(nSelected, 0);
+			int nPos = -1;
+			nPos = strDelFile.ReverseFind('.');
+			CString strFACPNum = _T("");
+			strFACPNum = strDelFile.Mid(nPos - 2, 2);
+			int nFACP = -1;
+			nFACP = _wtoi(strFACPNum);
+
+			POSITION posFacpNum = m_FacpNumList.GetHeadPosition();
+			POSITION posDelete;
+			while (posFacpNum)
+			{
+				posDelete = posFacpNum;
+				int nItem = m_FacpNumList.GetNext(posFacpNum);
+				if (nFACP == nItem)
+				{
+					m_FacpNumList.RemoveAt(posDelete);
+					break;
+				}
+			}
+		}
+
+		for (int i = selectedItemsVec.size() - 1; i >= 0; i--)
+		{
+			int nIndex = selectedItemsVec[i];
+			m_ctrlList.DeleteItem(nIndex);
+		}
+	}
+	else
+	{
+		if (m_nListCtrlSelIndex < 0)
+		{
+			AfxMessageBox(L"선택된 일람표가 없습니다.");
+			return;
+		}
+
+		CString strDelFile = _T("");
+		strDelFile = m_ctrlList.GetItemText(m_nListCtrlSelIndex, 0);
+		int nPos = -1;
+		nPos = strDelFile.ReverseFind('.');
+		CString strFACPNum = _T("");
+		strFACPNum = strDelFile.Mid(nPos - 2, 2);
+		int nFACP = -1;
+		nFACP = _wtoi(strFACPNum);
+
+		POSITION pos = m_FacpNumList.GetHeadPosition();
+		POSITION posTemp;
+		while (pos != NULL)
+		{
+			posTemp = pos;
+			int nItem = m_FacpNumList.GetNext(pos);
+			if (nFACP == nItem)
+			{
+				m_FacpNumList.RemoveAt(posTemp);
+				break;
+			}
+		}
+
+		m_ctrlList.DeleteItem(m_nListCtrlSelIndex);
+	}
+
+	SetButtonState();
+
+	m_strPath = _T("");
+	UpdateData(FALSE);
+
+	m_nListCtrlSelIndex = -1;
+}
+
+
+void CFormLoadRelayTable::OnClickListNewModuleTable(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	NM_LISTVIEW* pNMView = (NM_LISTVIEW*)pNMHDR;
+	m_nListCtrlSelIndex = pNMView->iItem;
+
+	CString strPath = m_ctrlList.GetItemText(m_nListCtrlSelIndex, 0);
+	m_strPath = strPath;
+	UpdateData(FALSE);
+
+	*pResult = 0;
+}
+
+int CFormLoadRelayTable::CheckDuplicate(int nValue)
+{
+	POSITION pos;
+	int nFacp = 0;
+	pos = m_FacpNumList.GetHeadPosition();
+	while (pos)
+	{
+		nFacp = m_FacpNumList.GetNext(pos);
+		if (nValue == nFacp)
+			return 0;
+	}
+	return 1;
+}
+
+void CFormLoadRelayTable::SetButtonState()
+{
+	CButton* pBtnPreview = (CButton*)GetDlgItem(IDC_BTN_PREVIEW);
+	CButton* pBtnApply = (CButton*)GetDlgItem(IDC_BTN_APPLY);
+	CButton* pBtnStop = (CButton*)GetDlgItem(IDC_BTN_STOP);
+
+	int nItemCount = m_ctrlList.GetItemCount();
+	if (nItemCount > 0)
+	{
+		pBtnPreview->EnableWindow(TRUE);
+		pBtnApply->EnableWindow(TRUE);
+		pBtnStop->EnableWindow(TRUE);
+	}
+	else
+	{
+		pBtnPreview->EnableWindow(FALSE);
+		pBtnApply->EnableWindow(FALSE);
+		pBtnStop->EnableWindow(FALSE);
+	}
 }

@@ -142,14 +142,22 @@ void CPropPageDevice::OnBnClickedBtnDel()
 			int nSelected = m_ctrlListCtrl.GetNextSelectedItem(pos);
 			selectedItemsVec.push_back(nSelected);
 
+			CString strDelFile = _T("");
+			strDelFile = m_ctrlListCtrl.GetItemText(nSelected, 0);
+			int nPos = -1;
+			nPos = strDelFile.ReverseFind('.');
+			CString strFACPNum = _T("");
+			strFACPNum = strDelFile.Mid(nPos - 2, 2);
+			int nFACP = -1;
+			nFACP = _wtoi(strFACPNum);
+
 			POSITION posFacpNum = m_FacpNumList.GetHeadPosition();
 			POSITION posDelete;
 			while (posFacpNum)
 			{
 				posDelete = posFacpNum;
-				int nFacp = -1;
-				nFacp = m_FacpNumList.GetNext(posFacpNum);
-				if (nSelected == nFacp)
+				int nItem = m_FacpNumList.GetNext(posFacpNum);
+				if (nFACP == nItem)
 				{
 					m_FacpNumList.RemoveAt(posDelete);
 					break;
