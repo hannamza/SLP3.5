@@ -194,6 +194,7 @@ void CFormEquip::OnBnClickedBtnAdd()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
+#ifndef _DEBUG
 	int nType = ET_NONE;
 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
@@ -202,6 +203,7 @@ void CFormEquip::OnBnClickedBtnAdd()
 		return;
 	}
 	//20240408 GBM end
+#endif
 
 	AddInit();
 }
@@ -212,6 +214,7 @@ void CFormEquip::OnBnClickedBtnSave()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
+#ifndef _DEBUG
 	int nType = ET_NONE;
 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
@@ -219,6 +222,7 @@ void CFormEquip::OnBnClickedBtnSave()
 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
 		return;
 	}
+#endif
 	//20240408 GBM end
 
 	if (m_bAdd)
@@ -233,6 +237,7 @@ void CFormEquip::OnBnClickedBtnDel()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
+#ifndef _DEBUG
 	int nType = ET_NONE;
 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
@@ -240,6 +245,7 @@ void CFormEquip::OnBnClickedBtnDel()
 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
 		return;
 	}
+#endif
 	//20240408 GBM end
 
 	if (m_pCurrentData == nullptr)
@@ -439,6 +445,49 @@ int CFormEquip::DataDelete()
 	if (hItem)
 		m_ctrlTree.DeleteItem(hItem);
 
+	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음
+	if (pEq->GetEquipType() >= ET_INPUTTYPE && pEq->GetEquipType() <= ET_OUTCONTENTS)
+	{
+		BOOL bRet = FALSE;
+		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
+		{
+			int nFacpType = -1;
+			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
+			if (nFacpType == F4)
+			{
+				bRet = TRUE;
+				break;
+			}
+		}
+
+		if (bRet)
+		{
+			int nType = pEq->GetEquipType();
+			int nIndex = pEq->GetEquipID();
+			CString strWin32AppProjectName = theApp.m_pFasSysData->GetPrjName();
+
+			CString strType = g_strEquipTypeString[nType];
+			CString strMsg1 = _T("");
+			CString strMsg2 = _T("");
+
+			bRet = CNewExcelManager::Instance()->AddOneEquipment(nType, pEq->GetEquipID(), _T(""), strWin32AppProjectName);
+			if (bRet)
+			{
+				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition has been successfully deleted from the module table file."), strType, nIndex, m_strName);
+				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 삭제하는 데에 성공했습니다."), strType, nIndex, m_strName);
+			}
+			else
+			{
+				strMsg1.Format(_T("Deleting the new equipment [%s ID - %d : %s] definition from the module table file failed."), strType, nIndex, m_strName);
+				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 삭제하는 데에 실패했습니다."), strType, nIndex, m_strName);
+			}
+
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+			GF_AddLog(strMsg2);
+		}
+	}
+	//20240411 GBM end
+
 	delete pEq;
 	pEq = nullptr;
 
@@ -465,9 +514,9 @@ int CFormEquip::DataAdd()
 
 	strSql.Format(L"INSERT TB_EQUIP_MST(EQ_ID,EQ_TYPE , EQ_NAME ,EQ_DESC,EQ_SYMBOL,ADD_USER) "
 		L" VALUES(%d,%d"
-		L",'%s','','%s','%s')"
+		L",'%s','%s','%s','%s')"
 		, nID,nType
-		,m_strName,m_strSymbol,m_pRefFasSysData->GetCurrentUser()
+		,m_strName,m_strName,m_strSymbol,m_pRefFasSysData->GetCurrentUser()
 	);
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
@@ -495,6 +544,46 @@ int CFormEquip::DataAdd()
 	m_ctrlTree.SetItemData(htemp, (DWORD_PTR)m_pCurrentData);
 	m_ctrlTree.SelectItem(htemp);
 	m_bAdd = TRUE;
+
+	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음
+	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
+	{
+		BOOL bRet = FALSE;
+		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
+		{
+			int nFacpType = -1;
+			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
+			if (nFacpType == F4)
+			{
+				bRet = TRUE;
+				break;
+			}
+		}
+
+		if (bRet)
+		{
+			CString strWin32AppProjectName = theApp.m_pFasSysData->GetPrjName();
+			CString strType = g_strEquipTypeString[nType];
+			CString strMsg1 = _T("");
+			CString strMsg2 = _T("");
+
+			bRet = CNewExcelManager::Instance()->AddOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
+			if (bRet)
+			{
+				strMsg1.Format(_T("The new equipment [%s ID - %d : %s] definition has been successfully added to the module table file."), strType, nID, m_strName);
+				strMsg2.Format(_T("새 설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에 추가하는 데에 성공했습니다."), strType, nID, m_strName);
+			}
+			else
+			{
+				strMsg1.Format(_T("Adding the new equipment [%s ID - %d : %s] definition to the module table file failed."), strType, nID, m_strName);
+				strMsg2.Format(_T("새 설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에 추가하는 데에 실패했습니다."), strType, nID, m_strName);
+			}
+
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+			GF_AddLog(strMsg2);
+		}
+	}
+	//20240411 GBM end
 
 	return 1;
 }
@@ -565,9 +654,9 @@ int CFormEquip::DataSave()
 		}
 	}
 
-	strSql.Format(L"UPDATE TB_EQUIP_MST SET EQ_NAME='%s' , EQ_SYMBOL='%s' "
+	strSql.Format(L"UPDATE TB_EQUIP_MST SET EQ_NAME='%s', EQ_DESC='%s', EQ_SYMBOL='%s' "
 		L" WHERE EQ_ID=%d AND EQ_TYPE=%d  "
-		, m_strName, m_strSymbol
+		, m_strName, m_strName, m_strSymbol
 		, nID, nType
 	);
 
@@ -592,6 +681,46 @@ int CFormEquip::DataSave()
 	m_pCurrentData->SetEquipName(m_strName);
 	m_pCurrentData->SetFileName(m_strSymbol);
 	m_ctrlTree.SetItemText(hItem, m_pCurrentData->GetEquipName());
+
+	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음
+	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
+	{
+		BOOL bRet = FALSE;
+		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
+		{
+			int nFacpType = -1;
+			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
+			if (nFacpType == F4)
+			{
+				bRet = TRUE;
+				break;
+			}
+		}
+
+		if (bRet)
+		{
+			CString strWin32AppProjectName = theApp.m_pFasSysData->GetPrjName();
+			CString strType = g_strEquipTypeString[nType];
+			CString strMsg1 = _T("");
+			CString strMsg2 = _T("");
+
+			bRet = CNewExcelManager::Instance()->AddOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
+			if (bRet)
+			{
+				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition was successfully modified in the module table file."), strType, nID, m_strName);
+				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 수정하는 데에 성공했습니다."), strType, nID, m_strName);
+			}
+			else
+			{
+				strMsg1.Format(_T("Failed to modify the equipment [%s ID - %d : %s] in the module table file."), strType, nID, m_strName);
+				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 수정하는 데에 실패했습니다."), strType, nID, m_strName);
+			}
+
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+			GF_AddLog(strMsg2);
+		}
+	}
+	//20240411 GBM end
 
 	return 1;
 }

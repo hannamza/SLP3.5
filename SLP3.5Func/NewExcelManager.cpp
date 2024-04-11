@@ -329,80 +329,66 @@ BOOL CNewExcelManager::UpdateEquipmentInfo(CString strWin32AppProjectName)
 	return TRUE;
 }
 
-BOOL CNewExcelManager::AddEquipment(int nType, int nIndex, CString strEquipment)
+BOOL CNewExcelManager::AddOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName)
 {
-	BOOL bRet = FALSE;
-	bRet = IsExistingEquipment(nType, strEquipment);
-	if (!bRet)
+	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
+	CString strProjectName;
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+
+	CString strModuleTablePath;
+	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+
+	//중계기 일람표 리스트 얻음
+	std::vector<CString> strModuleTableFileList;
+	strModuleTableFileList = CCommonFunc::GetFullPathFileListIntheFolder(strModuleTablePath, strProjectName);
+
+	int nModuleTableCount = -1;
+	nModuleTableCount = strModuleTableFileList.size();
+
+	if (nModuleTableCount == 0)
 	{
-		switch (nType)
-		{
-		case ET_INPUTTYPE:
-		{
-			strcpy_s(CNewInfo::Instance()->m_ei.inputType[nIndex], CCommonFunc::WCharToChar(strEquipment.GetBuffer(0)));
-			break;
-		}
-		case ET_EQNAME:
-		{
-			strcpy_s(CNewInfo::Instance()->m_ei.equipmentName[nIndex], CCommonFunc::WCharToChar(strEquipment.GetBuffer(0)));
-			break;
-		}
-		case ET_OUTPUTTYPE:
-		{
-			strcpy_s(CNewInfo::Instance()->m_ei.outputType[nIndex], CCommonFunc::WCharToChar(strEquipment.GetBuffer(0)));
-			break;
-		}
-		case ET_OUTCONTENTS:
-		{
-			strcpy_s(CNewInfo::Instance()->m_ei.outputCircuit[nIndex], CCommonFunc::WCharToChar(strEquipment.GetBuffer(0)));
-			break;
-		}
-		default:
-			break;
-		}
+		Log::Trace("There is no Module Table file in the [%s] folder.", CCommonFunc::WCharToChar(strModuleTablePath.GetBuffer(0)));
+		return FALSE;
 	}
 
-	return bRet;
-}
-
-BOOL CNewExcelManager::IsExistingEquipment(int nType, CString strEquipment)
-{
-	CString strTemp;
-
-	for (int i = 0; i < MAX_EQUIP_INFO_ITEM_COUNT; i++)
+	for (int i = 0; i < nModuleTableCount; i++)
 	{
-		strTemp = _T("");
-		switch (nType)
+		CString strModuleTableFile;
+		strModuleTableFile = strModuleTableFileList[i];
+
+		CExcelWrapper xls;
+		if (xls.Open(strModuleTableFile) == false)
 		{
-		case ET_INPUTTYPE:
+			Log::Trace("Failed to open file [%s].", CCommonFunc::WCharToChar(strModuleTableFile.GetBuffer(0)));
+			return FALSE;
+		}
+
+		int nSheetCount = 0;
+		nSheetCount = xls.GetSheetCount();
+
+		for (int j = 0; j < nSheetCount; j++)
 		{
-			strTemp.Format(_T("%s"), CNewInfo::Instance()->m_ei.inputType[i]);
-			break;
+			if (xls.SetWorkSheetChange(j + 1) == FALSE)
+				continue;
+
+			CString strSheetName = _T("");
+			strSheetName = xls.GetSheetName(j + 1);
+
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_EQUIPMENT_INFO) == 0)
+			{
+				int nCol = nType + EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_NUMBER;
+				int nRow = nIndex + EXCEL_ENUM_EQUIPMENT_INFO::ROW_HEADER;
+				xls.SetItemText(nRow, nCol, strEquipment);
+
+				break;
+			}
 		}
-		case ET_EQNAME:
-		{
-			strTemp.Format(_T("%s"), CNewInfo::Instance()->m_ei.equipmentName[i]);
-			break;
-		}
-		case ET_OUTPUTTYPE:
-		{
-			strTemp.Format(_T("%s"), CNewInfo::Instance()->m_ei.outputType[i]);
-			break;
-		}
-		case ET_OUTCONTENTS:
-		{
-			strTemp.Format(_T("%s"), CNewInfo::Instance()->m_ei.outputCircuit[i]);
-			break;
-		}
-		default:
-			break;
-		}
-		
-		if (strTemp.Compare(strEquipment) == 0)
-			return TRUE;
+
+		xls.SavaAs(strModuleTableFile);
+		xls.Close();
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 BOOL CNewExcelManager::CopyModuleTable(CStringList * pStrList, CString strWin32AppProjectName)

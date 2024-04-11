@@ -1210,18 +1210,18 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 		BOOL bRet = FALSE;
 		ASSERT(nWholeID >= 1);
 		int nIndex = nWholeID - 1;	// ID는 1베이스, 메모리는 0베이스
-		bRet = CNewExcelManager::Instance()->AddEquipment(nType, nIndex, strEquipName);
+		bRet = CNewInfo::Instance()->AddEquipment(nType, nIndex, strEquipName);
 		strType = g_strEquipTypeString[nType];
 
 		if (bRet)
 		{
-			strMsg1.Format(_T("[%s ID - %d: %s] already exists"), strType, nWholeID, strEquipName);
-			strMsg2.Format(_T("[%s ID - %d: %s] 이미 존재합니다."), strType, nWholeID, strEquipName);
+			strMsg1.Format(_T("[%s ID - %d : %s] already exists"), strType, nWholeID, strEquipName);
+			strMsg2.Format(_T("[%s ID - %d : %s] 이미 존재합니다."), strType, nWholeID, strEquipName);
 		}
 		else
 		{
-			strMsg1.Format(_T("[%s ID - %d: %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
-			strMsg2.Format(_T("[%s ID - %d: %s] 설비 정의에 존재하지 않습니다. 설비 정의에 추가합니다."), strType, nWholeID, strEquipName);
+			strMsg1.Format(_T("[%s ID - %d : %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
+			strMsg2.Format(_T("[%s ID - %d : %s] 설비 정의에 존재하지 않습니다. 설비 정의에 추가합니다."), strType, nWholeID, strEquipName);
 		}
 
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));

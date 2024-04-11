@@ -38,11 +38,8 @@ public:
 	// 설비 정보 갱신 (일괄 갱신)
 	BOOL UpdateEquipmentInfo(CString strWin32AppProjectName);
 
-	// 설비 정보 갱신 (새 중계기 일람표 적용 시 필요한 항목만 추가)
-	BOOL AddEquipment(int nType, int nIndex, CString strEquipment);
-
-	// 기존 설비 정보와 새 설비 정보 비교해서 기존에 있는지 확인
-	BOOL IsExistingEquipment(int nType, CString strEquipment);
+	// 설비 정의 추가 시 F4 프로젝트라면 중계기 일람표 설비 정의에도 적용
+	BOOL AddOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName);
 
 	// 중계기 일람표 갱신 시 새 중계기 일람표 프로젝트 폴더에 복사
 	BOOL CopyModuleTable(CStringList * pStrList, CString strWin32AppProjectName);
