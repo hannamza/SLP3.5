@@ -522,6 +522,7 @@ CRelayTableData::CRelayTableData()
 	m_nAllocRelayIndexType = 0;
 
 	m_bIsComparedData = FALSE;	//20240326 GBM - 메모리 누수 오류 수정
+	m_bNewEquipmentTypeAdded = FALSE;
 }
 
 CRelayTableData::~CRelayTableData()
@@ -732,7 +733,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				}
 				
 				//중계기 일람표 변경에 의한 비교 데이터라면 DB에 적용하는 행정은 하지 않음
-				if (!m_bIsComparedData)
+				if (!m_bIsComparedData && !bEIInit)
 				{
 					CNewDBManager::Instance()->SetDBAccessor(theApp.m_pMainDb);
 					BOOL bRet = FALSE;
@@ -1200,6 +1201,21 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	pEq = new CDataEquip;
 	pEq->SetData(nWholeID, nType, strEquipName, strEquipName, L"Basic.bmp");
 	spManager->AddTail(pEq);
+
+	//20240423 GBM start - 새 정의가 추가되었는지 여부
+	if (m_bNewEquipmentTypeAdded == FALSE)
+		m_bNewEquipmentTypeAdded = TRUE;
+	//20240423 GBM end
+
+	//20240408 GBM start - 중계기 일람표 상 회로의 설비 정의가 설비 정의 정보에 없을 때 (F3 프로젝트) 설비 정의가 추가되면 여기에서 프로그램 로그창에 표시해서 바로 확인 가능하도록 함
+	if (!m_bIsComparedData && !CNewExcelManager::Instance()->bExistEI)
+	{
+		CString strNewType = g_strEquipTypeString[nType];
+		CString strLog;
+		strLog.Format(_T("[%s ID - %d : %s가 설비 정의에 없어 새로 추가됩니다.]", strNewType, nWholeID, strEquipName));
+		GF_AddLog(strLog);
+	}
+	//20240408 GBM end
 
 	//20240408 GBM start - 중계기 일람표 갱신일 경우 DB를 변경하지 않았기 때문에 중계기 일람표 설비 정의와 기존 프로젝트 DB의 설비 정의가 차이가 날 경우 추가, 중계기 일람표 설비 정의가 있을 경우에만 의미가 있음
 	if (m_bIsComparedData && CNewExcelManager::Instance()->bExistEI)

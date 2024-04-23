@@ -983,7 +983,7 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
-	//20240306 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
+	//20240415 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
 	
 	//인증 여부 초기화
 	CNewInfo::Instance()->m_fi.projectInfo.authorized = false;
@@ -998,8 +998,8 @@ void CMainFrame::OnFacpCreateLink()
 
 			if (strUserInputPassword.Compare(strPassword) == 0)
 			{
-				AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증된 ROM 파일 생성을 진행합니다."));
-				GF_AddLog(L"관리자 모드가 인증되었습니다. 인증된 ROM 파일 생성을 진행합니다.");
+				AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다."));
+				GF_AddLog(L"관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다.");
 				Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
 				CNewInfo::Instance()->m_fi.projectInfo.authorized = true;
 			}
@@ -1021,7 +1021,7 @@ void CMainFrame::OnFacpCreateLink()
 		Log::Trace("Proceed with creating a unauthorized ROM file.");
 	}
 
-	//20240306 GBM end
+	//20240415 GBM end
 
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if(AfxMessageBox(L"연동데이터를 현재 상태로 컴파일 합니다.\nYes : 오류검사 후 컴파일\nNo:오류검사 없이 컴파일",MB_YESNO | MB_ICONQUESTION) != IDYES)

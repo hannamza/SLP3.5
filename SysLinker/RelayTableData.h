@@ -54,6 +54,7 @@ public:
 	SIMPLE_FUNC_IMPL(int, LastRelayIndex, m_nLastRelayIndex);
 
 	SIMPLE_FUNC_IMPL(BOOL, IsComparedData, m_bIsComparedData);	//20240326 GBM - 메모리 누수 오류 수정
+	SIMPLE_FUNC_IMPL(BOOL, NewEquipmentTypeAdded, m_bNewEquipmentTypeAdded);	//20240326 GBM - 메모리 누수 오류 수정
 
 	CStringList* GetRelayTableList() { return &m_strFileNameList; }
 
@@ -124,7 +125,9 @@ public:
 	BOOL		m_bChangeFlag;//< 프로젝트 변경 Flag
 	BOOL		m_bOpened; //< Project Opened 
 
-	BOOL	m_bIsComparedData;	//20240326 GBM - 메모리 누수 오류 수정
+	BOOL	m_bIsComparedData;	//20240326 GBM - 메모리 누수 오류 수정, 비교 데이터 여부 Flag
+	BOOL	m_bNewEquipmentTypeAdded;	//20240423 GBM - 설비 정의와 중계기 일람표 회로 중 설비 정의에 정의가 없어서 새로 추가된 경우에는 새 프로젝트 생성 후 중계기 일람표에 반영
+
 protected:
 	//CMapLocation							m_MapLocation;
 	std::shared_ptr<CManagerLocation>	m_spLocation;

@@ -2647,7 +2647,6 @@ int CSysLinkerApp::CreateProjectDatabase()
 			Log::Trace("Inserting new DB table failed!");
 		}
 
-
 		//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
 		bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
 		if (bRet)
@@ -2661,6 +2660,83 @@ int CSysLinkerApp::CreateProjectDatabase()
 			Log::Trace("F4 DB table insertion failed!");
 		}
 		//20240222 GBM end
+
+		//20240422 GBM start
+		//F4와 F3이 혼재되어 있을 경우 불일치되는 설비 정의가 메모리에 추가 반영되어 위(m_pFasSysData->InsertPrjBaseData())에서 DB에 써지지만
+		//중계기 일람표 Sheet에는 적용되지 않으므로 이를 적용, 추가된 설비 정보는 CRelayTableData::AddNewEquip(CString strEquipName, int nType)에서 
+		//중계기 일람표 설비 정의 메모리에 반영되지 않음(새 중계기 일람표 갱신 시 비교데이터가 아니므로), 
+		//이 시점에서 한번이라도 새 설비 정의가 추가되었다면 프로젝트 폴더의 중계기 일람표 폴더에 이미 중계기 일람표 복사가 완료되었으므로 직접 수정
+		//이 작업은 중계기 일람표를 다시 다 열어야 하므로 파일이 크면 오래 걸리는 작업이므로 새 정의가 추가되었을 때만 수행
+		if (m_pFasSysData->GetNewEquipmentTypeAdded())
+		{
+			POSITION pos;
+			std::shared_ptr <CManagerEquip> spManager;
+			CDataEquip * pEq;
+			int nID;
+			CString strTemp;
+			for (int i = ET_INPUTTYPE; i <= ET_OUTCONTENTS; i++)
+			{
+				spManager = m_pFasSysData->GetEquipManager(i);
+				if (spManager == nullptr)
+					return -1;
+
+				pos = spManager->GetHeadPosition();
+				while (pos)
+				{
+					nID = -1;
+					strTemp = _T("");
+					pEq = spManager->GetNext(pos);
+					if (pEq == nullptr)
+						continue;
+
+					nID = pEq->GetEquipID();
+					ASSERT(nID > 0);
+					nID--;	//번호는 1베이스 인덱스는 0베이스
+					strTemp = pEq->GetEquipName();
+					strTemp.Remove(' ');
+					strTemp.MakeUpper();
+
+					switch (i)
+					{
+					case ET_INPUTTYPE:
+					{
+						sprintf_s(CNewInfo::Instance()->m_ei.inputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+						break;
+					}
+					case ET_EQNAME:
+					{
+						sprintf_s(CNewInfo::Instance()->m_ei.equipmentName[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+						break;
+					}
+					case ET_OUTPUTTYPE:
+					{
+						sprintf_s(CNewInfo::Instance()->m_ei.outputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+						break;
+					}
+					case ET_OUTCONTENTS:
+					{
+						sprintf_s(CNewInfo::Instance()->m_ei.outputCircuit[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+						break;
+					}
+					default:
+						break;
+					}
+				}
+			}
+
+			bRet = CNewExcelManager::Instance()->UpdateEquipmentInfo(m_pFasSysData->GetPrjName());
+			if (bRet)
+			{
+				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 성공했습니다.");
+				Log::Trace("Successfully saved equipment information to new module table file!");
+			}
+			else
+			{
+				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 실패했습니다.");
+				Log::Trace("Failed to save equipment information to new module table file!");
+			}
+		}
+		//20240422 GBM end
 	}
 	//20240222 GBM end
 

@@ -65,6 +65,8 @@ public:
 	int DataSave();
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg void OnCbnSelchangeCmbEquiptype();
+
+	BOOL CheckEditableEquipment(int nEditType, int nEquimentType, int nID);
 };
 
 

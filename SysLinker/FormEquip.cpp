@@ -11,6 +11,13 @@
 #include "../Common/Utils/YAdoDatabase.h"
 // CFormEquip
 
+enum
+{
+	EQUIPMENT_TYPE_ADD,
+	EQUIPMENT_TYPE_MODIFY,
+	EQUIPMENT_TYPE_DELETE
+}EDIT_TYPE_ENUM;
+
 IMPLEMENT_DYNCREATE(CFormEquip, CFormView)
 
 CFormEquip::CFormEquip()
@@ -194,16 +201,16 @@ void CFormEquip::OnBnClickedBtnAdd()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
-#ifndef _DEBUG
-	int nType = ET_NONE;
-	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
-	{
-		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
-		return;
-	}
+// #ifndef _DEBUG
+// 	int nType = ET_NONE;
+// 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+// 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
+// 	{
+// 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
+// 		return;
+// 	}
+// #endif
 	//20240408 GBM end
-#endif
 
 	AddInit();
 }
@@ -214,15 +221,15 @@ void CFormEquip::OnBnClickedBtnSave()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
-#ifndef _DEBUG
-	int nType = ET_NONE;
-	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
-	{
-		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
-		return;
-	}
-#endif
+// #ifndef _DEBUG
+// 	int nType = ET_NONE;
+// 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+// 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
+// 	{
+// 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
+// 		return;
+// 	}
+// #endif
 	//20240408 GBM end
 
 	if (m_bAdd)
@@ -400,6 +407,13 @@ int CFormEquip::DisplayEquip(HTREEITEM hItem)
 
 int CFormEquip::DataDelete()
 {
+	//20240422 GBM start - 편집 여부 체크
+	int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+	int nID = m_nNum;
+	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
+		return 0;
+	//20240422 GBM end
+
 	YAdoDatabase * pDB = m_pRefFasSysData->GetPrjDB();
 	if (pDB == nullptr)
 		return 0;
@@ -510,8 +524,12 @@ int CFormEquip::DataAdd()
 	if (nSel < 0)
 		return 0;
 	nType = (int)m_cmbType.GetItemData(nSel);
-	
 
+	//20240422 GBM start - 편집 여부 체크
+	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
+		return 0;
+	//20240422 GBM end
+	
 	strSql.Format(L"INSERT TB_EQUIP_MST(EQ_ID,EQ_TYPE , EQ_NAME ,EQ_DESC,EQ_SYMBOL,ADD_USER) "
 		L" VALUES(%d,%d"
 		L",'%s','%s','%s','%s')"
@@ -635,6 +653,13 @@ int CFormEquip::DataSave()
 	{
 		if (m_bAdd)
 		{
+			//20240422 GBM start - 편집 여부 체크
+			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+			int nID = m_nNum;
+			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
+				return 0;
+			//20240422 GBM end
+
 			if (AfxMessageBox(L"이미 데이터가 있습니다. 기존데이터를 수정하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 				return 0;
 			std::shared_ptr <CManagerEquip> spManager = nullptr;
@@ -749,4 +774,75 @@ void CFormEquip::OnCbnSelchangeCmbEquiptype()
 		str.Format(L"%d" , nWhole);
 		GetDlgItem(IDC_ED_EQUIP_ID)->SetWindowText(str);
 	}
+}
+
+BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nID)
+{
+	CString strMsg;
+
+	if (nEditType == EQUIPMENT_TYPE_ADD)
+	{
+		if (nEquimentType == ET_INPUTTYPE)
+		{
+			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
+			{
+				strMsg.Format(_T("[입력 타입 ID : %d]는/은 추가할 수 없습니다."), nID);
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		else if (nEquimentType == ET_OUTPUTTYPE)
+		{
+			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
+			{
+				strMsg.Format(_T("[출력 타입 ID : %d]는/은 추가할 수 없습니다."), nID);
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+	}
+	else if (nEditType == EQUIPMENT_TYPE_MODIFY)
+	{
+// 		if (nEquimentType == ET_INPUTTYPE)
+// 		{
+// 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
+// 			{
+// 				strMsg.Format(_T("[입력 타입 ID : %d]는/은 변경할 수 없습니다."), nID);
+// 				AfxMessageBox(strMsg);
+// 				return FALSE;
+// 			}
+// 		}
+// 		else if (nEquimentType == ET_OUTPUTTYPE)
+// 		{
+// 			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
+// 			{
+// 				strMsg.Format(_T("[출력 타입 ID : %d]는/은 변경할 수 없습니다."), nID);
+// 				AfxMessageBox(strMsg);
+// 				return FALSE;
+// 			}
+// 		}
+	}
+	else if (nEditType == EQUIPMENT_TYPE_DELETE)
+	{
+		if (nEquimentType == ET_INPUTTYPE)
+		{
+			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
+			{
+				strMsg.Format(_T("[입력 타입 ID : %d]는/은 삭제할 수 없습니다."), nID);
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		else if (nEquimentType == ET_OUTPUTTYPE)
+		{
+			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
+			{
+				strMsg.Format(_T("[출력 타입 ID : %d]는/은 삭제할 수 없습니다."), nID);
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+	}
+
+	return TRUE;
 }
