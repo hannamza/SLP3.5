@@ -3158,11 +3158,11 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 
 	if (m_pFasSysData->LoadProjectDatabase() == 0)
 	{
-		GF_AddLog(L"프로젝트를 불러오는데 실패 했습니다.");
+		GF_AddLog(L"프로젝트 데이터베이스에서 데이터를 가져오는 데에 실패 했습니다.");
 		return 0;
 	}
 	m_pFasSysData->SetProjectOpened(TRUE);
-	GF_AddLog(L"프로젝트를 불러오는데 성공 했습니다.");
+	//GF_AddLog(L"프로젝트를 불러오는데 성공 했습니다.");	//20240424 GBM - 중복 메세지 삭제
 
 	return 1;
 }

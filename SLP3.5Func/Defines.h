@@ -1,5 +1,8 @@
 #pragma once
 
+// 영문화 플래그
+//#define ENGLISH_MODE	
+
 // 최대 수신기 개수
 #define MAX_FACP_COUNT	32
 

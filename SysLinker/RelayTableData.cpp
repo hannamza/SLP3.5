@@ -15530,7 +15530,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	nSize += 1;
 	//sizeof(szStrBuff);
 
-	//20240228 GBM start - 수신기 종류에 따라 문자열 제한 개수 분기 처리
+	//20240424 GBM start - 수신기 종류에 따라 문자열 제한 개수 분기 처리
 #if 1
 	int nFacpType = -1;
 	int nMaxSize;
@@ -15585,7 +15585,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		szStrBuff[39] = 0;
 	}
 #endif
-	//20240228 GBM end
+	//20240424 GBM end
 
 	// ROM BUFFER : 3 byte : Message Address
 	stTemp.bt65536Divid = uMsgOffset / 0x10000;;
