@@ -884,32 +884,32 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
 	BOOL bRet = FALSE;
 
-	// F4추가 테이블의 경우는 변경된 중계기 일람표가 F4 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+	// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
 	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
 	if (bRet)
 	{
-		bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
+		bRet = CNewDBManager::Instance()->CheckAndCreateGT1DBTables();
 		if (bRet)
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
 			Log::Trace("Inserting new DB table succeeded!");
 		}
 		else
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
 			Log::Trace("Inserting new DB table failed!");
 		}
 
-		bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
+		bRet = CNewDBManager::Instance()->InsertDatasIntoGT1DBTables();
 		if (bRet)
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
-			Log::Trace("F4 DB table insertion succeeded!");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+			Log::Trace("GT1 DB table insertion succeeded!");
 		}
 		else
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
-			Log::Trace("F4 DB table insertion failed!");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+			Log::Trace("GT1 DB table insertion failed!");
 		}
 
 	}
@@ -949,7 +949,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 			}
 
 			// DB와 중계기 일람표 상의 설비 정의가 불일치 (정확하게는 DB에는 있으나 중계기 일람표에는 없는 경우)할 경우 DB를 읽어서 새 중계기 일람표에 추가할 지는
-			// 추후 WEB 연동 테스트 후 결정 -> 기존 F3 프로젝트를 F4로 바꿀 때 생길 가능성이 있다고 보임
+			// 추후 WEB 연동 테스트 후 결정 -> 기존 F3 프로젝트를 GT1으로 바꿀 때 생길 가능성이 있다고 보임
 		}
 	}
 	else

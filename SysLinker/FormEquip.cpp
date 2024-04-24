@@ -467,7 +467,7 @@ int CFormEquip::DataDelete()
 		{
 			int nFacpType = -1;
 			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
-			if (nFacpType == F4)
+			if (nFacpType == GT1)
 			{
 				bRet = TRUE;
 				break;
@@ -571,7 +571,7 @@ int CFormEquip::DataAdd()
 		{
 			int nFacpType = -1;
 			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
-			if (nFacpType == F4)
+			if (nFacpType == GT1)
 			{
 				bRet = TRUE;
 				break;
@@ -715,7 +715,7 @@ int CFormEquip::DataSave()
 		{
 			int nFacpType = -1;
 			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
-			if (nFacpType == F4)
+			if (nFacpType == GT1)
 			{
 				bRet = TRUE;
 				break;

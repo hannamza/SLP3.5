@@ -1074,18 +1074,18 @@ int CMainFrame::CreateFacpLink()
 
 		//20240305 GBM start - 연동데이터 생성이 성공한 시점에 프로젝트 번호 업데이트 및 중계기 일람표 적용
 
-		//수신기 타입 정보에서 F4 타입이 하나도 없으면 아래 행정을 하지 않음 (F3만 있으면 의미가 없기 때문)
-		BOOL bF4TypeExist = FALSE;
+		//수신기 타입 정보에서 GT1 타입이 하나도 없으면 아래 행정을 하지 않음 (F3만 있으면 의미가 없기 때문)
+		BOOL bGT1TypeExist = FALSE;
 		for (int i = 0; i < MAX_FACP_COUNT; i++)
 		{
-			if (CNewInfo::Instance()->m_fi.facpType[i] == F4)
+			if (CNewInfo::Instance()->m_fi.facpType[i] == GT1)
 			{
-				bF4TypeExist = TRUE;
+				bGT1TypeExist = TRUE;
 				break;
 			}
 		}
 
-		if (bF4TypeExist)
+		if (bGT1TypeExist)
 		{
 			int nModuleTableVerNum = -1;
 			int nLinkedDataVerNum = -1;
@@ -1133,7 +1133,7 @@ int CMainFrame::CreateFacpLink()
 		}
 		else
 		{
-			Log::Trace("There is no F4 type among the FACPs, so project version number will not be updated!");
+			Log::Trace("There is no GT1 type among the FACPs, so project version number will not be updated!");
 		}
 		//20240305 GBM end
 	}

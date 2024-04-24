@@ -213,7 +213,7 @@ BOOL CNewDBManager::InsertDataIntoEquipmentInfoTable()
 	return TRUE;
 }
 
-BOOL CNewDBManager::CheckAndCreateF4DBTables()
+BOOL CNewDBManager::CheckAndCreateGT1DBTables()
 {
 	for (int nTable = TB_FACP_TYPE; nTable <= TB_PROJECT_INFO; nTable++)
 	{
@@ -327,7 +327,7 @@ CString CNewDBManager::GetQueryStringCreateProjectInfoTable()
 }
 
 // F4 추가 Table에 데이터 insert
-BOOL CNewDBManager::InsertDatasIntoF4DBTables()
+BOOL CNewDBManager::InsertDatasIntoGT1DBTables()
 {
 	if (!InsertDataIntoFACPTypeTable())
 		return FALSE;
@@ -461,7 +461,7 @@ BOOL CNewDBManager::InsertDataIntoProjectInfoTable()
 	return TRUE;
 }
 
-BOOL CNewDBManager::GetDataFromF4DBTables()
+BOOL CNewDBManager::GetDataFromGT1DBTables()
 {
 	if (!GetDataFromFACPTypeTable())
 		return FALSE;

@@ -26,8 +26,8 @@ public:
 	// 설비 정의 데이터 insert
 	BOOL InsertDataIntoEquipmentInfoTable();
 
-	// F4 추가 Table 존재 여부 확인 후 없으면 Create
-	BOOL CheckAndCreateF4DBTables();
+	// GT1 추가 Table 존재 여부 확인 후 없으면 Create
+	BOOL CheckAndCreateGT1DBTables();
 
 	BOOL CheckDBTableExist(CString strTableName);
 
@@ -37,8 +37,8 @@ public:
 
 	CString GetQueryStringCreateProjectInfoTable();
 
-	// F4 추가 Table에 데이터 insert
-	BOOL InsertDatasIntoF4DBTables();
+	// GT1 추가 Table에 데이터 insert
+	BOOL InsertDatasIntoGT1DBTables();
 
 	BOOL InsertDataIntoFACPTypeTable();
 
@@ -46,8 +46,8 @@ public:
 
 	BOOL InsertDataIntoProjectInfoTable();
 
-	// 기존 프로젝트 열기 시 F4 추가 Table에서 데이터 로드
-	BOOL GetDataFromF4DBTables();
+	// 기존 프로젝트 열기 시 GT1 추가 Table에서 데이터 로드
+	BOOL GetDataFromGT1DBTables();
 
 	BOOL GetDataFromFACPTypeTable();
 

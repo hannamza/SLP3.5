@@ -24,8 +24,8 @@
 // LCD 회로명 최대 문자 길이 - F3
 #define MAX_LCD_TEXT_LENGTH_F3 40
 
-// LCD 회로명 최대 문자 길이 - F4
-#define MAX_LCD_TEXT_LENGTH_F4 80
+// LCD 회로명 최대 문자 길이 - GT1
+#define MAX_LCD_TEXT_LENGTH_GT1 80
 
 // 설비 정의 문자 길이
 #define MAX_EQUIP_INFO_TEXT_LENGTH	50
@@ -54,21 +54,21 @@
 // 수신기 타입
 enum {
 	F3 = 1,
-	F4
+	GT1
 }FACP_TYPE;
 
 // 유닛 타입
 enum {
 	P형_중계반 = 1,
 	F3_중계반,
-	F4_중계반,
+	GT1_중계반,
 	F3_광센서_중계반,
-	F4_광센서_중계반,
+	GT1_광센서_중계반,
 	REDBOX,
 	피난사다리
 }UNIT_TYPE;
 
-// F4 추가 입력 타입 
+// GT1 추가 입력 타입 
 namespace NEW_EQUIPMENT_INPUT_TYPE {
 	enum {
 		AN정온교차A = 16,
@@ -81,7 +81,7 @@ namespace NEW_EQUIPMENT_INPUT_TYPE {
 	};
 }
 
-// F4 추가 입력 설비명
+// GT1 추가 입력 설비명
 namespace NEW_EQUIPMENT_INPUT_NAME {
 	enum {
 		CCTV = 52
@@ -243,14 +243,14 @@ namespace EXCEL_ENUM_EQUIPMENT_INFO {
 	}COLUMNS;
 }
 
-// F4 추가 테이블
+// GT1 추가 테이블
 enum {
 	TB_FACP_TYPE,
 	TB_UNIT_TYPE,
 	TB_PROJECT_INFO
 }NEW_TABLES;
 
-// F4 추가 입력 타입 문자열 
+// GT1 추가 입력 타입 문자열 
 static const TCHAR* g_lpszNewEquipmentInputType[] = {
 	_T(""),					// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
 	_T(""),					// 1
@@ -278,7 +278,7 @@ static const TCHAR* g_lpszNewEquipmentInputType[] = {
 	NULL
 };
 
-// F4 추가 입력 설비명 문자열
+// GT1 추가 입력 설비명 문자열
 static const TCHAR* g_lpszNewEquipmentInputName[] = {
 	_T(""),					// 0 없음, 설비명번호는 1베이스, 문자열은 0베이스	
 	_T(""),					// 1
@@ -336,7 +336,7 @@ static const TCHAR* g_lpszNewEquipmentInputName[] = {
 	NULL
 };
 
-// F4 추가 테이블 문자열
+// GT1 추가 테이블 문자열
 static const TCHAR* g_lpszNewTable[] = {
 	_T("TB_FACP_TYPE"),
 	_T("TB_UNIT_TYPE"),
@@ -416,13 +416,13 @@ typedef struct
 	bool authorized;
 }PROJECT_INFO;
 
-// F4APPENDIX 구조체
+// GT1APPENDIX 구조체
 typedef struct 
 {
 	PROJECT_INFO projectInfo;
 	unsigned char facpType[MAX_FACP_COUNT];
 	unsigned char unitType[MAX_FACP_COUNT][MAX_UNIT_COUNT];
-}F4APPENDIX_INFO;
+}GT1APPENDIX_INFO;
 
 // 설비 정의 데이터
 typedef struct 

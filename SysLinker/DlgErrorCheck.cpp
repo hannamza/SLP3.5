@@ -501,10 +501,10 @@ int CDlgErrorCheck::ProcErrorCheck()
 		int nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacpNum];
 		int nLimit;
 		CString strFacpType;
-		if (nFacpType == F4)
+		if (nFacpType == GT1)
 		{
 			nLimit = 80;
-			strFacpType = _T("[F4 수신기]");
+			strFacpType = _T("[GT1 수신기]");
 		}
 		else
 		{

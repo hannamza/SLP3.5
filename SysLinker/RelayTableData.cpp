@@ -548,7 +548,7 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	int	nRelayIdx = 0;
 	i = 0;
 
-	//20240308 GBM start - F4 Sheet 존재 여부 확인, 중계기 일람표 파일이 여러 개일 경우 한번만 처리
+	//20240308 GBM start - GT1 Sheet 존재 여부 확인, 중계기 일람표 파일이 여러 개일 경우 한번만 처리
 	CNewExcelManager::Instance()->bExistFT = FALSE;
 	CNewExcelManager::Instance()->bExistUT = FALSE;
 	CNewExcelManager::Instance()->bExistPI = FALSE;
@@ -1212,7 +1212,7 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	{
 		CString strNewType = g_strEquipTypeString[nType];
 		CString strLog;
-		strLog.Format(_T("[%s ID - %d : %s가 설비 정의에 없어 새로 추가됩니다.]", strNewType, nWholeID, strEquipName));
+		strLog.Format(_T("[%s ID - %d : %s가 설비 정의에 없어 새로 추가됩니다.]"), strNewType, nWholeID, strEquipName);
 		GF_AddLog(strLog);
 	}
 	//20240408 GBM end
@@ -10748,11 +10748,11 @@ int CRelayTableData::LoadProjectDatabase()
 		cvt.ChangeDatabase(m_pDB);
 	}
 
-	//20240305 GBM start - 전체 테이블 로드가 모드 성공한 이후 시점에 F4 추가 기능 테이블 정보를 로드
+	//20240305 GBM start - 전체 테이블 로드가 모드 성공한 이후 시점에 GT1 추가 기능 테이블 정보를 로드
 	BOOL bRet = TRUE;
 	CNewDBManager::Instance()->SetDBAccessor(m_pDB);
 
-	//최초부터 F4 프로젝트인지 혹은 중계기 일람표 변경으로 인해 F4 프로젝트가 되었는지에 따라 F4 추가 테이블이 존재하면 Select를 해서 정보를 가져오고 그렇지 않으면 가져오지 않음
+	//최초부터 GT1 프로젝트인지 혹은 중계기 일람표 변경으로 인해 GT1 프로젝트가 되었는지에 따라 GT1 추가 테이블이 존재하면 Select를 해서 정보를 가져오고 그렇지 않으면 가져오지 않음
 	for (int i = TB_FACP_TYPE; i <= TB_PROJECT_INFO; i++)
 	{
 		CString strTable = _T(""); 
@@ -10763,23 +10763,23 @@ int CRelayTableData::LoadProjectDatabase()
 			CString strMsg = _T("");
 			strMsg.Format(_T("Table [%s] does not exist in the database"), strTable);
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
-			GF_AddLog(L"F4 추가정보 테이블이 DB에 존재하지 않습니다. F4 추가정보를 처리하지 않습니다.", strTable);
+			GF_AddLog(L"GT1 추가정보 테이블이 DB에 존재하지 않습니다. GT1 추가정보를 처리하지 않습니다.", strTable);
 			break;
 		}
 	}
 
 	if (bRet)
 	{
-		bRet = CNewDBManager::Instance()->GetDataFromF4DBTables();
+		bRet = CNewDBManager::Instance()->GetDataFromGT1DBTables();
 		if (bRet)
 		{
-			GF_AddLog(L"데이터베이스에서 F4 추가정보를 가져오는 데에 성공했습니다.");
-			Log::Trace("Successfully retrieved F4 additional information from database.");
+			GF_AddLog(L"데이터베이스에서 GT1 추가정보를 가져오는 데에 성공했습니다.");
+			Log::Trace("Successfully retrieved GT1 additional information from database.");
 		}
 		else
 		{
-			GF_AddLog(L"데이터베이스에서 F4 추가정보를 가져오는 데에 실패했습니다.");
-			Log::Trace("Failed to retrieve F4 additional information from database.");
+			GF_AddLog(L"데이터베이스에서 GT1 추가정보를 가져오는 데에 실패했습니다.");
+			Log::Trace("Failed to retrieve GT1 additional information from database.");
 			return 0;
 		}
 	}
@@ -14226,7 +14226,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 				strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
 				strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
 			}
-			else if (nFacpType == F4)
+			else if (nFacpType == GT1)
 			{
 				int nModuleTableVerNum = -1;
 				int nLinkedDataVerNum = -1;
@@ -14543,7 +14543,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			strLcd.Format(L"%sLCD%02d.ROM", strPath, nLastFacp);
 			strEmergency.Format(L"%sEMER%02d.ROM", strPath, nLastFacp);
 		}
-		else if (nFacpType == F4)
+		else if (nFacpType == GT1)
 		{
 			int nModuleTableVerNum = -1;
 			int nLinkedDataVerNum = -1;
@@ -14639,20 +14639,20 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 	MakeRvContactInfo(strPath);
 	MakeManualOutput(strPath);
 
-	//20240329 GBM start - F4APPENDIX.ROM 생성
+	//20240329 GBM start - GT1APPENDIX.ROM 생성
 
-	//F4 Type 수신기가 하나도 없다면 아래 행정을 진행하지 않음, F3만 있다면 의미가 없기 때문
-	BOOL bF4TypeExist = FALSE;
+	//GT1 Type 수신기가 하나도 없다면 아래 행정을 진행하지 않음, F3만 있다면 의미가 없기 때문
+	BOOL bGT1TypeExist = FALSE;
 	for (int i = 0; i < MAX_FACP_COUNT; i++)
 	{
-		if (CNewInfo::Instance()->m_fi.facpType[i] == F4)
+		if (CNewInfo::Instance()->m_fi.facpType[i] == GT1)
 		{
-			bF4TypeExist = TRUE;
+			bGT1TypeExist = TRUE;
 			break;
 		}
 	}
 
-	if (bF4TypeExist)
+	if (bGT1TypeExist)
 	{
 		CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
 
@@ -14667,19 +14667,19 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		if (bAuthorized)
 			strAuthorized = _T("A");
 
-		CFile fF4Appendix;
+		CFile fGT1Appendix;
 		CString strFilePath;
-		strFilePath.Format(_T("%sF4APPENDIX_v%02d-%02d%s.ROM"), strPath, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		strFilePath.Format(_T("%sGT1APPENDIX_v%02d-%02d%s.ROM"), strPath, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 
-		if (!fF4Appendix.Open(strFilePath, CFile::modeCreate | CFile::modeWrite))
+		if (!fGT1Appendix.Open(strFilePath, CFile::modeCreate | CFile::modeWrite))
 		{
-			GF_AddLog(L"F4APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
-			Log::Trace("Failed to open F4APPENDIX.ROM file");
+			GF_AddLog(L"GT1APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
+			Log::Trace("Failed to open GT1APPENDIX.ROM file");
 			return 0;
 		}
 
-		fF4Appendix.Write(&CNewInfo::Instance()->m_fi, sizeof(F4APPENDIX_INFO));
-		fF4Appendix.Close();
+		fGT1Appendix.Write(&CNewInfo::Instance()->m_fi, sizeof(GT1APPENDIX_INFO));
+		fGT1Appendix.Close();
 		//20240329 GBM end
 	}
 
@@ -15541,10 +15541,10 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		nMaxSize = MAX_LCD_TEXT_LENGTH_F3;
 		strFacpType = _T("F3");
 	}
-	else if (nFacpType == F4)
+	else if (nFacpType == GT1)
 	{
-		nMaxSize = MAX_LCD_TEXT_LENGTH_F4;
-		strFacpType = _T("F4");
+		nMaxSize = MAX_LCD_TEXT_LENGTH_GT1;
+		strFacpType = _T("GT1");
 	}
 	else
 	{

@@ -6,7 +6,7 @@ public:
 	~CNewInfo();
 
 public:
-	F4APPENDIX_INFO m_fi;
+	GT1APPENDIX_INFO m_fi;
 	EQUIPMENT_INFO m_ei;
 
 public:

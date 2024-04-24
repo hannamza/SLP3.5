@@ -2626,43 +2626,43 @@ int CSysLinkerApp::CreateProjectDatabase()
 	if(m_pFasSysData->InsertPrjBaseData() <= 0)
 		return 0;
 
-	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 F4 추가 테이블에 Data Insert
+	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 GT1 추가 테이블에 Data Insert
 	CNewDBManager::Instance()->SetDBAccessor(m_pFasSysData->m_pDB);
-	//F4 추가 입력 타입은 gfs_base에 미리 넣어 프로젝트 DB를 복사하면 적용하고 F4 추가 테이블은 중계기 일람표 상에서 F4 추가 정보가 존재할 때만 F4 추가 테이블을 생성
+	//GT1 추가 입력 타입은 gfs_base에 미리 넣어 프로젝트 DB를 복사하면 적용하고 GT1 추가 테이블은 중계기 일람표 상에서 GT1 추가 정보가 존재할 때만 GT1 추가 테이블을 생성
 	BOOL bRet = FALSE;
 
-	// F4추가 테이블의 경우는 변경된 중계기 일람표가 F4 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+	// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
 	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
 	if (bRet)
 	{
-		bRet = CNewDBManager::Instance()->CheckAndCreateF4DBTables();
+		bRet = CNewDBManager::Instance()->CheckAndCreateGT1DBTables();
 		if (bRet)
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
 			Log::Trace("Inserting new DB table succeeded!");
 		}
 		else
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
 			Log::Trace("Inserting new DB table failed!");
 		}
 
-		//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 F4 추가 테이블에 Data Insert
-		bRet = CNewDBManager::Instance()->InsertDatasIntoF4DBTables();
+		//20240222 GBM start - 중계기 일람표 파싱이 끝난 시점에 GT1 추가 테이블에 Data Insert
+		bRet = CNewDBManager::Instance()->InsertDatasIntoGT1DBTables();
 		if (bRet)
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
-			Log::Trace("F4 DB table insertion succeeded!");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+			Log::Trace("GT1 DB table insertion succeeded!");
 		}
 		else
 		{
-			GF_AddLog(L"F4 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
-			Log::Trace("F4 DB table insertion failed!");
+			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+			Log::Trace("GT1 DB table insertion failed!");
 		}
 		//20240222 GBM end
 
 		//20240422 GBM start
-		//F4와 F3이 혼재되어 있을 경우 불일치되는 설비 정의가 메모리에 추가 반영되어 위(m_pFasSysData->InsertPrjBaseData())에서 DB에 써지지만
+		//GT1과 F3이 혼재되어 있을 경우 불일치되는 설비 정의가 메모리에 추가 반영되어 위(m_pFasSysData->InsertPrjBaseData())에서 DB에 써지지만
 		//중계기 일람표 Sheet에는 적용되지 않으므로 이를 적용, 추가된 설비 정보는 CRelayTableData::AddNewEquip(CString strEquipName, int nType)에서 
 		//중계기 일람표 설비 정의 메모리에 반영되지 않음(새 중계기 일람표 갱신 시 비교데이터가 아니므로), 
 		//이 시점에서 한번이라도 새 설비 정의가 추가되었다면 프로젝트 폴더의 중계기 일람표 폴더에 이미 중계기 일람표 복사가 완료되었으므로 직접 수정
@@ -2727,13 +2727,13 @@ int CSysLinkerApp::CreateProjectDatabase()
 			bRet = CNewExcelManager::Instance()->UpdateEquipmentInfo(m_pFasSysData->GetPrjName());
 			if (bRet)
 			{
-				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 성공했습니다.");
-				Log::Trace("Successfully saved equipment information to new module table file!");
+				GF_AddLog(L"설비 정의 Sheet에 없어서 추가된 설비 정의를 중계기 일람표에 저장하는 데에 성공했습니다.");
+				Log::Trace("We succeeded in saving the added equipment definition to the equipment definition sheet in module table file because it was not in the equipment definition sheet.");
 			}
 			else
 			{
-				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 실패했습니다.");
-				Log::Trace("Failed to save equipment information to new module table file!");
+				GF_AddLog(L"설비 정의 Sheet에 없어서 추가된 설비 정의를 중계기 일람표에 저장하는 데에 실패했습니다.");
+				Log::Trace("We failed to save the added equipment definition to the equipment definition sheet in module table file because it was not in the equipment definition sheet.");
 			}
 		}
 		//20240422 GBM end
@@ -3136,7 +3136,7 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 		return 0;
 	}
 
-	//20240327 GBM start - DB Open 후 DB에서 데이터를 가져오기 전에 F4 추가 입력 타입을 추가 -> 중계기 일람표(WEB)에서 회로 관련 설비 정의를 가지고 오기 때문에 이 행정을 하지 않음
+	//20240327 GBM start - DB Open 후 DB에서 데이터를 가져오기 전에 GT1 추가 입력 타입을 추가 -> 중계기 일람표(WEB)에서 회로 관련 설비 정의를 가지고 오기 때문에 이 행정을 하지 않음
 
 // 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
 // 
@@ -3145,12 +3145,12 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 // 	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
 // 	if (bRet)
 // 	{
-// 		GF_AddLog(L"F4 입력 타입 자동 추가에 성공했습니다.");
+// 		GF_AddLog(L"GT1 입력 타입 자동 추가에 성공했습니다.");
 // 		Log::Trace("Inserting a new input type of equipment succeeded!");
 // 	}
 // 	else
 // 	{
-// 		GF_AddLog(L"F4 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
+// 		GF_AddLog(L"GT1 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
 // 		Log::Trace("Inserting a new input type of equipment failed!");
 // 	}
 
@@ -3205,8 +3205,8 @@ int CSysLinkerApp::CloseProject()
 	delete m_pFasSysData;
 	m_pFasSysData = nullptr;
 
-	//20240307 GBM start - F4 추가 정보 메모리 초기화
-	memset(&CNewInfo::Instance()->m_fi, NULL, sizeof(F4APPENDIX_INFO));
+	//20240307 GBM start - GT1 추가 정보 메모리 초기화
+	memset(&CNewInfo::Instance()->m_fi, NULL, sizeof(GT1APPENDIX_INFO));
 	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
 	//20240307 GBM end
 
