@@ -495,7 +495,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 		nSize += 1;
 		//sizeof(szStrBuff);
 
-		//20240320 GBM start - 수신기 타입에 따른 글자수 제한 처리
+		//20240424 GBM start - 수신기 타입에 따른 글자수 제한 처리
 		int nFacpNum = pDev->GetFacpNum();
 		ASSERT(nFacpNum > -1);
 		int nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacpNum];
@@ -511,7 +511,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 			nLimit = 40;
 			strFacpType = _T("[F3 수신기]");
 		}			
-		//20240320 GBM end
+		//20240424 GBM end
 
 		if(nSize > nLimit)
 		{

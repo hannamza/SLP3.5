@@ -246,6 +246,25 @@ namespace EXCEL_ENUM_EQUIPMENT_INFO {
 	}COLUMNS;
 }
 
+// 비상방송 Excel Cell 위치 정의
+namespace EXCEL_ENUM_EB_INFO {
+	// Row
+	enum 
+	{
+		ROW_TITLE = 1,
+		ROW_HEADER,
+		ROW_LIST_START
+	}ROWS;
+
+	// Column
+	enum 
+	{
+		COLUMN_NUMBER = 1,
+		COLUMN_REMARKS,
+		COLUMN_COMM_CONTENT
+	}COLUMNS;
+}
+
 // GT1 추가 테이블
 enum {
 	TB_FACP_TYPE,

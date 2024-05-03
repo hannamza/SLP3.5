@@ -1077,6 +1077,7 @@
   <ItemGroup>
     <None Include="res\dropcopy.cur" />
     <None Include="res\ribbon.mfcribbon-ms" />
+    <None Include="res\ribbon1.mfcribbon-ms" />
     <None Include="res\SysLinker.rc2" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

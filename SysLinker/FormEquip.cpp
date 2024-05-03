@@ -244,15 +244,15 @@ void CFormEquip::OnBnClickedBtnDel()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
-#ifndef _DEBUG
-	int nType = ET_NONE;
-	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
-	{
-		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
-		return;
-	}
-#endif
+// #ifndef _DEBUG
+// 	int nType = ET_NONE;
+// 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+// 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
+// 	{
+// 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
+// 		return;
+// 	}
+// #endif
 	//20240408 GBM end
 
 	if (m_pCurrentData == nullptr)
@@ -459,7 +459,7 @@ int CFormEquip::DataDelete()
 	if (hItem)
 		m_ctrlTree.DeleteItem(hItem);
 
-	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음
+	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
 	if (pEq->GetEquipType() >= ET_INPUTTYPE && pEq->GetEquipType() <= ET_OUTCONTENTS)
 	{
 		BOOL bRet = FALSE;
@@ -484,7 +484,7 @@ int CFormEquip::DataDelete()
 			CString strMsg1 = _T("");
 			CString strMsg2 = _T("");
 
-			bRet = CNewExcelManager::Instance()->AddOneEquipment(nType, pEq->GetEquipID(), _T(""), strWin32AppProjectName);
+			bRet = CNewExcelManager::Instance()->UpdateOneEquipment(nType, pEq->GetEquipID(), _T(""), strWin32AppProjectName);
 			if (bRet)
 			{
 				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition has been successfully deleted from the module table file."), strType, nIndex, m_strName);
@@ -563,7 +563,7 @@ int CFormEquip::DataAdd()
 	m_ctrlTree.SelectItem(htemp);
 	m_bAdd = TRUE;
 
-	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음
+	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
 	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
 	{
 		BOOL bRet = FALSE;
@@ -585,7 +585,7 @@ int CFormEquip::DataAdd()
 			CString strMsg1 = _T("");
 			CString strMsg2 = _T("");
 
-			bRet = CNewExcelManager::Instance()->AddOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
+			bRet = CNewExcelManager::Instance()->UpdateOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
 			if (bRet)
 			{
 				strMsg1.Format(_T("The new equipment [%s ID - %d : %s] definition has been successfully added to the module table file."), strType, nID, m_strName);
@@ -707,7 +707,7 @@ int CFormEquip::DataSave()
 	m_pCurrentData->SetFileName(m_strSymbol);
 	m_ctrlTree.SetItemText(hItem, m_pCurrentData->GetEquipName());
 
-	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음
+	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
 	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
 	{
 		BOOL bRet = FALSE;
@@ -729,7 +729,7 @@ int CFormEquip::DataSave()
 			CString strMsg1 = _T("");
 			CString strMsg2 = _T("");
 
-			bRet = CNewExcelManager::Instance()->AddOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
+			bRet = CNewExcelManager::Instance()->UpdateOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
 			if (bRet)
 			{
 				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition was successfully modified in the module table file."), strType, nID, m_strName);
@@ -842,6 +842,17 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 				return FALSE;
 			}
 		}
+		//20240430 GBM start - 출력회로 3: 밸브는 삭제 불가능 하도록 함
+		else if (nEquimentType == ET_OUTCONTENTS)
+		{
+			if (nID == 3)
+			{
+				strMsg.Format(_T("[출력 회로 ID : %d] 밸브는 삭제할 수 없습니다."), nID);
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		//20240430 GBM end
 	}
 
 	return TRUE;

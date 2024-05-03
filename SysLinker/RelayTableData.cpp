@@ -754,7 +754,11 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 			}
 		}
 
-		//
+		//설비 정의 초기화는 한번만 되어야 하는데 중계기 일람표가 여러 개일 경우, 
+		//첫번째 중계기 일람표에 설비 정의 Sheet가 있으면 이를 적용하고 설비 정의에 없는 회로가 들어오면 정의를 추가 (GT1 설비 정의 -> 기존 F3 설비 정의의 순서)
+		//첫번째 중계기 일람표에 설비 정의 Sheet가 없으면 기존 설비 정의를 적용 후 설비 정의에 없는 회로가 들어오면 정의를 추가 (기존 F3 설비 -> GT1 설비 정의의 순서)
+		//무조건 GT1 설비를 적용하려면 ProcessDeviceTable 처리 전에 모든 중계기 일람표 파일을 열어서 그 중 설비 정의 Sheet 정보를 얻어온 후 ProcessDeviceTable를 처리해야 하는데
+		//그렇게 하면 중계기 일람표를 두번씩 Open해야 해서 처리 시간이 두배로 걸리므로 일단은 이렇게 처리
 		if (!m_bIsComparedData && !bEIInit)
 		{
 			if (theApp.m_spInputEquipManager)
@@ -1212,7 +1216,7 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	{
 		CString strNewType = g_strEquipTypeString[nType];
 		CString strLog;
-		strLog.Format(_T("[%s ID - %d : %s가 설비 정의에 없어 새로 추가됩니다.]"), strNewType, nWholeID, strEquipName);
+		strLog.Format(_T("[%s ID - %d : %s이(가) 설비 정의에 없어 새로 추가됩니다.]"), strNewType, nWholeID, strEquipName);
 		GF_AddLog(strLog);
 	}
 	//20240408 GBM end
@@ -15919,8 +15923,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	char szStrBuff[256] = { 0 };
  	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
  
-	//20240305 GBM start - 입력타입 개수 증설 (17 -> 100)
-#if 1
+	//20240429 GBM start - 설비 정의(입력타입, 출력타입) 개수 증설 (17 -> 100)
+
  	/************************************************************************/
  	/* 입력타입    0~ 99 : 100개 글자수 32                                                          */
  	/************************************************************************/
@@ -15949,37 +15953,6 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		strName.ReleaseBuffer();
  	}
  	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
-#else
-	/************************************************************************/
-	/* 입력타입    0~ 16 : 17개 글자수 32                                                          */
-	/************************************************************************/
-	spRefManager = m_spRefInputEquipManager;
-	if (spRefManager == nullptr)
-		return 0;
-	memset(pMsgBuff + uMsgOffset, 0, (32 * 17));
-
-	pos = spRefManager->GetHeadPosition();
-	while (pos)
-	{
-		pEquip = spRefManager->GetNext(pos);
-		if (pEquip == nullptr)
-			continue;
-		strName = pEquip->GetEquipName();
-		memset(szStrBuff, 0, 256);
-		nSize = GF_Unicode2ASCII(strName.GetBuffer(), szStrBuff, 256);
-		nSize += 1;
-		if (nSize >= 32)
-		{
-			nSize = 32;
-			szStrBuff[31] = 0;
-		}
-		nCopyPos = pEquip->GetEquipID() * 32;
-		memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
-		strName.ReleaseBuffer();
-	}
-	uMsgOffset += (32 * 17);
-#endif
-	//20240305 GBM end
  
  	/************************************************************************/
  	/* 출력타입 - 연동정지 0~ 99 : 100개 글자수 32                                                             */
@@ -16011,7 +15984,10 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		strName.ReleaseBuffer();
  	}
  	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
+
+	//20240429 GBM end
  
+	// 펌프 (최대 128개)
  	if(m_spPump == nullptr)
  		return 0;
  	memset(pMsgBuff + uMsgOffset,0,(32 * 128));
@@ -16105,6 +16081,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
  	}
  	uMsgOffset += (32 * 17);
+
  	return uMsgOffset;
  }
 

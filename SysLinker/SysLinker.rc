@@ -2503,6 +2503,8 @@ END
 
 IDR_RIBBON              RT_RIBBON_XML           "res\\ribbon.mfcribbon-ms"
 
+IDR_RIBBON_EN           RT_RIBBON_XML           "res\\ribbon1.mfcribbon-ms"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

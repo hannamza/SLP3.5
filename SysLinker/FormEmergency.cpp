@@ -375,12 +375,38 @@ int CFormEmergency::DataDelete()
 		return 0;
 	}
 	spManager->RemoveEmergency(pData->GetEmID());
+
+	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+	int nNum = pData->GetEmID();
+	CString strRemarks = pData->GetEmName();
+	CString strCommContent = pData->GetEmAddr();
+	CString strWin32AppProjectName = theApp.m_pFasSysData->GetPrjName();
+	CString strMsg1 = _T("");
+	CString strMsg2 = _T("");
+	BOOL bRet = FALSE;
+
+	bRet = CNewExcelManager::Instance()->UpdateOneEBInfo(nNum, _T(""), _T(""), strWin32AppProjectName);
+	if (bRet)
+	{
+		strMsg1.Format(_T("The emergency broadcast [ID : %d, Name : %s, Address : %s] has been successfully deleted from the module table file."), nNum, strRemarks, strCommContent);
+		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에서 삭제하는 데에 성공했습니다."), nNum, strRemarks, strCommContent);
+	}
+	else
+	{
+		strMsg1.Format(_T("Deleting the emergency broadcast [ID : %d, Name : %s, Address : %s] from the module table file failed."), nNum, strRemarks, strCommContent);
+		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에서 삭제하는 데에 실패했습니다."), nNum, strRemarks, strCommContent);
+	}
+
+	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+	GF_AddLog(strMsg2);
+	//20240502 GBM end
 	
 	delete pData;
 	pData = nullptr;
 	pDB->CommitTransaction();
 	InitData();
 	//AfxMessageBox(L"데이터를 삭제하는데 성공 했습니다.");
+
 	return 1;
 }
 
@@ -534,6 +560,32 @@ int CFormEmergency::DataAdd()
 	// 리스트 컨트롤에 포커스를 맞춥니다
 	m_ctrlList.SetFocus();
 	AfxMessageBox(L"비상방송 정보를 추가하는데 성공 했습니다.");
+
+	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+	int nNum = pData->GetEmID();
+	CString strRemarks = pData->GetEmName();
+	CString strCommContent = pData->GetEmAddr();
+	CString strWin32AppProjectName = theApp.m_pFasSysData->GetPrjName();
+	CString strMsg1 = _T("");
+	CString strMsg2 = _T("");
+	BOOL bRet = FALSE;
+
+	bRet = CNewExcelManager::Instance()->UpdateOneEBInfo(nNum, strRemarks, strCommContent, strWin32AppProjectName);
+	if (bRet)
+	{
+		strMsg1.Format(_T("The new emergency broadcast [ID : %d, Name : %s, Address : %s] has been successfully added to the module table file."), nNum, strRemarks, strCommContent);
+		strMsg2.Format(_T("새 비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 추가하는 데에 성공했습니다."), nNum, strRemarks, strCommContent);
+	}
+	else
+	{
+		strMsg1.Format(_T("Adding the emergency broadcast [ID : %d, Name : %s, Address : %s] to the module table file failed."), nNum, strRemarks, strCommContent);
+		strMsg2.Format(_T("새 비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 추가하는 데에 실패했습니다."), nNum, strRemarks, strCommContent);
+	}
+
+	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+	GF_AddLog(strMsg2);
+	//20240502 GBM end
+
 	return 1;
 }
 
@@ -644,6 +696,32 @@ int CFormEmergency::DataSave()
 	m_ctrlList.SetItemText(nIdx, 1, pData->GetEmName());
 	m_ctrlList.SetItemText(nIdx, 2, pData->GetEmAddr());
 	m_ctrlList.SetItemData(nIdx, (DWORD_PTR)pData);
+
+	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+	int nNum = pData->GetEmID();
+	CString strRemarks = pData->GetEmName();
+	CString strCommContent = pData->GetEmAddr();
+	CString strWin32AppProjectName = theApp.m_pFasSysData->GetPrjName();
+	CString strMsg1 = _T("");
+	CString strMsg2 = _T("");
+	BOOL bRet = FALSE;
+
+	bRet = CNewExcelManager::Instance()->UpdateOneEBInfo(nNum, strRemarks, strCommContent, strWin32AppProjectName);
+	if (bRet)
+	{
+		strMsg1.Format(_T("The new emergency broadcast [ID : %d, Name : %s, Address : %s] has been successfully modified in the module table file."), nNum, strRemarks, strCommContent);
+		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 수정하는 데에 성공했습니다."), nNum, strRemarks, strCommContent);
+	}
+	else
+	{
+		strMsg1.Format(_T("Failed to modify the emergency broadcast [ID : %d, Name : %s, Address : %s] in the module table file failed."), nNum, strRemarks, strCommContent);
+		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 수정하는 데에 실패했습니다."), nNum, strRemarks, strCommContent);
+	}
+
+	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
+	GF_AddLog(strMsg2);
+	//20240502 GBM end
+
 	return 1;
 }
 //

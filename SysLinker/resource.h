@@ -105,6 +105,7 @@
 #define IDS_EXPLORER                    305
 #define IDS_EDIT_MENU                   306
 #define IDR_RIBBON                      307
+#define IDR_RIBBON_EN                   308
 #define IDD_FORMPATTERN                 311
 #define IDB_WRITELARGE                  312
 #define IDD_FORMEMERGENCY               313

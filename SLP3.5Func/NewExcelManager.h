@@ -39,9 +39,12 @@ public:
 	BOOL UpdateEquipmentInfo(CString strWin32AppProjectName);
 
 	// 설비 정의 추가 시 GT1 프로젝트라면 중계기 일람표 설비 정의에도 적용
-	BOOL AddOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName);
+	BOOL UpdateOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName);
 
 	// 중계기 일람표 갱신 시 새 중계기 일람표 프로젝트 폴더에 복사
 	BOOL CopyModuleTable(CStringList * pStrList, CString strWin32AppProjectName);
+
+	// 비상방송 편집 시 중계기 일람표에 적용 (F3, GT1이든 상관없음)
+	BOOL UpdateOneEBInfo(int nNum, CString strRemarks, CString strCommContent, CString strWin32AppProjectName);
 };
 

@@ -1178,5 +1178,8 @@
     <None Include="res\dropcopy.cur">
       <Filter>리소스 파일</Filter>
     </None>
+    <None Include="res\ribbon1.mfcribbon-ms">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>

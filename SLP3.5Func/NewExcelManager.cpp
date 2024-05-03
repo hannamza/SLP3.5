@@ -329,7 +329,7 @@ BOOL CNewExcelManager::UpdateEquipmentInfo(CString strWin32AppProjectName)
 	return TRUE;
 }
 
-BOOL CNewExcelManager::AddOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName)
+BOOL CNewExcelManager::UpdateOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName)
 {
 	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
@@ -436,6 +436,71 @@ BOOL CNewExcelManager::CopyModuleTable(CStringList * pStrList, CString strWin32A
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
 			return FALSE;
 		}
+	}
+
+	return TRUE;
+}
+
+BOOL CNewExcelManager::UpdateOneEBInfo(int nNum, CString strRemarks, CString strCommContent, CString strWin32AppProjectName)
+{
+	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
+	CString strProjectName;
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+
+	CString strModuleTablePath;
+	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+
+	//중계기 일람표 리스트 얻음
+	std::vector<CString> strModuleTableFileList;
+	strModuleTableFileList = CCommonFunc::GetFullPathFileListIntheFolder(strModuleTablePath, strProjectName);
+
+	int nModuleTableCount = -1;
+	nModuleTableCount = strModuleTableFileList.size();
+
+	if (nModuleTableCount == 0)
+	{
+		Log::Trace("There is no Module Table file in the [%s] folder.", CCommonFunc::WCharToChar(strModuleTablePath.GetBuffer(0)));
+		return FALSE;
+	}
+
+	for (int i = 0; i < nModuleTableCount; i++)
+	{
+		CString strModuleTableFile;
+		strModuleTableFile = strModuleTableFileList[i];
+
+		CExcelWrapper xls;
+		if (xls.Open(strModuleTableFile) == false)
+		{
+			Log::Trace("Failed to open file [%s].", CCommonFunc::WCharToChar(strModuleTableFile.GetBuffer(0)));
+			return FALSE;
+		}
+
+		int nSheetCount = 0;
+		nSheetCount = xls.GetSheetCount();
+
+		for (int j = 0; j < nSheetCount; j++)
+		{
+			if (xls.SetWorkSheetChange(j + 1) == FALSE)
+				continue;
+
+			CString strSheetName = _T("");
+			strSheetName = xls.GetSheetName(j + 1);
+
+			if (strSheetName.CompareNoCase(_T("eb")) == 0)
+			{
+				int nCol = EXCEL_ENUM_EB_INFO::COLUMN_REMARKS;
+				int nRow = nNum + EXCEL_ENUM_EB_INFO::ROW_HEADER;
+				xls.SetItemText(nRow, nCol, strRemarks);
+
+				nCol = EXCEL_ENUM_EB_INFO::COLUMN_COMM_CONTENT;
+				xls.SetItemText(nRow, nCol, strCommContent);
+
+				break;
+			}
+		}
+
+		xls.SavaAs(strModuleTableFile);
+		xls.Close();
 	}
 
 	return TRUE;
