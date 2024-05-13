@@ -746,7 +746,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 					else
 					{
 						GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
-						Log::Trace("Failed to input facility information into DB!");
+						Log::Trace("Failed to input Equipment information into DB!");
 					}
 				}
 

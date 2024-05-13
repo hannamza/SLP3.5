@@ -376,7 +376,7 @@ int CFormEmergency::DataDelete()
 	}
 	spManager->RemoveEmergency(pData->GetEmID());
 
-	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
 	CString strCommContent = pData->GetEmAddr();
@@ -399,7 +399,7 @@ int CFormEmergency::DataDelete()
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
 	GF_AddLog(strMsg2);
-	//20240502 GBM end
+	//20240507 GBM end
 	
 	delete pData;
 	pData = nullptr;
@@ -561,7 +561,7 @@ int CFormEmergency::DataAdd()
 	m_ctrlList.SetFocus();
 	AfxMessageBox(L"비상방송 정보를 추가하는데 성공 했습니다.");
 
-	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
 	CString strCommContent = pData->GetEmAddr();
@@ -584,7 +584,7 @@ int CFormEmergency::DataAdd()
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
 	GF_AddLog(strMsg2);
-	//20240502 GBM end
+	//20240507 GBM end
 
 	return 1;
 }
