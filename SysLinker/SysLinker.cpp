@@ -1148,6 +1148,30 @@ void CSysLinkerApp::OnHomeProjectNew()
 		Log::Trace("Project Closed!");
 	}
 
+	//20240516 GBM start - 기본 DB가 프로젝트 생성 시 설비 정의가 중계기 일람표 상 설비 정의로 overwrite되므로 기본 설비 정의 엑셀 파일을 두어서 새 프로젝트 생성 시마다 초기화
+	CString strEquipmentDefinitionFile = _T("");
+	CString strFolder = _T("");
+	CString strFile = _T("");
+	std::vector<CString> fileVec;
+
+	strFolder.Format(_T("C:\\Ficon3\\%s"), F3_PRJ_DIR_DATABASE);
+	strFile.Format(_T("%s"), EQUIPMENT_INFO_EXCEL_FILE_NAME);
+	fileVec = CCommonFunc::GetFullPathFileListIntheFolder(strFolder, strFile);	// 경로를 얻는 매서드를 파일이 존재하는 지 여부로 활용
+	strEquipmentDefinitionFile.Format(_T("%s\\%s"), strFolder, strFile);
+	if (fileVec.size() > 0)
+	{
+		InitEquipmentInfoTable(strEquipmentDefinitionFile);
+	}
+	else
+	{
+		CString strMsg = _T("");
+		strMsg.Format(_T("기본 설비 정의 파일 [%s]이 없어서 적용하지 않습니다."), strEquipmentDefinitionFile);
+		GF_AddLog(strMsg);
+		strMsg.Format(_T("The default equipmemt definition file [%s] does not exist and will not be applied."), strEquipmentDefinitionFile);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+	}
+	//20240516 GBM end
+
 	CPropSheetNewProject psNewProject(L"New Project");
 	if (m_pFasSysData == nullptr)
 	{
@@ -3795,4 +3819,22 @@ void CSysLinkerApp::InsertDebug(CString strLog)
 	return;
 #endif
 
+}
+
+BOOL CSysLinkerApp::InitEquipmentInfoTable(CString strEquipmentDefinitionFile)
+{
+	CExcelWrapper xls;
+	if (!xls.Open(strEquipmentDefinitionFile))
+	{
+		return FALSE;
+	}
+
+	CNewExcelManager::Instance()->ParsingEquipmentInfo(&xls);
+	CNewDBManager::Instance()->SetDBAccessor(m_pMainDb);
+	CNewDBManager::Instance()->DeleteEquipmentCircuitInfoFromEquipmentInfoTable();
+	CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
+	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
+	xls.Close();
+	
+	return TRUE;
 }

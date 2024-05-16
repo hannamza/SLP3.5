@@ -213,6 +213,26 @@ BOOL CNewDBManager::InsertDataIntoEquipmentInfoTable()
 	return TRUE;
 }
 
+BOOL CNewDBManager::DeleteEquipmentCircuitInfoFromEquipmentInfoTable()
+{
+	//입력타입, 설비명, 출력타입, 출력내용만 중계기 일람표에서 작성되므로 이 내용만 지움
+	CString strQuery = _T("DELETE TB_EQUIP_MST WHERE EQ_TYPE >= 1 AND EQ_TYPE <= 4");
+	m_pDB->BeginTransaction();
+	if (m_pDB->ExecuteSql(strQuery))
+	{
+		Log::Trace("[%s] Query Succeeded!");
+	}
+	else
+	{
+		Log::Trace("[%s] Query Failed!");
+		m_pDB->RollbackTransaction();
+		return FALSE;
+	}
+	m_pDB->CommitTransaction();
+
+	return TRUE;
+}
+
 BOOL CNewDBManager::CheckAndCreateGT1DBTables()
 {
 	for (int nTable = TB_FACP_TYPE; nTable <= TB_PROJECT_INFO; nTable++)

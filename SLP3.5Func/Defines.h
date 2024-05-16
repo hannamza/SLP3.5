@@ -54,6 +54,9 @@
 // 관리자 모드 (ROM 인증 모드) Password
 #define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!");
 
+// 기본 DB 설비 회로 정의 파일 이름
+#define EQUIPMENT_INFO_EXCEL_FILE_NAME	_T("equipment.xlsx")
+
 // 수신기 타입
 enum {
 	F3 = 1,

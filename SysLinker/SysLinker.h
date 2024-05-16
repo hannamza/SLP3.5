@@ -323,6 +323,8 @@ public:
 	void InsertDebug(CString strLog);
 	afx_msg void OnErrorCheck();
 	afx_msg void OnUpdateErrorCheck(CCmdUI *pCmdUI);
+
+	BOOL InitEquipmentInfoTable(CString strEquipmentDefinitionFile);	//20240516 GBM - 기본 DB의 설비 정의를 초기화
 };
 
 extern CSysLinkerApp theApp;

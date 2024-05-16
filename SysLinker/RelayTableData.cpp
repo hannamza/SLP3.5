@@ -713,44 +713,49 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		nSheetCnt = xls.GetSheetCount();
 
 		//20240408 GBM start - 중계기 일람표를 열면 가장 먼저 설비 정의를 찾아서 먼저 파싱 후 기본 DB에 넣은 후 메모리 적용을 먼저한 후에 아래에서 설비 정의에 따른 회로 정보 처리가 이루어지도록 함
-		for (int nSheet = 0; nSheet < nSheetCnt; nSheet++)
+		//첫번째 수신기가 GT1이면 중계기 일람표 상의 설비 정의를 먼저 적용하고 이후 수신기가 F3 수신기라면 새 설비 정의를 추가하는 과정에서 F3 설비 정의를 추가하도록 하고,
+		//첫번째 수신기가 F3이면 이미 DB 정보로 설비 정보를 초기화한 이후이므로 이후 수신기가 GT1 수신기라도 파싱하지 않고 새 설비 정의를 추가하는 과정에서 추가하도록 함
+		if (!bEIInit)	
 		{
-			if (xls.SetWorkSheetChange(nSheet + 1) == FALSE)
-				continue;
-			strSheetName = xls.GetSheetName(nSheet + 1);
-
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_EQUIPMENT_INFO) == 0)
+			for (int nSheet = 0; nSheet < nSheetCnt; nSheet++)
 			{
-				if (CNewExcelManager::Instance()->bExistEI == FALSE)
-				{
-					CNewExcelManager::Instance()->bExistEI = TRUE;
-					BOOL bRet = FALSE;
-					bRet = CNewExcelManager::Instance()->ParsingEquipmentInfo(&xls);
-					if (!bRet)
-					{
-						Log::Trace("Equipment Info Excel Parsing Failed!");
-					}
-				}
-				
-				//중계기 일람표 변경에 의한 비교 데이터라면 DB에 적용하는 행정은 하지 않음
-				if (!m_bIsComparedData && !bEIInit)
-				{
-					CNewDBManager::Instance()->SetDBAccessor(theApp.m_pMainDb);
-					BOOL bRet = FALSE;
-					bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
-					if (bRet)
-					{
-						GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
-						Log::Trace("Equipment information was successfully entered into the DB!");
-					}
-					else
-					{
-						GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
-						Log::Trace("Failed to input Equipment information into DB!");
-					}
-				}
+				if (xls.SetWorkSheetChange(nSheet + 1) == FALSE)
+					continue;
+				strSheetName = xls.GetSheetName(nSheet + 1);
 
-				break;
+				if (strSheetName.CompareNoCase(EXCEL_SHEET_EQUIPMENT_INFO) == 0)
+				{
+					if (CNewExcelManager::Instance()->bExistEI == FALSE)
+					{
+						CNewExcelManager::Instance()->bExistEI = TRUE;
+						BOOL bRet = FALSE;
+						bRet = CNewExcelManager::Instance()->ParsingEquipmentInfo(&xls);
+						if (!bRet)
+						{
+							Log::Trace("Equipment Info Excel Parsing Failed!");
+						}
+					}
+
+					//중계기 일람표 변경에 의한 비교 데이터라면 DB에 적용하는 행정은 하지 않음
+					if (!m_bIsComparedData)
+					{
+						CNewDBManager::Instance()->SetDBAccessor(theApp.m_pMainDb);
+						BOOL bRet = FALSE;
+						bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
+						if (bRet)
+						{
+							GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
+							Log::Trace("Equipment information was successfully entered into the DB!");
+						}
+						else
+						{
+							GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
+							Log::Trace("Failed to input Equipment information into DB!");
+						}
+					}
+
+					break;
+				}
 			}
 		}
 

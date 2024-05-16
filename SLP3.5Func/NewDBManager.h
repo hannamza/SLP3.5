@@ -26,6 +26,9 @@ public:
 	// 설비 정의 데이터 insert
 	BOOL InsertDataIntoEquipmentInfoTable();
 
+	// 기본 DB에 기본 설비 정의 (equipment.xlsx)를 적용하기 전 기존 설비 회로 정의 (입력타입, 설비명, 출력타입, 출력내용) 삭제
+	BOOL DeleteEquipmentCircuitInfoFromEquipmentInfoTable();
+
 	// GT1 추가 Table 존재 여부 확인 후 없으면 Create
 	BOOL CheckAndCreateGT1DBTables();
 
