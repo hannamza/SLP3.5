@@ -220,11 +220,11 @@ BOOL CNewDBManager::DeleteEquipmentCircuitInfoFromEquipmentInfoTable()
 	m_pDB->BeginTransaction();
 	if (m_pDB->ExecuteSql(strQuery))
 	{
-		Log::Trace("[%s] Query Succeeded!");
+		Log::Trace("[%s] Query Succeeded!", strQuery);
 	}
 	else
 	{
-		Log::Trace("[%s] Query Failed!");
+		Log::Trace("[%s] Query Failed!", strQuery);
 		m_pDB->RollbackTransaction();
 		return FALSE;
 	}
