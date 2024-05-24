@@ -74,6 +74,130 @@
 #include "DlgPatternProperty.h"
 #include "../Version/Version.h"
 
+UINT ThreadCloseProject(LPVOID pParam)
+{
+	BOOL bRet = FALSE;
+	theApp.m_bThreadSucceeded = TRUE;
+
+	bRet = theApp.CloseProject();
+	if (!bRet)
+		theApp.m_bThreadSucceeded = FALSE;
+
+	theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(theApp.m_hThreadHandle);
+	return 0;
+}
+
+UINT ThreadGetDefaultEquipmentDefinition(LPVOID pParam)
+{
+	//20240516 GBM start - 기본 DB가 프로젝트 생성 시 설비 정의가 중계기 일람표 상 설비 정의로 overwrite되므로 기본 설비 정의 엑셀 파일을 두어서 새 프로젝트 생성 시마다 초기화
+	theApp.m_bThreadSucceeded = TRUE;
+	CString strEquipmentDefinitionFile = _T("");
+	CString strFolder = _T("");
+	CString strFile = _T("");
+	std::vector<CString> fileVec;
+	BOOL bRet = FALSE;
+
+	strFolder.Format(_T("C:\\Ficon3\\%s"), F3_PRJ_DIR_DATABASE);
+	strFile.Format(_T("%s"), EQUIPMENT_INFO_EXCEL_FILE_NAME);
+	fileVec = CCommonFunc::GetFullPathFileListIntheFolder(strFolder, strFile);	// 경로를 얻는 매서드를 파일이 존재하는 지 여부로 활용
+	strEquipmentDefinitionFile.Format(_T("%s\\%s"), strFolder, strFile);
+	theApp.m_strEquipmentDefinitionFile = strEquipmentDefinitionFile;
+	if (fileVec.size() > 0)
+	{
+		bRet = theApp.InitEquipmentInfoTable(strEquipmentDefinitionFile);
+		if (!bRet)
+		{
+			theApp.m_bThreadSucceeded = FALSE;
+
+			CString strMsg = _T("");
+			strMsg.Format(_T("기본 설비 정의 파일 [%s] 열기에 실패했습니다."), strEquipmentDefinitionFile);
+			GF_AddLog(strMsg);
+			strMsg.Format(_T("Failed to open default equipment definition file [%s]."), strEquipmentDefinitionFile);
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		}
+	}
+	else
+	{
+		theApp.m_bThreadSucceeded = FALSE;
+
+		CString strMsg = _T("");
+		strMsg.Format(_T("기본 설비 정의 파일 [%s]이 없어서 적용하지 않습니다."), strEquipmentDefinitionFile);
+		GF_AddLog(strMsg);
+		strMsg.Format(_T("The default equipmemt definition file [%s] does not exist and will not be applied."), strEquipmentDefinitionFile);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));	
+	}
+	
+	theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(theApp.m_hThreadHandle);
+	//20240516 GBM end
+
+	return 0;
+}
+
+UINT ThreadCreateNewProject(LPVOID pParam)
+{
+	theApp.m_bThreadSucceeded = TRUE;
+	if (theApp.m_pFasSysData == nullptr)
+	{
+		GF_AddLog(L"프로젝트 생성에 실패 했습니다.");
+		theApp.CloseProject();
+		theApp.m_bThreadSucceeded = FALSE;
+		theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
+		SetEvent(theApp.m_hThreadHandle);
+		return 0;
+	}
+
+	/************************************************************************/
+	/*
+	1. Project Path 설정 :
+	- 폴더 생성
+	- File 생성
+	2. Database 생성
+	- Database 생성
+	- Table 및 데이터 생성
+	3. View 설정
+	- DialogBar : Input , output ,
+
+	*/
+	/************************************************************************/
+	if (theApp.CreateProject() <= 0)
+	{
+		GF_AddLog(L"프로젝트를 생성하는데 실패 했습니다.");
+		theApp.CloseProject();
+		theApp.m_bThreadSucceeded = FALSE;
+	}
+
+	theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(theApp.m_hThreadHandle);
+	return 0;
+}
+
+UINT ThreadOpenProjectDatabase(LPVOID pParam)
+{
+	theApp.m_bThreadSucceeded = TRUE;
+	if (theApp.OpenProjectDatabase(theApp.m_pFasSysData) < 0)
+	{
+		GF_AddLog(L"프로젝트 데이터베이스를 여는데 실패 했습니다.");
+		theApp.m_bThreadSucceeded = FALSE;
+		theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
+		SetEvent(theApp.m_hThreadHandle);
+		return 0;
+	}
+
+	if (theApp.m_pFasSysData->LoadProjectDatabase() == 0)
+	{
+		GF_AddLog(L"프로젝트 데이터베이스에서 데이터를 가져오는 데에 실패 했습니다.");
+		theApp.m_bThreadSucceeded = FALSE;
+	}
+
+	theApp.m_pFasSysData->SetProjectOpened(TRUE);
+
+	theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(theApp.m_hThreadHandle);
+	return 0;
+}
+
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 ST_VIEWFORM_SELECTITEM g_stViewSelectItem;
 class CAboutDlg : public CDialogEx
@@ -268,10 +392,6 @@ BOOL CSysLinkerApp::InitInstance()
 	AfxEnableControlContainer();
 
 	EnableTaskbarInteraction();
-
-	//20240118 GBM start - github test
-	int a = 0;
-	//20240118 GBM end
 
 	// RichEdit 컨트롤을 사용하려면  AfxInitRichEdit2()가 있어야 합니다.	
 	// AfxInitRichEdit2();
@@ -1122,6 +1242,39 @@ void CSysLinkerApp::OnHomeProjectClose()
 	if (AfxMessageBox(L"현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 
+	//20240524 GBM start - 스레드로 전환
+#if 1
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadCloseProject, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+		Log::Trace("The project was successfully closed.");
+	}
+	else
+	{
+		GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+		Log::Trace("Failed to close the project.");
+	}
+
+	m_pProgressBarDlg = nullptr;
+
+	CString strName = _T("");
+	AfxGetMainWnd()->SetWindowTextW(strName);
+#else
 	CloseProject();
 
 	CString strName = _T("");
@@ -1129,6 +1282,8 @@ void CSysLinkerApp::OnHomeProjectClose()
 
 	GF_AddLog(L"프로젝트를 닫았습니다.");
 	Log::Trace("Project Closed!");
+#endif
+	//20240524 GBM end
 }
 
 void CSysLinkerApp::OnHomeProjectNew()
@@ -1140,37 +1295,75 @@ void CSysLinkerApp::OnHomeProjectNew()
 	{
 		if (AfxMessageBox(L"새 프로젝트를 생성하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
+
+		//20240524 GBM start - 스레드로 전환
+#if 1
+		m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+		m_bThreadSucceeded = FALSE;
+		CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+		CProgressBarDlg dlg(strMsg);
+		m_pProgressBarDlg = &dlg;
+
+		CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadCloseProject, this);
+		dlg.DoModal();
+
+		DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+		if (dw != WAIT_OBJECT_0)
+		{
+			Log::Trace("스레드 대기 실패! dw : %d", dw);
+		}
+
+		if (m_bThreadSucceeded)
+		{
+			GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+			Log::Trace("The project was successfully closed.");
+		}
+		else
+		{
+			GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+			Log::Trace("Failed to close the project.");
+		}
+
+		m_pProgressBarDlg = nullptr;
+
+		CString strName = _T("");
+		AfxGetMainWnd()->SetWindowTextW(strName);
+		//
+#else
 		CloseProject();
 
 		CString strName = _T("");
 		AfxGetMainWnd()->SetWindowTextW(strName);
-		GF_AddLog(L"프로젝트를 닫았습니다.");
-		Log::Trace("Project Closed!");
+ 		GF_AddLog(L"프로젝트를 닫았습니다.");
+ 		Log::Trace("Project Closed!");
+#endif
+		//20240524 GBM end
 	}
 
-	//20240516 GBM start - 기본 DB가 프로젝트 생성 시 설비 정의가 중계기 일람표 상 설비 정의로 overwrite되므로 기본 설비 정의 엑셀 파일을 두어서 새 프로젝트 생성 시마다 초기화
-	CString strEquipmentDefinitionFile = _T("");
-	CString strFolder = _T("");
-	CString strFile = _T("");
-	std::vector<CString> fileVec;
+	//20240524 GBM start - 스레드로 전환
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("기본 설비 정의를 로드 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
 
-	strFolder.Format(_T("C:\\Ficon3\\%s"), F3_PRJ_DIR_DATABASE);
-	strFile.Format(_T("%s"), EQUIPMENT_INFO_EXCEL_FILE_NAME);
-	fileVec = CCommonFunc::GetFullPathFileListIntheFolder(strFolder, strFile);	// 경로를 얻는 매서드를 파일이 존재하는 지 여부로 활용
-	strEquipmentDefinitionFile.Format(_T("%s\\%s"), strFolder, strFile);
-	if (fileVec.size() > 0)
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadGetDefaultEquipmentDefinition, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
 	{
-		InitEquipmentInfoTable(strEquipmentDefinitionFile);
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
 	}
-	else
+
+	if (m_bThreadSucceeded)
 	{
-		CString strMsg = _T("");
-		strMsg.Format(_T("기본 설비 정의 파일 [%s]이 없어서 적용하지 않습니다."), strEquipmentDefinitionFile);
-		GF_AddLog(strMsg);
-		strMsg.Format(_T("The default equipmemt definition file [%s] does not exist and will not be applied."), strEquipmentDefinitionFile);
-		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		GF_AddLog(L"기본 설비 정의 로드에 성공했습니다.");
+		Log::Trace("Loading of the default equipment definition was successful.");
 	}
-	//20240516 GBM end
+
+	m_pProgressBarDlg = nullptr;
+	//20240524 GBM end
 
 	CPropSheetNewProject psNewProject(L"New Project");
 	if (m_pFasSysData == nullptr)
@@ -1220,6 +1413,55 @@ void CSysLinkerApp::OnHomeProjectNew()
 		return;
 	}
 	m_pFasSysData = psNewProject.GetFasSysData();
+
+	//20240523 GBM start - 아래 행정을 스레드로 대체
+#if 1
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	strMsg = _T("        새 프로젝트를 생성 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg2(strMsg);
+	m_pProgressBarDlg = &dlg2;
+
+	CWinThread* pThread2 = AfxBeginThread((AFX_THREADPROC)ThreadCreateNewProject, this);
+	dlg2.DoModal();
+
+	DWORD dw2 = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw2 != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"새 프로젝트 생성에 성공했습니다.");
+		Log::Trace("New project creation was successful.");
+	}
+	else
+	{
+		GF_AddLog(L"새 프로젝트 생성에 실패했습니다.");
+		Log::Trace("New project creation was failed.");
+	}
+
+	CMainFrame * pMainWnd = nullptr;
+	pMainWnd = (CMainFrame *)AfxGetMainWnd();
+
+	if (pMainWnd)
+		pMainWnd->SetRelayTable(m_pFasSysData);
+
+	CSysLinkerView * pMakLinkView = (CSysLinkerView*)GetSysLinkerView(m_pTempleMakeLink);
+	pMakLinkView->SetRelayTableData(m_pFasSysData);
+	m_pFasSysData->SetProjectOpened(TRUE);
+
+	CString strName;
+	strName.Format(L"프로젝트명 - %s", m_pFasSysData->GetPrjName());
+	AfxGetMainWnd()->SetWindowTextW(strName);
+
+	GF_AddLog(L"[%s] 프로젝트를 생성했습니다.", m_pFasSysData->GetPrjName());
+	Log::Trace("[%s] Project Created!", CCommonFunc::WCharToChar(m_pFasSysData->GetPrjName().GetBuffer(0)));
+
+	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
+
+#else
 	if (m_pFasSysData == nullptr)
 	{
 		AfxMessageBox(L"프로젝트 생성에 실패 했습니다.");
@@ -1265,6 +1507,9 @@ void CSysLinkerApp::OnHomeProjectNew()
 	Log::Trace("[%s] Project Created!", CCommonFunc::WCharToChar(m_pFasSysData->GetPrjName().GetBuffer(0)));
 
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
+
+#endif
+	//20240523 GBM end
 }
 
 void CSysLinkerApp::OnHomeProjectOpen()
@@ -1275,12 +1520,49 @@ void CSysLinkerApp::OnHomeProjectOpen()
 	{
 		if (AfxMessageBox(L"프로젝트 열기를 하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
+
+		//20240524 GBM start - 스레드로 전환
+#if 1
+		m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+		m_bThreadSucceeded = FALSE;
+		CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+		CProgressBarDlg dlg(strMsg);
+		m_pProgressBarDlg = &dlg;
+
+		CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadCloseProject, this);
+		dlg.DoModal();
+
+		DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+		if (dw != WAIT_OBJECT_0)
+		{
+			Log::Trace("스레드 대기 실패! dw : %d", dw);
+		}
+
+		if (m_bThreadSucceeded)
+		{
+			GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+			Log::Trace("The project was successfully closed.");
+		}
+		else
+		{
+			GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+			Log::Trace("Failed to close the project.");
+		}
+
+		m_pProgressBarDlg = nullptr;
+
+		CString strName = _T("");
+		AfxGetMainWnd()->SetWindowTextW(strName);
+		//
+#else
 		CloseProject();
 
 		CString strName = _T("");
 		AfxGetMainWnd()->SetWindowTextW(strName);
 		GF_AddLog(L"프로젝트를 닫았습니다.");
 		Log::Trace("Project Closed!");
+#endif
+		//20240524 GBM end
 	}
 
 	CDlgLogIn dlg(m_pMainDb);
@@ -1402,7 +1684,7 @@ void CSysLinkerApp::OnHomeProjectSave()
 	// 4. 
 	m_pFasSysData->SetChangeFlag(FALSE);
 	GF_AddLog(L"프로젝트를 저장하는데 성공했습니다");
-	AfxMessageBox(L"프로젝트를 저장하는데 성공했습니다");
+	//AfxMessageBox(L"프로젝트를 저장하는데 성공했습니다");
 
 }
 
@@ -2659,6 +2941,7 @@ int CSysLinkerApp::CreateProjectDatabase()
 	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
 	if (bRet)
 	{
+		BOOL bRet = FALSE;
 		bRet = CNewDBManager::Instance()->CheckAndCreateGT1DBTables();
 		if (bRet)
 		{
@@ -2760,7 +3043,6 @@ int CSysLinkerApp::CreateProjectDatabase()
 				Log::Trace("We failed to save the added equipment definition to the equipment definition sheet in module table file because it was not in the equipment definition sheet.");
 			}
 		}
-		//20240422 GBM end
 	}
 	//20240222 GBM end
 
@@ -3154,6 +3436,35 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 
 	OpenProjectInfoFile(m_pFasSysData , strPrjFullPath, strPrjName);
 	OpenVersionInfoFile(m_pFasSysData, HIWORD(dwVer), LOWORD(dwVer), strPrjFullPath, strPrjName,bVerTemp);
+
+	//20240523 GBM start - 프로젝트 로드 시 가장 시간이 많이 걸리는 아래 행정을 스레드로 대체
+#if 1
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("        프로젝트 DB를 여는 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadOpenProjectDatabase, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"프로젝트 DB 열기에 성공했습니다.");
+		Log::Trace("Successfully opened the project DB.");
+	}
+	else
+	{
+		GF_AddLog(L"프로젝트 DB 열기에 실패했습니다.");
+		Log::Trace("Failed to open project DB.");
+	}
+#else
 	if (OpenProjectDatabase(m_pFasSysData) < 0)
 	{
 		GF_AddLog(L"프로젝트 데이터베이스를 여는데 실패 했습니다.");
@@ -3162,21 +3473,21 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 
 	//20240327 GBM start - DB Open 후 DB에서 데이터를 가져오기 전에 GT1 추가 입력 타입을 추가 -> 중계기 일람표(WEB)에서 회로 관련 설비 정의를 가지고 오기 때문에 이 행정을 하지 않음
 
-// 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
-// 
-// 	BOOL bRet = FALSE;
-// 
-// 	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
-// 	if (bRet)
-// 	{
-// 		GF_AddLog(L"GT1 입력 타입 자동 추가에 성공했습니다.");
-// 		Log::Trace("Inserting a new input type of equipment succeeded!");
-// 	}
-// 	else
-// 	{
-// 		GF_AddLog(L"GT1 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
-// 		Log::Trace("Inserting a new input type of equipment failed!");
-// 	}
+	// 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
+	// 
+	// 	BOOL bRet = FALSE;
+	// 
+	// 	bRet = CNewDBManager::Instance()->CheckAndInsertEquipmentNewInputType();
+	// 	if (bRet)
+	// 	{
+	// 		GF_AddLog(L"GT1 입력 타입 자동 추가에 성공했습니다.");
+	// 		Log::Trace("Inserting a new input type of equipment succeeded!");
+	// 	}
+	// 	else
+	// 	{
+	// 		GF_AddLog(L"GT1 입력 타입 자동 추가에 실패했습니다. 사용 중인 입력 타입을 확인하세요.");
+	// 		Log::Trace("Inserting a new input type of equipment failed!");
+	// 	}
 
 	//20240327 GBM end
 
@@ -3187,6 +3498,8 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 	}
 	m_pFasSysData->SetProjectOpened(TRUE);
 	//GF_AddLog(L"프로젝트를 불러오는데 성공 했습니다.");	//20240424 GBM - 중복 메세지 삭제
+#endif
+	//20240327 GBM end
 
 	return 1;
 }

@@ -9,6 +9,35 @@
 #include "DataFacp.h"
 #include "RelayTableData.h"
 #include "../Common/Utils/YAdoDatabase.h"
+
+UINT ThreadAddAndSaveEquip(LPVOID pParam)
+{
+	CFormEquip* pFE = (CFormEquip*)pParam;
+
+	if (pFE->m_bAdd)
+		pFE->m_bThreadSucceeded = pFE->DataAdd();
+	else
+		pFE->m_bThreadSucceeded = pFE->DataSave();
+
+	pFE->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFE->m_hThreadHandle);
+
+	return 0;
+}
+
+UINT ThreadDeleteEquip(LPVOID pParam)
+{
+	CFormEquip* pFE = (CFormEquip*)pParam;
+
+	pFE->m_bThreadSucceeded = pFE->DataDelete();
+
+	pFE->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFE->m_hThreadHandle);
+
+	return 0;
+}
+
+
 // CFormEquip
 
 enum
@@ -232,10 +261,43 @@ void CFormEquip::OnBnClickedBtnSave()
 // #endif
 	//20240408 GBM end
 
+	//20240524 GBM start - 스레드로 전환
+#if 1
+	UpdateData();
+	
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("설비 정보를 저장 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadAddAndSaveEquip, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"설비 정보 저장에 성공했습니다.");
+		Log::Trace("The equipment information was saved successfully.");
+	}
+	else
+	{
+		GF_AddLog(L"설비 정보 저장에 실패했습니다.");
+		Log::Trace("Failed to save the equipment information.");
+	}
+#else
+	UpdateData();
 	if (m_bAdd)
 		DataAdd();
 	else
 		DataSave();
+#endif
+	//20240524 GBM end
 }
 
 
@@ -264,7 +326,37 @@ void CFormEquip::OnBnClickedBtnDel()
 	if (AfxMessageBox(L"선택된 설비 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 
+	//20240524 GBM start - 스레드로 전환
+#if 1
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("설비 정보를 삭제 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadDeleteEquip, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"설비 정보 삭제에 성공했습니다.");
+		Log::Trace("The equipment information was deleted successfully.");
+	}
+	else
+	{
+		GF_AddLog(L"설비 정보 삭제에 실패했습니다.");
+		Log::Trace("Failed to delete the equipment information.");
+	}
+#else
 	DataDelete();
+#endif
+	//20240524 GBM end
 }
 
 
@@ -518,7 +610,7 @@ int CFormEquip::DataAdd()
 
 	CString strSql;
 	int nID, nType, nSel;
-	UpdateData();
+	//UpdateData();
 	nID = m_nNum;
 	nSel = m_cmbType.GetCurSel();
 	if (nSel < 0)
@@ -616,7 +708,7 @@ int CFormEquip::DataSave()
 	int nCnt;
 	CString strSql;
 	int nID, nType, nSel;
-	UpdateData();
+	//UpdateData();
 	if (m_pCurrentData == nullptr)
 	{
 		nID = m_nNum;

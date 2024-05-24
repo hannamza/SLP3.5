@@ -563,6 +563,8 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	//20240408 GBM start - 설비 정의 메모리/DB 초기화 부분을 중계기 일람표가 여러개 있더라도 한번만 실행
 	BOOL bEIInit = FALSE;
 
+	SetNewEquipmentTypeAdded(FALSE);
+
 	while (pos)
 	{
 		strPath = m_strFileNameList.GetNext(pos);
@@ -1211,10 +1213,10 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	pEq->SetData(nWholeID, nType, strEquipName, strEquipName, L"Basic.bmp");
 	spManager->AddTail(pEq);
 
-	//20240423 GBM start - 새 정의가 추가되었는지 여부
-	if (m_bNewEquipmentTypeAdded == FALSE)
-		m_bNewEquipmentTypeAdded = TRUE;
-	//20240423 GBM end
+	//20240422 GBM start - 새 설비 정의가 추가되면 flag TRUE
+	if (!GetNewEquipmentTypeAdded())
+		SetNewEquipmentTypeAdded(TRUE);
+	//20240422 GBM end
 
 	//20240408 GBM start - 중계기 일람표 상 회로의 설비 정의가 설비 정의 정보에 없을 때 (F3 프로젝트) 설비 정의가 추가되면 여기에서 프로그램 로그창에 표시해서 바로 확인 가능하도록 함
 	if (!m_bIsComparedData && !CNewExcelManager::Instance()->bExistEI)

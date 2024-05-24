@@ -11,6 +11,34 @@
 #include "../Common/Utils/ExcelWrapper.h"
 #include "DataLinked.h"
 #include <algorithm>
+
+UINT ThreadAddAndSaveEB(LPVOID pParam)
+{
+	CFormEmergency* pFE = (CFormEmergency*)pParam;
+	
+	if (pFE->m_bAdd)
+		pFE->m_bThreadSucceeded = pFE->DataAdd();
+	else
+		pFE->m_bThreadSucceeded = pFE->DataSave();
+
+	pFE->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFE->m_hThreadHandle);
+
+	return 0;
+}
+
+UINT ThreadDeleteEB(LPVOID pParam)
+{
+	CFormEmergency* pFE = (CFormEmergency*)pParam;
+
+	pFE->m_bThreadSucceeded = pFE->DataDelete();
+
+	pFE->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFE->m_hThreadHandle);
+
+	return 0;
+}
+
 // CFormEmergency
 
 IMPLEMENT_DYNCREATE(CFormEmergency, CFormView)
@@ -176,7 +204,7 @@ void CFormEmergency::InitData()
 	m_nNum = 0;
 	m_strName = L"";
 	//m_pCurrentData = nullptr;
-	UpdateData(FALSE);
+	//UpdateData(FALSE);
 
 }
 
@@ -196,10 +224,44 @@ void CFormEmergency::OnBnClickedBtnAdd()
 void CFormEmergency::OnBnClickedBtnSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	//20240524 GBM start - 스레드로 전환
+#if 1
+	UpdateData();	// DataAdd(), DataSave()에서 빼냄
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("비상방송 정보를 저장 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadAddAndSaveEB, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"비상방송 정보 저장에 성공했습니다.");
+		Log::Trace("Emergency broadcast information was saved successfully.");
+	}
+	else
+	{
+		GF_AddLog(L"비상방송 정보 저장에 실패했습니다.");
+		Log::Trace("Failed to save emergency broadcast information.");
+	}
+#else
+	UpdateData();	// DataAdd(), DataSave()에서 빼냄
 	if (m_bAdd)
 		DataAdd();
 	else
 		DataSave();
+#endif
+	//20240524 GBM end
 
 	if (AfxGetMainWnd())
 		AfxGetMainWnd()->SendMessage(UWM_DKP_EMERGENCY_REFRESH, DATA_ALL, 0);
@@ -209,7 +271,7 @@ void CFormEmergency::OnBnClickedBtnSave()
 void CFormEmergency::OnBnClickedBtnDel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
 	int nSel = m_ctrlList.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)
 	{
@@ -220,7 +282,39 @@ void CFormEmergency::OnBnClickedBtnDel()
 	if (AfxMessageBox(L"선택된 비상방송 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 
+	//20240524 GBM start - 스레드로 전환
+#if 1
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("비상방송 정보를 삭제 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadDeleteEB, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+		GF_AddLog(L"비상방송 정보 삭제에 성공했습니다.");
+		Log::Trace("Emergency broadcast information was deleted successfully.");
+	}
+	else
+	{
+		GF_AddLog(L"비상방송 정보를 삭제 실패했습니다.");
+		Log::Trace("Failed to delete emergency broadcast information.");
+	}
+#else
 	DataDelete();
+#endif
+	//20240524 GBM end
+
+	UpdateData();	//DataDelete() -> InitData()에서 빼냄
 
 	if (AfxGetMainWnd())
 		AfxGetMainWnd()->SendMessage(UWM_DKP_EMERGENCY_REFRESH, DATA_ALL, 0);
@@ -520,7 +614,7 @@ int CFormEmergency::DataAdd()
 	CString strSql;
 	int nID;
 	CDataEmBc * pData;
-	UpdateData();
+	//UpdateData();
 	nID = m_nNum;
 
 	strSql.Format(L"INSERT TB_EM_BC(NET_ID,EM_ID,EM_ADDR , EM_NAME ,ADD_USER) "
@@ -559,7 +653,7 @@ int CFormEmergency::DataAdd()
 	m_ctrlList.EnsureVisible(nCnt, false);
 	// 리스트 컨트롤에 포커스를 맞춥니다
 	m_ctrlList.SetFocus();
-	AfxMessageBox(L"비상방송 정보를 추가하는데 성공 했습니다.");
+	//AfxMessageBox(L"비상방송 정보를 추가하는데 성공 했습니다.");
 
 	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
 	int nNum = pData->GetEmID();
@@ -603,7 +697,7 @@ int CFormEmergency::DataSave()
 	int nID , nSel;
 	CDataEmBc * pData;
 
-	UpdateData();
+	//UpdateData();
 
 	nSel = m_ctrlList.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)

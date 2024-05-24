@@ -3,6 +3,7 @@
 
 #include "../Common/XList/XListCtrl.h"
 
+#include "ProgressBarDlg.h"
 
 // CFormEmergency 폼 뷰입니다.
 class CDataEmBc;
@@ -13,6 +14,8 @@ class CFormEmergency : public CFormView
 protected:
 	CFormEmergency();           // 동적 만들기에 사용되는 protected 생성자입니다.
 	virtual ~CFormEmergency();
+
+public:
 	BOOL						m_bAdd;
 
 public:
@@ -45,6 +48,13 @@ public:
 	CString m_strAddr;
 	//CDataEmBc *			m_pCurrentData;
 	UINT m_nNum;
+
+	//20240524 GBM start - 편집 처리를 스레드로 전환하기 위한 변수
+	HANDLE  m_hThreadHandle;
+	BOOL m_bThreadSucceeded;
+	CProgressBarDlg* m_pProgressBarDlg;
+	//20240524 GBM end
+
 	afx_msg void OnBnClickedBtnAdd();
 	afx_msg void OnBnClickedBtnSave();
 	afx_msg void OnBnClickedBtnDel();

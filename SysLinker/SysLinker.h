@@ -19,6 +19,7 @@
 
 #include "resource.h"       // 주 기호입니다.
 #include "ManagerEquip.h"
+#include "ProgressBarDlg.h"
 
 // CSysLinkerApp:
 // 이 클래스의 구현에 대해서는 SysLinker.cpp을 참조하십시오.
@@ -98,6 +99,13 @@ public:
 	// [KHS 2020-2-19 16:51:22] 
 	// Progress Dlg
 	CDlgProgress				*		m_pDlgProg;
+
+	//20240523 GBM start - GT1 데이터 DB 및 중계기 일람표 적용 행정을 스레드로 변경하기 위한 변수 추가
+	CProgressBarDlg*	m_pProgressBarDlg;
+	HANDLE				m_hThreadHandle;
+	BOOL				m_bThreadSucceeded;
+	CString				m_strEquipmentDefinitionFile;
+	//20240523 GBM end
 
 	virtual void PreLoadState();
 	virtual void LoadCustomState();

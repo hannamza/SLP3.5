@@ -3,6 +3,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 
+#include "ProgressBarDlg.h"
 
 // CPropPageDevice 대화 상자입니다.
 class CRelayTableData;
@@ -34,6 +35,9 @@ public:
 	CListCtrl m_ctrlListCtrl;
 	int m_nListCtrlSelIndex;
 	CString m_strEditPath;
+	
+	CProgressBarDlg* m_pProgressBarDlg;	//20240523 GBM - 스레드 대기 중 프로그래스바 팝업
+	HANDLE	m_hThreadHandle;	//20240523 GBM - 스레드 대기 이벤트 핸들
 
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();

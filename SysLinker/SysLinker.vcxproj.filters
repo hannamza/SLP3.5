@@ -522,6 +522,9 @@
     <ClInclude Include="DlgAdminMode.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ProgressBarDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -984,6 +987,9 @@
       <Filter>SLP3.5Func</Filter>
     </ClCompile>
     <ClCompile Include="DlgAdminMode.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBarDlg.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

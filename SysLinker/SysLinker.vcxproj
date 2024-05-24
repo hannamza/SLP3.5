@@ -732,6 +732,7 @@
     <ClInclude Include="ManagerPS.h" />
     <ClInclude Include="ManagerPump.h" />
     <ClInclude Include="OutputWnd.h" />
+    <ClInclude Include="ProgressBarDlg.h" />
     <ClInclude Include="RelayTableData.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="ManagerEquip.h" />
@@ -970,6 +971,7 @@
     <ClCompile Include="ManagerPS.cpp" />
     <ClCompile Include="ManagerPump.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
+    <ClCompile Include="ProgressBarDlg.cpp" />
     <ClCompile Include="RelayTableData.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="ManagerEquip.cpp" />

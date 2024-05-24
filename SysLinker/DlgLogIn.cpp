@@ -154,8 +154,11 @@ void CDlgLogIn::OnBnClickedOk()
 	if (CheckLogin(strDBPath ,m_strUser , m_strPwd) <= 0)
 		return;
 
+	//20240523 GBM start - 아래 행정은 CheckLogin에서 이미 하고 있으므로 불필요한 행정으로 주석처리
 	// DB 연결 해제
-	m_pRefMainDB->DetachMSDB(m_strOpenPrjName);
+	//m_pRefMainDB->DetachMSDB(m_strOpenPrjName);	
+	//20240523 GBM end
+
 	CDialogEx::OnOK();
 }
 

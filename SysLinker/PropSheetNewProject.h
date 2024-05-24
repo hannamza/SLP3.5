@@ -32,6 +32,7 @@ public:
 
 
 	CRelayTableData		*		m_pFasSysData; /// 중계기 일람표의 모든데이터
+
 	int InitPage();
 	int ProcessDeviceTable();
 	void SetFasSysData(CRelayTableData * pData);

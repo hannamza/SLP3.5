@@ -7,6 +7,25 @@
 #include "afxdialogex.h"
 #include "PropSheetNewProject.h"
 
+typedef struct 
+{
+	CPropSheetNewProject* pSheet;
+	CPropPageDevice* pPage;
+}ThreadParam;
+
+UINT ThreadParsingModuleTable(LPVOID pParam)
+{
+	ThreadParam* pTp = (ThreadParam*)pParam;
+	CPropSheetNewProject* pSheet = pTp->pSheet;
+	CPropPageDevice* pPage = pTp->pPage;
+
+	pSheet->ProcessDeviceTable();
+	pPage->m_pProgressBarDlg->PostMessageW(WM_CLOSE);
+	SetEvent(pPage->m_hThreadHandle);
+
+	return 0;
+}
+
 // CPropPageDevice 대화 상자입니다.
 
 IMPLEMENT_DYNAMIC(CPropPageDevice, CPropertyPage)
@@ -292,9 +311,34 @@ void CPropPageDevice::OnBnClickedBtnBrowser()
 LRESULT CPropPageDevice::OnWizardNext()
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	//20240523 GBM start - 스레드로 변경
+#if 1
+	CPropSheetNewProject * pSheet = reinterpret_cast<CPropSheetNewProject*>(GetParent());
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	CString strMsg = _T("중계기 일람표를 로드 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	ThreadParam tp;
+	tp.pSheet = pSheet;
+	tp.pPage = this;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadParsingModuleTable, &tp);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+#else
 	CPropSheetNewProject * pSheet = reinterpret_cast<CPropSheetNewProject*>(GetParent());
 	pSheet->ProcessDeviceTable();
-
+#endif
+	//20240523 GBM end
 	
 	return CPropertyPage::OnWizardNext();
 }
