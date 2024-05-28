@@ -31,6 +31,7 @@ public:
 	CListCtrl m_ctrlDeviceList;
 	CTreeCtrl m_ctrlLocTree;
 	CRelayTableData		*		m_pRefFasSysData; /// 중계기 일람표의 모든데이터
+	BOOL m_bInit;	//20240528 GBM - 새 프로젝트 생성 시 최초 중계기 일람표 로드를 한 상태에서 다시 중계기 일람표를 한 후 위치 정보창에서 프로그램 죽는 오류 수정 
 
 	virtual BOOL OnSetActive();
 	void SetFasSysData(CRelayTableData * pData) { m_pRefFasSysData = pData; }

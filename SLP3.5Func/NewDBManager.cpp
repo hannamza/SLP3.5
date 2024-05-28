@@ -372,7 +372,7 @@ BOOL CNewDBManager::InsertDataIntoFACPTypeTable()
 	for (int i = 0; i < MAX_FACP_COUNT; i++)
 	{
 		int nType = -1;
-		nType = CNewInfo::Instance()->m_fi.facpType[i];
+		nType = CNewInfo::Instance()->m_gi.facpType[i];
 
 		ASSERT(nType > -1);
 		if (nType == 0)	//수신기 Type은 1부터 시작, 0이라는 건 안쓰이는 수신기
@@ -406,7 +406,7 @@ BOOL CNewDBManager::InsertDataIntoUnitTypeTable()
 	{
 		// 수신기 타입을 읽어와서 0이면 존재하지 않는 수신기이므로 이후 루프를 돌지 않음
 		int nFACPType = -1;
-		nFACPType = CNewInfo::Instance()->m_fi.facpType[i];
+		nFACPType = CNewInfo::Instance()->m_gi.facpType[i];
 		if (nFACPType == 0)
 		{
 			break;
@@ -416,7 +416,7 @@ BOOL CNewDBManager::InsertDataIntoUnitTypeTable()
 		{
 			int nType = -1;
 
-			nType = CNewInfo::Instance()->m_fi.unitType[i][j];
+			nType = CNewInfo::Instance()->m_gi.unitType[i][j];
 
 			ASSERT((nType > -1) || (nType <= 피난사다리));
 
@@ -443,7 +443,7 @@ BOOL CNewDBManager::InsertDataIntoProjectInfoTable()
 {
 	//만약 모든 수신기가 F3라서 프로젝트명이 존재하지 않으면 DB Insert를 진행하지 않음
 	CString strProjectName = _T("");
-	strProjectName = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName);
+	strProjectName = CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName);
 	if(strProjectName.IsEmpty())
 	{ 
 		Log::Trace("There in no project information!");
@@ -460,13 +460,13 @@ BOOL CNewDBManager::InsertDataIntoProjectInfoTable()
 	int nLinkedDataVerNum = -1;
 	int bAuthorized = -1;
 
-	nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
+	nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
 	ASSERT(nModuleTableVerNum != -1);
 
-	nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+	nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
 	ASSERT(nLinkedDataVerNum != -1);
 
-	bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+	bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
 	ASSERT(bAuthorized != -1);
 
 	strQuery.Format(_T("INSERT INTO TB_PROJECT_INFO (PROJECT_NAME, MODULE_TABLE_VER_NUM, LINKED_DATA_VER_NUM, AUTHORIZED) VALUES (\'%s\', %d, %d, %d)"),
@@ -520,7 +520,7 @@ BOOL CNewDBManager::GetDataFromFACPTypeTable()
 			ASSERT(nFACP > -1);
 			ASSERT(nType > -1);
 
-			CNewInfo::Instance()->m_fi.facpType[nFACP] = nType;
+			CNewInfo::Instance()->m_gi.facpType[nFACP] = nType;
 
 			m_pDB->MoveNext();
 		}
@@ -562,7 +562,7 @@ BOOL CNewDBManager::GetDataFromUnitTypeTable()
 			ASSERT(nUnit > -1);
 			ASSERT(nType > 0);
 
-			CNewInfo::Instance()->m_fi.unitType[nFACP][nUnit] = nType;
+			CNewInfo::Instance()->m_gi.unitType[nFACP][nUnit] = nType;
 
 			m_pDB->MoveNext();
 		}
@@ -605,10 +605,10 @@ BOOL CNewDBManager::GetDataFromProjectInfoTable()
 		ASSERT(nLinkedDataVerNum > -1);
 		ASSERT(nAuthorized > -1);
 
-		strcpy_s(CNewInfo::Instance()->m_fi.projectInfo.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
-		CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum = nModuleTableVerNum;
-		CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum = nLinkedDataVerNum;
-		CNewInfo::Instance()->m_fi.projectInfo.authorized = nAuthorized;
+		strcpy_s(CNewInfo::Instance()->m_gi.projectInfo.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
+		CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum = nModuleTableVerNum;
+		CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum = nLinkedDataVerNum;
+		CNewInfo::Instance()->m_gi.projectInfo.authorized = nAuthorized;
 	}
 	else
 	{

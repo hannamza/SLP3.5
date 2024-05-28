@@ -91,8 +91,12 @@ BOOL CPropPageLocation::OnSetActive()
 
 int CPropPageLocation::FillLocationTree()
 {
+	m_bInit = FALSE;
+
 	if (m_pRefFasSysData)
 		m_pRefFasSysData->FillLocationTree(&m_ctrlLocTree);
+
+	m_bInit = TRUE;
 	return 0;
 }
 
@@ -162,6 +166,9 @@ void CPropPageLocation::OnNMDblclkLocTree(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CPropPageLocation::OnTvnSelchangedLocTree(NMHDR *pNMHDR, LRESULT *pResult)
 {
+	if (!m_bInit)
+		return;
+
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	HTREEITEM hSel = pNMTreeView->itemNew.hItem;

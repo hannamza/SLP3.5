@@ -261,7 +261,7 @@ void CFormEquip::OnBnClickedBtnSave()
 // #endif
 	//20240408 GBM end
 
-	//20240524 GBM start - 스레드로 전환
+	//20240527 GBM start - 스레드로 전환
 #if 1
 	UpdateData();
 	
@@ -297,7 +297,7 @@ void CFormEquip::OnBnClickedBtnSave()
 	else
 		DataSave();
 #endif
-	//20240524 GBM end
+	//20240527 GBM end
 }
 
 
@@ -326,7 +326,7 @@ void CFormEquip::OnBnClickedBtnDel()
 	if (AfxMessageBox(L"선택된 설비 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 
-	//20240524 GBM start - 스레드로 전환
+	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
@@ -356,7 +356,7 @@ void CFormEquip::OnBnClickedBtnDel()
 #else
 	DataDelete();
 #endif
-	//20240524 GBM end
+	//20240527 GBM end
 }
 
 
@@ -558,7 +558,7 @@ int CFormEquip::DataDelete()
 		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
 		{
 			int nFacpType = -1;
-			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
+			nFacpType = CNewInfo::Instance()->m_gi.facpType[nFacp];
 			if (nFacpType == GT1)
 			{
 				bRet = TRUE;
@@ -662,7 +662,7 @@ int CFormEquip::DataAdd()
 		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
 		{
 			int nFacpType = -1;
-			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
+			nFacpType = CNewInfo::Instance()->m_gi.facpType[nFacp];
 			if (nFacpType == GT1)
 			{
 				bRet = TRUE;
@@ -806,7 +806,7 @@ int CFormEquip::DataSave()
 		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
 		{
 			int nFacpType = -1;
-			nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacp];
+			nFacpType = CNewInfo::Instance()->m_gi.facpType[nFacp];
 			if (nFacpType == GT1)
 			{
 				bRet = TRUE;

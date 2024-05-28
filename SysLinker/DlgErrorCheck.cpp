@@ -498,7 +498,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 		//20240424 GBM start - 수신기 타입에 따른 글자수 제한 처리
 		int nFacpNum = pDev->GetFacpNum();
 		ASSERT(nFacpNum > -1);
-		int nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacpNum];
+		int nFacpType = CNewInfo::Instance()->m_gi.facpType[nFacpNum];
 		int nLimit;
 		CString strFacpType;
 		if (nFacpType == GT1)

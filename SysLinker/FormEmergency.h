@@ -49,11 +49,11 @@ public:
 	//CDataEmBc *			m_pCurrentData;
 	UINT m_nNum;
 
-	//20240524 GBM start - 편집 처리를 스레드로 전환하기 위한 변수
+	//20240527 GBM start - 편집 처리를 스레드로 전환하기 위한 변수
 	HANDLE  m_hThreadHandle;
 	BOOL m_bThreadSucceeded;
 	CProgressBarDlg* m_pProgressBarDlg;
-	//20240524 GBM end
+	//20240527 GBM end
 
 	afx_msg void OnBnClickedBtnAdd();
 	afx_msg void OnBnClickedBtnSave();

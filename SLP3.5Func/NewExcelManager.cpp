@@ -40,7 +40,7 @@ BOOL CNewExcelManager::ParsingProjectInfo(CExcelWrapper* xls)
 	ASSERT(!strTemp.IsEmpty());
 	strProjectName += _T("_") + strTemp;
 
-	strcpy_s(CNewInfo::Instance()->m_fi.projectInfo.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
+	strcpy_s(CNewInfo::Instance()->m_gi.projectInfo.projectName, CCommonFunc::WCharToChar(strProjectName.GetBuffer(0)));
 
 	strTemp = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_VERSION, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
 	ASSERT(!strTemp.IsEmpty());
@@ -50,16 +50,16 @@ BOOL CNewExcelManager::ParsingProjectInfo(CExcelWrapper* xls)
 
 	strAuthorized = xls->GetItemText(EXCEL_ENUM_PROJECT_INFO::ROW_AUTHORIZED, EXCEL_ENUM_PROJECT_INFO::COLUMN_CONTENT);
 
-	CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum = _wtoi(strModuleTableVer);
-	CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum = _wtoi(strRomVer);
+	CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum = _wtoi(strModuleTableVer);
+	CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum = _wtoi(strRomVer);
 
 	if (strAuthorized.Compare(_T("YES")) == 0)
 	{
-		CNewInfo::Instance()->m_fi.projectInfo.authorized = true;
+		CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
 	}
 	else
 	{
-		CNewInfo::Instance()->m_fi.projectInfo.authorized = false;
+		CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
 	}
 
 	return TRUE;
@@ -86,7 +86,7 @@ BOOL CNewExcelManager::ParsingFacpType(CExcelWrapper* xls)
 			return TRUE;
 		}
 
-		CNewInfo::Instance()->m_fi.facpType[nFacpNum] = nFacpType;
+		CNewInfo::Instance()->m_gi.facpType[nFacpNum] = nFacpType;
 	}
 
 	return TRUE;
@@ -116,7 +116,7 @@ BOOL CNewExcelManager::ParsingUnitType(CExcelWrapper* xls)
 			return TRUE;
 		}
 
-		CNewInfo::Instance()->m_fi.unitType[nFacpNum][nUnitNum] = nUnitType;
+		CNewInfo::Instance()->m_gi.unitType[nFacpNum][nUnitNum] = nUnitType;
 	}
 
 	return TRUE;
@@ -149,7 +149,7 @@ BOOL CNewExcelManager::UpdateProjectInfo(CString strWin32AppProjectName)
 {
 	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
-	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
 	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
@@ -201,9 +201,9 @@ BOOL CNewExcelManager::UpdateProjectInfo(CString strWin32AppProjectName)
 				CString strProjectVerNum = _T("");
 				CString strAuthorized = _T("");
 
-				nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
-				nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
-				bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+				nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+				nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+				bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
 
 				strProjectVerNum.Format(_T("%02d.%02d"), nModuleTableVerNum, nLinkedDataVerNum);
 				if (bAuthorized)
@@ -240,7 +240,7 @@ BOOL CNewExcelManager::UpdateEquipmentInfo(CString strWin32AppProjectName)
 {
 	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
-	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
 	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
@@ -333,7 +333,7 @@ BOOL CNewExcelManager::UpdateOneEquipment(int nType, int nIndex, CString strEqui
 {
 	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
-	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
 	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
@@ -395,7 +395,7 @@ BOOL CNewExcelManager::CopyModuleTable(CStringList * pStrList, CString strWin32A
 {
 	////중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
-	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
 	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
@@ -445,7 +445,7 @@ BOOL CNewExcelManager::UpdateOneEBInfo(int nNum, CString strRemarks, CString str
 {
 	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
-	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_fi.projectInfo.projectName));
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
 	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);

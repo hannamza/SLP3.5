@@ -225,7 +225,7 @@ void CFormEmergency::OnBnClickedBtnSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//20240524 GBM start - 스레드로 전환
+	//20240527 GBM start - 스레드로 전환
 #if 1
 	UpdateData();	// DataAdd(), DataSave()에서 빼냄
 
@@ -261,7 +261,7 @@ void CFormEmergency::OnBnClickedBtnSave()
 	else
 		DataSave();
 #endif
-	//20240524 GBM end
+	//20240527 GBM end
 
 	if (AfxGetMainWnd())
 		AfxGetMainWnd()->SendMessage(UWM_DKP_EMERGENCY_REFRESH, DATA_ALL, 0);
@@ -282,7 +282,7 @@ void CFormEmergency::OnBnClickedBtnDel()
 	if (AfxMessageBox(L"선택된 비상방송 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 
-	//20240524 GBM start - 스레드로 전환
+	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
@@ -312,7 +312,7 @@ void CFormEmergency::OnBnClickedBtnDel()
 #else
 	DataDelete();
 #endif
-	//20240524 GBM end
+	//20240527 GBM end
 
 	UpdateData();	//DataDelete() -> InitData()에서 빼냄
 

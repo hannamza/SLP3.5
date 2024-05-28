@@ -743,16 +743,26 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 					{
 						CNewDBManager::Instance()->SetDBAccessor(theApp.m_pMainDb);
 						BOOL bRet = FALSE;
-						bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
+
+						bRet = CNewDBManager::Instance()->DeleteEquipmentCircuitInfoFromEquipmentInfoTable();
 						if (bRet)
 						{
-							GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
-							Log::Trace("Equipment information was successfully entered into the DB!");
+							bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
+							if (bRet)
+							{
+								GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
+								Log::Trace("Equipment information was successfully entered into the DB!");
+							}
+							else
+							{
+								GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
+								Log::Trace("Failed to input Equipment information into DB!");
+							}
 						}
 						else
 						{
-							GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
-							Log::Trace("Failed to input Equipment information into DB!");
+							GF_AddLog(L"새 설비 정보를 DB에 입력하기 전 기존 설비 정보를 삭제하는 데에 실패했습니다, DB를 확인하세요.");
+							Log::Trace("Failed to delete existing equipment information before entering new equipment information into DB.!");
 						}
 					}
 
@@ -14230,7 +14240,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 #if 1
 			int nFacpType = -1;
 			CString strProjectVersionNum;
-			nFacpType = CNewInfo::Instance()->m_fi.facpType[nLastFacp];
+			nFacpType = CNewInfo::Instance()->m_gi.facpType[nLastFacp];
 			if (nFacpType == F3)
 			{
 				strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
@@ -14244,9 +14254,9 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 				bool bAuthorized = false;
 				CString strAuthorized = _T("");
 
-				nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
-				nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
-				bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+				nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+				nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+				bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
 				if (bAuthorized)
 					strAuthorized = _T("A");
 
@@ -14547,7 +14557,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 #if 1
 		int nFacpType = -1;
 		CString strProjectVersionNum;
-		nFacpType = CNewInfo::Instance()->m_fi.facpType[nLastFacp];
+		nFacpType = CNewInfo::Instance()->m_gi.facpType[nLastFacp];
 		if (nFacpType == F3)
 		{
 			strMain.Format(L"%sMAIN%02d.ROM", strPath, nLastFacp);
@@ -14561,9 +14571,9 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			bool bAuthorized = false;
 			CString strAuthorized = _T("");
 
-			nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
-			nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
-			bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+			bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
 			if (bAuthorized)
 				strAuthorized = _T("A");
 
@@ -14656,7 +14666,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 	BOOL bGT1TypeExist = FALSE;
 	for (int i = 0; i < MAX_FACP_COUNT; i++)
 	{
-		if (CNewInfo::Instance()->m_fi.facpType[i] == GT1)
+		if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
 		{
 			bGT1TypeExist = TRUE;
 			break;
@@ -14665,16 +14675,16 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 
 	if (bGT1TypeExist)
 	{
-		CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
+		CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
 
 		int nModuleTableVerNum = -1;
 		int nLinkedDataVerNum = -1;
 		bool bAuthorized = false;
 		CString strAuthorized = _T("");
 
-		nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
-		nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
-		bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+		nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+		nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+		bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
 		if (bAuthorized)
 			strAuthorized = _T("A");
 
@@ -14689,7 +14699,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			return 0;
 		}
 
-		fGT1Appendix.Write(&CNewInfo::Instance()->m_fi, sizeof(GT1APPENDIX_INFO));
+		fGT1Appendix.Write(&CNewInfo::Instance()->m_gi, sizeof(GT1APPENDIX_INFO));
 		fGT1Appendix.Close();
 		//20240329 GBM end
 	}
@@ -15546,7 +15556,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	int nFacpType = -1;
 	int nMaxSize;
 	CString strFacpType;
-	nFacpType = CNewInfo::Instance()->m_fi.facpType[nFacpNum];
+	nFacpType = CNewInfo::Instance()->m_gi.facpType[nFacpNum];
 	if (nFacpType == F3)
 	{
 		nMaxSize = MAX_LCD_TEXT_LENGTH_F3;

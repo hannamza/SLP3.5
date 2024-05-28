@@ -312,7 +312,7 @@ LRESULT CPropPageDevice::OnWizardNext()
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 
-	//20240523 GBM start - 스레드로 변경
+	//20240527 GBM start - 스레드로 변경
 #if 1
 	CPropSheetNewProject * pSheet = reinterpret_cast<CPropSheetNewProject*>(GetParent());
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -338,7 +338,7 @@ LRESULT CPropPageDevice::OnWizardNext()
 	CPropSheetNewProject * pSheet = reinterpret_cast<CPropSheetNewProject*>(GetParent());
 	pSheet->ProcessDeviceTable();
 #endif
-	//20240523 GBM end
+	//20240527 GBM end
 	
 	return CPropertyPage::OnWizardNext();
 }

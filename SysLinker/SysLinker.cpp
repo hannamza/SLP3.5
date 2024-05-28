@@ -1242,7 +1242,7 @@ void CSysLinkerApp::OnHomeProjectClose()
 	if (AfxMessageBox(L"현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 
-	//20240524 GBM start - 스레드로 전환
+	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
@@ -1283,7 +1283,7 @@ void CSysLinkerApp::OnHomeProjectClose()
 	GF_AddLog(L"프로젝트를 닫았습니다.");
 	Log::Trace("Project Closed!");
 #endif
-	//20240524 GBM end
+	//20240527 GBM end
 }
 
 void CSysLinkerApp::OnHomeProjectNew()
@@ -1296,7 +1296,7 @@ void CSysLinkerApp::OnHomeProjectNew()
 		if (AfxMessageBox(L"새 프로젝트를 생성하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
 
-		//20240524 GBM start - 스레드로 전환
+		//20240527 GBM start - 스레드로 전환
 #if 1
 		m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 		m_bThreadSucceeded = FALSE;
@@ -1337,10 +1337,10 @@ void CSysLinkerApp::OnHomeProjectNew()
  		GF_AddLog(L"프로젝트를 닫았습니다.");
  		Log::Trace("Project Closed!");
 #endif
-		//20240524 GBM end
+		//20240527 GBM end
 	}
 
-	//20240524 GBM start - 스레드로 전환
+	//20240527 GBM start - 스레드로 전환
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
 	CString strMsg = _T("기본 설비 정의를 로드 중입니다. 잠시 기다려 주세요.");
@@ -1363,7 +1363,7 @@ void CSysLinkerApp::OnHomeProjectNew()
 	}
 
 	m_pProgressBarDlg = nullptr;
-	//20240524 GBM end
+	//20240527 GBM end
 
 	CPropSheetNewProject psNewProject(L"New Project");
 	if (m_pFasSysData == nullptr)
@@ -1521,7 +1521,7 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		if (AfxMessageBox(L"프로젝트 열기를 하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
 
-		//20240524 GBM start - 스레드로 전환
+		//20240527 GBM start - 스레드로 전환
 #if 1
 		m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 		m_bThreadSucceeded = FALSE;
@@ -1562,7 +1562,7 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		GF_AddLog(L"프로젝트를 닫았습니다.");
 		Log::Trace("Project Closed!");
 #endif
-		//20240524 GBM end
+		//20240527 GBM end
 	}
 
 	CDlgLogIn dlg(m_pMainDb);
@@ -3543,7 +3543,7 @@ int CSysLinkerApp::CloseProject()
 	m_pFasSysData = nullptr;
 
 	//20240307 GBM start - GT1 추가 정보 메모리 초기화
-	memset(&CNewInfo::Instance()->m_fi, NULL, sizeof(GT1APPENDIX_INFO));
+	memset(&CNewInfo::Instance()->m_gi, NULL, sizeof(GT1APPENDIX_INFO));
 	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
 	//20240307 GBM end
 

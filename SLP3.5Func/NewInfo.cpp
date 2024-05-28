@@ -4,7 +4,7 @@
 
 CNewInfo::CNewInfo()
 {
-	memset(&m_fi, NULL, sizeof(GT1APPENDIX_INFO));
+	memset(&m_gi, NULL, sizeof(GT1APPENDIX_INFO));
 	memset(&m_ei, NULL, sizeof(EQUIPMENT_INFO));
 }
 

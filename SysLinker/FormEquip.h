@@ -38,11 +38,11 @@ public:
 	CString					m_strFileRootPath; //< Symbol Root Path
 	CDataEquip				*	m_pCurrentData;
 
-	//20240524 GBM start - 편집 처리를 스레드로 전환하기 위한 변수
+	//20240527 GBM start - 편집 처리를 스레드로 전환하기 위한 변수
 	HANDLE  m_hThreadHandle;
 	BOOL m_bThreadSucceeded;
 	CProgressBarDlg* m_pProgressBarDlg;
-	//20240524 GBM end
+	//20240527 GBM end
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.

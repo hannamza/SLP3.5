@@ -986,7 +986,7 @@ void CMainFrame::OnFacpCreateLink()
 	//20240415 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
 	
 	//인증 여부 초기화
-	CNewInfo::Instance()->m_fi.projectInfo.authorized = false;
+	CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
 	if (AfxMessageBox(_T("관리자 모드(ROM 인증 모드)로 진행하시겠습니까?"), MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
 		CDlgAdminMode dlg;
@@ -1001,7 +1001,7 @@ void CMainFrame::OnFacpCreateLink()
 				AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다."));
 				GF_AddLog(L"관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다.");
 				Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
-				CNewInfo::Instance()->m_fi.projectInfo.authorized = true;
+				CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
 			}
 			else
 			{
@@ -1078,7 +1078,7 @@ int CMainFrame::CreateFacpLink()
 		BOOL bGT1TypeExist = FALSE;
 		for (int i = 0; i < MAX_FACP_COUNT; i++)
 		{
-			if (CNewInfo::Instance()->m_fi.facpType[i] == GT1)
+			if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
 			{
 				bGT1TypeExist = TRUE;
 				break;
@@ -1089,14 +1089,14 @@ int CMainFrame::CreateFacpLink()
 		{
 			int nModuleTableVerNum = -1;
 			int nLinkedDataVerNum = -1;
-			bool bAuthorized = CNewInfo::Instance()->m_fi.projectInfo.authorized;
+			bool bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
 			CString strAuthorized = _T("");
 			if (bAuthorized)
 			{
 				strAuthorized = _T("A");
 			}
-			nModuleTableVerNum = CNewInfo::Instance()->m_fi.projectInfo.moduleTableVerNum;
-			nLinkedDataVerNum = CNewInfo::Instance()->m_fi.projectInfo.linkedDataVerNum;
+			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
 			BOOL bRet = FALSE;
 			CString strMsg = _T("");
 

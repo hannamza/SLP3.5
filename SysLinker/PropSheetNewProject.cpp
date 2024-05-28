@@ -50,10 +50,28 @@ int CPropSheetNewProject::InitPage()
 int CPropSheetNewProject::ProcessDeviceTable()
 {
 	//AfxMessageBox(L"ReadDeviceTable");
+
+	//20240527 GBM start - 메모리 누수 수정
+#if 1
 	if (m_pFasSysData == nullptr)
 	{
 		m_pFasSysData = new CRelayTableData;
 	}
+	else
+	{
+		//뒤로 갔다가 다시 앞으로 올 경우 메모리 해제
+		m_pFasSysData->m_strFileNameList.RemoveAll();
+		m_pFasSysData->RemoveAllData();
+		memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
+		memset(&CNewInfo::Instance()->m_gi, NULL, sizeof(GT1APPENDIX_INFO));
+	}
+#else
+	if (m_pFasSysData == nullptr)
+	{
+		m_pFasSysData = new CRelayTableData;
+	}
+#endif
+	//20240527 GBM end
 
 	int nCnt, i; 
 	CString str;
