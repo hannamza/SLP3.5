@@ -370,7 +370,7 @@ LRESULT CFormLoadRelayTable::OnProgressEvent(WPARAM wp, LPARAM lp)
 void CFormLoadRelayTable::OnBnClickedBtnApply()
 {
 	//20240408 GBM start - 새 중계기 일람표 적용 시 프로그램 자동 종료
-	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터 업데이트를 성공하면 자동으로 프로그램이 종료됩니다.\n"
+	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트 업데이트를 성공하면 자동으로 프로그램이 종료됩니다.\n"
 		L"진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 	{
 		return;
@@ -568,7 +568,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			nRet = me->ApplyDiffDataProc();
 			if (nRet > 0)
 			{
-				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 성공했습니다.\n"
+				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 성공했습니다.\n"
 					L"프로그램이 자동으로 종료되면 다시 실행해 주시기 바랍니다.");
 
 				Log::Trace("The new module file has been successfully applied and this program ends!");
@@ -577,7 +577,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			}
 			else
 			{
-				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 연동데이터를 업데이트 하는데 실패했습니다.\n");
+				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 실패했습니다.\n");
 				Log::Trace("Applying the new module file failed!");
 			}
 #else
@@ -820,71 +820,68 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	}
 
 	//20240408 GBM start - 새 중계기 일람표의 설비 정보를 저장, 중계기 일람표 상에 설비 정의가 있으면 DB에 넣으면 되고 없으면 기존에는 설비 정의 DB 저장 기능이 없으므로 넣으면 됨
-	if (CNewExcelManager::Instance()->bExistEI == FALSE)
+	POSITION pos;
+	std::shared_ptr <CManagerEquip> spManager;
+	CDataEquip * pEq;
+	int nID;
+	CString strTemp;
+	for (int i = ET_INPUTTYPE; i <= ET_OUTCONTENTS; i++)
 	{
-		POSITION pos;
-		std::shared_ptr <CManagerEquip> spManager;
-		CDataEquip * pEq;
-		int nID;
-		CString strTemp;
-		for (int i = ET_INPUTTYPE; i <= ET_OUTCONTENTS; i++)
+		spManager = m_pNewRelayTable->GetEquipManager(i);
+		if (spManager == nullptr)
+			return -1;
+
+		pos = spManager->GetHeadPosition();
+		while (pos)
 		{
-			spManager = m_pNewRelayTable->GetEquipManager(i);
-			if (spManager == nullptr)
-				return -1;
+			nID = -1;
+			strTemp = _T("");
+			pEq = spManager->GetNext(pos);
+			if (pEq == nullptr)
+				continue;
 
-			pos = spManager->GetHeadPosition();
-			while (pos)
+			nID = pEq->GetEquipID();
+			ASSERT(nID > 0);
+			nID--;	//번호는 1베이스 인덱스는 0베이스
+			strTemp = pEq->GetEquipName();
+			strTemp.Remove(' ');
+			strTemp.MakeUpper();
+
+			switch (i)
 			{
-				nID = -1;
-				strTemp = _T("");
-				pEq = spManager->GetNext(pos);
-				if (pEq == nullptr)
-					continue;
-
-				nID = pEq->GetEquipID();
-				ASSERT(nID > 0);
-				nID--;	//번호는 1베이스 인덱스는 0베이스
-				strTemp = pEq->GetEquipName();
-				strTemp.Remove(' ');
-				strTemp.MakeUpper();
-
-				switch (i)
-				{
-				case ET_INPUTTYPE:
-				{
-					sprintf_s(CNewInfo::Instance()->m_ei.inputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
-					break;
-				}
-				case ET_EQNAME:
-				{
-					sprintf_s(CNewInfo::Instance()->m_ei.equipmentName[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
-					break;
-				}
-				case ET_OUTPUTTYPE:
-				{
-					sprintf_s(CNewInfo::Instance()->m_ei.outputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
-					break;
-				}
-				case ET_OUTCONTENTS:
-				{
-					sprintf_s(CNewInfo::Instance()->m_ei.outputCircuit[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
-					break;
-				}
-				default:
-					break;
-				}
-
+			case ET_INPUTTYPE:
+			{
+				sprintf_s(CNewInfo::Instance()->m_ei.inputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+				break;
+			}
+			case ET_EQNAME:
+			{
+				sprintf_s(CNewInfo::Instance()->m_ei.equipmentName[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+				break;
+			}
+			case ET_OUTPUTTYPE:
+			{
+				sprintf_s(CNewInfo::Instance()->m_ei.outputType[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+				break;
+			}
+			case ET_OUTCONTENTS:
+			{
+				sprintf_s(CNewInfo::Instance()->m_ei.outputCircuit[nID], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+				break;
+			}
+			default:
+				break;
 			}
 
 		}
+
 	}
 
 	//20240408 GBM start - 프로젝트, 수신기 TYPE, UNIT TYPE은 존재할 때만 테이블을 추가하고, 설비 정의는 미리보기가 아닌 적용할 때 설비 Sheet 존재여부와 상관없이 DB에 변경사항까지 모두 적용
 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
-	BOOL bRet = FALSE;
 
 	// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+	BOOL bRet = FALSE;
 	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
 	if (bRet)
 	{
@@ -934,7 +931,9 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		GF_AddLog(L"새 중계기 일람표를 복사하는 데에 성공했습니다.");
 		Log::Trace("Successfully copied new module table file!");
 
-		if (CNewExcelManager::Instance()->bExistEI == TRUE)
+		// 수신기 중 GT1이 있으면 중계기 일람표에 적용
+		bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
+		if (bRet)
 		{
 			bRet = CNewExcelManager::Instance()->UpdateEquipmentInfo(theApp.m_pFasSysData->GetPrjName());
 			if (bRet)
@@ -1027,7 +1026,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 
 #ifdef _DEBUG
 	CDataDevice * pDevTemp;
-	CString strTemp;
+	//CString strTemp;
 	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 2, 2, 28);
 	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
 #endif

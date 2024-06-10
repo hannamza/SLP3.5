@@ -39,7 +39,16 @@ public:
 	BOOL UpdateEquipmentInfo(CString strWin32AppProjectName);
 
 	// 설비 정의 추가 시 GT1 프로젝트라면 중계기 일람표 설비 정의에도 적용
-	BOOL UpdateOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName);
+	BOOL UpdateOneEquipmentInfo(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName);
+
+	// 패턴 편집 시 중계기 일람표 적용
+	BOOL UpdatePatternInfo(int nFacp, int nUnit, int nLoop, int nCircuit, int nEditType, CString strPatternName, CString strWin32AppProjectName);
+
+	// 중계기 일람표 상의 해당 패턴 삭제
+	BOOL DeletePatternFromModuleTableFile(CString strPatternName, std::vector<CString>& strModuleTableFileList);
+
+	// 중계기 일람표 상의 패턴 아이템(출력회로) 추가 -> 타입 나눠서 삭제도 가능하도록 매서드 수정하면 될 듯
+	BOOL UpdateLinkedCircuitInThePattern(int nFacp, int nUnit, int nLoop, int nCircuit, CString strPatternName, std::vector<CString>& strModuleTableFileList);
 
 	// 중계기 일람표 갱신 시 새 중계기 일람표 프로젝트 폴더에 복사
 	BOOL CopyModuleTable(CStringList * pStrList, CString strWin32AppProjectName);

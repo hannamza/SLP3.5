@@ -329,7 +329,7 @@ BOOL CNewExcelManager::UpdateEquipmentInfo(CString strWin32AppProjectName)
 	return TRUE;
 }
 
-BOOL CNewExcelManager::UpdateOneEquipment(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName)
+BOOL CNewExcelManager::UpdateOneEquipmentInfo(int nType, int nIndex, CString strEquipment, CString strWin32AppProjectName)
 {
 	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
 	CString strProjectName;
@@ -389,6 +389,203 @@ BOOL CNewExcelManager::UpdateOneEquipment(int nType, int nIndex, CString strEqui
 	}
 
 	return TRUE;
+}
+
+BOOL CNewExcelManager::DeletePatternFromModuleTableFile(CString strPatternName, std::vector<CString>& strModuleTableFileList)
+{
+	std::vector<CString>::iterator iter;
+	iter = strModuleTableFileList.begin();
+	for (; iter != strModuleTableFileList.end(); iter++)
+	{
+		CString strModuleTableFile = _T("");
+		strModuleTableFile = *iter;
+		CExcelWrapper xls;
+		if (xls.Open(strModuleTableFile) == false)
+		{
+			Log::Trace("Failed to open file [%s].", CCommonFunc::WCharToChar(strModuleTableFile.GetBuffer(0)));
+			return FALSE;
+		}
+
+		BOOL bUnitSheetFound = FALSE;
+		int nSheetCount = xls.GetSheetCount();
+
+		for (int j = 0; j < nSheetCount; j++)
+		{
+			if (xls.SetWorkSheetChange(j + 1) == FALSE)
+				continue;
+
+			CString strSheetName = _T("");
+			strSheetName = xls.GetSheetName(j + 1);
+
+			if (strSheetName.Find(_T("Unit")) != -1)
+			{
+				bUnitSheetFound = TRUE;
+
+				for (int nLoop = 0; nLoop < MAX_LOOP_COUNT; nLoop++)
+				{
+					int nLoopInterval = nLoop * EXCEL_ENUM_CIRCUIT_INFO::COLUMN_OUTPUT_CONTENT;
+					for (int nRow = EXCEL_ENUM_CIRCUIT_INFO::ROW_LIST_START; nRow < EXCEL_ENUM_CIRCUIT_INFO::ROW_LIST_START + MAX_CIRCUIT_COUNT; nRow++)
+					{
+						CString strPattern = _T("");
+						strPattern = xls.GetItemText(nRow, EXCEL_ENUM_CIRCUIT_INFO::COLUMN_PATTERN_NAME + nLoopInterval);
+
+						if (strPatternName.Compare(strPattern) == 0)
+						{
+							xls.SetItemText(nRow, EXCEL_ENUM_CIRCUIT_INFO::COLUMN_PATTERN_NAME + nLoopInterval, _T(""));
+						}
+					}
+				}
+			}
+		}
+
+		if (!bUnitSheetFound)
+		{
+			xls.Close();
+			Log::Trace("There is no [UnitXX] excel sheet.");
+			return FALSE;
+		}
+
+		xls.SavaAs(strModuleTableFile);
+		xls.Close();
+	}
+
+	return TRUE;
+}
+
+BOOL CNewExcelManager::UpdateLinkedCircuitInThePattern(int nFacp, int nUnit, int nLoop, int nCircuit, CString strPatternName, std::vector<CString>& strModuleTableFileList)
+{
+	CString strModuleTableFile = _T("");
+	std::vector<CString>::iterator iter;
+	iter = strModuleTableFileList.begin();
+	for (; iter != strModuleTableFileList.end(); iter++)
+	{
+		int nFacpNum = -1;
+		CString strFacpNum = _T("");
+		CString strFile = _T("");
+		strFile = *iter;
+
+		strFacpNum = strFile.Mid(strFile.GetLength() - 7, 2);	// XX.xlsx
+		nFacpNum = _wtoi(strFacpNum);
+		ASSERT(nFacpNum > -1);
+
+		if (nFacp == nFacpNum)
+		{
+			strModuleTableFile = strFile;
+			break;
+		}
+	}
+
+	if (strModuleTableFile.IsEmpty())
+	{
+		Log::Trace("There is no Module Table file [FACP number : %d] in the [%s] folder.", nFacp, CCommonFunc::WCharToChar(strModuleTableFile.GetBuffer(0)));
+		return FALSE;
+	}
+
+	CExcelWrapper xls;
+	if (xls.Open(strModuleTableFile) == false)
+	{
+		Log::Trace("Failed to open file [%s].", CCommonFunc::WCharToChar(strModuleTableFile.GetBuffer(0)));
+		return FALSE;
+	}
+
+	BOOL bUnitSheetFound = FALSE;
+	CString strUnitSheet = _T("");
+	strUnitSheet.Format(_T("%02dUnit"), nUnit);
+	int nSheetCount = xls.GetSheetCount();
+
+	for (int j = 0; j < nSheetCount; j++)
+	{
+		if (xls.SetWorkSheetChange(j + 1) == FALSE)
+			continue;
+
+		CString strSheetName = _T("");
+		strSheetName = xls.GetSheetName(j + 1);
+
+		if (strSheetName.CompareNoCase(strUnitSheet) == 0)
+		{
+			bUnitSheetFound = TRUE;
+
+			//회로 정보가 있는 지 확인 (입력타입은 회로가 있다면 반드시 존재하므로 입력타입 문자열이 비어있는 지로 판단)
+			int nColumn = nLoop * EXCEL_ENUM_CIRCUIT_INFO::COLUMN_OUTPUT_CONTENT + EXCEL_ENUM_CIRCUIT_INFO::COLUMN_INPUT_TYPE;
+			int nRow = EXCEL_ENUM_CIRCUIT_INFO::ROW_LIST_START + nCircuit - 1;	//회로번호 1베이스
+
+			CString strInputType = _T("");
+			strInputType = xls.GetItemText(nRow, nColumn);
+			if (strInputType.IsEmpty())
+			{
+				xls.Close();
+				CString strMsg = _T("");
+				strMsg.Format(_T("There is no circuit [%02d%02d%d%03d]."), nFacp, nUnit, nLoop, nCircuit);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+				return FALSE;
+			}
+
+			//회로 정보가 있다면 수정
+			nColumn = nLoop * EXCEL_ENUM_CIRCUIT_INFO::COLUMN_OUTPUT_CONTENT + EXCEL_ENUM_CIRCUIT_INFO::COLUMN_PATTERN_NAME;
+			xls.SetItemText(nRow, nColumn, strPatternName);
+
+			break;
+		}
+	}
+
+	if (!bUnitSheetFound)
+	{
+		xls.Close();
+		CString strMsg = _T("");
+		strMsg.Format(_T("There is no excel sheet [Unit%02d]."), nUnit);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		return FALSE;
+	}
+
+	xls.SavaAs(strModuleTableFile);
+	xls.Close();
+
+	return TRUE;
+}
+
+BOOL CNewExcelManager::UpdatePatternInfo(int nFacp, int nUnit, int nLoop, int nCircuit, int nEditType, CString strPatternName, CString strWin32AppProjectName)
+{
+	BOOL bSucceeded = FALSE;
+
+	//중계기 일람표 경로 문자열 조합, 중계기 일람표 파일명은 중계기 일람표 상의 프로젝트명으로 찾고, 폴더는 SLP3에서 설정된 프로젝트명으로 찾음, 추후에는 일치시키는 방향으로 진행할 예정
+	CString strProjectName;
+	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
+
+	CString strModuleTablePath;
+	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+
+	//중계기 일람표 리스트 얻음
+	std::vector<CString> strModuleTableFileList;
+	strModuleTableFileList = CCommonFunc::GetFullPathFileListIntheFolder(strModuleTablePath, strProjectName);
+
+	int nModuleTableCount = -1;
+	nModuleTableCount = strModuleTableFileList.size();
+
+	if (nModuleTableCount == 0)
+	{
+		Log::Trace("There is no Module Table file in the [%s] folder.", CCommonFunc::WCharToChar(strModuleTablePath.GetBuffer(0)));
+		return FALSE;
+	}
+
+	// 편집 타입 분기
+	switch (nEditType)
+	{
+	case PATTERN_DELETE:
+	{
+		bSucceeded = DeletePatternFromModuleTableFile(strPatternName, strModuleTableFileList);
+		break;
+	}
+	case PATTERN_ITEM_ADD:
+	case PATTERN_ITEM_DELETE:
+	{
+		bSucceeded = UpdateLinkedCircuitInThePattern(nFacp, nUnit, nLoop, nCircuit, strPatternName, strModuleTableFileList);
+		break;
+	}
+	default:
+		break;
+	}
+
+	return bSucceeded;
 }
 
 BOOL CNewExcelManager::CopyModuleTable(CStringList * pStrList, CString strWin32AppProjectName)

@@ -478,6 +478,7 @@ public:
 	int DeleteLinkInfo(CDataDevice * pDev,CDataLinked * pLink);
 	CDataPattern * AddNewPattern(int nPtnId, CString strPtnName, int nPtype,int nManualMake, CPtrList * pDevList);
 	CDataPattern * ChangePattern(CDataPattern * pPtn,int nManualMakeStatus, CPtrList * pPtnItemList);
+	CDataPattern * ChangePattern(CDataPattern * pPtn, int nManualMakeStatus, std::vector<CDataLinked*>& dataLinkedVec);		//20240604 GBM - 스레드 전환을 위한 매서드 오버로드
 	BOOL DeletePattern(CDataPattern * pPtn);
 	BOOL DeletePatternInMemory(CDataPattern * pPtn);
 	BOOL DeleteDeviceInMemory(CDataDevice * pDev);

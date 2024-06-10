@@ -69,6 +69,7 @@ BOOL CDlgInputChange::OnInitDialog()
 		hditem.mask = HDI_IMAGE | HDI_FORMAT;
 		m_ctrlInputList.m_HeaderCtrl.GetItem(i, &hditem);
 		hditem.fmt |= HDF_IMAGE;
+		
 		if (i == 2) // 2번째 column을 check box로 setting
 			hditem.iImage = XHEADERCTRL_UNCHECKED_IMAGE;
 		else
@@ -150,7 +151,7 @@ void CDlgInputChange::DisplayCompareResult(
 		m_ctrlInputList.InsertItem(nIdx, pItem->m_pOldCopyDev->GetInputFullName(),crFore,crBack);
 		m_ctrlInputList.SetItemText(nIdx,1, pItem->m_pNewCopyDev->GetInputFullName(), crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 2, L"변경");
-		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);
+		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);	
 		m_ctrlInputList.SetItemData(nIdx, (DWORD_PTR)pItem);
 		nIdx++;
 		suL.stParam.wStep = nStep;
@@ -173,7 +174,7 @@ void CDlgInputChange::DisplayCompareResult(
 		m_ctrlInputList.InsertItem(nIdx, pItem->m_pOldCopyDev->GetInputFullName(), crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 1, L"", crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 2, L"삭제");
-		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);
+		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);	
 		m_ctrlInputList.SetItemData(nIdx, (DWORD_PTR)pItem);
 		nIdx++;
 		suL.stParam.wStep = nStep;
@@ -196,7 +197,7 @@ void CDlgInputChange::DisplayCompareResult(
 		m_ctrlInputList.InsertItem(nIdx, L"", crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 1, pItem->m_pNewCopyDev->GetInputFullName(), crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 2, L"추가");
-		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);
+		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);	
 		m_ctrlInputList.SetItemData(nIdx, (DWORD_PTR)pItem);
 		nIdx++;
 		suL.stParam.wStep = nStep;

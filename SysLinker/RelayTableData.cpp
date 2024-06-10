@@ -580,6 +580,14 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	}
 	//20240408 GBM end
 
+	//20240604 GBM start - GT1 수신기가 아닐 경우 설비 정의 Sheet가 존재해도 플래그가 True가 안될 경우가 있어 다른 Sheet의 존재 여부로 판단
+	if (CNewExcelManager::Instance()->bExistEI == FALSE)
+	{
+		if (CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT)
+			CNewExcelManager::Instance()->bExistEI = TRUE;
+	}
+	//20240604 GBM end
+
 	m_nLastRelayIndex = nRelayIdx;
 	//SendProgressStep(pPrgTagetWnd, PROG_RESULT_FINISH, nCnt, nCnt,0,0);
 
@@ -1229,7 +1237,7 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	//20240422 GBM end
 
 	//20240408 GBM start - 중계기 일람표 상 회로의 설비 정의가 설비 정의 정보에 없을 때 (F3 프로젝트) 설비 정의가 추가되면 여기에서 프로그램 로그창에 표시해서 바로 확인 가능하도록 함
-	if (!m_bIsComparedData && !CNewExcelManager::Instance()->bExistEI)
+	if (!m_bIsComparedData)
 	{
 		CString strNewType = g_strEquipTypeString[nType];
 		CString strLog;
@@ -1239,7 +1247,7 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	//20240408 GBM end
 
 	//20240408 GBM start - 중계기 일람표 갱신일 경우 DB를 변경하지 않았기 때문에 중계기 일람표 설비 정의와 기존 프로젝트 DB의 설비 정의가 차이가 날 경우 추가, 중계기 일람표 설비 정의가 있을 경우에만 의미가 있음
-	if (m_bIsComparedData && CNewExcelManager::Instance()->bExistEI)
+	if (m_bIsComparedData)
 	{
 		CString strMsg1 = _T("");
 		CString strMsg2 = _T("");
@@ -9321,6 +9329,60 @@ CDataPattern * CRelayTableData::ChangePattern(CDataPattern * pPtn,int nManualMak
 // 		if (m_pDB->ExecuteSql(strSql))
 // 			pPList->AddTail(pDev);
 // 	}
+	return pPtn;
+}
+
+CDataPattern * CRelayTableData::ChangePattern(CDataPattern * pPtn, int nManualMakeStatus, std::vector<CDataLinked*>& dataLinkedVec)
+{
+	BOOL bSame = FALSE;
+	//CDataDevice * pNew , * pOld;
+	//CDataPattern * pData;
+	CString strSql;
+	//CPtrList * pPList;
+	//POSITION posOld , posNew;
+
+
+	strSql.Format(L"UPDATE TB_PATTERN_MST SET PT_NAME='%s' , PT_TYPE=%d , MANUAL_MAKE=%d WHERE NET_ID=1 AND PT_ID=%d "
+		, pPtn->GetPatternName(), pPtn->GetPatternType(), pPtn->GetManualMake(), pPtn->GetPatternID()
+	);
+
+	m_pDB->ExecuteSql(strSql);
+
+	// pattern에 추가 삭제되는것은 바로 바로 한다.
+	// 
+	// 	pPList = pData->GetDeviceList();
+	// 	posOld = pPList->GetHeadPosition();
+	// 	while (posNew)
+	// 	{
+	// 		pNew = (CDataDevice *)pDevList->GetNext(posNew);
+	// 		if (pNew == nullptr)
+	// 			continue;
+	// 
+	// 		bSame = FALSE; 
+	// 		posOld = pPList->GetHeadPosition();
+	// 		while (posOld)
+	// 		{
+	// 			pOld = (CDataDevice *)pPList->GetNext(posOld);
+	// 			if (pOld == nullptr)
+	// 				continue;
+	// 
+	// 			if (pOld->IsEqual(pNew))
+	// 			{
+	// 				bSame = TRUE;
+	// 				break;
+	// 			}
+	// 		}
+	// 
+	// 		if (bSame)
+	// 			continue; 
+	// 
+	// 		strSql.Format(L"INSERT INTO TB_PATTERN_ITEM(NET_ID,PT_ID,FACP_ID,UNIT_ID,CHN_ID,RLY_ID,ADD_USER) "
+	// 			L" VALUES(1,%d,%d,%d,%d,%d,'ADMIN') "
+	// 			, pData->GetPatternID(), pDev->GetFacpID(), pDev->GetUnitID(), pDev->GetChnID(), pDev->GetDeviceID()
+	// 		);
+	// 		if (m_pDB->ExecuteSql(strSql))
+	// 			pPList->AddTail(pDev);
+	// 	}
 	return pPtn;
 }
 

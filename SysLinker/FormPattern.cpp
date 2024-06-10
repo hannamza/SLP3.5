@@ -15,6 +15,240 @@
 #include	"../Common/Utils/YAdoDatabase.h"
 #include <algorithm>
 
+UINT ThreadDeletePattern(LPVOID pParam)
+{
+	CFormPattern* pFP = (CFormPattern*)pParam;
+	pFP->m_bThreadSucceeded = TRUE;
+
+	int nPtnID = 0;
+	pFP->m_pEditItem = pFP->m_pCurItem;
+	nPtnID = ((CDataPattern*)pFP->m_pEditItem->pData)->GetPatternID();
+	BOOL bManualMake = ((CDataPattern*)pFP->m_pEditItem->pData)->GetManualMake();
+	YAdoDatabase * pDb = pFP->m_pRefFasSysData->GetPrjDB();
+	pDb->BeginTransaction();
+	if (pFP->DeletePattern(pDb, nPtnID) <= 0)
+	{
+		pDb->RollbackTransaction();
+		//AfxMessageBox(L"패턴을 삭제하는데 실패 했습니다.");
+		CString strMsg = _T("");
+		strMsg.Format(_T("Failed to delete the pattern [%s]."), ((CDataPattern*)pFP->m_pEditItem->pData)->GetPatternName());
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		pFP->m_bThreadSucceeded = FALSE;
+		return 0;
+	}
+
+	if (pFP->DeleteRelay(nPtnID, pDb) <= 0)
+	{
+		pDb->RollbackTransaction();
+		//AfxMessageBox(L"패턴에 포함된 디바이스를 삭제하는데 실패 했습니다.");
+		CString strMsg = _T("");
+		strMsg.Format(_T("Failed to delete the output circuit included in the pattern [%s]."), ((CDataPattern*)pFP->m_pEditItem->pData)->GetPatternName());
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		pFP->m_bThreadSucceeded = FALSE;
+		return 0;
+	}
+
+	if (pFP->m_pRefFasSysData->DeleteLinkFromAllInput(LK_TYPE_PATTERN, nPtnID, 0, 0, 0) <= 0)
+	{
+		pDb->RollbackTransaction();
+		//AfxMessageBox(L"패턴을 사용하는 입력에서 해당 정보를 삭제하는데 실패 했습니다.");
+		CString strMsg = _T("");
+		strMsg.Format(_T("Failed to delete input circuit information that uses the deleted pattern [%s] as output."), ((CDataPattern*)pFP->m_pEditItem->pData)->GetPatternName());
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		pFP->m_bThreadSucceeded = FALSE;
+		return 0;
+	}
+	pDb->CommitTransaction();
+
+	// 중계기 일람표 상의 패턴이고 GT1 수신기가 있다면 중계기 일람표 파일 수정
+	if (!bManualMake)
+	{
+		BOOL bGT1Exist = FALSE;
+		bGT1Exist = CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistEI;
+		if (bGT1Exist)
+		{
+			BOOL bRet = FALSE;
+			bRet = CNewExcelManager::Instance()->UpdatePatternInfo(-1, -1, -1, -1, PATTERN_DELETE, ((CDataPattern*)pFP->m_pEditItem->pData)->GetPatternName(), theApp.m_pFasSysData->m_strPrjName);
+			if (!bRet)
+			{
+				CString strMsg = _T("");
+				strMsg.Format(_T("Failed to delete pattern [%s] from the module table file."), ((CDataPattern*)pFP->m_pEditItem->pData)->GetPatternName());
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+				pFP->m_bThreadSucceeded = FALSE;
+			}
+		}
+	}
+
+	pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFP->m_hThreadHandle);
+
+	return 0;
+}
+
+UINT ThreadDeleteLinkedCircuitFromThePattern(LPVOID pParam)
+{
+	CFormPattern* pFP = (CFormPattern*)pParam;
+	pFP->m_bThreadSucceeded = TRUE;
+
+	int nCnt = -1;
+	CString strSql;
+	CDataLinked* plnk;
+	CDataPattern* pPtn = (CDataPattern *)pFP->m_pCurItem->pData;
+	if (pPtn == nullptr)
+	{
+		pFP->m_bThreadSucceeded = FALSE;
+		pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+		SetEvent(pFP->m_hThreadHandle);
+		return 0;
+	}
+
+	YAdoDatabase * pDB;
+	pDB = pFP->m_pRefFasSysData->GetPrjDB();
+	pDB->BeginTransaction();
+
+	for (int i = 0; i < pFP->m_dataLinkedVec.size(); i++)
+	{
+		plnk = (CDataLinked*)pFP->m_dataLinkedVec[i];
+		if (plnk == nullptr)
+		{
+			pFP->m_bThreadSucceeded = FALSE;
+			pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+			SetEvent(pFP->m_hThreadHandle);
+			return 0;
+		}
+
+		strSql.Format(L"SELECT * FROM TB_PATTERN_ITEM WHERE NET_ID=1 "
+			L" AND PT_ID=%d AND ITEM_TYPE=%d AND FACP_ID=%d AND UNIT_ID=%d"
+			L" AND CHN_ID=%d AND RLY_ID=%d"
+			, pPtn->GetPatternID(), plnk->GetLinkType(), plnk->GetTgtFacp(), plnk->GetTgtUnit()
+			, plnk->GetTgtChn(), plnk->GetTgtDev()
+		);
+
+
+		if (pDB->OpenQuery(strSql) == FALSE)
+		{
+			pFP->m_bThreadSucceeded = FALSE;
+			pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+			SetEvent(pFP->m_hThreadHandle);
+			return 0;
+		}
+
+		nCnt = pDB->GetRecordCount();
+		if (nCnt == 0)
+		{
+			pFP->m_bThreadSucceeded = FALSE;
+			pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+			SetEvent(pFP->m_hThreadHandle);
+			return 0;
+		}
+
+		strSql.Format(L"DELETE FROM TB_PATTERN_ITEM WHERE NET_ID=1 "
+			L" AND PT_ID=%d AND ITEM_TYPE=%d AND FACP_ID=%d AND UNIT_ID=%d"
+			L" AND CHN_ID=%d AND RLY_ID=%d"
+			, pPtn->GetPatternID(), plnk->GetLinkType(), plnk->GetTgtFacp(), plnk->GetTgtUnit()
+			, plnk->GetTgtChn(), plnk->GetTgtDev()
+		);
+
+		if (pDB->ExecuteSql(strSql) == FALSE)
+		{
+			pFP->m_bThreadSucceeded = FALSE;
+			pDB->RollbackTransaction();
+			pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+			SetEvent(pFP->m_hThreadHandle);
+			return 0;
+		}
+	}
+
+	pDB->CommitTransaction();
+
+	//20240604 GBM start - 해당 패턴이 중계기 일람표 상의 패턴이고 수신기 중 GT1 수신기가 있다면 중계기 일람표를 수정
+	BOOL bManualMake = FALSE;
+	bManualMake = pPtn->GetManualMake();
+	if (!bManualMake)
+	{
+		BOOL bGT1TypeExist = FALSE;
+		for (int i = 0; i < MAX_FACP_COUNT; i++)
+		{
+			if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
+			{
+				bGT1TypeExist = TRUE;
+				break;
+			}
+		}
+
+		if (bGT1TypeExist)
+		{
+			for (int i = 0; i < pFP->m_dataLinkedVec.size(); i++)
+			{
+				plnk = (CDataLinked*)pFP->m_dataLinkedVec[i];
+				if (plnk == nullptr)
+				{
+					pFP->m_bThreadSucceeded = FALSE;
+					pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+					SetEvent(pFP->m_hThreadHandle);
+					return 0;
+				}
+
+				CString strPatternName = pPtn->GetPatternName();
+				int nFacp = plnk->GetTgtFacp() - 1;
+				int nUnit = plnk->GetTgtUnit() - 1;
+				int nLoop = plnk->GetTgtChn() - 1;
+				int nCircuit = plnk->GetTgtDev();
+
+				if (!CNewExcelManager::Instance()->UpdatePatternInfo(nFacp, nUnit, nLoop, nCircuit, PATTERN_ITEM_DELETE, _T(""), pFP->m_pRefFasSysData->GetPrjName()))
+				{
+					pFP->m_bThreadSucceeded = FALSE;
+					pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+					SetEvent(pFP->m_hThreadHandle);
+				}
+			}
+		}
+	}
+	//20240604 GBM end
+
+	pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFP->m_hThreadHandle);
+
+	return 0;
+}
+
+UINT ThreadAddLinkedCircuitToThePattern(LPVOID pParam)
+{
+	//
+	CFormPattern* pFP = (CFormPattern*)pParam;
+	pFP->m_bThreadSucceeded = TRUE;
+	CDataPattern * pPtn;
+	CDataLinked * plnk;
+
+	pPtn = (CDataPattern *)pFP->m_pEditItem->pData;
+	pFP->m_pRefFasSysData->ChangePattern(pPtn, pPtn->GetManualMake(), pFP->m_dataLinkedVec);
+
+	if (pPtn->GetManualMake() != 1)
+	{
+		int nLinked = pFP->m_dataLinkedVec.size();
+		for (int i = 0; i < nLinked; i++)
+		{
+			plnk = pFP->m_dataLinkedVec[i];
+			int nFacp = plnk->GetTgtFacp() - 1;
+			int nUnit = plnk->GetTgtUnit() - 1;
+			int nLoop = plnk->GetTgtChn() - 1;
+			int nCircuit = plnk->GetTgtDev();
+
+			if (!CNewExcelManager::Instance()->UpdatePatternInfo(nFacp, nUnit, nLoop, nCircuit, PATTERN_ITEM_ADD, pPtn->GetPatternName(), pFP->m_pRefFasSysData->GetPrjName()))
+			{
+				pFP->m_bThreadSucceeded = FALSE;
+				pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+				SetEvent(pFP->m_hThreadHandle);
+			}
+		}
+	}
+
+	pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pFP->m_hThreadHandle);
+
+	return 0;
+}
+
 // CFormPattern
 
 IMPLEMENT_DYNCREATE(CFormPattern, CFormView)
@@ -224,9 +458,10 @@ void CFormPattern::OnBnClickedBtnSave()
 
 void CFormPattern::OnBnClickedBtnDel()
 {
+	//20240603 GBM start - 스레드로 전환하고 중계기 일람표 상의 패턴이라면 중계기 일람표에 적용
+#if 1
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CPtrList ptrList;
-	int nPtnID = 0; 
+
  	if (m_pRefFasSysData == nullptr)
 		return ;
 	if (m_pCurItem == nullptr || m_pCurItem->pData == nullptr)
@@ -236,11 +471,72 @@ void CFormPattern::OnBnClickedBtnDel()
 		return; 
 	if(AfxMessageBox(L"선택된 패턴을 삭제 하시겠습니까?" , MB_YESNO) == IDNO)
 		return;
+
+	UpdateData();
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("패턴을 삭제하는 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadDeletePattern, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	m_pProgressBarDlg = nullptr;
+
+	if (AfxGetMainWnd())
+		AfxGetMainWnd()->SendMessage(UWM_DKP_PATTERN_REFRESH, DATA_ALL, 0);
+
+	if (m_bThreadSucceeded)
+	{
+		CString strMsg = _T("");
+		strMsg.Format(_T("The pattern [%s] was successfully deleted."), ((CDataPattern*)m_pEditItem->pData)->GetPatternName());
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		AfxMessageBox(L"패턴을 삭제하는데 성공했습니다.");
+	}
+	else
+	{
+		CString strMsg = _T("");
+		strMsg.Format(_T("Failed to delete the pattern [%s]."), ((CDataPattern*)m_pEditItem->pData)->GetPatternName());
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		AfxMessageBox(L"패턴을 삭제하는데 실패했습니다.");
+	}
+
+	m_ctrlPtnTree.DeleteItem(m_pEditItem->hItem);
+	m_pRefFasSysData->DeletePatternInMemory((CDataPattern*)m_pEditItem->pData);
+	POSITION pos = m_ptrItemList.Find(m_pEditItem);
+	if (pos)
+		m_ptrItemList.RemoveAt(pos);
+
+	delete m_pEditItem;
+	InitView();
+	//
+	
+#else
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CPtrList ptrList;
+	int nPtnID = 0;
+	if (m_pRefFasSysData == nullptr)
+		return;
+	if (m_pCurItem == nullptr || m_pCurItem->pData == nullptr)
+		return;
+
+	if (m_pCurItem->nDataType == PTN_PATTERN)
+		return;
+	if (AfxMessageBox(L"선택된 패턴을 삭제 하시겠습니까?", MB_YESNO) == IDNO)
+		return;
 	m_pEditItem = m_pCurItem;
 	nPtnID = ((CDataPattern*)m_pEditItem->pData)->GetPatternID();
 	YAdoDatabase * pDb = m_pRefFasSysData->GetPrjDB();
 	pDb->BeginTransaction();
-	if (DeletePattern(pDb , nPtnID) <= 0)
+	if (DeletePattern(pDb, nPtnID) <= 0)
 	{
 		pDb->RollbackTransaction();
 		AfxMessageBox(L"패턴을 삭제하는데 실패 했습니다.");
@@ -254,14 +550,14 @@ void CFormPattern::OnBnClickedBtnDel()
 		return;
 	}
 
-	if(m_pRefFasSysData->DeleteLinkFromAllInput(LK_TYPE_PATTERN,nPtnID,0,0,0) <= 0)
+	if (m_pRefFasSysData->DeleteLinkFromAllInput(LK_TYPE_PATTERN, nPtnID, 0, 0, 0) <= 0)
 	{
 		pDb->RollbackTransaction();
 		AfxMessageBox(L"패턴을 사용하는 입력에서 해당 정보를 삭제하는데 실패 했습니다.");
 		return;
 	}
 	pDb->CommitTransaction();
-	
+
 	m_ctrlPtnTree.DeleteItem(m_pEditItem->hItem);
 	m_pRefFasSysData->DeletePatternInMemory((CDataPattern*)m_pEditItem->pData);
 	if (AfxGetMainWnd())
@@ -276,6 +572,8 @@ void CFormPattern::OnBnClickedBtnDel()
 	InitView();
 
 	AfxMessageBox(L"패턴을 삭제하는데 성공했습니다.");
+#endif
+	//20240603 GBM end
 }
 
 
@@ -343,6 +641,9 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 
 
 	//////////////////////////////////////////////////////////////////////////
+
+	//20240604 GBM start - 스레드로 전환
+#if 1
 	CString str;
 	int nRet = 0, nCnt, i;
 	CDataPattern * pPtn;
@@ -351,7 +652,6 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 	CDataLinked * plnk;
 	POSITION pos;
 	std::vector<int> vtSel;
-	YAdoDatabase * pDB;
 
 	if (m_pCurItem == nullptr)
 		return;
@@ -370,6 +670,96 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 
 	if (AfxMessageBox(L"패턴 항목을 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 		return;
+
+	if (m_pRefFasSysData == nullptr)
+	{
+		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+		return;
+	}
+
+	m_dataLinkedVec.clear();
+	pos = m_ctrlRelayList.GetFirstSelectedItemPosition();
+
+	while (pos)
+	{
+		int nSelected = m_ctrlRelayList.GetNextSelectedItem(pos);
+		vtSel.push_back(nSelected);
+	}
+	sort(vtSel.begin(), vtSel.end());
+
+	for (int i = 0; i < vtSel.size(); i++)
+	{
+		plnk = (CDataLinked*)m_ctrlRelayList.GetItemData(vtSel[i]);
+		m_dataLinkedVec.push_back(plnk);
+	}
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("선택된 출력 회로를 패턴에서 삭제하는 중입니다.\n                       잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadDeleteLinkedCircuitFromThePattern, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	m_pProgressBarDlg = nullptr;
+
+	for (i = (int)vtSel.size() - 1; i >= 0; --i)
+	{
+		plnk = (CDataLinked*)m_ctrlRelayList.GetItemData(vtSel[i]);
+		if (plnk == nullptr)
+		{
+			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
+			strError = L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.";
+			bError = TRUE;
+			break;;
+		}
+		pPtn->DeleteItemPtr(plnk);
+		delete plnk;	//20240604 GBM - 메모리 누수 수정
+		m_ctrlRelayList.DeleteItem(vtSel[i]);
+	}
+	
+	if (m_bThreadSucceeded)
+		AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다");
+	else
+		AfxMessageBox(L"연동 출력 정보를 삭제하는데 실패했습니다");
+
+	if (AfxGetMainWnd())
+		AfxGetMainWnd()->SendMessage(UWM_DKP_PATTERN_REFRESH, DATA_ALL, 0);
+#else
+	CString str;
+	int nRet = 0, nCnt, i;
+	CDataPattern * pPtn;
+	BOOL bError = FALSE;
+	CString strSql, strError = L"";
+	CDataLinked * plnk;
+	POSITION pos;
+	std::vector<int> vtSel;
+	YAdoDatabase * pDB;
+
+	if (m_pCurItem == nullptr)
+	return;
+	int nSel;
+	nSel = m_ctrlRelayList.GetNextItem(-1, LVNI_SELECTED);
+	if (nSel < 0)
+		return;
+
+	pPtn = (CDataPattern *)m_pCurItem->pData;
+	if (pPtn == nullptr)
+	return;
+
+	nCnt = m_ctrlRelayList.GetSelectedCount();
+	if (nCnt < 0)
+		return;
+
+	if (AfxMessageBox(L"패턴 항목을 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+	return;
 
 	if (m_pRefFasSysData == nullptr)
 	{
@@ -452,12 +842,16 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 			break;;
 		}
 		pPtn->DeleteItemPtr(plnk);
+		delete plnk;	//20240604 GBM - 메모리 누수 수정
 		m_ctrlRelayList.DeleteItem(vtSel[i]);
 	}
 	pDB->CommitTransaction();
 	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다");
 	if (AfxGetMainWnd())
-		AfxGetMainWnd()->SendMessage(UWM_DKP_PATTERN_REFRESH, DATA_ALL, 0);
+	AfxGetMainWnd()->SendMessage(UWM_DKP_PATTERN_REFRESH, DATA_ALL, 0);
+#endif
+	//20240604 GBM end
+
 }
 
 
@@ -759,13 +1153,62 @@ int CFormPattern::AddDatabasePattern(UINT nID , CString strPattern , int nType ,
 	pPtn = m_pRefFasSysData->AddNewPattern(nID, strPattern, nType,1, &ptrList);
 	ChangeTreeItem(DATA_ADD, pPtn->GetPatternType(), pPtn);
 	AddCancel();
-	AfxMessageBox(L"패터을 추가하는데 성공했습니다.");
+	AfxMessageBox(L"패턴을 추가하는데 성공했습니다.");
 	return 1;
 }
 
 
 int CFormPattern::SaveDatabasePattern(ST_TREEITEM * pItem, CString strPattern, int nType,int nManualMakeStatuse)
 {
+	//20240604 GBM start - 스레드로 전환
+#if 1
+	CDataLinked * plnk;
+	CDataPattern * pPtn;
+	int i = 0, nCnt;
+	nCnt = m_ctrlRelayList.GetItemCount();
+	m_dataLinkedVec.clear();
+	for (i = 0; i < nCnt; i++)
+	{
+		plnk = (CDataLinked*)m_ctrlRelayList.GetItemData(i);
+		if (plnk == nullptr)
+			continue;
+		m_dataLinkedVec.push_back(plnk);
+	}
+
+	if (m_pRefFasSysData == nullptr)
+		return -1;
+	if (m_pCurItem == nullptr)
+		return -1;
+
+	m_pEditItem = m_pCurItem;
+	pPtn = (CDataPattern*)m_pEditItem->pData;
+	pPtn->SetPatternName(strPattern);
+	pPtn->SetPatternType(nType);
+	pPtn->SetManualMake(nManualMakeStatuse);
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+	CString strMsg = _T("수정된 패턴 정보를 저장하는 중입니다. 잠시 기다려 주세요.");
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadAddLinkedCircuitToThePattern, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	m_pProgressBarDlg = nullptr;
+
+	pPtn = (CDataPattern*)m_pEditItem->pData;
+	ChangeTreeItem(DATA_SAVE, pPtn->GetPatternType(), pPtn);
+	AfxMessageBox(L"패턴을 저장하는데 성공했습니다.");
+	m_pEditItem = nullptr;
+	return 1;
+#else
 	CDataLinked * plnk;
 	//CDataDevice * pDev;
 	CDataPattern * pPtn;
@@ -791,20 +1234,22 @@ int CFormPattern::SaveDatabasePattern(ST_TREEITEM * pItem, CString strPattern, i
 	pPtn->SetPatternType(nType);
 	pPtn->SetManualMake(nManualMakeStatuse);
 
-	pPtn = m_pRefFasSysData->ChangePattern((CDataPattern*)m_pEditItem->pData,nManualMakeStatuse, &ptrList);
-// 	pPtn->SetPatternName(strPattern);
-// 	pPtn->SetPatternType(nType);
-// 	pPtn->SetManualMake(nManualMakeStatuse);
+	pPtn = m_pRefFasSysData->ChangePattern((CDataPattern*)m_pEditItem->pData, nManualMakeStatuse, &ptrList);
+	// 	pPtn->SetPatternName(strPattern);
+	// 	pPtn->SetPatternType(nType);
+	// 	pPtn->SetManualMake(nManualMakeStatuse);
 	ChangeTreeItem(DATA_SAVE, pPtn->GetPatternType(), pPtn);
-	AfxMessageBox(L"패터을 저장하는데 성공했습니다.");
+	AfxMessageBox(L"패턴을 저장하는데 성공했습니다.");
 	m_pEditItem = nullptr;
 	return 1;
+#endif
+	//20240604 GBM end
 }
 
 
 int CFormPattern::DeletePattern(YAdoDatabase * pDB, int nPtnID)
 {
-	UpdateData();
+	//UpdateData();		//스레드 변경으로 주석처리
 	CString strSql;
 	strSql.Format(L"DELETE FROM TB_PATTERN_MST WHERE PT_ID=%d" , nPtnID);
 	if (pDB->ExecuteSql(strSql) == FALSE)
@@ -1290,7 +1735,6 @@ void CFormPattern::OnTvnPumpDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 
 }
 
-
 void CFormPattern::OnTvnContactDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	*pResult = 0;
@@ -1395,9 +1839,9 @@ void CFormPattern::OnTvnContactDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		m_ctrlRelayList.SetItemData(0, (DWORD_PTR)pLink);
 	}
 
-
 	m_ctrlRelayList.SetRedraw();
 
+	delete ptc;
 }
 
 void CFormPattern::OnTvnPSwitchDropedItem(NMHDR *pNMHDR, LRESULT *pResult)

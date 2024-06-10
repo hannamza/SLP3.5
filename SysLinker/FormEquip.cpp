@@ -576,7 +576,7 @@ int CFormEquip::DataDelete()
 			CString strMsg1 = _T("");
 			CString strMsg2 = _T("");
 
-			bRet = CNewExcelManager::Instance()->UpdateOneEquipment(nType, pEq->GetEquipID(), _T(""), strWin32AppProjectName);
+			bRet = CNewExcelManager::Instance()->UpdateOneEquipmentInfo(nType, pEq->GetEquipID(), _T(""), strWin32AppProjectName);
 			if (bRet)
 			{
 				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition has been successfully deleted from the module table file."), strType, nIndex, m_strName);
@@ -677,7 +677,7 @@ int CFormEquip::DataAdd()
 			CString strMsg1 = _T("");
 			CString strMsg2 = _T("");
 
-			bRet = CNewExcelManager::Instance()->UpdateOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
+			bRet = CNewExcelManager::Instance()->UpdateOneEquipmentInfo(nType, nID, m_strName, strWin32AppProjectName);
 			if (bRet)
 			{
 				strMsg1.Format(_T("The new equipment [%s ID - %d : %s] definition has been successfully added to the module table file."), strType, nID, m_strName);
@@ -821,7 +821,7 @@ int CFormEquip::DataSave()
 			CString strMsg1 = _T("");
 			CString strMsg2 = _T("");
 
-			bRet = CNewExcelManager::Instance()->UpdateOneEquipment(nType, nID, m_strName, strWin32AppProjectName);
+			bRet = CNewExcelManager::Instance()->UpdateOneEquipmentInfo(nType, nID, m_strName, strWin32AppProjectName);
 			if (bRet)
 			{
 				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition was successfully modified in the module table file."), strType, nID, m_strName);

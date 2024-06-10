@@ -5,6 +5,7 @@
 
 #include "afxwin.h"
 
+#include "ProgressBarDlg.h"
 
 class CDataPattern;
 class CRelayTableData;
@@ -52,6 +53,12 @@ public:
 	CString m_strPatternName;
 	CString m_strPatternCode;
 	UINT m_uPatternID;
+
+	HANDLE m_hThreadHandle;
+	BOOL m_bThreadSucceeded;
+	CProgressBarDlg* m_pProgressBarDlg;
+	std::vector<CDataLinked*> m_dataLinkedVec;
+
 	afx_msg void OnBnClickedBtnAdd();
 	afx_msg void OnBnClickedBtnSave();
 	afx_msg void OnBnClickedBtnDel();

@@ -659,8 +659,18 @@ void CDTreeCtrl::OnTvnBegindrag(NMHDR *pNMHDR, LRESULT *pResult)
 			return;
 	}
 
+	//20240610 GBM start - 메모리 누수 수정
+#if 1
+	if (m_pDragImage != nullptr)
+	{
+		delete m_pDragImage;
+		m_pDragImage = nullptr;
+	}
+#else
 	if (m_pDragImage == nullptr)
 		m_pDragImage = new CImageList;
+#endif
+	//20240610 GBM end
 	m_pDragImage = CreateDragImageEx(pNMTreeView->itemNew.hItem);
 
 	if (m_pDragImage == nullptr)

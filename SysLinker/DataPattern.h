@@ -22,7 +22,8 @@ public:
 	POSITION	AddDeviceToPattern(CDataDevice * pDev,int nInsertType);
 	POSITION	AddItemToPattern(CDataLinked * pItem);
 	CPtrList *	GetPtnItemList() { return &m_ptrPtnItemList; }
-protected:
+//protected:
+public:
 	CString			m_strPatternName;
 	INT_PTR			m_nPatternID;
 	short			m_sPtnType;
