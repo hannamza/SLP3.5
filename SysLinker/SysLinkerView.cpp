@@ -1309,13 +1309,13 @@ void CSysLinkerView::OnPtnlkMenuDelptn()
 	pLink = (CDataLinked*)m_ctrlPatternList.GetItemData(nIdx);
 	if (pLink == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 접점에 대한 정보를 가져오는데 실패 했습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 접점에 대한 정보를 가져오는데 실패했습니다.");
 		return; 
 	}
 
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
 		return;
 	}
 
@@ -1339,7 +1339,7 @@ void CSysLinkerView::OnPtnlkMenuDelptn()
 
 	}
 	m_ctrlPatternList.DeleteItem(nIdx);
-	AfxMessageBox(L"연동된 접점 정보를 삭제하는데 성공했습니다");
+	AfxMessageBox(L"연동된 접점 정보를 삭제하는데 성공했습니다.");
 }
 
 
@@ -1414,7 +1414,7 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
 		return;
 	}
 
@@ -1442,7 +1442,7 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
-			strError = L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.";
+			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -1456,7 +1456,7 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 
 		if (pDB->OpenQuery(strSql) == FALSE)
 		{
-			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 연동정보를 가져오는데 실패했습니다.";
+			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 연동정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -1473,7 +1473,7 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 
 		if (pDB->ExecuteSql(strSql) == FALSE)
 		{
-			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 연동정보를 삭제하는데 실패했습니다.";
+			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 연동정보를 삭제하는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -1495,7 +1495,7 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
-			strError = L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.";
+			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -1504,7 +1504,7 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 	}
 	pDB->CommitTransaction();
 	ChangeRelayEditNumber();
-	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다");
+	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다.");
 // 	
 // 
 // 
@@ -1838,11 +1838,11 @@ void CSysLinkerView::OnBnClickedBtnDel()
 
 	if (nRet <= 0)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다.");
 	}
 	else
 	{
-		AfxMessageBox(L"삭제하는데 성공 했습니다.");
+		AfxMessageBox(L"삭제하는데 성공했습니다.");
 	}
 	AddCancel();
 }

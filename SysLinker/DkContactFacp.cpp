@@ -190,7 +190,7 @@ int CDkContactFacp::InitTree()
 
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"펌프정보가 정보가 설정되지 않았습니다.");
+		AfxMessageBox(L"접점정보가 설정되지 않았습니다.");
 		return 0;
 	}
 	RemoveAllTreeData();

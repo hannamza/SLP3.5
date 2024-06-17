@@ -57,7 +57,7 @@ BOOL CDlgInputChange::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	VERIFY(m_ctrlInputList.m_cImageList.Create(IDB_CHECKBOXES, 16, 3, RGB(255, 0, 255)));
 	m_ctrlInputList.m_HeaderCtrl.SetImageList(&m_ctrlInputList.m_cImageList);
-	m_ctrlInputList.InsertColumn(0, _T("이전회로"), LVCFMT_LEFT, 350);
+	m_ctrlInputList.InsertColumn(0, _T("이전 회로"), LVCFMT_LEFT, 350);
 	m_ctrlInputList.InsertColumn(1, _T("새 회로"), LVCFMT_LEFT, 350);
 	m_ctrlInputList.InsertColumn(2, _T("수정"), LVCFMT_LEFT, 70);
 	m_ctrlInputList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);

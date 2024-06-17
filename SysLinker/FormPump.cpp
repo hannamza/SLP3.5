@@ -1070,7 +1070,7 @@ int CFormPump::DataAdd(CDataPump * pData)
 	}
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 입력하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -1078,7 +1078,7 @@ int CFormPump::DataAdd(CDataPump * pData)
 	pNewData->CopyData(pData);
 	if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 입력하는데 실패했습니다.");
 		return 0;
 	}
 	spPump->AddTail(pNewData);
@@ -1106,7 +1106,7 @@ int CFormPump::DataSave(CDataPump * pData)
 
 	if (pDb->OpenQuery(strSql) == FALSE)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 저장하는데 실패했습니다.");
 		return 0;
 	}
 	nCnt = pDb->GetRecordCount();
@@ -1132,7 +1132,7 @@ int CFormPump::DataSave(CDataPump * pData)
 
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 저장하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -1142,7 +1142,7 @@ int CFormPump::DataSave(CDataPump * pData)
 		pNewData->CopyData(pData);
 		if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)	//20240402 GBM - ">" -> "<="로 변경
 		{
-			AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+			AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 저장하는데 실패했습니다.");
 			return 0;
 		}
 		std::shared_ptr<CManagerPump> spManager = m_pRefFasSysData->GetPumpManager();
@@ -1153,7 +1153,7 @@ int CFormPump::DataSave(CDataPump * pData)
 	{
 		if (m_pDlgLeftTopTreePane->ChangeTreeData(pData) <= 0)
 		{
-			AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+			AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 저장하는데 실패했습니다.");
 			return 0;
 		}
 	}
@@ -1179,7 +1179,7 @@ int CFormPump::DataDelete(CDataPump * pData)
 
 	if (pDb->OpenQuery(strSql) == FALSE)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 	nCnt = pDb->GetRecordCount();
@@ -1193,13 +1193,13 @@ int CFormPump::DataDelete(CDataPump * pData)
 
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 
 	if (m_pDlgLeftTopTreePane->DeleteTreeData(pData) <= 0)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스에 펌프 정보를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -1269,31 +1269,31 @@ void CFormPump::OnPtnlkMenuDelptn()
 	pLink = (CDataLinked*)m_ctrlPatternList.GetItemData(nIdx);
 	if (pLink == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 패턴에 대한 정보를 가져오는데 실패 했습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 패턴에 대한 정보를 가져오는데 실패했습니다.");
 		return;
 	}
 
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
 		return;
 	}
 
 	pDB = m_pRefFasSysData->GetPrjDB();
 	if (pDB == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트의 데이터베이스 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트의 데이터베이스 정보가 잘못됐습니다.");
 		return;
 	}
 
 	if (DeleteLink(pLink, pDB) == 0)
 	{
-		AfxMessageBox(L"연동된 패턴 정보를 삭제하는데 실패했습니다");
+		AfxMessageBox(L"연동된 패턴 정보를 삭제하는데 실패했습니다.");
 		return;
 	}
 	m_ctrlPatternList.DeleteItem(nIdx);
 	m_pCurrentData->DeleteLink(pLink);
-	AfxMessageBox(L"연동된 패턴 정보를 삭제하는데 성공했습니다");
+	AfxMessageBox(L"연동된 패턴 정보를 삭제하는데 성공했습니다.");
 }
 
 
@@ -1317,7 +1317,7 @@ void CFormPump::OnRlylkMenuDelrly()
 
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
 		return;
 	}
 
@@ -1329,7 +1329,7 @@ void CFormPump::OnRlylkMenuDelrly()
 
 	if (pDB == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트의 데이터베이스 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트의 데이터베이스 정보가 잘못됐습니다.");
 		return;
 	}
 	pos = m_ctrlRelayList.GetFirstSelectedItemPosition();
@@ -1350,14 +1350,14 @@ void CFormPump::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
-			strError = L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.";
+			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
 
 		if (DeleteLink(pLink, pDB) == 0)
 		{
-			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 연동정보를 삭제하는데 실패했습니다.";
+			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 연동정보를 삭제하는데 실패했습니다.";
 			bError = TRUE;
 			break;
 		}
@@ -1377,7 +1377,7 @@ void CFormPump::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
-			strError = L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.";
+			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -1386,7 +1386,7 @@ void CFormPump::OnRlylkMenuDelrly()
 	}
 	pDB->CommitTransaction();
 	vtSel.clear();
-	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다");
+	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다.");
 }
 
 

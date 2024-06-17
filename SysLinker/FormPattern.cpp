@@ -427,7 +427,7 @@ void CFormPattern::OnBnClickedBtnSave()
 	nSel = m_cmbPtnType.GetCurSel();
 	if (nSel < 0)
 	{
-		AfxMessageBox(L"선택된 패턴 타입 잆습니다.");
+		AfxMessageBox(L"선택된 패턴 타입이 없습니다.");
 		return;
 	}
 	nType = (int)m_cmbPtnType.GetItemData(nSel);
@@ -469,7 +469,7 @@ void CFormPattern::OnBnClickedBtnDel()
 
 	if (m_pCurItem->nDataType == PTN_PATTERN)
 		return; 
-	if(AfxMessageBox(L"선택된 패턴을 삭제 하시겠습니까?" , MB_YESNO) == IDNO)
+	if(AfxMessageBox(L"선택된 패턴을 삭제하시겠습니까?" , MB_YESNO) == IDNO)
 		return;
 
 	UpdateData();
@@ -673,7 +673,7 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"삭제하는데 실패 했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
 		return;
 	}
 
@@ -726,9 +726,9 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 	}
 	
 	if (m_bThreadSucceeded)
-		AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다");
+		AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다.");
 	else
-		AfxMessageBox(L"연동 출력 정보를 삭제하는데 실패했습니다");
+		AfxMessageBox(L"연동 출력 정보를 삭제하는데 실패했습니다.");
 
 	if (AfxGetMainWnd())
 		AfxGetMainWnd()->SendMessage(UWM_DKP_PATTERN_REFRESH, DATA_ALL, 0);

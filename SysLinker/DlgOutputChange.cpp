@@ -80,7 +80,7 @@ BOOL CDlgOutputChange::OnInitDialog()
 
 	VERIFY(m_ctrlRelayList.m_cImageList.Create(IDB_CHECKBOXES, 16, 3, RGB(255, 0, 255)));
 	m_ctrlRelayList.m_HeaderCtrl.SetImageList(&m_ctrlRelayList.m_cImageList);
-	m_ctrlRelayList.InsertColumn(0, _T("이전회로"), LVCFMT_LEFT, 350);
+	m_ctrlRelayList.InsertColumn(0, _T("이전 회로"), LVCFMT_LEFT, 350);
 	m_ctrlRelayList.InsertColumn(1, _T("새 회로"), LVCFMT_LEFT, 350);
 	m_ctrlRelayList.InsertColumn(2, _T("수정"), LVCFMT_LEFT, 70);
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);

@@ -143,7 +143,7 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 
 	if (m_pRefChangeData == nullptr)
 	{
-		AfxMessageBox(L"임시저장 위치가 초기화 되지 않았습니다. 프로그램을 재기동 해주십시요");
+		AfxMessageBox(L"임시저장 위치가 초기화되지 않았습니다. 프로그램을 재기동 해주십시오.");
 		return;
 	}
 	nSel = m_cmbFacp.GetCurSel();
@@ -156,14 +156,14 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 	nFacpID = (int)m_cmbFacp.GetItemData(nSel);
 	if (nFacpID <= 0)
 	{
-		AfxMessageBox(L"수신기가 정보가 없습니다.");
+		AfxMessageBox(L"수신기 정보가 없습니다.");
 		return;
 	}
 
 	nSel = m_cmbType.GetCurSel();
 	if (nSel < 0)
 	{
-		AfxMessageBox(L"타입이 설정되지 않았습니다. 타입 설정을 해주십시요.");
+		AfxMessageBox(L"타입이 설정되지 않았습니다. 타입 설정을 해주십시오.");
 		return;
 	}
 
@@ -176,12 +176,12 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 
 	if (m_strName == L"")
 	{
-		AfxMessageBox(L"이름을 입력해 주십시요");
+		AfxMessageBox(L"이름을 입력해 주십시오.");
 		return;
 	}
 	if (m_nNum <= 0)
 	{
-		AfxMessageBox(L"압력 스위치 번호를 입력해 주십시요");
+		AfxMessageBox(L"압력 스위치 번호를 입력해 주십시오.");
 		return;
 	}
 	nPcb = m_nNum / 4 + 1;
@@ -205,7 +205,7 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 	}
 	if (lRet == 0)
 	{
-		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 수정하는 데에 실패했습니다.");
 		return;
 	}
 	SetAddButtonEnable(TRUE);

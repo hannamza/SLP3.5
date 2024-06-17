@@ -177,7 +177,7 @@ void CDlgLoadRom::OnBnClickedBtnBrowser()
 
 	if (m_bFoundRvFile == FALSE)
 	{
-		AfxMessageBox(_T("역변환 정보 파일 없습니다."));
+		AfxMessageBox(_T("역변환 정보 파일이 없습니다."));
 	}
 }
 
@@ -220,7 +220,7 @@ void CDlgLoadRom::OnBnClickedOk()
 
 	if (m_pRefRelayTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트 기초 정보가 설정 되지 않았습니다.");
+		AfxMessageBox(L"프로젝트 기초 정보가 설정되지 않았습니다.");
 		return;
 	}
 	m_pRefRelayTable->SetProjectInfo(m_strPrjName, m_strSiteName, COleDateTime::GetCurrentTime(), L"admin"

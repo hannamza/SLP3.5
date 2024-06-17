@@ -423,7 +423,7 @@ int CFormEquip::FillEquipTree()
 	CString strTypeName, strDesc, strName, strSymbol;
 	std::shared_ptr <CManagerEquip> spManager = nullptr;
 
-	hRoot = m_ctrlTree.InsertItem(L"설비정보",0,0, TVI_ROOT);
+	hRoot = m_ctrlTree.InsertItem(L"설비 정보",0,0, TVI_ROOT);
 	if (m_pRefFasSysData == nullptr)
 		return 0; 
 
@@ -631,7 +631,7 @@ int CFormEquip::DataAdd()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -758,14 +758,14 @@ int CFormEquip::DataSave()
 			spManager = m_pRefFasSysData->GetEquipManager(nType);
 			if (spManager == nullptr)
 			{
-				AfxMessageBox(L"데이터를 가져오는데 실패 했습니다.");
+				AfxMessageBox(L"데이터를 가져오는데 실패했습니다.");
 				return 0;
 			}
 
 			m_pCurrentData = spManager->GetEquip(nID);
 			if (m_pCurrentData == nullptr)
 			{
-				AfxMessageBox(L"데이터를 가져오는데 실패 했습니다.");
+				AfxMessageBox(L"데이터를 가져오는데 실패했습니다.");
 				return 0;
 			}
 		}
@@ -779,7 +779,7 @@ int CFormEquip::DataSave()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -878,7 +878,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
 			{
-				strMsg.Format(_T("[입력 타입 ID : %d]는/은 추가할 수 없습니다."), nID);
+				strMsg.Format(_T("[입력 타입 ID : %d]는 추가할 수 없습니다."), nID);
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -887,7 +887,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
 			{
-				strMsg.Format(_T("[출력 타입 ID : %d]는/은 추가할 수 없습니다."), nID);
+				strMsg.Format(_T("[출력 타입 ID : %d]는 추가할 수 없습니다."), nID);
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -920,7 +920,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
 			{
-				strMsg.Format(_T("[입력 타입 ID : %d]는/은 삭제할 수 없습니다."), nID);
+				strMsg.Format(_T("[입력 타입 ID : %d]는 삭제할 수 없습니다."), nID);
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -929,7 +929,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
 			{
-				strMsg.Format(_T("[출력 타입 ID : %d]는/은 삭제할 수 없습니다."), nID);
+				strMsg.Format(_T("[출력 타입 ID : %d]는 삭제할 수 없습니다."), nID);
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}

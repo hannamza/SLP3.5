@@ -268,7 +268,7 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 	{
 	case PROG_RESULT_CANCEL:
 		GetDlgItem(IDC_BTN_VIEW)->EnableWindow(TRUE);
-		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"사용자가 취소 했습니다.");
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"사용자가 취소했습니다.");
 		m_ctrlProg.SetPos(100);
 		m_ctrlReport.Complete();
 		if(m_pNotifyWnd && m_pNotifyWnd->GetSafeHwnd())
@@ -276,7 +276,7 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 		break;
 	case PROG_RESULT_ERROR:
 		GetDlgItem(IDC_BTN_VIEW)->EnableWindow(TRUE);
-		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"생성중 오류가 발생 했습니다.");
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"생성 중 오류가 발생했습니다.");
 		m_ctrlProg.SetPos(100);
 		m_ctrlReport.Complete();
 		if(m_pNotifyWnd && m_pNotifyWnd->GetSafeHwnd())
@@ -284,14 +284,14 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 		break;
 	case PROG_RESULT_STEP:
 		nP = (int)(((float)wp / (float)m_nAllCnt) * 100);
-		str.Format(L"[%d]%% (%d/%d) 검사중 - 오류 %d , 경고 %d",nP,wp,m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
+		str.Format(L"[%d]%% (%d/%d) 검사 중 - 오류 %d, 경고 %d",nP,wp,m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlProg.SetPos(nP);
 		break;
 	case PROG_RESULT_FINISH:
 		GetDlgItem(IDC_BTN_VIEW)->EnableWindow(TRUE);
 		//str.Format(L"%d개의 데이터를 검사했습니다.",m_nAllCnt);
-		str.Format(L"전체 %d개의 데이터 중 오류 %d개,경고 %d개를 발견했습니다",m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
+		str.Format(L"전체 %d개의 데이터 중 오류 %d개,경고 %d개를 발견했습니다.",m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlReport.Complete();
 		m_ctrlProg.SetPos(100);
@@ -341,7 +341,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 
 	if(pDBUtil->DBOpen() == FALSE)
 	{
-		GF_AddDebug(L"자동생성 오류 : 데이터베이스를 연결하는데 실패했습니다.");
+		GF_AddDebug(L"자동생성 오류 : 데이터베이스를 연결하는 데에 실패했습니다.");
 		AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
 		return 0;
 
@@ -411,7 +411,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 			if(nItemCnt >= D_MAX_PTNITEM_COUNT)
 			{
 				// Error 확인 - 리스트 입력
-				strDesc.Format(L"패턴 : %s 개수초과 - %d개" , nItemCnt);
+				strDesc.Format(L"패턴 : %s 개수초과 - %d개" , pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
 				InsertErrorList(CHK_PATTERN_CNT,nItemCnt,pPtn,strDesc);
 			}
 			nOffset ++;
@@ -882,8 +882,8 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"오류검사결과 파일을 생성하는데 실패 했습니다.\n");
-		AfxMessageBox(L"오류검사결과 파일을 생성하는데 실패 했습니다");
+		GF_AddLog(L"오류검사결과 파일을 생성하는데 실패했습니다.\n");
+		AfxMessageBox(L"오류검사결과 파일을 생성하는데 실패했습니다");
 		return;
 	}
 
@@ -901,6 +901,6 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 		file.Write(szBuff,nTempSize);
 	}
 	file.Close();
-	strtemp.Format(L"다음파일명으로\n%s\n저장되었습니다.",strPath);
+	strtemp.Format(L"다음 파일명으로\n[%s]\n저장되었습니다.",strPath);
 	AfxMessageBox(strtemp);
 }

@@ -1172,7 +1172,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		//SendProgressStep(pPrgTagetWnd, PROG_RESULT_ERROR, nAllCnt, nAllStep, nDetailAll, nDetail);
 		AfxMessageBox(L"Excel을 여는데 실패 했습니다.\n"
 			L"연동데이터 Excel 파일의 Validation에러 또는 Excel 파일이 사용 중입니다.\n" 
-			L"해당 파일을 Excel로 여신 다음 오류를 해결하고 다시 시도하여 주십시요", MB_ICONERROR);
+			L"해당 파일을 Excel로 여신 다음 오류를 해결하고 다시 시도하여 주십시오.", MB_ICONERROR);
 		return 0;
 	}
 	return 1;
@@ -1241,7 +1241,7 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	{
 		CString strNewType = g_strEquipTypeString[nType];
 		CString strLog;
-		strLog.Format(_T("[%s ID - %d : %s이(가) 설비 정의에 없어 새로 추가됩니다.]"), strNewType, nWholeID, strEquipName);
+		strLog.Format(_T("[%s ID - %d : %s]가 설비 정의에 없어 새로 추가됩니다."), strNewType, nWholeID, strEquipName);
 		GF_AddLog(strLog);
 	}
 	//20240408 GBM end
@@ -1261,12 +1261,12 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 		if (bRet)
 		{
 			strMsg1.Format(_T("[%s ID - %d : %s] already exists"), strType, nWholeID, strEquipName);
-			strMsg2.Format(_T("[%s ID - %d : %s] 이미 존재합니다."), strType, nWholeID, strEquipName);
+			strMsg2.Format(_T("[%s ID - %d : %s]가 이미 존재합니다."), strType, nWholeID, strEquipName);
 		}
 		else
 		{
 			strMsg1.Format(_T("[%s ID - %d : %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
-			strMsg2.Format(_T("[%s ID - %d : %s] 설비 정의에 존재하지 않습니다. 설비 정의에 추가합니다."), strType, nWholeID, strEquipName);
+			strMsg2.Format(_T("[%s ID - %d : %s]가 설비 정의에 존재하지 않습니다. 설비 정의에 추가합니다."), strType, nWholeID, strEquipName);
 		}
 
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -6224,13 +6224,13 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 	nf=nu = nc = nr = nei = nen = neo = nec = nlb = nlt = nls = nlf = nlr = 0 ;
  	if (m_pDB == nullptr)
  	{
- 		AfxMessageBox(L"프로젝트의 데이터베이스 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시요");
+ 		AfxMessageBox(L"프로젝트의 데이터베이스 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시오.");
  		return 0;
  	}
  
  	if (m_pDB->IsOpen() == FALSE)
  	{
- 		AfxMessageBox(L"프로젝트 데이터베이스에 접속되지 않았습니다.\n프로젝트를 열고 다시 시작하십시요");
+ 		AfxMessageBox(L"프로젝트 데이터베이스에 접속되지 않았습니다.\n프로젝트를 열고 다시 시작하십시오.");
  		return 0;
  	}
 
@@ -6319,7 +6319,7 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
  
  	if (m_pDB->OpenQuery(strSql) == FALSE)
  	{
- 		AfxMessageBox(L"데이터베이스에서 감지기/중계기 정보를 가져오는데 실패 했습니다.");
+ 		AfxMessageBox(L"데이터베이스에서 감지기/중계기 정보를 가져오는데 실패했습니다.");
  		return 0;
  	}
 	
@@ -6372,7 +6372,7 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 			{
 				if (m_pDB->GetFieldValue(arr[x], nValue) == FALSE)
 				{
-					AfxMessageBox(L"데이터베이스에서 정보를 가져오는데 실패 했습니다.");
+					AfxMessageBox(L"데이터베이스에서 정보를 가져오는데 실패했습니다.");
 					return 0;
 				}
 				strTempItem.Format(L"%d", nValue);
@@ -6381,7 +6381,7 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 			{
 				if (m_pDB->GetFieldValue(arr[x], strTempItem) == FALSE)
 				{
-					AfxMessageBox(L"데이터베이스에서 정보를 가져오는데 실패 했습니다.");
+					AfxMessageBox(L"데이터베이스에서 정보를 가져오는데 실패했습니다.");
 					return 0;
 				}
 			}
@@ -7004,14 +7004,14 @@ int CRelayTableData::InsertPrjBaseData()
 
 	if (CheckColumn(L"TB_PATTERN_ITEM", L"ITEM_TYPE", TRUE, L"SMALLINT") == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	if(CheckAddColumn(L"TB_PATTERN_ITEM",L"INSERT_TYPE",TRUE,L"SMALLINT") == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	// [2022/11/24 16:55:29 KHS] 
@@ -7024,8 +7024,8 @@ int CRelayTableData::InsertPrjBaseData()
 	int nRet = CheckAddColumn(L"TB_PATTERN_MST",L"MANUAL_MAKE",FALSE,L"SMALLINT");
 	if(nRet == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼의 존재를 확인한는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼의 존재를 확인하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	else if(nRet == 2)
@@ -7035,8 +7035,8 @@ int CRelayTableData::InsertPrjBaseData()
 
 	if(CheckAddColumn(L"TB_PATTERN_MST",L"MANUAL_MAKE",TRUE,L"SMALLINT") == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -7050,46 +7050,46 @@ int CRelayTableData::InsertPrjBaseData()
 
 	if (CheckAddColumn(L"TB_PSWITCH_MST", L"PS_LCD", TRUE, L"varchar(100)") == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_PUMP_MST", L"PMP_LCD", TRUE, L"varchar(100)") == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_RELAY_LIST", L"RIDX", TRUE, L"int") == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	if (TempFunc_CheckTempSaveTable() == 0)
 	{
-		GF_AddLog(L"자동생성시 사용하는 임시테이블(회로)을 추가하는데 실패 했습니다..");
+		GF_AddLog(L"자동생성시 사용하는 임시테이블(회로)을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	if (TempFunc_CheckTempUsedPtnTable() == 0)
 	{
-		GF_AddLog(L"자동생성시 사용하는 임시테이블(패턴)을 추가하는데 실패 했습니다..");
+		GF_AddLog(L"자동생성시 사용하는 임시테이블(패턴)을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	if (TempFunc_CheckFacpContactTable() == 0)
 	{
-		GF_AddLog(L"수신기 접점 테이블을 추가하는데 실패 했습니다..");
+		GF_AddLog(L"수신기 접점 테이블을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	
 	if (TempFunc_CheckAutoLogicTable() == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2 컬럼확인에 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2 컬럼확인에 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2 컬럼확인에 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2 컬럼확인에 실패했습니다.");
 		return 0;
 	}
 	InsertPrjBaseEquipDB();
@@ -10016,7 +10016,7 @@ int CRelayTableData::TempFunc_CheckAutoLogicTable()
 // 	strSql += L"GO ";
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"TB_AUTO 생성 오류");
+		AfxMessageBox(L"TB_AUTO_LOGIC_V2 생성 오류");
 		return 0;
 	}
 	abk.ChangeOldTableToNewTable();
@@ -10045,7 +10045,7 @@ int CRelayTableData::TempFunc_CheckTempSaveTable()
 	if (nCnt == 1)
 		return 1;
 	
-	AfxMessageBox(L"연동데이터 자동생성 프로그램이 데이터베이스에 없습니다.\n관리자를 호출하여 데이터베이스에 자동생성 프로그램을 설치하여야합니다.");
+	AfxMessageBox(L"연동데이터 자동생성 프로그램이 데이터베이스에 없습니다.\n관리자를 호출하여 데이터베이스에 자동생성 프로그램을 설치하여야 합니다.");
 
 	strSql = L"CREATE TABLE [dbo].[TB_TEMP_SAVED_LINK]( ";
 	strSql += L"[SRC_FACP][int] NOT NULL, ";
@@ -10456,7 +10456,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (CheckColumn(L"TB_PATTERN_ITEM", L"ITEM_TYPE", TRUE, L"SMALLINT") == 0)
 	{
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 // 	if (CheckAutoLogicColumn(L"TB_AUTO_LOGIC", L"LG_USE_ROOM", TRUE, L"TINYINT") == 0)
@@ -10466,23 +10466,23 @@ int CRelayTableData::LoadProjectDatabase()
 // 	}
 	if (TempFunc_CheckTempSaveTable() == 0)
 	{
-		GF_AddLog(L"자동생성시 사용하는 임시테이블을 추가하는데 실패 했습니다..");
+		GF_AddLog(L"자동생성시 사용하는 임시테이블을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	if (TempFunc_CheckTempUsedPtnTable() == 0)
 	{
-		GF_AddLog(L"자동생성시 사용하는 임시테이블(패턴)을 추가하는데 실패 했습니다..");
+		GF_AddLog(L"자동생성시 사용하는 임시테이블(패턴)을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	if (TempFunc_CheckFacpContactTable() == 0)
 	{
-		GF_AddLog(L"수신기 접점 테이블을 추가하는데 실패 했습니다..");
+		GF_AddLog(L"수신기 접점 테이블을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	nRet = TempFunc_CheckStoredProcedure(L"SP_GENERATE_PTN_BY_SOURCE", 1);
 	if (nRet < 0)
 	{
-		GF_AddLog(L"SP_GENERATE_PTN_BY_SOURCE 존재 유무를 검사하는데 실패 했습니다.");
+		GF_AddLog(L"SP_GENERATE_PTN_BY_SOURCE 존재 유무를 검사하는데 실패했습니다.");
 		return 0;
 	}
 	else if (nRet > 0)
@@ -10490,7 +10490,7 @@ int CRelayTableData::LoadProjectDatabase()
 		nRet = TempFunc_MakeStoredProcedure(g_strSpGeneratePtnBySource, 1, nRet == 1);
 		if (nRet < 0)
 		{
-			GF_AddLog(L"SP_GENERATE_PTN_BY_SOURCE %s 하는데 실패 했습니다.", nRet == 1 ? L"생성" : L"수정");
+			GF_AddLog(L"SP_GENERATE_PTN_BY_SOURCE %s 하는데 실패했습니다.", nRet == 1 ? L"생성" : L"수정");
 			return 0;
 		}
 	}
@@ -10499,7 +10499,7 @@ int CRelayTableData::LoadProjectDatabase()
 	nRet = TempFunc_CheckStoredProcedure(L"SP_GENERATE_LINK", 1);
 	if (nRet < 0)
 	{
-		GF_AddLog(L"SP_GENERATE_LINK 존재 유무를 검사하는데 실패 했습니다.");
+		GF_AddLog(L"SP_GENERATE_LINK 존재 유무를 검사하는데 실패했습니다.");
 		return 0;
 	}
 	else if (nRet > 0)
@@ -10507,7 +10507,7 @@ int CRelayTableData::LoadProjectDatabase()
 		nRet = TempFunc_MakeStoredProcedure(g_strSpGenerateLink, 1, nRet == 1);
 		if (nRet < 0)
 		{
-			GF_AddLog(L"SP_GENERATE_LINK %s 하는데 실패 했습니다.", nRet == 1 ? L"생성" : L"수정");
+			GF_AddLog(L"SP_GENERATE_LINK %s 하는데 실패했습니다.", nRet == 1 ? L"생성" : L"수정");
 			return 0;
 		}
 	}
@@ -10515,7 +10515,7 @@ int CRelayTableData::LoadProjectDatabase()
 	nRet = TempFunc_CheckStoredProcedure(L"SP_DELETE_TEMPLINK_PTNITEM", 1);
 	if (nRet < 0)
 	{
-		GF_AddLog(L"SP_DELETE_TEMPLINK_PTNITEM 존재 유무를 검사하는데 실패 했습니다.");
+		GF_AddLog(L"SP_DELETE_TEMPLINK_PTNITEM 존재 유무를 검사하는데 실패했습니다.");
 		return 0;
 	}
 	else if (nRet > 0)
@@ -10523,26 +10523,26 @@ int CRelayTableData::LoadProjectDatabase()
 		nRet = TempFunc_MakeStoredProcedure(g_strSpDeleteTempLinkPtnItem, 1, nRet == 1);
 		if (nRet < 0)
 		{
-			GF_AddLog(L"SP_DELETE_TEMPLINK_PTNITEM %s 하는데 실패 했습니다.", nRet == 1 ? L"생성" : L"수정");
+			GF_AddLog(L"SP_DELETE_TEMPLINK_PTNITEM %s 하는데 실패했습니다.", nRet == 1 ? L"생성" : L"수정");
 			return 0;
 		}
 	}
 
 	if (TempFunc_CheckAutoLogicTable() == 0)
 	{
-		GF_AddLog(L"이전버전의 자동생성 로직을 변경하는데 실패 했습니다..");
+		GF_AddLog(L"이전버전의 자동생성 로직을 변경하는데 실패했습니다.");
 		return 0;
 	}
 
 	if(TempFunc_CheckIndex() == 0)
 	{
-		GF_AddLog(L"이전버전의 데이터베이스에 인덱스를 추가하는데 실패 했습니다..");
+		GF_AddLog(L"이전버전의 데이터베이스에 인덱스를 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	if(CheckAddColumn(L"TB_PATTERN_ITEM",L"INSERT_TYPE",TRUE,L"SMALLINT") == 0)
 	{
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 	// [2022/11/24 16:55:29 KHS] 
@@ -10556,8 +10556,8 @@ int CRelayTableData::LoadProjectDatabase()
 	nRet = CheckAddColumn(L"TB_PATTERN_MST",L"MANUAL_MAKE",FALSE,L"SMALLINT");
 	if(nRet == 0)
 	{
-		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼의 존재를 확인한는데 실패 했습니다.");
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패 했습니다.");
+		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼이 존재하는지 확인하는데 실패했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼이 존재하는지 확인하는데 실패했습니다.");
 		return 0;
 	}
 	else if(nRet == 2)
@@ -10567,26 +10567,26 @@ int CRelayTableData::LoadProjectDatabase()
 
 	if(CheckAddColumn(L"TB_PATTERN_MST",L"MANUAL_MAKE",TRUE,L"SMALLINT") == 0)
 	{
-		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_PSWITCH_MST", L"PS_LCD", TRUE, L"varchar(100)") == 0)
 	{
-		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_PUMP_MST", L"PMP_LCD", TRUE, L"varchar(100)") == 0)
 	{
-		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
 
 	if (CheckAddColumn(L"TB_RELAY_LIST", L"RIDX", TRUE, L"int") == 0)
 	{
-		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10596,7 +10596,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadEquip() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 설비정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 설비정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 	
@@ -10607,7 +10607,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadLocation() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 위치정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 위치정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10619,7 +10619,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadPatternMst() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 패턴정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 패턴정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10630,7 +10630,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadFacp() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 수신기정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 수신기정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
  
@@ -10641,7 +10641,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadUnit() <= 0)
  	{
-		GF_AddLog(L"데이터베이스에서 유닛정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 유닛정보를 가져오는데 실패했습니다.");
  		return 0;
  	}
  
@@ -10652,7 +10652,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadChannel() <= 0)
  	{
-		GF_AddLog(L"데이터베이스에서 계통정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 계통정보를 가져오는데 실패했습니다.");
  		return 0;
  	}
  
@@ -10663,7 +10663,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadRelay() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 디바이스정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 디바이스정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 #if _DBLOAD_TIME_
@@ -10673,7 +10673,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadLinkRelay() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 연동정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 연동정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10685,18 +10685,18 @@ int CRelayTableData::LoadProjectDatabase()
 
 	if (LoadPatternItem() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 패턴내 디바이스정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 패턴 내 디바이스정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
-	GF_AddDebug(L"시간 체크 : 패턴 ITem 정보 가져오기 - %d", dwEnd - dwStart);
+	GF_AddDebug(L"시간 체크 : 패턴 Item 정보 가져오기 - %d", dwEnd - dwStart);
 #endif
 	if (LoadPump() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 펌프 정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 펌프 정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10708,7 +10708,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadLinkPump() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 펌프 연동 정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 펌프 연동 정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10719,7 +10719,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadPresureSwitch() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 압력 스위치 정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 압력 스위치 정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10730,7 +10730,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadLinkPSwitch() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 압력 스위치 연동정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 압력 스위치 연동정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10742,7 +10742,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadSwtich() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 스위치정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 스위치정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10753,7 +10753,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadAccess() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 권한정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 권한정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10764,7 +10764,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadFunction() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 Function정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 Function 정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -10775,7 +10775,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadGroup() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 그룹 정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 그룹 정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 // 
@@ -10786,7 +10786,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadEmBroadcast() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 비상방송 정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 비상방송 정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 // 
@@ -10797,7 +10797,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadAutMakeLogic() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 자동생성 로직을 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 자동생성 로직을 가져오는데 실패했습니다.");
 		return 0;
 	}
 #if _DBLOAD_TIME_
@@ -10807,7 +10807,7 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (LoadFacpContact() <= 0)
 	{
-		GF_AddLog(L"데이터베이스에서 접점정보를 가져오는데 실패 했습니다.");
+		GF_AddLog(L"데이터베이스에서 접점정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 #if _DBLOAD_TIME_
@@ -11884,7 +11884,7 @@ int CRelayTableData::LoadPatternMst()
 
 	if(nCnt > D_MAX_PATTERN_COUNT)
 	{
-		GF_AddLog(L"패턴개수를 초과 했습니다.패턴개수 : %d" , nCnt);
+		GF_AddLog(L"패턴개수를 초과 했습니다. 패턴개수 : %d" , nCnt);
 	}
 	for (i = 0; i < nCnt; i++)
 	{
@@ -13196,7 +13196,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  		pEq = FindEquipData(strIn , ET_INPUTTYPE);
  		if (pEq == nullptr)
  		{
- 			strtemp.Format(L"입력타입[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못햇습니다.\n"
+ 			strtemp.Format(L"입력타입[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n"
  				, strIn);
  			strErr += strtemp;
  			continue;
@@ -13204,7 +13204,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  		nIn = pEq->GetEquipID();
  		if (nIn <= 0)
  		{
- 			strtemp.Format(L"입력타입[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못햇습니다.\n"
+ 			strtemp.Format(L"입력타입[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
  				, strIn);
  			strErr += strtemp;
  			continue;
@@ -13215,7 +13215,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			pEq = FindEquipData(strName, ET_EQNAME);
  			if (pEq == nullptr)
  			{
- 				strtemp.Format(L"설비명[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못햇습니다.\n"
+ 				strtemp.Format(L"설비명[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n"
  					, strName);
  				strErr += strtemp;
  				continue;
@@ -13223,7 +13223,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			nName = pEq->GetEquipID();
  			if (nName <= 0)
  			{
- 				strtemp.Format(L"설비명[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못햇습니다.\n"
+ 				strtemp.Format(L"설비명[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
  					, strName);
  				strErr += strtemp;
  				continue;
@@ -13235,7 +13235,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			pEq = FindEquipData(strOut, ET_OUTPUTTYPE);
  			if (pEq == nullptr)
  			{
- 				strtemp.Format(L"출력타입[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못햇습니다.\n"
+ 				strtemp.Format(L"출력타입[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n"
  					, strOut);
  				strErr += strtemp;
  				continue;
@@ -13243,7 +13243,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			nOut = pEq->GetEquipID();
  			if (nOut <= 0)
  			{
- 				strtemp.Format(L"출력타입[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못햇습니다.\n"
+ 				strtemp.Format(L"출력타입[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
  					, strOut);
  				strErr += strtemp;
  				continue;
@@ -13255,7 +13255,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			pEq = FindEquipData(stCont, ET_OUTCONTENTS);
  			if (pEq == nullptr)
  			{
- 				strtemp.Format(L"출력설명[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못햇습니다.\n" 
+ 				strtemp.Format(L"출력설명[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n" 
  					, stCont);
  				strErr += strtemp;
  				continue;
@@ -13263,7 +13263,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			nCont = pEq->GetEquipID();
 			if (nCont <= 0)
 			{
-				strtemp.Format(L"출력설명[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못햇습니다.\n"
+				strtemp.Format(L"출력설명[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
 					, stCont);
 				strErr += strtemp;
 				continue;
@@ -13658,7 +13658,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 						strFile.Format(L"%s\\%s_%02d.xlsx",strPath,m_strPrjName,nLastFacp);
 						xls.SaveCopyAs(strFile);
 						xls.Close();
-						GF_AddLog(L"패턴 출력표를 생성하는데 실패 했습니다.파일(%s),패턴(%s)패터아이템(%d)"
+						GF_AddLog(L"패턴 출력표를 생성하는데 실패했습니다. 파일(%s),패턴(%s) 패턴아이템(%d)"
 							,strFile,pPtn->GetPatternName(),nDownCol - D_MAX_PTNITEM_COUNT);
 						return 0;
 					}
@@ -14416,7 +14416,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			nDldDataSize = 2 + nPtnItemCount * 3;
 			if (0x0C00 + nDldDataSize >= 0xE400)
 			{
-				GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다\n연동데이터 개수(%d), 패턴데이터개수(%d)"
+				GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다.\n연동데이터 개수(%d), 패턴데이터개수(%d)"
 					, nLastUnit, nLinkCnt, nPtnItemCount);
 				return 0;
 			}
@@ -14433,7 +14433,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			nDldDataSize = 2 + nPtnItemCount * 3;
 			if (0x0C00 + nDldDataSize >= 0xE400)
 			{
-				GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다\n연동데이터 개수(%d), 패턴데이터개수(%d)"
+				GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다.\n연동데이터 개수(%d), 패턴데이터개수(%d)"
 					, nLastUnit, nLinkCnt, nPtnItemCount);
 				return 0;
 			}
@@ -14700,7 +14700,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 
 		if (0x0C00 + nDldDataSize >= 0xE400)
 		{
-			GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다\n연동데이터 개수(%d), 패턴데이터개수(%d)"
+			GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다.\n연동데이터 개수(%d), 패턴데이터개수(%d)"
 				, nLastUnit, nLinkCnt, nPtnItemCount);
 			return 0;
 		}
@@ -15600,7 +15600,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	nTemp = pList->GetCount();
 	if (nPCnt > D_MAX_LINKITEM_COUNT || nDevCnt > D_MAX_LINKITEM_COUNT)
 	{
-	 	GF_AddLog(L"오류 : 한 회선 당 최대 연동데이터 개수는 %d개 이면 %s는 Pattern %d개 , 출력 %d로 최대 개수를 초과 했습니다."
+	 	GF_AddLog(L"오류 : 한 회선 당 최대 연동데이터 개수는 %d개인데 %s는 Pattern %d개 , 출력 %d로 최대 개수를 초과 했습니다."
 	 		, D_MAX_LINKITEM_COUNT, strName, nPCnt, nDevCnt, nTemp);
 	 	nRet = 0;
 	}
@@ -15703,7 +15703,7 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	nTemp = m_spPresureSwitch->GetCount();
 	if (nTemp > D_MAX_PUMP_COUNT)
 	{
-		GF_AddLog(L"오류 : 압력 스위치의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 압력스위치 개수를 초과 했습니다."
+		GF_AddLog(L"오류 : 압력 스위치의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 압력스위치 개수를 초과했습니다."
 			, D_MAX_PUMP_COUNT, nTemp);
 		nRet = 0;
 	}
@@ -15832,7 +15832,7 @@ UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pF
 		nItemCount = pList->GetCount();
 		if (nItemCount > D_MAX_PTNITEM_COUNT)
 		{
-			GF_AddLog(L"오류 : 패턴 중계기 최대 개수는 %d개 이며 [%s] 패턴은 %d개로 최대 패턴개수를 초과 했습니다."
+			GF_AddLog(L"오류 : 한 패턴 당 최대 연동 출력 개수는 %d개 이며 [%s] 패턴은 연동된 출력이 %d개로 한 패턴 당 최대 연동 출력 개수를 초과했습니다."
 				, D_MAX_PTNITEM_COUNT, pData->GetPatternName(), nItemCount);
 			nRet = 0; 
 			//continue;
@@ -16446,7 +16446,7 @@ UINT CRelayTableData::AddEmergencyRom(BYTE * pEmBuff, UINT &uEmOffset)
 	nCnt = m_spEmergencyManager->GetCount();
 	if (nCnt > D_MAX_EMERGENCY_COUNT)
 	{
-		GF_AddLog(L"오류 : 비상방송의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 비상방송 개수를 초과 했습니다."
+		GF_AddLog(L"오류 : 비상방송의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 비상방송 개수를 초과했습니다."
 			, D_MAX_EMERGENCY_COUNT, nCnt);
 		nRet = 0;
 	}
@@ -16662,7 +16662,7 @@ int CRelayTableData::LoadFromRvLocInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"파일을 가져오는데 실패 했습니다.\n");
+		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
 		return 0;
 	}
 	//strLine = L"#TYPE,건물,건물종류,계단,층,실,이름,기타\n";
@@ -16725,7 +16725,7 @@ int CRelayTableData::LoadFromRvEmergencyInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"파일을 가져오는데 실패 했습니다.\n");
+		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
 		return 0;
 	}
 	//strLine = L"#ID,주소,이름\n";
@@ -16773,7 +16773,7 @@ int CRelayTableData::LoadFromRvPatternInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"파일을 가져오는데 실패 했습니다.\n");
+		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
 		return 0;
 	}
 	//strLine = L"#ID,TYPE,이름\n";
@@ -16829,7 +16829,7 @@ int CRelayTableData::LoadFromRvContactInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"파일을 가져오는데 실패 했습니다.\n");
+		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
 		return 0;
 	}
 	//strLine = L"#수신기ID,접점ID,접점번호,접점이름\n";
@@ -16874,7 +16874,7 @@ int CRelayTableData::LoadFromRvEqInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"파일을 가져오는데 실패 했습니다.\n");
+		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
 		return 0;
 	}
 
@@ -16934,7 +16934,7 @@ int CRelayTableData::LoadFromRvRelayInfo(CString strReverseInfo)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 	//strRvLine = L"#RelayIndex|,수신기|,유닛|,계통|,회로|, 입력이름 |,출력이름 |,설비명|,출력설명|,설비번호|

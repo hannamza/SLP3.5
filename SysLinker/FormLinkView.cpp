@@ -326,7 +326,7 @@ void CFormLinkView::OnBnClickedBtnExcel()
 	CString strFilter = L"연동 출력표(*.csv)|*.csv|All Files (*.*)|*.*||";
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"프로젝트가 닫혀있습니다. 프로젝트를 여신 후 다시 실행 해 주십시요");
+		AfxMessageBox(L"프로젝트가 닫혀있습니다. 프로젝트를 여신 후 다시 실행 해 주십시오.");
 		return;
 	}
 
@@ -350,8 +350,8 @@ void CFormLinkView::OnBnClickedBtnExcel()
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"연동출력표 파일을 생성하는데 실패 했습니다.\n");
-		AfxMessageBox(L"연동출력표 파일을 생성하는데 실패 했습니다");
+		GF_AddLog(L"연동출력표 파일을 생성하는데 실패했습니다.\n");
+		AfxMessageBox(L"연동출력표 파일을 생성하는데 실패했습니다");
 		return ;
 	}
 

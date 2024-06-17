@@ -399,10 +399,10 @@ CString GF_GetSHErrorString(int nError)
 		strError = L"소스는 루트 디렉토리이며 이동하거나 이름을 바꿀 수 없습니다.";
 		break;
 	case 0x75:
-		strError = L"대상은 소스의 하위 트리입니다.";
+		strError = L"사용자가 작업을 취소했거나 적절한 플래그가 SHFileOperation 에 제공된 경우 자동으로 취소되었습니다.";
 		break;
 	case 0x76:
-		strError = L"사용자가 작업을 취소했거나 적절한 플래그가 SHFileOperation 에 제공된 경우 자동으로 취소되었습니다 .";
+		strError = L"대상은 소스의 하위 트리입니다.";
 		break;
 	case 0x78:
 		strError = L"보안 설정이 소스에 대한 액세스를 거부했습니다.";
@@ -411,7 +411,7 @@ CString GF_GetSHErrorString(int nError)
 		strError = L"소스 또는 대상 경로가 MAX_PATH를 초과했거나 초과했습니다.";
 		break;
 	case 0x7A:
-		strError = L"작업에 여러 대상 경로가 포함되어 이동 작업의 경우 실패 할 수 있습니다.";
+		strError = L"작업에 여러 대상 경로가 포함되어 이동 작업의 경우 실패할 수 있습니다.";
 		break;
 	case 0x7C:
 		strError = L"소스 또는 대상 또는 둘 다의 경로가 유효하지 않습니다.";

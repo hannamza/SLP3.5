@@ -255,7 +255,7 @@ int CFormAutoMake::AutoMakeStart()
 
 	if(m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"연동데이터 자동생성하는데 실패 했습니다.(중계기일람표 가져오기 실패)");
+		AfxMessageBox(L"연동데이터 자동생성하는데 실패했습니다.(중계기일람표 가져오기 실패)");
 		return 0;
 	}
 
@@ -263,13 +263,13 @@ int CFormAutoMake::AutoMakeStart()
 
 	if(m_spRefAutoLogic == nullptr)
 	{
-		AfxMessageBox(L"연동데이터 자동생성하는데 실패 했습니다.(자동생성 로직 가져오기 실패)");
+		AfxMessageBox(L"연동데이터 자동생성하는데 실패했습니다.(자동생성 로직 가져오기 실패)");
 		return 0;
 	}
 	m_bStopFlag = FALSE;
 	if(InitAutoSystemData() < 0)
 	{
-		AfxMessageBox(L"연동데이터 자동생성하는데 실패 했습니다.(데이터 초기화 실패)");
+		AfxMessageBox(L"연동데이터 자동생성하는데 실패했습니다.(데이터 초기화 실패)");
 		return 0;
 	}
 
@@ -285,7 +285,7 @@ void CFormAutoMake::OnBnClickedBtnMake()
 	m_ctrlTree.DeleteAllItems();
 	RemoveAllData();
 
-	if(AfxMessageBox(L"연동데이터 자동생성 시작전 오류검사를 진행하실려면\nYes : 오류검사 후 연동데이터 생성\nNo:오류검사 없이 연동데이터 생성",MB_YESNO | MB_ICONQUESTION) != IDYES)
+	if(AfxMessageBox(L"연동데이터 자동생성 시작전 오류검사를 진행하실려면\nYes : 오류검사 후 연동데이터 생성\nNo:오류검사없이 연동데이터 생성",MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		AutoMakeStart();
 	}
@@ -1907,14 +1907,14 @@ int CFormAutoMake::AddIndividualAutoLink3(CDataAutoMake * pSourceAuto, YAdoDatab
 		pDBUtil->MoveNext();
 #if _DBG_MAKE_TIME_
 		dwEnd = GetTickCount();
-		GF_AddDebug(L"	- AddIndividualAutoLink2-One Device : %d", dwEnd - dwStart);
+		GF_AddDebug(L"	- AddIndividualAutoLink3-One Device : %d", dwEnd - dwStart);
 		dwStart = dwEnd;
 #endif
 	}
 	pDBUtil->RSClose();
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
-	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink2) : %d", dwEnd - dwStart);
+	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink3) : %d", dwEnd - dwStart);
 #endif
 	return 1;
 }
@@ -2220,14 +2220,14 @@ int CFormAutoMake::AddIndividualAutoLink5(CDataAutoMake * pSourceAuto, YAdoDatab
 		pDBUtil->MoveNext();
 #if _DBG_MAKE_TIME_
 		dwEnd = GetTickCount();
-		GF_AddDebug(L"	- AddIndividualAutoLink2-One Device : %d", dwEnd - dwStart);
+		GF_AddDebug(L"	- AddIndividualAutoLink5-One Device : %d", dwEnd - dwStart);
 		dwStart = dwEnd;
 #endif
 	}
 	pDBUtil->RSClose();
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
-	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink2) : %d", dwEnd - dwStart);
+	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink5) : %d", dwEnd - dwStart);
 #endif
 	return 1;
 }
@@ -2738,11 +2738,11 @@ LRESULT CFormAutoMake::OnMakeProgress(WPARAM wp, LPARAM lp)
 	switch (lp)
 	{
 	case PROG_RESULT_CANCEL:
-		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"사용자가 취소 했습니다.");
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"사용자가 취소했습니다.");
 		m_ctrlProg.SetPos(100);
 		break;
 	case PROG_RESULT_ERROR:
-		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"생성중 오류가 발생 했습니다.");
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"생성 중 오류가 발생했습니다.");
 		m_ctrlProg.SetPos(100);
 		KillTimer(TM_PROG_TIMER);
 		break;
@@ -2790,8 +2790,8 @@ int CFormAutoMake::SaveAutoLink()
 	if (m_pRefFasSysData == nullptr)
 	{
 		SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_ERROR);
-		GF_AddLog(L"프로젝트가 닫혀있는 상태입니다. 프로젝트를 열고 다시 시도해주십시요.");
-		AfxMessageBox(L"프로젝트가 닫혀있는 상태입니다. 프로젝트를 열고 다시 시도해주십시요");
+		GF_AddLog(L"프로젝트가 닫혀있는 상태입니다. 프로젝트를 열고 다시 시도해 주십시오.");
+		AfxMessageBox(L"프로젝트가 닫혀있는 상태입니다. 프로젝트를 열고 다시 시도해주십시오.");
 		return 0; 
 	}
 	int nIdx = 0 , nRet =0;
@@ -2808,7 +2808,7 @@ int CFormAutoMake::SaveAutoLink()
 
 	if(pDb->DropCleanBuffer() == FALSE)
 	{
-		AfxMessageBox(L"데이터베이스의 메모리 버퍼를 초기화 하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터베이스의 메모리 버퍼를 초기화하는데 실패했습니다.");
 		return 0;
 	}
 	pDb->BeginTransaction();
@@ -2830,7 +2830,7 @@ int CFormAutoMake::SaveAutoLink()
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
 		SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
-		AfxMessageBox(L"전체 연동출력을 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"전체 연동출력을 삭제하는데 실패했습니다.");
 		pDb->RollbackTransaction();
 		return 0;
 	}
@@ -3272,7 +3272,7 @@ int CFormAutoMake::DisplayAutoMake()
 			m_ctrlTree.SetItemData(hItem, (DWORD_PTR)pNewAuto);
 		}
 	}
-	AfxMessageBox(L"자동생성을 완료 했습니다.");
+	AfxMessageBox(L"자동생성을 완료했습니다.");
 	return 1;
 }
 
@@ -4936,9 +4936,9 @@ LRESULT CFormAutoMake::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
 		if(lp == 0)
 			AutoMakeStart();
 		else if(lp == -1)
-			AfxMessageBox(L"사용자가 취소 했습니다.");
+			AfxMessageBox(L"사용자가 취소했습니다.");
 		else
-			AfxMessageBox(L"오류가 발생하여 연동데이터 자동생성 할 수 없습니다.");
+			AfxMessageBox(L"오류가 발생하여 연동데이터 자동생성을 할 수 없습니다.");
 		break;
 	}
 	return 0;

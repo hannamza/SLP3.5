@@ -140,7 +140,7 @@ UINT ThreadCreateNewProject(LPVOID pParam)
 	theApp.m_bThreadSucceeded = TRUE;
 	if (theApp.m_pFasSysData == nullptr)
 	{
-		GF_AddLog(L"프로젝트 생성에 실패 했습니다.");
+		GF_AddLog(L"프로젝트 생성에 실패했습니다.");
 		theApp.CloseProject();
 		theApp.m_bThreadSucceeded = FALSE;
 		theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
@@ -163,7 +163,7 @@ UINT ThreadCreateNewProject(LPVOID pParam)
 	/************************************************************************/
 	if (theApp.CreateProject() <= 0)
 	{
-		GF_AddLog(L"프로젝트를 생성하는데 실패 했습니다.");
+		GF_AddLog(L"프로젝트를 생성하는데 실패했습니다.");
 		theApp.CloseProject();
 		theApp.m_bThreadSucceeded = FALSE;
 	}
@@ -178,7 +178,7 @@ UINT ThreadOpenProjectDatabase(LPVOID pParam)
 	theApp.m_bThreadSucceeded = TRUE;
 	if (theApp.OpenProjectDatabase(theApp.m_pFasSysData) < 0)
 	{
-		GF_AddLog(L"프로젝트 데이터베이스를 여는데 실패 했습니다.");
+		GF_AddLog(L"프로젝트 데이터베이스를 여는데 실패했습니다.");
 		theApp.m_bThreadSucceeded = FALSE;
 		theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
 		SetEvent(theApp.m_hThreadHandle);
@@ -187,7 +187,7 @@ UINT ThreadOpenProjectDatabase(LPVOID pParam)
 
 	if (theApp.m_pFasSysData->LoadProjectDatabase() == 0)
 	{
-		GF_AddLog(L"프로젝트 데이터베이스에서 데이터를 가져오는 데에 실패 했습니다.");
+		GF_AddLog(L"프로젝트 데이터베이스에서 데이터를 가져오는 데에 실패했습니다.");
 		theApp.m_bThreadSucceeded = FALSE;
 	}
 
@@ -775,7 +775,7 @@ CView* CSysLinkerApp::OpenFormView(FormViewStyle iStyle)
 	else if (iStyle == FV_ACCESS)
 	{
 		pDocTemp = m_pTempleAccess;
-		strTitle = L"Access권한 편집";
+		strTitle = L"Access 권한 편집";
 	}
 	else if (iStyle == FV_EMERGENCY)
 	{
@@ -1293,7 +1293,7 @@ void CSysLinkerApp::OnHomeProjectNew()
 
 	if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
 	{
-		if (AfxMessageBox(L"새 프로젝트를 생성하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		if (AfxMessageBox(L"새 프로젝트를 생성하시려면 현재 프로젝트를 닫아야 합니다.\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
 
 		//20240527 GBM start - 스레드로 전환
@@ -1518,7 +1518,7 @@ void CSysLinkerApp::OnHomeProjectOpen()
 
 	if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
 	{
-		if (AfxMessageBox(L"프로젝트 열기를 하시려면 현재 프로젝트를 닫아야 합니다\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		if (AfxMessageBox(L"프로젝트 열기를 하시려면 현재 프로젝트를 닫아야 합니다.\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
 
 		//20240527 GBM start - 스레드로 전환
@@ -1622,14 +1622,14 @@ void CSysLinkerApp::OnHomeProjectSave()
 	// 4.
 	if (m_pFasSysData == nullptr)
 	{
-		AfxMessageBox(L"프로젝트가 열려 있지 않습니다.");
-		GF_AddLog(L"프로젝트가 열려 있지 않습니다.");
+		AfxMessageBox(L"프로젝트가 열려있지 않습니다.");
+		GF_AddLog(L"프로젝트가 열려있지 않습니다.");
 		return;
 	}
 	// Database 용량 줄이기
 	if (m_pFasSysData->ReduceDatabase() == 0)
 	{
-		AfxMessageBox(L"프로젝트를 저장하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트를 저장하는데 실패했습니다.");
 		return; 
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1662,8 +1662,8 @@ void CSysLinkerApp::OnHomeProjectSave()
 	if (GF_IsExistFile(strDBPath) == FALSE)
 	{
 		CString strError;
-		strError.Format(L"프로젝트를 저장하는데 실패 했습니다.(데이터베이스 Backup 실패)\r\n"
-			L"'%s'에 같은 이름으로 파일 있습니다. 이 파일을 삭제하고 다시 저장해 주십시요"
+		strError.Format(L"프로젝트를 저장하는데 실패했습니다.(데이터베이스 Backup 실패)\r\n"
+			L"'%s'에 같은 이름으로 파일 있습니다. 이 파일을 삭제하고 다시 저장해 주십시오."
 			, strDBPath
 		);
 		AfxMessageBox(strError);
@@ -1672,7 +1672,7 @@ void CSysLinkerApp::OnHomeProjectSave()
 	if (m_pMainDb->BackupDatabase(m_pFasSysData->GetDBName(), strDBPath) == FALSE)
 	{
 //		AfxMessageBox(L"프로젝트를 저장하는데 실패 했습니다.\n데이터베이스 Backup 실패");
-		GF_AddLog(L"프로젝트를 저장하는데 실패 했습니다.\n데이터베이스 Backup 실패");
+		GF_AddLog(L"프로젝트를 저장하는데 실패했습니다.\n데이터베이스 Backup 실패");
 // 		if (m_pMainDb->BackupDatabase(m_pFasSysData->GetDBName(), strDBPath) == FALSE)
 // 		{
 // 			GF_AddLog(L"프로젝트를 저장하는데 실패 했습니다.\n데이터베이스 Backup 실패");
@@ -1683,7 +1683,7 @@ void CSysLinkerApp::OnHomeProjectSave()
 	//////////////////////////////////////////////////////////////////////////
 	// 4. 
 	m_pFasSysData->SetChangeFlag(FALSE);
-	GF_AddLog(L"프로젝트를 저장하는데 성공했습니다");
+	GF_AddLog(L"프로젝트를 저장하는데 성공했습니다.");
 	//AfxMessageBox(L"프로젝트를 저장하는데 성공했습니다");
 
 }
@@ -1693,8 +1693,8 @@ void CSysLinkerApp::OnHomeProjectTable()
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if (m_pFasSysData == nullptr)
 	{
-		GF_AddLog(L"프로젝트가 열려 있지 않습니다.");
-		AfxMessageBox(L"프로젝트가 열려 있지 않습니다.");
+		GF_AddLog(L"프로젝트가 열려있지 않습니다.");
+		AfxMessageBox(L"프로젝트가 열려있지 않습니다.");
 		return;
 	}
 	OpenFormView(FV_LOADRELAYTABLE);
@@ -1937,8 +1937,8 @@ void CSysLinkerApp::OnFacpReverseLink()
 
 	if (CreateProjectFromRom(dlg.m_strRomPath, &dlg.m_ptrList , dlg.m_bFoundRvFile) <= 0)
 	{
-		GF_AddLog(L"ROM 파일로부터 프로젝트를 생성하는데 실패 했습니다.");
-		AfxMessageBox(L"ROM 파일로부터 프로젝트를 생성하는데 실패 했습니다.");
+		GF_AddLog(L"ROM 파일로부터 프로젝트를 생성하는데 실패했습니다.");
+		AfxMessageBox(L"ROM 파일로부터 프로젝트를 생성하는데 실패했습니다.");
 		return;
 	}
 
@@ -1952,7 +1952,7 @@ void CSysLinkerApp::OnFacpReverseLink()
 	pMakLinkView->SetRelayTableData(m_pFasSysData);
 	m_pFasSysData->SetProjectOpened(TRUE);
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
-	AfxMessageBox(L"ROM 파일로부터 프로젝트를 생성하는데 성공 했습니다.");
+	AfxMessageBox(L"ROM 파일로부터 프로젝트를 생성하는데 성공했습니다.");
 }
 
 
@@ -2400,7 +2400,7 @@ int CSysLinkerApp::LoadEquipBaseData()
 		L"ORDER BY A.EQ_TYPE, A.EQ_ID");
 	if (m_pMainDb->OpenQuery(strSql) == FALSE)
 	{
-		GF_AddLog(L"데이터베이스 테이블을 여는데 실패했습니다. : TB_EQUIP_MST open failed");
+		GF_AddLog(L"데이터베이스 테이블을 여는데 실패했습니다. : TB_EQUIP_MST open failed.");
 		return 0;
 	}
 	nCnt = m_pMainDb->GetRecordCount();
@@ -2855,7 +2855,7 @@ int CSysLinkerApp::CopyBaseFile(CString strPrjName, CString strTargetSymbolPath 
 	if (::CopyFile(strFile, strTarget, FALSE) == FALSE)
 		//if (::CopyFile(strFile, strTarget, FALSE) == FALSE)
 	{
-		strError.Format(L"DBMS에 데이터 파일을 설정하는데 실패 했습니다.ErrorCode:%ld" , GetLastError());
+		strError.Format(L"DBMS에 데이터 파일을 설정하는데 실패했습니다.ErrorCode:%ld" , GetLastError());
 		GF_AddLog(strError + L" -- " + strTarget + L" -- "  + strFile);
 		AfxMessageBox(strError);
 		AfxMessageBox(strTarget + L"---" + strFile);
@@ -3085,7 +3085,7 @@ int CSysLinkerApp::SaveProjectInfoFile(CString strCurrentPrjRootFolder)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 
@@ -3142,7 +3142,7 @@ int CSysLinkerApp::SaveVersionInfoFile(WORD wMajor, WORD wMinor, CString strCurr
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 	strtemp.Format(L"%d.%d", m_pFasSysData->GetPrjMajorNum(), m_pFasSysData->GetPrjMinorNum());
@@ -3170,7 +3170,7 @@ int CSysLinkerApp::OpenProjectInfoFile(CRelayTableData * pFasSysData , CString s
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 	// Project Version Temp Folder 생성
@@ -3234,7 +3234,7 @@ int CSysLinkerApp::OpenVersionInfoFile(CRelayTableData * pFasSysData , WORD wMaj
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		GF_AddLog(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 	file.ReadString(strtemp); //GetPrjMajorNum GetPrjMinorNum
@@ -3279,7 +3279,7 @@ int CSysLinkerApp::RegisterBasicDB()
 	if (pDB->AttachMSDB(g_stConfig.szDBName, strDB, strlog) == FALSE)
 	{
 		CString strError;
-		strError.Format(L"프로그램 기초 데이터베이스(%s)를 등록하는데 실패 했습니다.\n%s"
+		strError.Format(L"프로그램 기초 데이터베이스(%s)를 등록하는데 실패했습니다.\n%s"
 			, g_stConfig.szDBName, pDB->GetLastErrorString());
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
@@ -3340,7 +3340,7 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 	{
 		if (OpenBaseDatabase() == 0)
 		{
-			GF_AddLog(L"기초정보 데이터베이스를 여는데 실패 했습니다.");
+			GF_AddLog(L"기초정보 데이터베이스를 여는데 실패했습니다.");
 			return 0;
 		}
 	}
@@ -3360,7 +3360,7 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		if (m_pMainDb->DetachMSDB(pFasSysData->GetDBName()) == FALSE)
 		{
 			CString strError;
-			strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패 했습니다.\n%s"
+			strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패했습니다.\n%s"
 				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
@@ -3377,7 +3377,7 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		{
 
 			CString strError;
-			strError.Format(L"프로젝트 데이터베이스(%s)를 등록하는데 실패 했습니다.\n%s"
+			strError.Format(L"프로젝트 데이터베이스(%s)를 등록하는데 실패했습니다.\n%s"
 				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
@@ -3391,7 +3391,7 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		{
 
 			CString strError;
-			strError.Format(L"프로젝트 데이터베이스(%s)를 복원하는데 실패 했습니다.\n%s"
+			strError.Format(L"프로젝트 데이터베이스(%s)를 복원하는데 실패했습니다.\n%s"
 				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
@@ -3403,7 +3403,7 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		, 1433, g_stConfig.szDBUser, g_stConfig.szDBPass) <= 0)
 	{
 		CString strError;
-		strError.Format(L"프로젝트 데이터베이스(%s)를 연결하는데 실패 했습니다.\n%s"
+		strError.Format(L"프로젝트 데이터베이스(%s)를 연결하는데 실패했습니다.\n%s"
 			, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
@@ -3423,8 +3423,8 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 	{
 		if (CopyProjectVersionTemp(strPrjName, strPrjFullPath, dwVer) <= 0)
 		{
-			GF_AddLog(L"프로젝트 정보를 가져오는데 실패 했습니다.");
-			AfxMessageBox(L"프로젝트 정보를 가져오는데 실패 했습니다.");
+			GF_AddLog(L"프로젝트 정보를 가져오는데 실패했습니다.");
+			AfxMessageBox(L"프로젝트 정보를 가져오는데 실패했습니다.");
 			return -1;
 		}
 	}
@@ -3733,8 +3733,8 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	{
 		if (GetLastError() != ERROR_ALREADY_EXISTS)
 		{
-			GF_AddLog(L"버전 폴더를 생성하는데 실패 했습니다.");
-			AfxMessageBox(L"버전 폴더를 생성하는데 실패 했습니다.");
+			GF_AddLog(L"버전 폴더를 생성하는데 실패했습니다.");
+			AfxMessageBox(L"버전 폴더를 생성하는데 실패했습니다.");
 			return 0;
 		}
 	}
@@ -3749,8 +3749,8 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	);
 	if (CopyFile(strFrom , strTo, FALSE) == FALSE)
 	{
-		GF_AddLog(L"버전정보 파일을 이동하는데 실패 했습니다.");
-		AfxMessageBox(L"버전정보 파일을 이동하는데 실패 했습니다.");
+		GF_AddLog(L"버전정보 파일을 이동하는데 실패했습니다.");
+		AfxMessageBox(L"버전정보 파일을 이동하는데 실패했습니다.");
 		return 0; 
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -3849,8 +3849,8 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	{
 		if (GetLastError() != ERROR_ALREADY_EXISTS)
 		{
-			GF_AddLog(L"데이터베이스 폴더를 생성하는데 실패 했습니다.");
-			AfxMessageBox(L"데이터베이스 폴더를 생성하는데 실패 했습니다.");
+			GF_AddLog(L"데이터베이스 폴더를 생성하는데 실패했습니다.");
+			AfxMessageBox(L"데이터베이스 폴더를 생성하는데 실패했습니다.");
 			return 0;
 		}
 	}
@@ -3865,8 +3865,8 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	{
 		if (GetLastError() != ERROR_ALREADY_EXISTS)
 		{
-			GF_AddLog(L"RELEASE 폴더를 생성하는데 실패 했습니다.");
-			AfxMessageBox(L"RELEASE 폴더를 생성하는데 실패 했습니다.");
+			GF_AddLog(L"RELEASE 폴더를 생성하는데 실패했습니다.");
+			AfxMessageBox(L"RELEASE 폴더를 생성하는데 실패했습니다.");
 			return 0;
 		}
 	}

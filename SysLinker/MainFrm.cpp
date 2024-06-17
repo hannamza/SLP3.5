@@ -1024,7 +1024,7 @@ void CMainFrame::OnFacpCreateLink()
 	//20240415 GBM end
 
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
-	if(AfxMessageBox(L"연동데이터를 현재 상태로 컴파일 합니다.\nYes : 오류검사 후 컴파일\nNo:오류검사 없이 컴파일",MB_YESNO | MB_ICONQUESTION) != IDYES)
+	if(AfxMessageBox(L"연동데이터를 현재 상태로 컴파일합니다.\nYes : 오류검사 후 컴파일\nNo:오류검사 없이 컴파일",MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		CreateFacpLink();
 	}
@@ -1051,8 +1051,8 @@ int CMainFrame::CreateFacpLink()
 	//CRelayTableData * pRefTable = m_pRefFasSysData;
 	if(m_pRefFasSysData == nullptr)
 	{
-		GF_AddLog(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시요");
-		AfxMessageBox(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시요");
+		GF_AddLog(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시오.");
+		AfxMessageBox(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시오.");
 		return 0;
 	}
 	CString strPrjPath,strFullPath,strDBPath;
@@ -1069,7 +1069,7 @@ int CMainFrame::CreateFacpLink()
 	nRet = m_pRefFasSysData->MakeLinkData(strPath);
 	if(nRet > 0)
 	{
-		GF_AddLog(L"프로젝트를 컴파일 하는데 성공했습니다.(연동데이터 생성 성공)");
+		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동데이터 생성 성공)");
 		//	AfxMessageBox(L"프로젝트를 컴파일 하는데 성공했습니다.");
 
 		//20240305 GBM start - 연동데이터 생성이 성공한 시점에 프로젝트 번호 업데이트 및 중계기 일람표 적용
@@ -1194,7 +1194,7 @@ LRESULT CMainFrame::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
  		if(lp == 0)
 			PostMessage(UWM_ERRORCHECK_CREATELINK,wp,lp);
  		else if(lp == -1)
- 			AfxMessageBox(L"사용자가 취소 했습니다.");
+ 			AfxMessageBox(L"사용자가 취소했습니다.");
  // 		else if(lp == -2)
  // 			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
  		else

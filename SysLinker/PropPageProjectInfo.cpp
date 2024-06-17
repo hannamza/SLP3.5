@@ -174,7 +174,7 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	if (m_pRefFasSysData == nullptr)
 	{
-		AfxMessageBox(L"프로젝트를 정보를 초기화하는데 실패 했습니다. 처음부터 다시 시작하여 주십시요");
+		AfxMessageBox(L"프로젝트 정보를 초기화하는데 실패했습니다. 처음부터 다시 시작하여 주십시오.");
 		CPropertyPage::OnCancel();
 		return 0;
 	}
@@ -213,7 +213,7 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 
 	if (bFind == TRUE)
 	{
-		if (AfxMessageBox(L"같은 이름의 프로젝트가 이미 존재 합니다.\n"
+		if (AfxMessageBox(L"같은 이름의 프로젝트가 이미 존재합니다.\n"
 			L"기존 프로젝트를 삭제하고 새로 생성하시겠습니까?" , MB_ICONQUESTION|MB_YESNO) == IDYES)
 		{
 			// 폴더 삭제
@@ -222,7 +222,7 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 			pDB = theApp.GetMainDatabase();
 			if (pDB == nullptr)
 			{
-				AfxMessageBox(L"프로그램을 사용할 수 있는 권한이 없습니다.\n프로그램을 재기동 후 로그인하여 다시 시도해 주십시요");
+				AfxMessageBox(L"프로그램을 사용할 수 있는 권한이 없습니다.\n프로그램을 재기동 후 로그인하여 다시 시도해 주십시오.");
 				return -1;
 			}
 			if (pDB->IsAttachedDatabase(strtemp) == TRUE)
@@ -230,7 +230,7 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 				if (pDB->DetachMSDB(strtemp) == FALSE)
 				{
 					CString strError;
-					strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패 했습니다.\n%s"
+					strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패했습니다.\n%s"
 						, strtemp, pDB->GetLastErrorString());
 					AfxMessageBox(strError);
 					return -1;

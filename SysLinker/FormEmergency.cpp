@@ -408,13 +408,13 @@ int CFormEmergency::DataDelete()
 	CRelayTableData * pTable = theApp.GetRelayTableData();
 	if (pTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트 정보가 없습니다. \n데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 	YAdoDatabase * pDB = pTable->GetPrjDB();
 	if (pDB == nullptr)
 	{
-		AfxMessageBox(L"프로젝트에 데이터베이스 정보가 없습니다. \n데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트에 데이터베이스 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -433,7 +433,7 @@ int CFormEmergency::DataDelete()
 
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터베이스에서 비상방송 데이터를 가져오는데 실패 했습니다. \n데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터베이스에서 비상방송 데이터를 가져오는데 실패 했습니다. \n데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -452,7 +452,7 @@ int CFormEmergency::DataDelete()
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
 		pDB->RollbackTransaction();
-		AfxMessageBox(L"데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -465,7 +465,7 @@ int CFormEmergency::DataDelete()
 	if (spManager == nullptr)
 	{
 		pDB->RollbackTransaction();
-		AfxMessageBox(L"데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 	spManager->RemoveEmergency(pData->GetEmID());
@@ -518,13 +518,13 @@ int CFormEmergency::DataMultiDelete()
 	CRelayTableData * pTable = theApp.GetRelayTableData();
 	if (pTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트 정보가 없습니다. \n데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 	YAdoDatabase * pDB = pTable->GetPrjDB();
 	if (pDB == nullptr)
 	{
-		AfxMessageBox(L"프로젝트에 데이터베이스 정보가 없습니다. \n데이터를 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트에 데이터베이스 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -547,7 +547,7 @@ int CFormEmergency::DataMultiDelete()
 		pData = (CDataEmBc*)m_ctrlList.GetItemData(vtSel[i]);
 		if (pData == nullptr)
 		{
-			strError = L"삭제하는데 실패 했습니다. 비상방송 정보를 가져오는데 실패 했습니다.";
+			strError = L"삭제하는데 실패했습니다. 비상방송 정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -557,7 +557,7 @@ int CFormEmergency::DataMultiDelete()
 		);
 		if (pDB->OpenQuery(strSql) == FALSE)
 		{
-			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 비상방송 정보를 가져오는데 실패했습니다.";
+			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 비상방송 정보를 가져오는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -572,7 +572,7 @@ int CFormEmergency::DataMultiDelete()
 
 		if (pDB->ExecuteSql(strSql) == FALSE)
 		{
-			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 비상방송 정보를 삭제하는데 실패했습니다.";
+			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 비상방송 정보를 삭제하는데 실패했습니다.";
 			bError = TRUE;
 			break;;
 		}
@@ -598,7 +598,7 @@ int CFormEmergency::DataMultiDelete()
 		m_ctrlList.DeleteItem(vtSel[i]);
 	}
 	InitData();
-	AfxMessageBox(L"데이터를 삭제하는데 성공 했습니다.");
+	AfxMessageBox(L"데이터를 삭제하는데 성공했습니다.");
 	return 1;
 }
 int CFormEmergency::DataAdd()
@@ -624,7 +624,7 @@ int CFormEmergency::DataAdd()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터를 추가하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 추가하는데 실패했습니다.");
 		return 0;
 	}
 	pData = new CDataEmBc;
@@ -633,7 +633,7 @@ int CFormEmergency::DataAdd()
 	spManager = pTable->GetEmergencyManager();
 	if (spManager == nullptr)
 	{
-		AfxMessageBox(L"데이터를 추가하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 추가하는데 실패했습니다.");
 		return 0;
 	}
 	spManager->AddTail(pData);
@@ -721,7 +721,7 @@ int CFormEmergency::DataSave()
 
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터베이스에서 비상방송정보를 가져오는데 실팼습니다.");
+		AfxMessageBox(L"데이터베이스에서 비상방송정보를 가져오는데 실패했습니다.");
 		return 0;
 	}
 
@@ -779,7 +779,7 @@ int CFormEmergency::DataSave()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
 		return 0;
 	}
 
@@ -857,7 +857,7 @@ int CFormEmergency::FindItem(int nID)
 void CFormEmergency::OnBnClickedBtnLoad()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (AfxMessageBox(L"기존 비상방송 데이터가 모두 삭제 됩니다\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	if (AfxMessageBox(L"기존 비상방송 데이터가 모두 삭제됩니다.\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		return; 
 	}
@@ -865,7 +865,7 @@ void CFormEmergency::OnBnClickedBtnLoad()
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시요");
+		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시오.");
 		return; 
 	}
 	CExcelWrapper xls;
@@ -887,7 +887,7 @@ void CFormEmergency::OnBnClickedBtnLoad()
 	CString strPath = FileDialog.GetPathName();
 	if (xls.Open(strPath) == false)
 	{
-		AfxMessageBox(L"Excel파일을 여는데 실패 했습니다.");
+		AfxMessageBox(L"Excel파일을 여는데 실패했습니다.");
 		return;
 	}
 

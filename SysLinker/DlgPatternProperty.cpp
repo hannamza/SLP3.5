@@ -91,7 +91,7 @@ void CDlgPatternProperty::OnBnClickedOk()
 	pDB = m_pRefFasSysData->GetPrjDB();
 	if(pDB == nullptr)
 	{
-		AfxMessageBox(L"프로젝트 데이터베이스 정보를 가져오는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트 데이터베이스 정보를 가져오는데 실패했습니다.");
 		return;
 	}
 

@@ -449,7 +449,7 @@ void CFormLocation::OnBnClickedBtnSave()
 	if(SaveLevelInfo() == 0)
 	{
 		//AfxMessageBox(L"층번호를 수정하는데 실패했습니다.",MB_OK | MB_ICONERROR);
-		if(AfxMessageBox(L"변경 되지 전의 층 정보를 다시 가져올까요?",MB_YESNO | MB_ICONQUESTION) == IDYES)
+		if(AfxMessageBox(L"변경 되기 전의 층 정보를 다시 가져올까요?",MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			m_bModified = FALSE;
 			GetDlgItem(IDC_BTN_SAVE)->EnableWindow(FALSE);

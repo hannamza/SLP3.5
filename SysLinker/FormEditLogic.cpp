@@ -295,13 +295,13 @@ int CFormEditLogic::DataAdd()
 	CRelayTableData * pTable = theApp.GetRelayTableData();
 	if (pTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시요");
+		AfxMessageBox(L"프로젝트 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시오.");
 		return 0;
 	}
 	YAdoDatabase * pDB = pTable->GetPrjDB();
 	if (pDB == nullptr)
 	{
-		AfxMessageBox(L"프로젝트의 데이터베이스 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시요");
+		AfxMessageBox(L"프로젝트의 데이터베이스 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시오.");
 		return 0;
 	}
 	UpdateData();
@@ -316,7 +316,7 @@ int CFormEditLogic::DataAdd()
 	pEq = (CDataEquip *)m_cmbInType.GetItemData(nSel);
 	if (pEq == nullptr)
 	{
-		AfxMessageBox(L"입력 타입이 데이터가 없습니다.");
+		AfxMessageBox(L"입력 타입의 데이터가 없습니다.");
 		return 0;
 	}
 	nInType = pEq->GetEquipID();
@@ -331,7 +331,7 @@ int CFormEditLogic::DataAdd()
 	pEq = (CDataEquip *)m_cmbContents.GetItemData(nSel);
 	if (pEq == nullptr)
 	{
-		AfxMessageBox(L"출력내용 데이터가 없습니다.");
+		AfxMessageBox(L"출력내용의 데이터가 없습니다.");
 		return 0;
 	}
 	nCont = pEq->GetEquipID();
@@ -366,14 +366,14 @@ int CFormEditLogic::DataAdd()
  	);
  	if (pDB->OpenQuery(strSql) == FALSE)
  	{
- 		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패 했습니다.");
+ 		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패했습니다.");
  		return 0;
  	}
  	nCnt = pDB->GetRecordCount();
  
  	if (nCnt > 0)
  	{
- 		if (AfxMessageBox(L"이미 자동생성 로직이 있습니다.\n기존정보를 변경 하시겠습니까?"
+ 		if (AfxMessageBox(L"이미 자동생성 로직이 있습니다.\n기존정보를 변경하시겠습니까?"
  			, MB_YESNO | MB_ICONQUESTION) == IDYES)
  			return DataSave();
  		else
@@ -400,7 +400,7 @@ int CFormEditLogic::DataAdd()
  
  	if (pDB->ExecuteSql(strSql) == FALSE)
  	{
- 		AfxMessageBox(L"데이터를 추가하는데 실패 했습니다.");
+ 		AfxMessageBox(L"데이터를 추가하는데 실패했습니다.");
  		return 0;
  	}
  
@@ -474,7 +474,7 @@ int CFormEditLogic::DataAdd()
  	m_ctrlLogic.SetItemData(nCnt, (DWORD_PTR)pLogic);
  	AddCancel();
 
-	AfxMessageBox(L"자동 연동 로직을 추가하는데 성공 했습니다.");
+	AfxMessageBox(L"자동 연동 로직을 추가하는데 성공했습니다.");
 	return 1;
 }
 
@@ -573,7 +573,7 @@ int CFormEditLogic::DataSave()
  
  	if (pDB->ExecuteSql(strSql) == FALSE)
  	{
- 		AfxMessageBox(L"데이터를 수정하는데 실패 했습니다.");
+ 		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
  		return 0;
  	}
  
@@ -686,7 +686,7 @@ int CFormEditLogic::DataDelete()
  
  	if (pDB->OpenQuery(strSql) == FALSE)
  	{
- 		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패 했습니다.");
+ 		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패했습니다.");
  		return 0;
  	}
  	nCnt = pDB->GetRecordCount();
@@ -699,7 +699,7 @@ int CFormEditLogic::DataDelete()
  		);
  		if (pDB->ExecuteSql(strSql) == FALSE)
  		{
- 			AfxMessageBox(L"자동생성 로직을 삭제하는데 실패 했습니다.");
+ 			AfxMessageBox(L"자동생성 로직을 삭제하는데 실패했습니다.");
  			return 0;
  		}
  	}
@@ -760,7 +760,7 @@ int CFormEditLogic::DataMultiDelete()
  		if (pData == nullptr)
  		{
  			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
- 			strError = L"삭제하는데 실패 했습니다. 자동생성 로직에 대한 정보를 가져오는데 실패 했습니다.";
+ 			strError = L"삭제하는데 실패했습니다. 자동생성 로직에 대한 정보를 가져오는데 실패했습니다.";
  			bError = TRUE;
  			break;;
  		}
@@ -773,7 +773,7 @@ int CFormEditLogic::DataMultiDelete()
  
  		if (pDB->OpenQuery(strSql) == FALSE)
  		{
- 			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 자동생성 로직을 가져오는데 실패했습니다.";
+ 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 자동생성 로직을 가져오는데 실패했습니다.";
  			bError = TRUE;
  			break;
  		}
@@ -788,7 +788,7 @@ int CFormEditLogic::DataMultiDelete()
  		);
  		if (pDB->ExecuteSql(strSql) == FALSE)
  		{
- 			strError = L"삭제하는데 실패 했습니다. 데이터베이스에서 자동생성 로직을 삭제하는데 실패했습니다.";
+ 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 자동생성 로직을 삭제하는데 실패했습니다.";
  			bError = TRUE;
  			break;;
  		}
@@ -1186,7 +1186,7 @@ void CFormEditLogic::OnBnClickedBtnLogicImport()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	if (AfxMessageBox(L"기존 자동생성 로직이 모두 삭제 됩니다\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	if (AfxMessageBox(L"기존 자동생성 로직이 모두 삭제됩니다.\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		return;
 	}
@@ -1194,7 +1194,7 @@ void CFormEditLogic::OnBnClickedBtnLogicImport()
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시요");
+		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시오.");
 		return;
 	}
 	CExcelWrapper xls;
@@ -1251,7 +1251,7 @@ void CFormEditLogic::OnBnClickedBtnLogicImport()
 	strSql.Format(L"DELETE FROM TB_AUTO_LOGIC_V2 ");
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터베이스에서 자동생성 로직을 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터베이스에서 자동생성 로직을 삭제하는데 실패했습니다.");
 		return;
 	}
 
@@ -1276,7 +1276,7 @@ void CFormEditLogic::OnBnClickedBtnLogicExport()
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
-		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시요");
+		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시오.");
 		return;
 	}
 

@@ -440,7 +440,7 @@ BEGIN
     POPUP "PTNLinkPopup"
     BEGIN
         MENUITEM "패턴 삭제",                       ID_PTNLK_MENU_DELPTN
-        MENUITEM "패턴 보기 전환",                    ID_PTNLK_MENU_VIEWPTN
+        MENUITEM "패턴 보기 전환",                    ID_PTNVIEW_
     END
 END
 
@@ -483,9 +483,9 @@ END
 
 IDR_POPUP_PUMP_VIEW MENU
 BEGIN
-    POPUP "PatternView"
+    POPUP "PumpView"
     BEGIN
-        MENUITEM "패턴 화면으로 이동",                  ID_PTNVIEW_SELECT_ITEM
+        MENUITEM "펌프 화면으로 이동",                  ID_PUMPVIEW_SELECT_ITEM
     END
 END
 
@@ -705,7 +705,7 @@ BEGIN
     LTEXT           "* Stop Bit",IDC_ST_SERVER4,16,146,32,8
     LTEXT           "* Parity Bit",IDC_ST_SERVER5,174,134,36,8
     LTEXT           "* Data Bit",IDC_ST_SERVER6,16,133,32,8
-    GROUPBOX        "Serial 접속 정",IDC_STATIC,7,107,307,58
+    GROUPBOX        "Serial 접속 정보",IDC_STATIC,7,107,307,58
     GROUPBOX        "데이터베이스",IDC_STATIC,7,27,307,78
     LTEXT           "Database 주소",IDC_STATIC_1,15,37,50,8
     LTEXT           "Database 이름",IDC_STATIC_2,15,50,50,8
@@ -1083,8 +1083,8 @@ BEGIN
     PUSHBUTTON      "추가",IDC_BTN_ADD,31,85,50,14
     PUSHBUTTON      "저장",IDC_BTN_SAVE,81,85,50,14
     PUSHBUTTON      "삭제",IDC_BTN_DEL,131,85,50,14
-    LTEXT           "압력스위치         : ",IDC_STATIC,7,41,61,8
-    LTEXT           "압력스위치 번호 : ",IDC_STATIC,7,22,61,8
+    LTEXT           "펌프",IDC_STATIC,7,41,61,8
+    LTEXT           "펌프 번호 : ",IDC_STATIC,7,22,61,8
     LTEXT           "이름                    : ",IDC_STATIC,7,57,61,8
     LTEXT           "수신기                 : ",IDC_STATIC,7,9,61,8
     PUSHBUTTON      "취소",IDC_BTN_CANCEL,157,85,50,14,NOT WS_VISIBLE
@@ -1618,7 +1618,7 @@ BEGIN
     PUSHBUTTON      "변경 적용",IDC_BTN_APPLY,78,36,50,14
     CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,45,64,148,9
     CONTROL         "주소가 동일할 때 중복",IDC_RD_ADDR,"Button",BS_AUTORADIOBUTTON,19,22,74,10
-    CONTROL         "이름이 동일할때 중복",IDC_RD_NAME,"Button",BS_AUTORADIOBUTTON,103,22,72,10
+    CONTROL         "이름이 동일할 때 중복",IDC_RD_NAME,"Button",BS_AUTORADIOBUTTON,103,22,72,10
     PUSHBUTTON      "...",IDC_BTN_BROWSER,173,7,20,14
     EDITTEXT        IDC_ED_TABLE,53,7,117,14,ES_AUTOHSCROLL | ES_READONLY
     LTEXT           "중계기 일람표 : ",IDC_STATIC,7,9,44,8
@@ -1767,7 +1767,7 @@ BEGIN
     LTEXT           "+N층까지제어",IDC_STATIC,17,97,39,8
     GROUPBOX        "대상 설정",IDC_STATIC,7,7,408,29
     GROUPBOX        "입력과 출력의 위치 일치조건",IDC_STATIC,16,65,123,28
-    GROUPBOX        "위치(입력과 출력 위치가 정보가 동일)",IDC_STATIC,147,62,146,56
+    GROUPBOX        "위치(입력과 출력 위치 정보가 동일)",IDC_STATIC,147,62,146,56
     CONTROL         "지하주차장 포함",IDC_CHK_UNDER_PARKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,303,97,97,10
     LTEXT           "(지하 또는 주차장 발화 시 로직 적용)",IDC_STATIC,304,108,100,8
 END
@@ -1993,7 +1993,7 @@ BEGIN
     IDD_FORMPATTERN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 430
+        RIGHTMARGIN, 429
         TOPMARGIN, 7
         BOTTOMMARGIN, 285
     END

@@ -264,7 +264,7 @@ void CFormLoadRelayTable::OnBnClickedBtnPreview()
 	UpdateData();
 	if(CheckUpdateCondition() == FALSE)
 	{
-		AfxMessageBox(L"패턴 정보중에 수동/자동 생성 여부를 설정하지 않았습니다.\n수동/자동 여부를 설정하고 다시 실행해 주십시요");
+		AfxMessageBox(L"패턴 정보중 에 수동/자동 생성 여부를 설정하지 않았습니다.\n수동/자동 여부를 설정하고 다시 실행해 주십시오.");
 		return;
 	}
 	
@@ -388,7 +388,7 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(CheckUpdateCondition() == FALSE)
 	{
-		AfxMessageBox(L"패턴 정보중에 수동/자동 생성 여부를 설정하지 않았습니다.\n수동/자동 여부를 설정하고 다시 실행해 주십시요");
+		AfxMessageBox(L"패턴 정보중에 수동/자동 생성 여부를 설정하지 않았습니다.\n수동/자동 여부를 설정하고 다시 실행해 주십시오.");
 		return;
 	}
 
@@ -404,7 +404,7 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 	strtemp = pOldTable->GetProjectVersionPath();
 	if(strtemp.GetLength() <= 0)
 	{
-		AfxMessageBox(L"프로젝트의 디렉토리 위치정보가 없어 적용하는데 실패 했습니다.");
+		AfxMessageBox(L"프로젝트의 디렉토리 위치정보가 없어 적용하는데 실패했습니다.");
 		return;
 	}
 
@@ -577,7 +577,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			}
 			else
 			{
-				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 실패했습니다.\n");
+				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 실패했습니다.");
 				Log::Trace("Applying the new module file failed!");
 			}
 #else
@@ -645,7 +645,7 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 		pNewTable = LoadNewRelayTable();
 		if (pNewTable == 0)
 		{
-			AfxMessageBox(L"Excel 파일을 읽어오는데 실패 했습니다.");
+			AfxMessageBox(L"Excel 파일을 읽어오는데 실패했습니다.");
 			return -1;
 		}
 	}
@@ -808,7 +808,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		pNewTable = LoadNewRelayTable();
 		if (pNewTable == 0)
 		{
-			AfxMessageBox(L"Excel 파일을 읽어오는데 실패 했습니다.");
+			AfxMessageBox(L"Excel 파일을 읽어오는데 실패했습니다.");
 			m_pNewRelayTable->SendProgStep(this, PROG_RESULT_ERROR, 0, 0);
 			return -1;
 		}
@@ -1135,7 +1135,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 
 
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_FINISH, 0, 0);
-	AfxMessageBox(L"새로운 일람표 적용을 완료 했습니다.");
+	AfxMessageBox(L"새로운 일람표 적용을 완료했습니다.");
 	return 1;
 }
 

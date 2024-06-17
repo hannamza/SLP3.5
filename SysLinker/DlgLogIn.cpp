@@ -295,7 +295,7 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 		if (m_pRefMainDB->DetachMSDB(m_strOpenPrjName) == FALSE)
 		{
 			CString strError;
-			strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패 했습니다.\n%s"
+			strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패했습니다.\n%s"
 				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
@@ -313,7 +313,7 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 		{
 
 			CString strError;
-			strError.Format(L"프로젝트 데이터베이스(%s)를 등록하는데 실패 했습니다.\n%s"
+			strError.Format(L"프로젝트 데이터베이스(%s)를 등록하는데 실패했습니다.\n%s"
 				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
@@ -327,7 +327,7 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 		{
 
 			CString strError;
-			strError.Format(L"프로젝트 데이터베이스(%s)를 복원하는데 실패 했습니다.\n%s"
+			strError.Format(L"프로젝트 데이터베이스(%s)를 복원하는데 실패했습니다.\n%s"
 				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
@@ -340,7 +340,7 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 	if (pDB->DBOpen() == FALSE)
 	{
 		CString strError;
-		strError.Format(L"프로젝트 데이터베이스(%s)를 접속하는데 실패 했습니다.\n%s"
+		strError.Format(L"프로젝트 데이터베이스(%s)를 접속하는데 실패했습니다.\n%s"
 			, m_strOpenPrjName, pDB->GetLastErrorString());
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
@@ -359,7 +359,7 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
 		CString strError;
-		strError.Format(L"사용자 정보를 가져오는데 실패 했습니다.\n%s"
+		strError.Format(L"사용자 정보를 가져오는데 실패했습니다.\n%s"
 			, pDB->GetLastErrorString());
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
@@ -551,7 +551,7 @@ ST_TEMP_PRJINFO * CDlgLogIn::SetVersionInfo(ST_TEMP_PRJINFO * pParentInfo
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		USERLOG(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		USERLOG(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return nullptr;
 	}
 
@@ -600,7 +600,7 @@ ST_TEMP_PRJINFO *   CDlgLogIn::SetProjectInfo(CString strPrjPath , CString strPr
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		USERLOG(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		USERLOG(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 	pInfo = new ST_TEMP_PRJINFO;
