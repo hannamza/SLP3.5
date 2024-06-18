@@ -518,7 +518,7 @@ void CFormLocation::OnNMClickLocationTree(NMHDR *pNMHDR,LRESULT *pResult)
  
  	if(m_bModified)
  	{
- 		if(AfxMessageBox(L"변경 사항이 있습니다 저장하시겠습니까?",MB_YESNO | MB_ICONQUESTION) == IDYES)
+ 		if(AfxMessageBox(L"변경 사항이 있습니다. 저장하시겠습니까?",MB_YESNO | MB_ICONQUESTION) == IDYES)
  		{
  			// SAVE
  			if(SaveLevelInfo() == 0)

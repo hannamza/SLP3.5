@@ -118,7 +118,7 @@ int CDlgVersion::SetVersionList(int nRow, CString strVerFile)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
-		USERLOG(L"프로젝트 파일을 생성하는데 실패 했습니다.\n");
+		USERLOG(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
 		return 0;
 	}
 

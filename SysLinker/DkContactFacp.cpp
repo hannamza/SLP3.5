@@ -353,7 +353,7 @@ void CDkContactFacp::OnLoadContact()
 	strSql.Format(L"DELETE FROM TB_FACP_CONTACT ");
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터베이스에서 자동생성 로직을 삭제하는데 실패 했습니다.");
+		AfxMessageBox(L"데이터베이스에서 접점 정보를 삭제하는데 실패했습니다.");
 		xls.Close();
 		return;
 	}

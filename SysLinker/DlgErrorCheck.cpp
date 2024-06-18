@@ -883,7 +883,7 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
 		GF_AddLog(L"오류검사결과 파일을 생성하는데 실패했습니다.\n");
-		AfxMessageBox(L"오류검사결과 파일을 생성하는데 실패했습니다");
+		AfxMessageBox(L"오류검사결과 파일을 생성하는데 실패했습니다.");
 		return;
 	}
 

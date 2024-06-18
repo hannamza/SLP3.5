@@ -10734,6 +10734,8 @@ int CRelayTableData::LoadProjectDatabase()
 		return 0;
 	}
 
+	//20240618 GBM start - 사용하지 않는 매서드 주석처리
+#if 0
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
@@ -10784,6 +10786,10 @@ int CRelayTableData::LoadProjectDatabase()
 	dwEnd = GetTickCount();
 	GF_AddDebug(L"시간 체크 : LoadGroup 설정 - %d", dwEnd - dwStart);
 #endif
+
+#endif
+	//20240618 GBM end
+
 	if (LoadEmBroadcast() <= 0)
 	{
 		GF_AddLog(L"데이터베이스에서 비상방송 정보를 가져오는데 실패했습니다.");
@@ -15645,8 +15651,8 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		}
 		else
 		{
-			GF_AddLog(L"수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[주소:%02d%02d-%d%03d](이름:%s)", strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
-			strMsg.Format(_T("수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[주소:%02d%02d-%d%03d](이름:%s)"), strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+			GF_AddLog(L"수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[회로이름:%02d%02d-%d%03d](이름:%s)", strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+			strMsg.Format(_T("수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[회로이름:%02d%02d-%d%03d](이름:%s)"), strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
 		}
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
 

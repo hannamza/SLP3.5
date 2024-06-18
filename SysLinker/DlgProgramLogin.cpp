@@ -116,7 +116,7 @@ void CDlgProgramLogin::OnBnClickedOk()
 	if (m_pRefMainDB->OpenQuery(strSql) == FALSE)
 	{
 		CString strError;
-		strError.Format(L"사용자 정보를 가져오는데 실패 했습니다.\n%s"
+		strError.Format(L"사용자 정보를 가져오는데 실패했습니다.\n%s"
 			, m_pRefMainDB->GetLastErrorString());
 		GF_AddLog(strError);
 		AfxMessageBox(strError);

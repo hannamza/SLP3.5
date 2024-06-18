@@ -433,7 +433,7 @@ int CFormEmergency::DataDelete()
 
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
-		AfxMessageBox(L"데이터베이스에서 비상방송 데이터를 가져오는데 실패 했습니다. \n데이터를 삭제하는데 실패했습니다.");
+		AfxMessageBox(L"데이터베이스에서 비상방송 데이터를 가져오는데 실패했습니다. \n데이터를 삭제하는데 실패했습니다.");
 		return 0;
 	}
 

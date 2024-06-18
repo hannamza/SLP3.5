@@ -542,7 +542,7 @@ int CFormEditLogic::DataSave()
  	);
  	if (pDB->OpenQuery(strSql) == FALSE)
  	{
- 		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패 했습니다.");
+ 		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패했습니다.");
  		return 0;
  	}
  	nCnt = pDB->GetRecordCount();
