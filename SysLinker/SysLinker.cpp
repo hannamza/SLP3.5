@@ -2294,9 +2294,9 @@ void CSysLinkerApp::OnUpdateFacpReverseLink(CCmdUI *pCmdUI)
 {
 	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
 	if (pCmdUI)
-		//20240312 GBM start - 메뉴 비활성화
-		pCmdUI->Enable(FALSE);
-		//pCmdUI->Enable(m_bProgramLogin);
+		//20240312 GBM start - 메뉴 비활성화 -> 20240618 GBM start - 다시 활성화
+		//pCmdUI->Enable(FALSE);
+		pCmdUI->Enable(m_bProgramLogin);
 		//20240312 GBM end
 }
 
