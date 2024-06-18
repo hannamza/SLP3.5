@@ -983,30 +983,49 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
-	//20240415 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
-	
-	//인증 여부 초기화
-	CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
-	if (AfxMessageBox(_T("관리자 모드(ROM 인증 모드)로 진행하시겠습니까?"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+	//20240618 GBM start - GT1 프로젝트가 아닌 경우 관리자 모드 여부를 묻지 않음
+	BOOL bGT1TypeExist = FALSE;
+	for (int i = 0; i < MAX_FACP_COUNT; i++)
 	{
-		CDlgAdminMode dlg;
-		if (dlg.DoModal() == IDOK)
+		if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
 		{
-			CString strPassword = ADMIN_MODE_PASSWORD;
-			CString strUserInputPassword = _T("");
-			strUserInputPassword = dlg.m_strEditPassword;
+			bGT1TypeExist = TRUE;
+			break;
+		}
+	}
 
-			if (strUserInputPassword.Compare(strPassword) == 0)
+	if (bGT1TypeExist)
+	{
+		//20240415 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
+
+		//인증 여부 초기화
+		CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
+		if (AfxMessageBox(_T("관리자 모드(ROM 인증 모드)로 진행하시겠습니까?"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			CDlgAdminMode dlg;
+			if (dlg.DoModal() == IDOK)
 			{
-				AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다."));
-				GF_AddLog(L"관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다.");
-				Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
-				CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
+				CString strPassword = ADMIN_MODE_PASSWORD;
+				CString strUserInputPassword = _T("");
+				strUserInputPassword = dlg.m_strEditPassword;
+
+				if (strUserInputPassword.Compare(strPassword) == 0)
+				{
+					AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다."));
+					GF_AddLog(L"관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다.");
+					Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
+					CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
+				}
+				else
+				{
+					AfxMessageBox(_T("잘못된 암호입니다."));
+					return;
+				}
 			}
 			else
 			{
-				AfxMessageBox(_T("잘못된 암호입니다."));
-				return;
+				GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
+				Log::Trace("Proceed with creating a unauthorized ROM file.");
 			}
 		}
 		else
@@ -1014,14 +1033,10 @@ void CMainFrame::OnFacpCreateLink()
 			GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
 			Log::Trace("Proceed with creating a unauthorized ROM file.");
 		}
-	}
-	else
-	{
-		GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
-		Log::Trace("Proceed with creating a unauthorized ROM file.");
-	}
 
-	//20240415 GBM end
+		//20240415 GBM end
+	}
+	//20240618 GBM end
 
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if(AfxMessageBox(L"연동데이터를 현재 상태로 컴파일합니다.\nYes : 오류검사 후 컴파일\nNo:오류검사 없이 컴파일",MB_YESNO | MB_ICONQUESTION) != IDYES)
@@ -1143,16 +1158,16 @@ int CMainFrame::CreateFacpLink()
 			strPath += L"\\";
 		strPath += L"*.*";
 		//GF_DeleteDir(strPath);
-		GF_AddLog(L"프로젝트를 컴파일 하는데 실패했습니다.(연동데이터 생성 실패)");
-		AfxMessageBox(L"프로젝트를 컴파일 하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
+		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동데이터 생성 실패)");
+		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
 		return 0;
 		//AfxMessageBox(L"프로젝트를 컴파일 하는데 실패했습니다.");
 	}
 	nRet = m_pRefFasSysData->MakeConstructorTable(strPath);
 	if(nRet > 0)
 	{
-		GF_AddLog(L"프로젝트를 컴파일 하는데 성공했습니다.(연동 출력표생성 성공)");
-		AfxMessageBox(L"프로젝트를 컴파일 하는데 성공했습니다.",MB_OK | MB_ICONINFORMATION);
+		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동출력표 생성 성공)");
+		AfxMessageBox(L"프로젝트를 컴파일하는데 성공했습니다.",MB_OK | MB_ICONINFORMATION);
 		return 1;
 	}
 	else
@@ -1161,8 +1176,8 @@ int CMainFrame::CreateFacpLink()
 			strPath += L"\\";
 		strPath += L"*.*";
 		//GF_DeleteDir(strPath);
-		GF_AddLog(L"프로젝트를 컴파일 하는데 실패했습니다.(연동 출력표생성 실패)");
-		AfxMessageBox(L"프로젝트를 컴파일 하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
+		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동출력표 생성 실패)");
+		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
 		return 0; 
 	}
 }
