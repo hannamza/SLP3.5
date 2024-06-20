@@ -1344,7 +1344,7 @@ CDataLocBase * CRelayTableData::AddNewLocation(CString strBuild, CString strBtyp
 
 CDataSystem * CRelayTableData::AddSystemDeviceDataByNum(
 	int nFacpNum, int nUnitNum, int nChannelNum, int nRelayNum
-	,CDataLocBase	* pInputLoc,CDataLocBase	* pOutputLoc
+	, CDataLocBase	* pInputLoc, CDataLocBase	* pOutputLoc
 	, CDataEquip * pEqInput, CDataEquip * pEqOut, CDataEquip * pEqOutContents
 	, CDataPattern * pPattern
 	, CDataEquip * pEqName, CString strAddEqIdx
@@ -1352,54 +1352,65 @@ CDataSystem * CRelayTableData::AddSystemDeviceDataByNum(
 	, int nScrID
 	, LPVOID lpRev01, LPVOID lpRev02, LPVOID lpRev03
 	, int nRelayIndex
-	,int nFid,int nUid,int nCid,int nRid
+	, int nFid, int nUid, int nCid, int nRid
 )
 {
 	CDataSystem * pData = nullptr;
 	CDataDevice * pDevice;
 	CString strKey;
 
-	if(nFid < 0)
+	if (nFid < 0)
 	{
 		nFid = CvtFacpNumToID(nFacpNum);
-		if(nFid < 0)
+		if (nFid < 0)
 			return nullptr;
 	}
 
-	if(nUid < 0)
+	if (nUid < 0)
 	{
-		nUid = CvtUnitNumToID(nFacpNum,nUnitNum);
-		if(nUid < 0)
+		nUid = CvtUnitNumToID(nFacpNum, nUnitNum);
+		if (nUid < 0)
 			return nullptr;
 	}
 
-	if(nCid < 0)
+	if (nCid < 0)
 	{
-		nCid = CvtChannelNumToID(nFacpNum,nUnitNum,nChannelNum);
-		if(nCid < 0)
+		nCid = CvtChannelNumToID(nFacpNum, nUnitNum, nChannelNum);
+		if (nCid < 0)
 			return nullptr;
 	}
 
-	if(nRid < 0)
+	if (nRid < 0)
 	{
-		nRid = CvtRelayNumToID(nFacpNum,nUnitNum,nChannelNum,nRelayNum);
-		if(nRid < 0)
+		nRid = CvtRelayNumToID(nFacpNum, nUnitNum, nChannelNum, nRelayNum);
+		if (nRid < 0)
 		{
-			nRid = GetWholeDeviceID(nFacpNum,nUnitNum,nChannelNum,nRelayNum);
+			nRid = GetWholeDeviceID(nFacpNum, nUnitNum, nChannelNum, nRelayNum);
 		}
 	}
-	
+
 	strKey = GF_GetSysDataKey(SE_RELAY, nFacpNum, nUnitNum, nChannelNum, nRelayNum);
 	pData = m_MapSystemData[strKey];
 	if (pData == nullptr)
 	{
 		pData = new CDataSystem;
 	}
-	
+
 	if (pOutputLoc == nullptr)
 		pOutputLoc = pInputLoc;
 
+	//20240620 GBM start - 메모리 누수 오류 수정
+#if 1
+	pDevice = (CDataDevice*)pData->GetSysData();
+	if (pDevice == nullptr)
+	{
+		pDevice = new CDataDevice;
+	}
+#else
 	pDevice = new CDataDevice;
+#endif
+	//20240620 GBM end
+
 	pDevice->SetDeviceData(nFid, nUid, nCid, nRid
 		, strKey
 		, pInputLoc, pOutputLoc
@@ -1595,22 +1606,39 @@ CDataSystem * CRelayTableData::AddSystemChannelDataByNum(int nFacpNum, int nUnit
 	CDataSystem * pData = nullptr;
 	CDataChannel * pChn;
 	CString strKey;
-	int nFID = 0 , nUID = 0;
+	int nFID = 0, nUID = 0;
 	nFID = CvtFacpNumToID(nFacpNum);
 	if (nFID < 0)
 		return nullptr;
 
-	nUID = CvtUnitNumToID(nFacpNum , nUnitNum);
+	nUID = CvtUnitNumToID(nFacpNum, nUnitNum);
 	if (nUID < 0)
 		return nullptr;
 
-	pChn = new CDataChannel;
-	strKey = GF_GetSysDataKey(SE_CHANNEL, nFacpNum, nUnitNum,nChnNum);
+	//20240620 GBM start - 메모리 누수 오류 수정
+#if 1
+	strKey = GF_GetSysDataKey(SE_CHANNEL, nFacpNum, nUnitNum, nChnNum);
 	pData = m_MapSystemData[strKey];
 	if (pData == nullptr)
 	{
 		pData = new CDataSystem;
 	}
+	pChn = (CDataChannel*)pData->GetSysData();
+	if (pChn == nullptr)
+	{
+		pChn = new CDataChannel;
+	}
+#else
+	pChn = new CDataChannel;
+	strKey = GF_GetSysDataKey(SE_CHANNEL, nFacpNum, nUnitNum, nChnNum);
+	pData = m_MapSystemData[strKey];
+	if (pData == nullptr)
+	{
+		pData = new CDataSystem;
+	}
+#endif
+	//20240620 GBM end
+
 	pData->SetDataType(SE_CHANNEL);
 	pData->SetSysData((LPVOID)pChn);
 	pData->SetKey(strKey);
@@ -16606,6 +16634,13 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 		
 		nCnt++;
 	}
+
+	//20240619 GBM start - 메모리 누수 오류 수정
+	delete[] pMain;
+	delete[] pLcd;
+	delete[] pEmer;
+	//20240619 GBM end
+
 	return 0;
 }
 

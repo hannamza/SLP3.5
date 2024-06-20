@@ -47,7 +47,9 @@ public:
 	// 중계기 일람표 상의 해당 패턴 삭제
 	BOOL DeletePatternFromModuleTableFile(CString strPatternName, std::vector<CString>& strModuleTableFileList);
 
-	// 중계기 일람표 상의 패턴 아이템(출력회로) 추가 -> 타입 나눠서 삭제도 가능하도록 매서드 수정하면 될 듯
+	// 중계기 일람표 상의 패턴 아이템(출력회로) 편집 -> 현재는 중계기 일람표 상 패턴의 삭제만 가능, 
+	// 패턴 추가, 패턴 아이템의 추가는 WEB에서 하거나 이를 Win32App에서 하면 [수동 생성 패턴]이 되어 중계기 일람표 상이 아닌 프로젝트 DB에만 적용
+	// [수동 생성 패턴]의 경우 한 회로가 여러 패턴에 속할 수도 있는데 이 경우 중계기 일람표 상의 표현이 현재는 불가능하기 때문
 	BOOL UpdateLinkedCircuitInThePattern(int nFacp, int nUnit, int nLoop, int nCircuit, CString strPatternName, std::vector<CString>& strModuleTableFileList);
 
 	// 중계기 일람표 갱신 시 새 중계기 일람표 프로젝트 폴더에 복사

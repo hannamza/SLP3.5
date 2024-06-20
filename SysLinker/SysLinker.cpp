@@ -1903,6 +1903,24 @@ void CSysLinkerApp::OnFacpPreviewLink()
 
 void CSysLinkerApp::OnFacpReverseLink()
 {
+	//20240619 GBM start - F3 프로젝트에서만 진행하도록 함
+	BOOL bGT1TypeExist = FALSE;
+	for (int i = 0; i < MAX_FACP_COUNT; i++)
+	{
+		if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
+		{
+			bGT1TypeExist = TRUE;
+			break;
+		}
+	}
+
+	if (bGT1TypeExist)
+	{
+		AfxMessageBox(_T("[연동데이터 역변환]기능은 F3 수신기 프로젝트에서만 사용 가능합니다.\n현재 프로젝트는 최소 1개 이상의 GT1 수신기가 구성되어 있습니다."));
+		return;
+	}
+	//20240619 GBM end
+
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if (m_pFasSysData != nullptr)
 	{
@@ -2673,7 +2691,7 @@ int CSysLinkerApp::CreateProjectFromRom(CString strRomPath , CPtrList *pPtrList,
 
 	m_pFasSysData->CreateFromRom(strRomPath , pPtrList , bUseRvFile);
 	
-	nRet = CreateProjectDatabase();
+	nRet = CreateProjectDatabase(TRUE);
 // 	m_pFasSysData->InsertPrjBasePatternDB();
 // 	m_pFasSysData->InsertPrjBaseLocationDB();
 // 	m_pFasSysData->InsertPrjBaseRelayTable();
@@ -2865,7 +2883,7 @@ int CSysLinkerApp::CopyBaseFile(CString strPrjName, CString strTargetSymbolPath 
 	return 1;
 }
 
-int CSysLinkerApp::CreateProjectDatabase()
+int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 {
 	//////////////////////////////////////////////////////////////////////////
 	// Database 생성 
@@ -2931,6 +2949,11 @@ int CSysLinkerApp::CreateProjectDatabase()
 		return 0; 
 	if(m_pFasSysData->InsertPrjBaseData() <= 0)
 		return 0;
+
+	//20240619 GBM start - ROM 파일 역변환인 경우 아래 루틴 건너뜀
+	if (bReverse)
+		return 1;
+	//20240619 GBM end
 
 	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 GT1 추가 테이블에 Data Insert
 	CNewDBManager::Instance()->SetDBAccessor(m_pFasSysData->m_pDB);

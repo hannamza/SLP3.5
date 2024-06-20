@@ -233,7 +233,7 @@ public:
 			2. PROJECT DB 연결
 			3. 기본 데이터 입력
 	 */
-	int CreateProjectDatabase();
+	int CreateProjectDatabase(BOOL bReverse = FALSE);
 
 	/*!
 	 * @fn         SaveProjectInfoFile
