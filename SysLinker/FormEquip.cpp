@@ -282,12 +282,12 @@ void CFormEquip::OnBnClickedBtnSave()
 
 	if (m_bThreadSucceeded)
 	{
-		GF_AddLog(L"설비 정보 저장에 성공했습니다.");
+		AfxMessageBox(L"설비 정보 저장에 성공했습니다.");
 		Log::Trace("The equipment information was saved successfully.");
 	}
 	else
 	{
-		GF_AddLog(L"설비 정보 저장에 실패했습니다.");
+		AfxMessageBox(L"설비 정보 저장에 실패했습니다.");
 		Log::Trace("Failed to save the equipment information.");
 	}
 #else
@@ -345,12 +345,12 @@ void CFormEquip::OnBnClickedBtnDel()
 
 	if (m_bThreadSucceeded)
 	{
-		GF_AddLog(L"설비 정보 삭제에 성공했습니다.");
+		AfxMessageBox(L"설비 정보 삭제에 성공했습니다.");
 		Log::Trace("The equipment information was deleted successfully.");
 	}
 	else
 	{
-		GF_AddLog(L"설비 정보 삭제에 실패했습니다.");
+		AfxMessageBox(L"설비 정보 삭제에 실패했습니다.");
 		Log::Trace("Failed to delete the equipment information.");
 	}
 #else
@@ -552,6 +552,7 @@ int CFormEquip::DataDelete()
 		m_ctrlTree.DeleteItem(hItem);
 
 	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
+#ifdef MODULE_TABLE_UPDATE_MODE
 	if (pEq->GetEquipType() >= ET_INPUTTYPE && pEq->GetEquipType() <= ET_OUTCONTENTS)
 	{
 		BOOL bRet = FALSE;
@@ -592,6 +593,7 @@ int CFormEquip::DataDelete()
 			GF_AddLog(strMsg2);
 		}
 	}
+#endif
 	//20240411 GBM end
 
 	delete pEq;
@@ -656,6 +658,7 @@ int CFormEquip::DataAdd()
 	m_bAdd = TRUE;
 
 	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
+#ifdef MODULE_TABLE_UPDATE_MODE
 	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
 	{
 		BOOL bRet = FALSE;
@@ -693,6 +696,7 @@ int CFormEquip::DataAdd()
 			GF_AddLog(strMsg2);
 		}
 	}
+#endif
 	//20240411 GBM end
 
 	return 1;
@@ -800,6 +804,7 @@ int CFormEquip::DataSave()
 	m_ctrlTree.SetItemText(hItem, m_pCurrentData->GetEquipName());
 
 	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
+#ifdef MODULE_TABLE_UPDATE_MODE
 	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
 	{
 		BOOL bRet = FALSE;
@@ -837,6 +842,7 @@ int CFormEquip::DataSave()
 			GF_AddLog(strMsg2);
 		}
 	}
+#endif
 	//20240411 GBM end
 
 	return 1;
@@ -876,7 +882,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 	{
 		if (nEquimentType == ET_INPUTTYPE)
 		{
-			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
+			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::NMS)
 			{
 				strMsg.Format(_T("[입력 타입 ID : %d]는 추가할 수 없습니다."), nID);
 				AfxMessageBox(strMsg);
@@ -918,7 +924,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 	{
 		if (nEquimentType == ET_INPUTTYPE)
 		{
-			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
+			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::NMS)
 			{
 				strMsg.Format(_T("[입력 타입 ID : %d]는 삭제할 수 없습니다."), nID);
 				AfxMessageBox(strMsg);

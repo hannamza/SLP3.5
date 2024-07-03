@@ -246,12 +246,12 @@ void CFormEmergency::OnBnClickedBtnSave()
 
 	if (m_bThreadSucceeded)
 	{
-		GF_AddLog(L"비상방송 정보 저장에 성공했습니다.");
+		AfxMessageBox(L"비상방송 정보 저장에 성공했습니다.");
 		Log::Trace("Emergency broadcast information was saved successfully.");
 	}
 	else
 	{
-		GF_AddLog(L"비상방송 정보 저장에 실패했습니다.");
+		AfxMessageBox(L"비상방송 정보 저장에 실패했습니다.");
 		Log::Trace("Failed to save emergency broadcast information.");
 	}
 #else
@@ -301,12 +301,12 @@ void CFormEmergency::OnBnClickedBtnDel()
 
 	if (m_bThreadSucceeded)
 	{
-		GF_AddLog(L"비상방송 정보 삭제에 성공했습니다.");
+		AfxMessageBox(L"비상방송 정보 삭제에 성공했습니다.");
 		Log::Trace("Emergency broadcast information was deleted successfully.");
 	}
 	else
 	{
-		GF_AddLog(L"비상방송 정보를 삭제 실패했습니다.");
+		AfxMessageBox(L"비상방송 정보를 삭제 실패했습니다.");
 		Log::Trace("Failed to delete emergency broadcast information.");
 	}
 #else
@@ -471,6 +471,7 @@ int CFormEmergency::DataDelete()
 	spManager->RemoveEmergency(pData->GetEmID());
 
 	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
+#ifdef MODULE_TABLE_UPDATE_MODE
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
 	CString strCommContent = pData->GetEmAddr();
@@ -493,6 +494,7 @@ int CFormEmergency::DataDelete()
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
 	GF_AddLog(strMsg2);
+#endif
 	//20240507 GBM end
 	
 	delete pData;
@@ -656,6 +658,7 @@ int CFormEmergency::DataAdd()
 	//AfxMessageBox(L"비상방송 정보를 추가하는데 성공 했습니다.");
 
 	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
+#ifdef MODULE_TABLE_UPDATE_MODE
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
 	CString strCommContent = pData->GetEmAddr();
@@ -678,6 +681,7 @@ int CFormEmergency::DataAdd()
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
 	GF_AddLog(strMsg2);
+#endif
 	//20240507 GBM end
 
 	return 1;
@@ -792,6 +796,7 @@ int CFormEmergency::DataSave()
 	m_ctrlList.SetItemData(nIdx, (DWORD_PTR)pData);
 
 	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+#ifdef MODULE_TABLE_UPDATE_MODE
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
 	CString strCommContent = pData->GetEmAddr();
@@ -814,6 +819,7 @@ int CFormEmergency::DataSave()
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
 	GF_AddLog(strMsg2);
+#endif
 	//20240502 GBM end
 
 	return 1;

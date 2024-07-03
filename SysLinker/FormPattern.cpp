@@ -60,6 +60,8 @@ UINT ThreadDeletePattern(LPVOID pParam)
 	}
 	pDb->CommitTransaction();
 
+	//20240703 GBM start - 중계기 일람표 편집 기능 Disable
+#ifdef MODULE_TABLE_UPDATE_MODE
 	// 중계기 일람표 상의 패턴이고 GT1 수신기가 있다면 중계기 일람표 파일 수정
 	if (!bManualMake)
 	{
@@ -78,6 +80,8 @@ UINT ThreadDeletePattern(LPVOID pParam)
 			}
 		}
 	}
+#endif
+	//20240703 GBM end
 
 	pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
 	SetEvent(pFP->m_hThreadHandle);
@@ -161,6 +165,8 @@ UINT ThreadDeleteLinkedCircuitFromThePattern(LPVOID pParam)
 
 	pDB->CommitTransaction();
 
+	//20240703 GBM start - 중계기 일람표 편집 기능 Disable
+#ifdef MODULE_TABLE_UPDATE_MODE
 	//20240604 GBM start - 해당 패턴이 중계기 일람표 상의 패턴이고 수신기 중 GT1 수신기가 있다면 중계기 일람표를 수정
 	BOOL bManualMake = FALSE;
 	bManualMake = pPtn->GetManualMake();
@@ -205,6 +211,8 @@ UINT ThreadDeleteLinkedCircuitFromThePattern(LPVOID pParam)
 		}
 	}
 	//20240604 GBM end
+#endif
+	//20240703 GBM end
 
 	pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
 	SetEvent(pFP->m_hThreadHandle);
@@ -223,6 +231,8 @@ UINT ThreadAddLinkedCircuitToThePattern(LPVOID pParam)
 	pPtn = (CDataPattern *)pFP->m_pEditItem->pData;
 	pFP->m_pRefFasSysData->ChangePattern(pPtn, pPtn->GetManualMake(), pFP->m_dataLinkedVec);
 
+	//20240703 GBM start - 중계기 일람표 편집 기능 Disable
+#ifdef MODULE_TABLE_UPDATE_MODE
 	if (pPtn->GetManualMake() != 1)
 	{
 		int nLinked = pFP->m_dataLinkedVec.size();
@@ -242,6 +252,8 @@ UINT ThreadAddLinkedCircuitToThePattern(LPVOID pParam)
 			}
 		}
 	}
+#endif
+	//20240703 GBM end
 
 	pFP->m_pProgressBarDlg->PostMessage(WM_CLOSE);
 	SetEvent(pFP->m_hThreadHandle);

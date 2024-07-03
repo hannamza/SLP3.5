@@ -2991,6 +2991,8 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 		}
 		//20240222 GBM end
 
+		//20240703 GBM start - 중계기 일람표 편집 기능 Disable
+#ifdef MODULE_TABLE_UPDATE_MODE
 		//20240422 GBM start
 		//GT1과 F3이 혼재되어 있을 경우 불일치되는 설비 정의가 메모리에 추가 반영되어 위(m_pFasSysData->InsertPrjBaseData())에서 DB에 써지지만
 		//중계기 일람표 Sheet에는 적용되지 않으므로 이를 적용, 추가된 설비 정보는 CRelayTableData::AddNewEquip(CString strEquipName, int nType)에서 
@@ -3066,6 +3068,9 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 				Log::Trace("We failed to save the added equipment definition to the equipment definition sheet in module table file because it was not in the equipment definition sheet.");
 			}
 		}
+#endif
+		//20240703 GBM end
+
 	}
 	//20240222 GBM end
 

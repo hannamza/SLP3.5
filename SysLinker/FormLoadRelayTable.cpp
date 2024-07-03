@@ -924,6 +924,8 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		Log::Trace("Failed to input facility information into DB!");
 	}
 
+	//20240703 GBM start - 중계기 일람표 편집 기능 Disable
+#ifdef MODULE_TABLE_UPDATE_MODE
 	//새로 적용된 중계기 일람표를 프로젝트 폴더에 복사하고 설비 정의를 WRITE함
 	bRet = CNewExcelManager::Instance()->CopyModuleTable(pNewTable->GetRelayTableList(), theApp.m_pFasSysData->GetPrjName());
 	if (bRet)
@@ -956,6 +958,8 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		GF_AddLog(L"새 중계기 일람표를 복사하는 데에 실패했습니다.");
 		Log::Trace("Failed to copy new module table file!");
 	}
+#endif
+	//20240703 GBM end
 	//20240408 GBM end
 
 	if (m_bPreview == FALSE)

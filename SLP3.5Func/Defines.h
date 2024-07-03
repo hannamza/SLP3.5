@@ -3,6 +3,9 @@
 // 영문화 플래그
 //#define ENGLISH_MODE	
 
+// 중계기 일람표 업데이트 플래그 - 편집에 따라 GT1 추가 정보 / 설비 정의 / 비상방송 / 패턴 (중계기 일람표 상, 수동 패턴 제외)를 갱신시키는 기능 Enable / disable
+//#define MODULE_TABLE_UPDATE_MODE
+
 // 최대 수신기 개수
 #define MAX_FACP_COUNT	32
 
@@ -127,7 +130,8 @@ namespace EQUIPMENT_DEFINITION {
 		AN연식교차B,
 		발신기화재,
 		광센서감지기,
-		CCTV
+		CCTV,
+		NMS
 	}INPUT_TYPES;
 
 	//출력타입
