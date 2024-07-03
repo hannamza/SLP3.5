@@ -172,10 +172,25 @@ void CDlgLoadRom::OnBnClickedBtnBrowser()
 				continue;
 			strExt = strtemp.Mid(nMid + 1);
 			if (strExt.CompareNoCase(_T("ROM")) != 0)
-				continue; 
+				continue;
+
+			//20240709 GBM start - GT1 역변환 기능 적용
+#if 1
+			CString strGT1 = _T("");
+			strGT1 = strtemp.Left(11);
+			if (strGT1.CompareNoCase(_T("GT1APPENDIX")) == 0)
+			{
+				btType = 2;
+			}
+			else
+			{
+				btType = 0;
+			}
+#else
 			btType = 0;
-		}
-			
+#endif
+			//20240709 GBM end
+		}	
 		
 		pData = new ST_ROMITEM;
 		memset((void*)pData, 0, sizeof(ST_ROMITEM));

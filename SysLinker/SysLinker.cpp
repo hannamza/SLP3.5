@@ -1903,24 +1903,6 @@ void CSysLinkerApp::OnFacpPreviewLink()
 
 void CSysLinkerApp::OnFacpReverseLink()
 {
-	//20240619 GBM start - F3 프로젝트에서만 진행하도록 함
-	BOOL bGT1TypeExist = FALSE;
-	for (int i = 0; i < MAX_FACP_COUNT; i++)
-	{
-		if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
-		{
-			bGT1TypeExist = TRUE;
-			break;
-		}
-	}
-
-	if (bGT1TypeExist)
-	{
-		AfxMessageBox(_T("[연동데이터 역변환]기능은 F3 수신기 프로젝트에서만 사용 가능합니다.\n현재 프로젝트는 최소 1개 이상의 GT1 수신기가 구성되어 있습니다."));
-		return;
-	}
-	//20240619 GBM end
-
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if (m_pFasSysData != nullptr)
 	{
@@ -2950,18 +2932,33 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 	if(m_pFasSysData->InsertPrjBaseData() <= 0)
 		return 0;
 
-	//20240619 GBM start - ROM 파일 역변환인 경우 아래 루틴 건너뜀
-	if (bReverse)
-		return 1;
-	//20240619 GBM end
-
 	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 GT1 추가 테이블에 Data Insert
 	CNewDBManager::Instance()->SetDBAccessor(m_pFasSysData->m_pDB);
 	//GT1 추가 입력 타입은 gfs_base에 미리 넣어 프로젝트 DB를 복사하면 적용하고 GT1 추가 테이블은 중계기 일람표 상에서 GT1 추가 정보가 존재할 때만 GT1 추가 테이블을 생성
 	BOOL bRet = FALSE;
 
-	// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
-	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
+	//역변환일 경우 수신기 타입 정보를 보고 GT1 프로젝트인지 판단
+	if (bReverse)
+	{
+		BOOL bGT1Type = FALSE;
+
+		for (int nFacp = 0; nFacp < MAX_FACP_COUNT; nFacp++)
+		{
+			if (CNewInfo::Instance()->m_gi.facpType[nFacp] == GT1)
+			{
+				bGT1Type = TRUE;
+				break;
+			}
+		}
+		bRet = bGT1Type;
+	}
+	// 일반적인 새 프로젝트 생성일 경우는 중계기 일람표를 읽으므로 GT1 관련 시트가 존재하는 지 여부를 보고 판단
+	else
+	{
+		// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+		bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
+	}
+	
 	if (bRet)
 	{
 		BOOL bRet = FALSE;

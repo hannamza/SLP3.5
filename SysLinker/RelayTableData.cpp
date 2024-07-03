@@ -16596,13 +16596,94 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 	if (bUseRvFile)
 		LoadFromRomUseReverseInfo(strRomPath);
 
+	//20240703 GBM start - GT1 역변환 기능 적용
+	int nModuleTableVerNum = 0;
+	int nLinkedDataVerNum = 0;
+	CString strAuthorized = _T("");
+
+	POSITION pos;
+	pos = pPtrRomList->GetHeadPosition();
+	while (pos)
+	{
+		pItem = (ST_ROMITEM *)pPtrRomList->GetNext(pos);
+		if (pItem->btType == 2)	// GT1APPENDIX
+		{
+			CString strGT1Appendix = _T("");
+			strGT1Appendix.Format(_T("%s%s"), strRomPath, pItem->szFile);
+			CFile fGT1Appendix;
+			if (!fGT1Appendix.Open(strGT1Appendix, CFile::modeRead))
+			{
+				GF_AddLog(L"GT1APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
+				Log::Trace("Failed to open GT1APPENDIX.ROM file");
+				return 0;
+			}
+
+			int nFileSize = sizeof(GT1APPENDIX_INFO);
+			BYTE* buf = new BYTE[nFileSize];
+			fGT1Appendix.Read(buf, nFileSize);
+			memcpy(&CNewInfo::Instance()->m_gi, buf, sizeof(GT1APPENDIX_INFO));
+			delete[] buf;
+
+			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+			strAuthorized = _T("");
+			if (CNewInfo::Instance()->m_gi.projectInfo.authorized)
+			{
+				strAuthorized = _T("A");
+			}
+
+			break;
+		}
+	}
+	//20240703 GBM end
+
 	for (i = 0; i < D_MAX_FACP_COUNT; i++)
 	{
 		memset(pMain, 0, 0x7FFFFF);
 		memset(pLcd, 0, 0x27FFFF);
 		memset(pEmer, 0, 0x27FFFF);
 
-		strMain.Format(L"%s%02d.ROM", ROM_MAIN,i);
+		//20240703 GBM start - GT1 역변환 기능 적용 
+#if 1
+		int nFacpType = CNewInfo::Instance()->m_gi.facpType[i];
+		if (nFacpType == F3)
+		{
+			strMain.Format(L"%s%02d.ROM", ROM_MAIN, i);
+			strLcd.Format(L"%s%02d.ROM", ROM_LCD, i);
+			strEmer.Format(L"%s%02d.ROM", ROM_EMER, i);
+		}
+		else if(nFacpType == GT1)
+		{
+			strMain.Format(L"%s%02d_v%02d-%02d%s.ROM", ROM_MAIN, i, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			strLcd.Format(L"%s%02d_v%02d-%02d%s.ROM", ROM_LCD, i, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			strEmer.Format(L"%s%02d_v%02d-%02d%s.ROM", ROM_EMER, i, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		}
+		else
+		{
+			strMain.Format(L"%s%02d.ROM", ROM_MAIN, i);
+			strLcd.Format(L"%s%02d.ROM", ROM_LCD, i);
+			strEmer.Format(L"%s%02d.ROM", ROM_EMER, i);
+		}
+
+		if (FindRomFileList(strMain, pPtrRomList) <= 0)
+			continue;
+		strtemp = strRomPath + strMain;
+		if (LoadFile(strtemp, pMain) < 0)
+			continue;
+
+		if (FindRomFileList(strLcd, pPtrRomList) <= 0)
+			continue;
+		strtemp = strRomPath + strLcd;
+		if (LoadFile(strtemp, pLcd) < 0)
+			continue;
+
+		if (FindRomFileList(strEmer, pPtrRomList) <= 0)
+			continue;
+		strtemp = strRomPath + strEmer;
+		if (LoadFile(strtemp, pEmer) < 0)
+			continue;
+#else
+		strMain.Format(L"%s%02d.ROM", ROM_MAIN, i);
 		if (FindRomFileList(strMain, pPtrRomList) <= 0)
 			continue;
 		strtemp = strRomPath + strMain;
@@ -16622,6 +16703,8 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 		strtemp = strRomPath + strEmer;
 		if (LoadFile(strtemp, pEmer) < 0)
 			continue;
+#endif
+		//20240703 GBM end
 
 		AddSystemFacpDataByNum(i, i+1);
 		strRvFile.Format(L"%s%02d.CSV", FN_RVRELAYINFO, i);
