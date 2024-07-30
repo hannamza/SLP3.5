@@ -44,6 +44,7 @@ int CPropSheetNewProject::InitPage()
 	//AddPage(&m_pgEmergency);
 	//SetWizardButtons(PSWIZB_BACK | PSWIZB_NEXT | PSWIZB_FINISH | PSWIZB_CANCEL);
 	SetWizardMode();
+
 	return 0;
 }
 
@@ -96,4 +97,34 @@ void CPropSheetNewProject::SetFasSysData(CRelayTableData * pData)
 	m_pgLocation.SetFasSysData(pData);
 	m_pgPattern.SetFasSysData(pData);
 	m_pgEmergency.SetFasSysData(pData);
+}
+
+
+BOOL CPropSheetNewProject::OnInitDialog()
+{
+	BOOL bResult = CPropertySheet::OnInitDialog();
+
+	// TODO:  여기에 특수화된 코드를 추가합니다.
+#ifdef ENGLISH_MODE
+	CWnd* pBackBtn = GetDlgItem(ID_WIZBACK);
+	CWnd* pNextBtn = GetDlgItem(ID_WIZNEXT);
+	CWnd* pCancelBtn = GetDlgItem(IDCANCEL);
+
+	if (pBackBtn != nullptr)
+	{
+		pBackBtn->SetWindowText(_T("Back"));
+	}
+
+	if (pNextBtn != nullptr)
+	{
+		pNextBtn->SetWindowText(_T("Next"));
+	}
+
+	if (pCancelBtn != nullptr)
+	{
+		pCancelBtn->SetWindowText(_T("Cancel"));
+	}
+#endif
+
+	return bResult;
 }

@@ -110,10 +110,16 @@ void CFormPSwitch::OnInitialUpdate()
 	//ResizeParentToFit();
 	InitSplitter();
 	m_pChangeData = new CDataPS;
+#ifndef ENGLISH_MODE
 	m_ctrlRightTopPatternList.InsertColumn(0, L"제어 접점", LVCFMT_LEFT, 150);
 	m_ctrlRightTopPatternList.InsertColumn(1, L"접점 종류", LVCFMT_LEFT, 150);
+#else
+	m_ctrlRightTopPatternList.InsertColumn(0, L"CONTROL RELAY CONTACT", LVCFMT_LEFT, 150);
+	m_ctrlRightTopPatternList.InsertColumn(1, L"RELAY CONTACT TYPE", LVCFMT_LEFT, 150);
+#endif
 	m_ctrlRightTopPatternList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
+#ifndef ENGLISH_MODE
 	m_ctrlRightBottomRelayList.InsertColumn(0, L"출력이름", LVCFMT_LEFT, 300);
 	m_ctrlRightBottomRelayList.InsertColumn(1, L"입력타입", LVCFMT_LEFT, 80);
 	m_ctrlRightBottomRelayList.InsertColumn(2, L"출력타입", LVCFMT_LEFT, 80);
@@ -123,6 +129,17 @@ void CFormPSwitch::OnInitialUpdate()
 	m_ctrlRightBottomRelayList.InsertColumn(6, L"위치", LVCFMT_LEFT, 150);
 	m_ctrlRightBottomRelayList.InsertColumn(7, L"연동타입", LVCFMT_LEFT, 80);
 	m_ctrlRightBottomRelayList.InsertColumn(8, L"출력종류", LVCFMT_LEFT, 80);
+#else
+	m_ctrlRightBottomRelayList.InsertColumn(0, L"OUTPUT NAME", LVCFMT_LEFT, 300);
+	m_ctrlRightBottomRelayList.InsertColumn(1, L"INPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRightBottomRelayList.InsertColumn(2, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRightBottomRelayList.InsertColumn(3, L"EQUIPMENT NAME", LVCFMT_LEFT, 80);
+	m_ctrlRightBottomRelayList.InsertColumn(4, L"EQUIPMENT NO.", LVCFMT_LEFT, 50);
+	m_ctrlRightBottomRelayList.InsertColumn(5, L"OUTPUT DESCRIPTION", LVCFMT_LEFT, 80);
+	m_ctrlRightBottomRelayList.InsertColumn(6, L"LOCATION", LVCFMT_LEFT, 150);
+	m_ctrlRightBottomRelayList.InsertColumn(7, L"INTERLOCK TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRightBottomRelayList.InsertColumn(8, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+#endif
 
 // 	m_ctrlRightBottomRelayList.InsertColumn(0, L"감지기/중계기", LVCFMT_LEFT, 150);
 // 	m_ctrlRightBottomRelayList.InsertColumn(1, L"주소", LVCFMT_LEFT, 150);
@@ -398,7 +415,11 @@ LRESULT CFormPSwitch::OnChildPaneTreeSelChanged(WPARAM wp, LPARAM lp)
 			m_ctrlRightBottomRelayList.SetItemText(nRIdx, 5, pDev->GetOutContentsName());
 			m_ctrlRightBottomRelayList.SetItemText(nRIdx, 6, pDev->GetOutputLocationName());
 			m_ctrlRightBottomRelayList.SetItemText(nRIdx, 7, g_szLogicTypeString[pLink->GetLogicType()]);
+#ifndef ENGLISH_MODE
 			m_ctrlRightBottomRelayList.SetItemText(nRIdx, 8, L"감지기/중계기");
+#else
+			m_ctrlRightBottomRelayList.SetItemText(nRIdx, 8, L"DETECTOR/MODULE");
+#endif
 			m_ctrlRightBottomRelayList.SetItemData(nRIdx, (DWORD_PTR)pLink);
 			nRIdx++;
 			continue;
@@ -498,8 +519,13 @@ void CFormPSwitch::OnTvnOutputDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		m_ctrlRightBottomRelayList.SetItemText(0, 4, pDev->GetEqAddIndex());
 		m_ctrlRightBottomRelayList.SetItemText(0, 5, pDev->GetOutContentsName());
 		m_ctrlRightBottomRelayList.SetItemText(0, 6, pDev->GetOutputLocationName());
+#ifndef ENGLISH_MODE
 		m_ctrlRightBottomRelayList.SetItemText(0, 7, L"수동");
 		m_ctrlRightBottomRelayList.SetItemText(0, 8, L"감지기/중계기");
+#else
+		m_ctrlRightBottomRelayList.SetItemText(0, 7, L"MANUAL");
+		m_ctrlRightBottomRelayList.SetItemText(0, 8, L"DETECTOR/MODULE");
+#endif
 
 		pLink = new CDataLinked;
 		pLink->SetLinkData(pDev->GetFacpID(), pDev->GetUnitID(), pDev->GetChnID(), pDev->GetDeviceID()
@@ -985,12 +1011,20 @@ int CFormPSwitch::DataAdd(CDataPS * pData)
 	YAdoDatabase * pDb = m_pRefFasSysData->GetPrjDB();
 	if (pDb == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project database has not been connected.");
+#endif
 		return 0;
 	}
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to enter the pressure switch information into the project database.");
+#endif
 		return 0;
 	}
 
@@ -998,7 +1032,11 @@ int CFormPSwitch::DataAdd(CDataPS * pData)
 	pNewData->CopyData(pData);
 	if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 입력하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to enter the pressure switch information into the project database.");
+#endif
 		return 0;
 	}
 	spPs->AddTail(pNewData);
@@ -1016,7 +1054,11 @@ int CFormPSwitch::DataSave(CDataPS * pData)
 	YAdoDatabase * pDb = m_pRefFasSysData->GetPrjDB();
 	if (pDb == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project database has not been connected.");
+#endif
 		return 0;
 	}
 
@@ -1026,7 +1068,11 @@ int CFormPSwitch::DataSave(CDataPS * pData)
 
 	if (pDb->OpenQuery(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 저장하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to save the pressure switch information in the project database.");
+#endif
 		return 0;
 	}
 	nCnt = pDb->GetRecordCount();
@@ -1052,7 +1098,11 @@ int CFormPSwitch::DataSave(CDataPS * pData)
 
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 저장하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to save the pressure switch information in the project database.");
+#endif
 		return 0;
 	}
 	
@@ -1062,7 +1112,11 @@ int CFormPSwitch::DataSave(CDataPS * pData)
 		pNewData->CopyData(pData);
 		if (m_pDlgLeftTopTreePane->AddTreeData(pNewData) <= 0)	//20240402 GBM - ">" -> "<="로 변경
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 저장하는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to save the pressure switch information in the project database.");
+#endif
 			return 0;
 		}
 		std::shared_ptr<CManagerPS> spManager = m_pRefFasSysData->GetPSwitchManager();
@@ -1073,7 +1127,11 @@ int CFormPSwitch::DataSave(CDataPS * pData)
 	{
 		if (m_pDlgLeftTopTreePane->ChangeTreeData(pData) <= 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 저장하는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to save the pressure switch information in the project database.");
+#endif
 			return 0;
 		}
 	}
@@ -1102,7 +1160,11 @@ int CFormPSwitch::DataDelete(CDataPS * pData)
 	YAdoDatabase * pDb = m_pRefFasSysData->GetPrjDB();
 	if (pDb == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project database has not been connected.");
+#endif
 		return 0;
 	}
 
@@ -1112,7 +1174,11 @@ int CFormPSwitch::DataDelete(CDataPS * pData)
 
 	if (pDb->OpenQuery(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the pressure switch information from the project database.");
+#endif
 		return 0;
 	}
 	nCnt = pDb->GetRecordCount();
@@ -1126,13 +1192,21 @@ int CFormPSwitch::DataDelete(CDataPS * pData)
 
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the pressure switch information from the project database.");
+#endif
 		return 0;
 	}
 
 	if (m_pDlgLeftTopTreePane->DeleteTreeData(pData) <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스에 압력스위치 정보를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the pressure switch information from the project database.");
+#endif
 		return 0;
 	}
 
@@ -1165,13 +1239,21 @@ void CFormPSwitch::OnContextMenu(CWnd* pWnd, CPoint point)
 		return;
 	if (pHitWnd == (CWnd*)&m_ctrlRightTopPatternList)
 	{
+#ifndef ENGLISH_MODE
 		nID = IDR_POPUP_PTNLINK;
+#else
+		nID = IDR_POPUP_PTNLINK_EN;
+#endif
 		m_ctrlRightTopPatternList.ScreenToClient(&ptHit);
 		nIdx = m_ctrlRightTopPatternList.HitTest(ptHit, nullptr);
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		nID = IDR_POPUP_RELAYLINK;
+#else
+		nID = IDR_POPUP_RELAYLINK_EN;
+#endif
 		m_ctrlRightBottomRelayList.ScreenToClient(&ptHit);
 		nIdx = m_ctrlRightBottomRelayList.HitTest(ptHit, nullptr);
 	}
@@ -1192,8 +1274,13 @@ void CFormPSwitch::OnPtnlkMenuDelptn()
 	if (nIdx < 0)
 		return;
 
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"패턴정보를 삭제하시겠습니까?", MB_YESNO) == IDNO)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the pattern information?", MB_YESNO) == IDNO)
+		return;
+#endif
 
 	CString strSql;
 	CDataLinked * pLink;
@@ -1201,31 +1288,51 @@ void CFormPSwitch::OnPtnlkMenuDelptn()
 	pLink = (CDataLinked*)m_ctrlRightTopPatternList.GetItemData(nIdx);
 	if (pLink == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 패턴에 대한 정보를 가져오는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Failed to retrieve information about the pattern.");
+#endif
 		return;
 	}
 
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Invalid project settings information.");
+#endif
 		return;
 	}
 
 	pDB = m_pRefFasSysData->GetPrjDB();
 	if (pDB == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트의 데이터베이스 정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. The project has invalid database information.");
+#endif
 		return;
 	}
 
 	if (DeleteLink(pLink, pDB) == 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"연동된 패턴 정보를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete interlocked pattern information.");
+#endif
 		return;
 	}
 	m_pCurrentData->DeleteLink(pLink);
 	m_ctrlRightTopPatternList.DeleteItem(nIdx);
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"연동된 패턴 정보를 삭제하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully deleted the interlock pattern information.");
+#endif
 }
 
 
@@ -1244,12 +1351,21 @@ void CFormPSwitch::OnRlylkMenuDelrly()
 	if (nCnt < 0)
 		return;
 
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"연동 출력을 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the interlock output?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+		return;
+#endif
 
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Invalid project settings.");
+#endif
 		return;
 	}
 
@@ -1261,7 +1377,11 @@ void CFormPSwitch::OnRlylkMenuDelrly()
 
 	if (pDB == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트의 데이터베이스 정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. The project has invalid database information.");
+#endif
 		return;
 	}
 	pos = m_ctrlRightBottomRelayList.GetFirstSelectedItemPosition();
@@ -1282,14 +1402,22 @@ void CFormPSwitch::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve information about the interlock output.";
+#endif
 			bError = TRUE;
 			break;;
 		}
 
 		if (DeleteLink(pLink, pDB) == 0)
 		{
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 연동정보를 삭제하는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to delete the interlocked information from the database.";
+#endif
 			bError = TRUE;
 			break;
 		}
@@ -1318,7 +1446,11 @@ void CFormPSwitch::OnRlylkMenuDelrly()
 	}
 	pDB->CommitTransaction();
 	vtSel.clear();
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully deleted the interlock output information.");
+#endif
 }
 
 

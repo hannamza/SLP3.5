@@ -24,7 +24,7 @@ CDkContactFacp::~CDkContactFacp()
 	RemoveAllTreeData();
 }
 
-
+#ifndef ENGLISH_MODE
 BEGIN_MESSAGE_MAP(CDkContactFacp, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
@@ -38,6 +38,21 @@ BEGIN_MESSAGE_MAP(CDkContactFacp, CDockablePane)
 	//ON_COMMAND(ID_PROPERTIES, OnLoadContact)
 	ON_UPDATE_COMMAND_UI(ID_LOAD_CONTACTFACP, OnUpdateLoadContact)
 END_MESSAGE_MAP()
+#else
+BEGIN_MESSAGE_MAP(CDkContactFacp, CDockablePane)
+	ON_WM_CREATE()
+	ON_WM_SIZE()
+	ON_WM_CONTEXTMENU()
+	ON_WM_PAINT()
+	ON_WM_SETFOCUS()
+	//ON_TVN_DROPED_ITEM(IDC_OUTVIEW_TREE, OnTvnContactDropedItem)
+	//ON_COMMAND(ID_LOAD_CONTACT, &CDkContactFacp::OnLoadContact)
+	ON_COMMAND(ID_LOAD_CONTACTFACP_EN, &CDkContactFacp::OnLoadContact)
+	//ON_COMMAND(ID_LOAD_CONTACTFACP, OnLoadContact)
+	//ON_COMMAND(ID_PROPERTIES, OnLoadContact)
+	ON_UPDATE_COMMAND_UI(ID_LOAD_CONTACTFACP_EN, OnUpdateLoadContact)
+END_MESSAGE_MAP()
+#endif
 
 // CDkContactFacp 메시지 처리기입니다.
 
@@ -60,8 +75,13 @@ int CDkContactFacp::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_ctrlContact.SetCursorResourceID(IDC_DROPADD_CURSOR);
 	m_ctrlContact.SetAllowDragFlag(TRUE);
 	// 이미지를 로드합니다.
+#ifndef ENGLISH_MODE
  	m_TbContact.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, IDR_CONT_FACP);
  	m_TbContact.LoadToolBar(IDR_CONT_FACP, 0, 0, TRUE /* 잠금 */);
+#else
+	m_TbContact.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, IDR_CONT_FACP_EN);
+	m_TbContact.LoadToolBar(IDR_CONT_FACP_EN, 0, 0, TRUE /* 잠금 */);
+#endif
 
 	OnChangeVisualStyle();
 
@@ -190,7 +210,11 @@ int CDkContactFacp::InitTree()
 
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"접점정보가 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"No relay contact information has been set.");
+#endif
 		return 0;
 	}
 	RemoveAllTreeData();
@@ -287,19 +311,33 @@ int CDkContactFacp::AddDropWnd(CWnd* pWnd)
 void CDkContactFacp::OnLoadContact()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"기존 접점 모두 삭제 됩니다\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		return;
 	}
-
+#else
+	if (AfxMessageBox(L"All existing relay contacts will be deleted.\nDo you still want to proceed?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	{
+		return;
+	}
+#endif
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시요");
+#else
+		AfxMessageBox(L"Please log in to your project or create a new one before proceeding.");
+#endif
 		return;
 	}
 	CExcelWrapper xls;
+#ifndef ENGLISH_MODE
 	CString strDefault = L"*.xls", strFilter = L"접점 데이터(*.xls)|*.xls|All Files (*.*)|*.*||";
+#else
+	CString strDefault = L"*.xls", strFilter = L"Relay Contact Data(*.xls)|*.xls|All Files (*.*)|*.*||";
+#endif
 	CFileDialog FileDialog(TRUE, NULL, strDefault, OFN_HIDEREADONLY, strFilter, this);
 	int i, nSheetCnt;
 	BOOL bRead = FALSE;
@@ -325,7 +363,11 @@ void CDkContactFacp::OnLoadContact()
 	CString strPath = FileDialog.GetPathName();
 	if (xls.Open(strPath) == false)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel파일을 여는데 실패 했습니다.");
+#else
+		AfxMessageBox(L"Failed to open the Excel file.");
+#endif
 		return;
 	}
 
@@ -344,7 +386,11 @@ void CDkContactFacp::OnLoadContact()
 
 	if (bRead == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel파일 내에 'CONTACT' Sheet가 없습니다.");
+#else
+		AfxMessageBox(L"There is no 'CONTACT' sheet in the Excel file.");
+#endif
 		xls.Close();
 		return;
 	}
@@ -353,7 +399,11 @@ void CDkContactFacp::OnLoadContact()
 	strSql.Format(L"DELETE FROM TB_FACP_CONTACT ");
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터베이스에서 접점 정보를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete relay contact information from the database.");
+#endif
 		xls.Close();
 		return;
 	}

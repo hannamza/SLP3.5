@@ -14,7 +14,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_VIEW_RELAY };
+#else
+	enum { IDD = IDD_DLG_VIEW_RELAY_EN };
+#endif
 #endif
 
 protected:
@@ -41,7 +45,12 @@ public:
 	CComboBox m_cmbContents;
 	CDataDevice		*	m_pCurDevice;
 public:
+
+#ifndef ENGLISH_MODE
 	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_VIEW_RELAY, pParent); }
+#else
+	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_VIEW_RELAY_EN, pParent); }
+#endif
 	void DisplayItem(CDataDevice *	pCurDevice); //< null 일때 화면 최기화
 	afx_msg void OnClose();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

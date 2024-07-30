@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CPropPagePattern, CPropertyPage)
 
+#ifndef ENGLISH_MODE
 CPropPagePattern::CPropPagePattern()
 	: CPropertyPage(IDD_PROP_PAGE_PATTERN)
 	, m_bEquip(FALSE)
@@ -38,6 +39,35 @@ CPropPagePattern::CPropPagePattern()
 	m_pRefFasSysData = nullptr;
 
 }
+#else
+CPropPagePattern::CPropPagePattern()
+	: CPropertyPage(IDD_PROP_PAGE_PATTERN_EN)
+	, m_bEquip(FALSE)
+	, m_bEquipBuild(FALSE)
+	, m_bEquipLevel(FALSE)
+	, m_bLevel(FALSE)
+	, m_bPattern(TRUE)
+	, m_bBuild(FALSE)
+	, m_bLevelBuild(FALSE)
+	, m_bRoom(FALSE)
+	, m_bRoomBuild(FALSE)
+	, m_bRoomLevel(FALSE)
+	, m_bStair(FALSE)
+	, m_bStairBuild(FALSE)
+	, m_bBtype(FALSE)
+	, m_bBtypeBuild(FALSE)
+	, m_bStairBtype(FALSE)
+	, m_bLevelBType(FALSE)
+	, m_bLevelStair(FALSE)
+	, m_bRoomBType(FALSE)
+	, m_bRoomStair(FALSE)
+	, m_bEquipBType(FALSE)
+	, m_bEquipStair(FALSE)
+{
+	m_pRefFasSysData = nullptr;
+
+}
+#endif
 
 CPropPagePattern::~CPropPagePattern()
 {
@@ -85,9 +115,15 @@ BOOL CPropPagePattern::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+#ifndef ENGLISH_MODE
 	m_ctrlPatternList.InsertColumn(0, _T("순번"), LVCFMT_CENTER, 50);
 	m_ctrlPatternList.InsertColumn(1, _T("패턴 이름"), LVCFMT_CENTER, 200);
 	m_ctrlPatternList.InsertColumn(2, _T("종류"), LVCFMT_CENTER, 80);
+#else
+	m_ctrlPatternList.InsertColumn(0, _T("ORDER"), LVCFMT_CENTER, 50);
+	m_ctrlPatternList.InsertColumn(1, _T("PATTERN NAME"), LVCFMT_CENTER, 200);
+	m_ctrlPatternList.InsertColumn(2, _T("TYPE"), LVCFMT_CENTER, 80);
+#endif
 	m_ctrlPatternList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.

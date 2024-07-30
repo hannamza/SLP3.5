@@ -184,6 +184,7 @@ END_MESSAGE_MAP()
 
 // CSysLinkerView 생성/소멸
 
+#ifndef ENGLISH_MODE
 CSysLinkerView::CSysLinkerView()
 	: CFormView(IDD_SYSLINKER_FORM)
 {
@@ -202,6 +203,26 @@ CSysLinkerView::CSysLinkerView()
 	m_nAddType = -1;
 	m_pRefPtrSelectedItems = nullptr;
 }
+#else
+CSysLinkerView::CSysLinkerView()
+	: CFormView(IDD_SYSLINKER_FORM_EN)
+{
+	// TODO: 여기에 생성 코드를 추가합니다.
+	m_pRefFasSysData = nullptr;
+	m_pDevice = nullptr;
+	for (int i = 0; i < D_MAX_DATA_PAGE; i++)
+		m_pPage[i] = nullptr;
+
+	m_pRefCurData = nullptr;
+	m_pNewData = nullptr;
+	m_pNewData = new ST_TREEITEM;
+	m_pNewData->pData = new CDataSystem;
+	m_nAction = DATA_SAVE;
+
+	m_nAddType = -1;
+	m_pRefPtrSelectedItems = nullptr;
+}
+#endif
 
 CSysLinkerView::~CSysLinkerView()
 {
@@ -246,23 +267,41 @@ BOOL CSysLinkerView::PreCreateWindow(CREATESTRUCT& cs)
 void CSysLinkerView::OnInitialUpdate()
 {
 	CFormView::OnInitialUpdate();
+#ifndef ENGLISH_MODE
 	GetParent()->SetWindowTextW(_T("연동데이터 편집"));
+#else
+	GetParent()->SetWindowTextW(_T("EDIT SITE LOGIC DATA"));
+#endif
 	GetParent()->SendMessage(UWM_CHILDFRAME_CLOSEENABLE , 0 , 0);
+#ifndef ENGLISH_MODE
 	AfxGetMainWnd()->SetWindowText(L"연동데이터 편집");
+#else
+	AfxGetMainWnd()->SetWindowText(L"EDIT SITE LOGIC DATA");
+#endif
 
 	ResizeParentToFit();
 	InitSplitter();
 
 	m_stDevName.SetFont(L"맑은 고딕");
 	m_stDevName.SetHeight(18);
+#ifndef ENGLISH_MODE
 	m_stDevName.SetText(L"현재 디바이스");
+#else
+	m_stDevName.SetText(L"CURRENT DEVICE");
+#endif
 	m_stDevName.SetAlignment(DT_CENTER | DT_SINGLELINE);
 
-
+#ifndef ENGLISH_MODE
 	m_ctrlPatternList.InsertColumn(0, L"제어 접점" ,LVCFMT_LEFT, 150);
 	m_ctrlPatternList.InsertColumn(1, L"접점 종류", LVCFMT_LEFT, 150);
+#else
+	m_ctrlPatternList.InsertColumn(0, L"CONTROL RELAY CONTACT", LVCFMT_LEFT, 150);
+	m_ctrlPatternList.InsertColumn(1, L"RELAY CONTACT TYPE", LVCFMT_LEFT, 150);
+#endif
+
 	m_ctrlPatternList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
+#ifndef ENGLISH_MODE
 	m_ctrlRelayList.InsertColumn(0, L"순서", LVCFMT_LEFT, 80);
 	m_ctrlRelayList.InsertColumn(1, L"출력이름", LVCFMT_LEFT, 300);
 	m_ctrlRelayList.InsertColumn(2, L"입력타입", LVCFMT_LEFT, 80);
@@ -273,6 +312,18 @@ void CSysLinkerView::OnInitialUpdate()
 	m_ctrlRelayList.InsertColumn(7, L"위치", LVCFMT_LEFT, 150);
 	m_ctrlRelayList.InsertColumn(8, L"연동타입", LVCFMT_LEFT, 80);
 	m_ctrlRelayList.InsertColumn(9, L"출력종류", LVCFMT_LEFT, 80);
+#else
+	m_ctrlRelayList.InsertColumn(0, L"ORDER", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(1, L"OUTPUT NAME", LVCFMT_LEFT, 300);
+	m_ctrlRelayList.InsertColumn(2, L"INPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(3, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(4, L"EQUIPMENT NAME", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(5, L"EQUIPMENT NO.", LVCFMT_LEFT, 50);
+	m_ctrlRelayList.InsertColumn(6, L"OUTPUT DESCRIPTION", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(7, L"LOCATION", LVCFMT_LEFT, 150);
+	m_ctrlRelayList.InsertColumn(8, L"INTERLOCK TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(9, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+#endif
 
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
@@ -322,13 +373,21 @@ void CSysLinkerView::OnContextMenu(CWnd*  pWnd , CPoint point)
 		return;
 	if (pHitWnd == (CWnd*)&m_ctrlPatternList)
 	{
+#ifndef ENGLISH_MODE
 		nID = IDR_POPUP_PTNLINK;
+#else
+		nID = IDR_POPUP_PTNLINK_EN;
+#endif
 		m_ctrlPatternList.ScreenToClient(&ptHit);
 		nIdx = m_ctrlPatternList.HitTest(ptHit,nullptr);
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		nID = IDR_POPUP_RELAYLINK;
+#else
+		nID = IDR_POPUP_RELAYLINK_EN;
+#endif
 		m_ctrlRelayList.ScreenToClient(&ptHit);
 		nIdx = m_ctrlRelayList.HitTest(ptHit, nullptr);
 	}
@@ -581,7 +640,11 @@ void CSysLinkerView::OnTvnOutputDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		m_ctrlRelayList.SetItemText(nIdx, 5, pDev->GetEqAddIndex(),crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 6, pDev->GetOutContentsName(),crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 7, pDev->GetOutputLocationName(),crText,crBk);
+#ifndef ENGLISH_MODE
 		m_ctrlRelayList.SetItemText(nIdx, 8, L"수동",crText,crBk);
+#else
+		m_ctrlRelayList.SetItemText(nIdx, 8, L"MANUAL", crText, crBk);
+#endif
 		m_ctrlRelayList.SetItemText(nIdx, 9, L"",crText,crBk);
 
 		if (bMulti)
@@ -758,7 +821,11 @@ void CSysLinkerView::OnTvnEmergencyDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		else
 			strName = pItem->GetEmName() + '(' + pItem->GetEmAddr() + ')';
 		strType = g_szLinkTypeString[LK_TYPE_EMERGENCY];
+#ifndef ENGLISH_MODE
 		strType += L"- 이름(주소)";
+#else
+		strType += L"- NAME (PUBLIC ADDRESS)";
+#endif
 
 		m_ctrlPatternList.InsertItem(0,strName,crText,crBk);
 		m_ctrlPatternList.SetItemText(0, 1, strType,crText,crBk);
@@ -1095,7 +1162,11 @@ int CSysLinkerView::DisplayLinkData(CDataDevice* pDev)
 			{
 				crBk = RGB(255,255,0);
 				crText = RGB(0,0,0);
+#ifndef ENGLISH_MODE
 				strDeleteText.Format(L"%s회로" , TXT_DELETE_ITEM);
+#else
+				strDeleteText.Format(L"%sCIRCUIT", TXT_DELETE_ITEM);
+#endif
 				m_ctrlRelayList.InsertItem(nRIdx,strDeleteText,crText,crBk);
 				m_ctrlRelayList.SetItemText(nRIdx,1,L" - ",crText,crBk);
 				m_ctrlRelayList.SetItemText(nRIdx,2,L" - ",crText,crBk);
@@ -1138,9 +1209,17 @@ int CSysLinkerView::DisplayLinkData(CDataDevice* pDev)
 				{
 					crBk = RGB(255,255,0);
 					crText = RGB(0,0,0);
+#ifndef ENGLISH_MODE
 					strDeleteText.Format(L"%s패턴",TXT_DELETE_ITEM);
+#else
+					strDeleteText.Format(L"%sPATTERN", TXT_DELETE_ITEM);
+#endif
 					strName = strDeleteText;// pPtn->GetPatternName();
+#ifndef ENGLISH_MODE
 					strType = L"패턴종류 없음";//g_szPatternTypeString[pPtn->GetPatternType()];
+#else
+					strType = L"NO PATTERN TYPE";//g_szPatternTypeString[pPtn->GetPatternType()];
+#endif
 					//continue;
 				}
 				else
@@ -1156,7 +1235,11 @@ int CSysLinkerView::DisplayLinkData(CDataDevice* pDev)
 				{
 					crBk = RGB(255,255,0);
 					crText = RGB(0,0,0);
+#ifndef ENGLISH_MODE
 					strDeleteText.Format(L"%s비상방송",TXT_DELETE_ITEM);
+#else
+					strDeleteText.Format(L"%sPUBLIC_ADDRESS", TXT_DELETE_ITEM);
+#endif
 					strName = strDeleteText;// pPtn->GetPatternName();
 				}
 				else
@@ -1168,7 +1251,11 @@ int CSysLinkerView::DisplayLinkData(CDataDevice* pDev)
 
 				}
 				strType = g_szLinkTypeString[LK_TYPE_EMERGENCY];
+#ifndef ENGLISH_MODE
 				strType += L"- 이름(주소)";
+#else
+				strType += L"- NAME (PUBLIC ADDRESS)";
+#endif
 				break;
 			case LK_TYPE_PUMP:
 				pPmp = m_pRefFasSysData->GetPump(pLink->GetTgtFacp(),pLink->GetTgtUnit());
@@ -1176,7 +1263,11 @@ int CSysLinkerView::DisplayLinkData(CDataDevice* pDev)
 				{
 					crBk = RGB(255,255,0);
 					crText = RGB(0,0,0);
+#ifndef ENGLISH_MODE
 					strDeleteText.Format(L"%s펌프",TXT_DELETE_ITEM);
+#else
+					strDeleteText.Format(L"%sPUMP", TXT_DELETE_ITEM);
+#endif
 					strName = strDeleteText;// pPtn->GetPatternName();
 				}
 				else
@@ -1199,7 +1290,11 @@ int CSysLinkerView::DisplayLinkData(CDataDevice* pDev)
 				{
 					crBk = RGB(255,255,0);
 					crText = RGB(0,0,0);
+#ifndef ENGLISH_MODE
 					strDeleteText.Format(L"%s수신기접점",TXT_DELETE_ITEM);
+#else
+					strDeleteText.Format(L"%sFACP_RELAY", TXT_DELETE_ITEM);
+#endif
 					strName = strDeleteText;// pPtn->GetPatternName();
 				}
 				else
@@ -1285,18 +1380,32 @@ void CSysLinkerView::OnPtnlkMenuDelptn()
 	if (nIdx < 0)
 		return; 
 
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"접점정보를 삭제하시겠습니까?", MB_YESNO) == IDNO)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the relay contact information?", MB_YESNO) == IDNO)
+		return;
+#endif
 
 	str = m_ctrlPatternList.GetItemText(nIdx,0);
 	if(str.Find(TXT_DELETE_ITEM) >= 0)
 	{
+#ifndef ENGLISH_MODE
 		int nRet = AfxMessageBox(L"정보가 삭제된 접점 입니다.\n"
 			L"해당 접점을 사용하는 모든 입력에서 삭제 - (예)\n"
 			L"현재 입력에서만 삭제 - (아니오)\n"
 			L"삭제 작업을 취소 - (취소)\n"
 			,MB_ICONQUESTION | MB_YESNOCANCEL
 		);
+#else
+		int nRet = AfxMessageBox(L"The information of the relay contact has been deleted.\n"
+			L"To delete from all inputs that use the relay contact - (YES)\n"
+			L"To delete only from the current input - (NO)\n"
+			L"To cancel the delete operation - (CANCEL)\n"
+			, MB_ICONQUESTION | MB_YESNOCANCEL
+		);
+#endif
 		if(nRet == IDCANCEL)
 			return;
 		else if(nRet == IDYES)
@@ -1309,13 +1418,21 @@ void CSysLinkerView::OnPtnlkMenuDelptn()
 	pLink = (CDataLinked*)m_ctrlPatternList.GetItemData(nIdx);
 	if (pLink == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 접점에 대한 정보를 가져오는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Failed to retrieve information about the relay contact.");
+#endif
 		return; 
 	}
 
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Invalid project settings information.");
+#endif
 		return;
 	}
 
@@ -1339,7 +1456,11 @@ void CSysLinkerView::OnPtnlkMenuDelptn()
 
 	}
 	m_ctrlPatternList.DeleteItem(nIdx);
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"연동된 접점 정보를 삭제하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"연동된 접점 정보를 삭제하는데 성공했습니다.");
+#endif
 }
 
 
@@ -1408,13 +1529,21 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 	if (nCnt < 0)
 		return; 
 
-
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"연동 출력을 삭제하시겠습니까?", MB_YESNO|MB_ICONQUESTION) == IDNO)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the interlock output?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+		return;
+#endif
 
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Invalid project settings information. ");
+#endif
 		return;
 	}
 
@@ -1442,7 +1571,11 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve information about the interlock output.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -1456,7 +1589,11 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 
 		if (pDB->OpenQuery(strSql) == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 연동정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve the interlock information from the database.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -1473,7 +1610,11 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 
 		if (pDB->ExecuteSql(strSql) == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 연동정보를 삭제하는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to delete the interlocked information from the database.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -1495,7 +1636,11 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 		if (pLink == nullptr)
 		{
 			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 연동 출력에 대한 정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve information about the interlock output.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -1504,7 +1649,11 @@ void CSysLinkerView::OnRlylkMenuDelrly()
 	}
 	pDB->CommitTransaction();
 	ChangeRelayEditNumber();
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully deleted the interlock output information.");
+#endif
 // 	
 // 
 // 
@@ -1616,7 +1765,11 @@ void CSysLinkerView::OnRClickRelayList(NMHDR *pNMHDR, LRESULT *pResult)
 	::GetCursorPos(&ptCur);
 	CMenu MenuTemp;
 	CMenu *pContextMenu = NULL;
+#ifndef ENGLISH_MODE
 	MenuTemp.LoadMenu(IDR_POPUP_RELAYLINK);
+#else
+	MenuTemp.LoadMenu(IDR_POPUP_RELAYLINK_EN);
+#endif
 	pContextMenu = MenuTemp.GetSubMenu(0);
 	pContextMenu->TrackPopupMenu(TPM_LEFTALIGN, ptCur.x, ptCur.y, ::AfxGetMainWnd());
 
@@ -1641,7 +1794,11 @@ void CSysLinkerView::OnRClickPatternList(NMHDR *pNMHDR, LRESULT *pResult)
 	::GetCursorPos(&ptCur);
 	CMenu MenuTemp;
 	CMenu *pContextMenu = NULL;
+#ifndef ENGLISH_MODE
 	MenuTemp.LoadMenu(IDR_POPUP_PTNLINK);
+#else
+	MenuTemp.LoadMenu(IDR_POPUP_PTNLINK_EN);
+#endif
 	pContextMenu = MenuTemp.GetSubMenu(0);
 	pContextMenu->TrackPopupMenu(TPM_LEFTALIGN, ptCur.x, ptCur.y, ::AfxGetMainWnd());
 	*pResult = 0;
@@ -1812,7 +1969,11 @@ void CSysLinkerView::OnBnClickedBtnAdd()
 	CRect rc;
 	CMenu mn, *pContext;
 	GetDlgItem(IDC_BTN_ADD)->GetWindowRect(&rc);
+#ifndef ENGLISH_MODE
 	mn.LoadMenu(IDR_ADD_MENU);
+#else
+	mn.LoadMenu(IDR_ADD_MENU_EN);
+#endif
 	pContext = mn.GetSubMenu(0);
 	pContext->TrackPopupMenu(TPM_LEFTALIGN, rc.left, rc.bottom, this);
 }
@@ -1838,11 +1999,19 @@ void CSysLinkerView::OnBnClickedBtnDel()
 
 	if (nRet <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete.");
+#endif
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 성공했습니다.");
+#else
+		AfxMessageBox(L"Successfully deleted.");
+#endif
 	}
 	AddCancel();
 }
@@ -2388,7 +2557,11 @@ CDataSystem * CSysLinkerView::DataAddFacp(YAdoDatabase * pDB)
 	if (m_pRefFasSysData->GetFacpByNum(pNew->GetFacpNum()) != nullptr)
 	{
 		CString str;
+#ifndef ENGLISH_MODE
 		str.Format(L"수신기 번호 [%d]는 이미 있습니다.\n기존 수신기 정보를 바꾸시겠습니까?", pNew->GetFacpNum());
+#else
+		str.Format(L"The FACP number [%d] already exists.\nDo you want to change the existing FACP information ? ", pNew->GetFacpNum());
+#endif
 		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return nullptr;
 	}
@@ -2445,8 +2618,13 @@ CDataSystem * CSysLinkerView::DataAddUnit(YAdoDatabase * pDB)
 	if (m_pRefFasSysData->GetUnitByNum(nFNum,pNew->GetUnitNum()) != nullptr)
 	{
 		CString str;
+#ifndef ENGLISH_MODE
 		str.Format(L"수신기 번호[%d] 유닛번호[%d]는 이미 있습니다.\n기존 유닛 정보를 바꾸시겠습니까?"
 			, nFNum, pNew->GetUnitNum());
+#else
+		str.Format(L"The FACP number [%d] unit number [%d] already exists.\nDo you want to change the existing unit information ?"
+			, nFNum, pNew->GetUnitNum());
+#endif
 		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return nullptr;
 	}
@@ -2507,8 +2685,13 @@ CDataSystem * CSysLinkerView::DataAddChn(YAdoDatabase * pDB)
 	if (m_pRefFasSysData->GetChannelByNum(nFNum, nUNum, pNew->GetChnNum()) != nullptr)
 	{
 		CString str;
+#ifndef ENGLISH_MODE
 		str.Format(L"수신기 번호[%d] 유닛번호[%d] 계통번호[%d]는 이미 있습니다.\n기존 계통 정보를 바꾸시겠습니까?"
 			, nFNum , nUNum, pNew->GetChnNum());
+#else
+		str.Format(L"The FACP number [%d] unit number [%d] loop number [%d] already exists.\nDo you want to change the existing loop information ?"
+			, nFNum, nUNum, pNew->GetChnNum());
+#endif
 		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return nullptr;
 	}
@@ -2577,8 +2760,13 @@ CDataSystem * CSysLinkerView::DataAddRelay(YAdoDatabase * pDB)
 	if (m_pRefFasSysData->GetDevice(pNew->GetDevKey()) != nullptr)
 	{
 		CString str;
+#ifndef ENGLISH_MODE
 		str.Format(L"수신기 번호[%d] 유닛번호[%d] 계통번호[%d] 회로번호[%d]는 이미 있습니다.\n기존 회로 정보를 바꾸시겠습니까?"
 			, pNew->GetFacpNum(),pNew->GetUnitNum() , pNew->GetDeviceNum() , pNew->GetDeviceNum());
+#else
+		str.Format(L"The FACP number [%d] unit number [%d] loop number [%d] circuit number [%d] already exists.\nDo you want to replace the existing circuit information ? "
+			, pNew->GetFacpNum(), pNew->GetUnitNum(), pNew->GetDeviceNum(), pNew->GetDeviceNum());
+#endif
 		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return nullptr;
 	}
@@ -3400,6 +3588,8 @@ void CSysLinkerView::OnBnClickedBtnSave2()
 		return;
 
 	strMessage = L"";
+
+#ifndef ENGLISH_MODE
 	if (m_nAction == DATA_ADD)
 	{
 		nRet = DataAdd();
@@ -3423,8 +3613,42 @@ void CSysLinkerView::OnBnClickedBtnSave2()
 		AfxMessageBox(strMessage);
 		AddCancel();
 	}
+#else
+	if (m_nAction == DATA_ADD)
+	{
+		nRet = DataAdd();
+	}
+	else
+	{
+		nRet = DataSave();
+	}
 
-	
+	if (nRet <= 0)
+	{
+		if (m_nAction == DATA_ADD)
+		{
+			strMessage = L"Failed to add.";
+		}
+		else
+		{
+			strMessage = L"Failed to save.";
+		}
+	}
+	else
+	{
+		if (m_nAction == DATA_ADD)
+		{
+			strMessage = L"Successfully added.";
+		}
+		else
+		{
+			strMessage += L"Successfully saved.";
+			AddCancel();
+		}
+	}
+
+	AfxMessageBox(strMessage);
+#endif
 		
 }
 

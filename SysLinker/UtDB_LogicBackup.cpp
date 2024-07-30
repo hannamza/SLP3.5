@@ -3,7 +3,7 @@
 #include "../Common/Utils/YAdoDatabase.h"
 #include "../Common/Utils/ExcelWrapper.h"
 
-
+#ifndef ENGLISH_MODE
 TCHAR *sztempAutoCol[] =
 {
 	L"¼ø¹ø",
@@ -20,6 +20,24 @@ TCHAR *sztempAutoCol[] =
 	L"Plus NÃþ",
 	NULL
 };
+#else
+TCHAR *sztempAutoCol[] =
+{
+	L"ORDER",
+	L"INPUT CIRCUIT",
+	L"EQUIPMENT NAME",
+	L"OUTPUT TYPE",
+	L"OUTPUT DESCRIPTION",
+	L"PUBLIC ADDRESS OUTPUT",
+	L"ALL FLOORS",
+	L"ROOM DISTINCTION",
+	L"BASEMENT LOGIC",
+	L"TARGET FLOOR",
+	L"OUTPUT CIRCUIT",
+	L"+ N FLOOR(S)",
+	NULL
+};
+#endif
 
 CUtDB_LogicBackup::CUtDB_LogicBackup(YAdoDatabase * pDB)
 {

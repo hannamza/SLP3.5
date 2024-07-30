@@ -384,6 +384,7 @@ CString  GF_DeleteDir(CString strPath)
 CString GF_GetSHErrorString(int nError)
 {
 	CString strError = L"";
+#ifndef ENGLISH_MODE
 	switch (nError)
 	{
 	case 0x71:
@@ -465,6 +466,89 @@ CString GF_GetSHErrorString(int nError)
 		strError = L"알 수없는 오류가 발생했습니다.";
 		break;
 	}
+#else
+	switch (nError)
+	{
+	case 0x71:
+		strError = L"The source and destination files are the same file.";
+		break;
+	case 0x72:
+		strError = L"There are multiple file paths specified in the source buffer, but only one destination file path is specified.";
+		break;
+	case 0x73:
+		strError = L"Although the rename operation was specified, the directory has a different destination path. Use the move operation instead.";
+		break;
+	case 0x74:
+		strError = L"The source is a root directory, which cannot be moved or renamed.";
+		break;
+	case 0x75:
+		strError = L"The operation was canceled by the user, or silently canceled if an appropriate flag was sent to SHFileOperation.";
+		break;
+	case 0x76:
+		strError = L"The destination is a subtree of the source.";
+		break;
+	case 0x78:
+		strError = L"Security settings denied access to the source.";
+		break;
+	case 0x79:
+		strError = L"The source or destination path exceeded or would exceed MAX_PATH.";
+		break;
+	case 0x7A:
+		strError = L"The move operation may fail because the operation involves multiple destination paths.";
+		break;
+	case 0x7C:
+		strError = L"The path in the source and/or destination is invalid.";
+		break;
+	case 0x7D:
+		strError = L"The source and destination have the same parent folder.";
+		break;
+	case 0x7E:
+		strError = L"The destination path is an existing file.";
+		break;
+	case 0x80:
+		strError = L"The destination path is an existing folder.";
+		break;
+	case 0x81:
+		strError = L"The name of the file exceeds MAX_PATH.";
+		break;
+	case 0x82:
+		strError = L"The destination is a read-only CD-ROM and is likely not formatted.";
+		break;
+	case 0x83:
+		strError = L"The destination is a read-only DVD and is likely not formatted.";
+		break;
+	case 0x84:
+		strError = L"The destination is a writable CD-ROM and is likely not formatted.";
+		break;
+	case 0x85:
+		strError = L"The file involved in the operation is too large for the destination media or file system.";
+		break;
+	case 0x86:
+		strError = L"The source is a read-only CD-ROM and is likely not formatted.";
+		break;
+	case 0x87:
+		strError = L"The source is a read-only DVD and is likely not formatted.";
+		break;
+	case 0x88:
+		strError = L"The source is a writable CD-ROM and is likely not formatted.";
+		break;
+	case 0xB7:
+		strError = L"Exceeded MAX_PATH during the operation.";
+		break;
+	case 0x402:
+		strError = L"An unknown error has occurred. This typically happens due to an invalid path in the source or destination. This error does not occur on Windows Vista or later.";
+		break;
+	case 0x10000:
+		strError = L"An unspecified error has occurred on the destination.";
+		break;
+	case 0x10000 | 0x74:
+		strError = L"The destination is a root directory, which cannot be renamed.";
+		break;
+	default:
+		strError = L"An unknown error has occurred.";
+		break;
+	}
+#endif
 	return strError;
 }
 

@@ -31,6 +31,7 @@
 
 IMPLEMENT_DYNCREATE(CFormAutoMake, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormAutoMake::CFormAutoMake()
 	: CFormView(IDD_FORMAUTOMAKE)
 {
@@ -39,6 +40,16 @@ CFormAutoMake::CFormAutoMake()
 	m_crBack = ::GetSysColor(COLOR_3DFACE);
 	m_brBackground.CreateSolidBrush(m_crBack);
 }
+#else
+CFormAutoMake::CFormAutoMake()
+	: CFormView(IDD_FORMAUTOMAKE_EN)
+{
+	m_pRefFasSysData = nullptr;
+	m_spRefAutoLogic = nullptr;
+	m_crBack = ::GetSysColor(COLOR_3DFACE);
+	m_brBackground.CreateSolidBrush(m_crBack);
+}
+#endif
 
 CFormAutoMake::~CFormAutoMake()
 {
@@ -176,6 +187,7 @@ void CFormAutoMake::OnInitialUpdate()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	m_pRefFasSysData = theApp.GetRelayTableData();
 
+#ifndef ENGLISH_MODE
 	m_ctrlList.InsertColumn(0, _T("종류"), LVCFMT_LEFT, 40);
 	m_ctrlList.InsertColumn(1, _T("출력/패턴이름"), LVCFMT_LEFT, 250);
 	m_ctrlList.InsertColumn(2, _T("입력타입"), LVCFMT_LEFT, 70);
@@ -188,6 +200,21 @@ void CFormAutoMake::OnInitialUpdate()
 	m_ctrlList.InsertColumn(9 , _T("계단"), LVCFMT_LEFT, 50);
 	m_ctrlList.InsertColumn(10, _T("층"), LVCFMT_LEFT, 50);
 	m_ctrlList.InsertColumn(11, _T("실"), LVCFMT_LEFT, 50);
+#else
+	m_ctrlList.InsertColumn(0, _T("TYPE"), LVCFMT_LEFT, 40);
+	m_ctrlList.InsertColumn(1, _T("OUTPUT/PATTERN NAME"), LVCFMT_LEFT, 250);
+	m_ctrlList.InsertColumn(2, _T("INPUT TYPE"), LVCFMT_LEFT, 70);
+	m_ctrlList.InsertColumn(3, _T("EQUIPMENT NAME"), LVCFMT_LEFT, 70);
+	m_ctrlList.InsertColumn(4, _T("OUTPUT TYPE"), LVCFMT_LEFT, 70);
+	m_ctrlList.InsertColumn(5, _T("OUTPUT DESCRIPTION"), LVCFMT_LEFT, 70);
+	m_ctrlList.InsertColumn(6, _T("OUTPUT ADDRESS"), LVCFMT_LEFT, 100);
+	m_ctrlList.InsertColumn(7, _T("BUILDING"), LVCFMT_LEFT, 50);
+	m_ctrlList.InsertColumn(8, _T("BUILDING TYPE"), LVCFMT_LEFT, 50);
+	m_ctrlList.InsertColumn(9, _T("LINE"), LVCFMT_LEFT, 50);
+	m_ctrlList.InsertColumn(10, _T("FLOOR"), LVCFMT_LEFT, 50);
+	m_ctrlList.InsertColumn(11, _T("ROOM"), LVCFMT_LEFT, 50);
+#endif
+
 	m_ctrlList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 }
 
@@ -255,7 +282,11 @@ int CFormAutoMake::AutoMakeStart()
 
 	if(m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"연동데이터 자동생성하는데 실패했습니다.(중계기일람표 가져오기 실패)");
+#else
+		AfxMessageBox(L"Failed to autogenerate the site logic data. (Failed to retrieve the module table)");
+#endif
 		return 0;
 	}
 
@@ -263,13 +294,21 @@ int CFormAutoMake::AutoMakeStart()
 
 	if(m_spRefAutoLogic == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"연동데이터 자동생성하는데 실패했습니다.(자동생성 로직 가져오기 실패)");
+#else
+		AfxMessageBox(L"Failed to autogenerate the site logic data. (Failed to retrieve the autogeneration logic)");
+#endif
 		return 0;
 	}
 	m_bStopFlag = FALSE;
 	if(InitAutoSystemData() < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"연동데이터 자동생성하는데 실패했습니다.(데이터 초기화 실패)");
+#else
+		AfxMessageBox(L"Failed to autogenerate the site logic data. (Failed to initialize data)");
+#endif
 		return 0;
 	}
 
@@ -285,6 +324,7 @@ void CFormAutoMake::OnBnClickedBtnMake()
 	m_ctrlTree.DeleteAllItems();
 	RemoveAllData();
 
+#ifndef ENGLISH_MODE
 	if(AfxMessageBox(L"연동데이터 자동생성 시작전 오류검사를 진행하실려면\nYes : 오류검사 후 연동데이터 생성\nNo:오류검사없이 연동데이터 생성",MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		AutoMakeStart();
@@ -300,8 +340,23 @@ void CFormAutoMake::OnBnClickedBtnMake()
 
 		pMainWnd->StartErrorCheck(ERR_CHECK_MAKEAUTOLINK,this);
 	}
-	
+#else
+	if (AfxMessageBox(L"To proceed with error check before starting to autogenerate site logic data\nYes: Generate site logic data after error check\nNo : Generate site logic data without error checking", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	{
+		AutoMakeStart();
+	}
+	else
+	{
+		CMainFrame * pMainWnd = (CMainFrame *)AfxGetMainWnd();
 
+		if (pMainWnd == nullptr)
+		{
+			return;
+		}
+
+		pMainWnd->StartErrorCheck(ERR_CHECK_MAKEAUTOLINK, this);
+	}
+#endif
 	
 // 	if (GenerateAutoLinkData() < 0)
 // 	{
@@ -540,6 +595,7 @@ BOOL CFormAutoMake::CheckEtcLoc(CDataDevice * pSrcDev, CDataDevice * pTargetDev
 
 	if (pLogic->GetUseUnderParking() == 1)
 	{
+#ifndef ENGLISH_MODE
 		if (pSrcLoc->GetBTypeName() == L"주차장"
 			|| pSrcLoc->GetBuildName() == L"주차장"
 			|| pTgtLoc->GetBTypeName() == L"주차장"
@@ -549,6 +605,17 @@ BOOL CFormAutoMake::CheckEtcLoc(CDataDevice * pSrcDev, CDataDevice * pTargetDev
 			strT[1] = strS[1];
 			strT[2] = strS[2];
 		}
+#else
+		if (pSrcLoc->GetBTypeName() == L"PARKING LOT"
+			|| pSrcLoc->GetBuildName() == L"PARKING LOT"
+			|| pTgtLoc->GetBTypeName() == L"PARKING LOT"
+			|| pTgtLoc->GetBuildName() == L"PARKING LOT")
+		{
+			strT[0] = strS[0];
+			strT[1] = strS[1];
+			strT[2] = strS[2];
+		}
+#endif
 	}
 	
 	
@@ -648,6 +715,7 @@ BOOL CFormAutoMake::CheckEtcLoc2(CDataDevice * pSrcDev, CDataDevice * pTargetDev
 
 	if (pLogic->GetUseUnderParking() == 1)
 	{
+#ifndef ENGLISH_MODE
 		if (pSrcLoc->GetBTypeName() == L"주차장"
 			|| pSrcLoc->GetBuildName() == L"주차장"
 			|| pTgtLoc->GetBTypeName() == L"주차장"
@@ -657,6 +725,17 @@ BOOL CFormAutoMake::CheckEtcLoc2(CDataDevice * pSrcDev, CDataDevice * pTargetDev
 			strT[1] = strS[1];
 			strT[2] = strS[2];
 		}
+#else
+		if (pSrcLoc->GetBTypeName() == L"PARKING LOT"
+			|| pSrcLoc->GetBuildName() == L"PARKING LOT"
+			|| pTgtLoc->GetBTypeName() == L"PARKING LOT"
+			|| pTgtLoc->GetBuildName() == L"PARKING LOT")
+		{
+			strT[0] = strS[0];
+			strT[1] = strS[1];
+			strT[2] = strS[2];
+		}
+#endif
 	}
 
 	nCnt = 3;
@@ -1601,7 +1680,13 @@ int CFormAutoMake::AddIndividualAutoLink2(CDataAutoMake * pSourceAuto, YAdoDatab
 	pDBUtil->RSClose();
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink2) : %d" , dwEnd-dwStart);
+#else
+	GF_AddDebug(L"	- AUTOGENERATE(AddIndividualAutoLink2) : %d", dwEnd - dwStart);
+#endif
+
 #endif
 	return 1;
 }
@@ -1914,7 +1999,13 @@ int CFormAutoMake::AddIndividualAutoLink3(CDataAutoMake * pSourceAuto, YAdoDatab
 	pDBUtil->RSClose();
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink3) : %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"	- AUTOGENERATE(AddIndividualAutoLink3) : %d", dwEnd - dwStart);
+#endif
+
 #endif
 	return 1;
 }
@@ -2227,7 +2318,13 @@ int CFormAutoMake::AddIndividualAutoLink5(CDataAutoMake * pSourceAuto, YAdoDatab
 	pDBUtil->RSClose();
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"	- 자동생성(AddIndividualAutoLink5) : %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"	- AUTOGENERATE(AddIndividualAutoLink5) : %d", dwEnd - dwStart);
+#endif
+
 #endif
 	return 1;
 }
@@ -2722,8 +2819,14 @@ int CFormAutoMake::ProcessSaveAutoLink()
 	GetDlgItem(IDC_BTN_MAKE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BTN_SAVE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
+
+#ifndef ENGLISH_MODE
 	if(SaveAutoLink() > 0)
 		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다.",MB_OK | MB_ICONINFORMATION);
+#else
+	if (SaveAutoLink() > 0)
+		AfxMessageBox(L"The generated site logic data has been saved.", MB_OK | MB_ICONINFORMATION);
+#endif
 
 	GetDlgItem(IDC_BTN_MAKE)->EnableWindow(TRUE);
 	GetDlgItem(IDC_BTN_SAVE)->EnableWindow(TRUE);
@@ -2738,11 +2841,19 @@ LRESULT CFormAutoMake::OnMakeProgress(WPARAM wp, LPARAM lp)
 	switch (lp)
 	{
 	case PROG_RESULT_CANCEL:
+#ifndef ENGLISH_MODE
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"사용자가 취소했습니다.");
+#else
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"User canceled.");
+#endif
 		m_ctrlProg.SetPos(100);
 		break;
 	case PROG_RESULT_ERROR:
+#ifndef ENGLISH_MODE
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"생성 중 오류가 발생했습니다.");
+#else
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"An error has occurred during creation.");
+#endif
 		m_ctrlProg.SetPos(100);
 		KillTimer(TM_PROG_TIMER);
 		break;
@@ -2750,7 +2861,11 @@ LRESULT CFormAutoMake::OnMakeProgress(WPARAM wp, LPARAM lp)
 		SetTimer(TM_PROG_TIMER, 1000, nullptr);
 		m_nCurTimerIdx = wp;
 		nP = (int)(((float)wp / (float)m_nAllCnt) * 100);
+#ifndef ENGLISH_MODE
 		str.Format(L"[%d]%% 작업중(%d/%d) : 연동입력 개수(%d)", nP, wp, m_nAllCnt, m_nAllCnt-m_nTimePrgCnt);
+#else
+		str.Format(L"[%d]% in progress ([%d]/[%d]) interlocked input count ([%d])", nP, wp, m_nAllCnt, m_nAllCnt - m_nTimePrgCnt);
+#endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlProg.SetPos(nP);
 		break;
@@ -2759,12 +2874,20 @@ LRESULT CFormAutoMake::OnMakeProgress(WPARAM wp, LPARAM lp)
 		break;
 	case PROG_RESULT_STEP:
 		nP = (int)(((float)wp / (float)m_nAllCnt) * 100);
+#ifndef ENGLISH_MODE
 		str.Format(L"[%d]%% 작업중(%d/%d) :연동입력 개수(%d)", nP,wp , m_nAllCnt, m_nAllCnt - m_nTimePrgCnt);
+#else
+		str.Format(L"[%d]% in progress ([%d]/[%d]) interlocked input count ([%d])", nP, wp, m_nAllCnt, m_nAllCnt - m_nTimePrgCnt);
+#endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlProg.SetPos(nP);
 		break;
 	case PROG_RESULT_FINISH:
+#ifndef ENGLISH_MODE
 		str.Format(L"%d개의 연동데이터를 생성했습니다.", m_nAllCnt-m_nTimePrgCnt);
+#else
+		str.Format(L"You have created [%d] piece(s) of site logic data.", m_nAllCnt - m_nTimePrgCnt);
+#endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlProg.SetPos(100);
 		KillTimer(TM_PROG_TIMER);
@@ -2790,8 +2913,13 @@ int CFormAutoMake::SaveAutoLink()
 	if (m_pRefFasSysData == nullptr)
 	{
 		SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_ERROR);
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트가 닫혀있는 상태입니다. 프로젝트를 열고 다시 시도해 주십시오.");
 		AfxMessageBox(L"프로젝트가 닫혀있는 상태입니다. 프로젝트를 열고 다시 시도해주십시오.");
+#else
+		GF_AddLog(L"The project is closed. Please open the project and try again.");
+		AfxMessageBox(L"The project is closed. Please open the project and try again.");
+#endif
 		return 0; 
 	}
 	int nIdx = 0 , nRet =0;
@@ -2808,7 +2936,11 @@ int CFormAutoMake::SaveAutoLink()
 
 	if(pDb->DropCleanBuffer() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터베이스의 메모리 버퍼를 초기화하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to initialize the memory buffer of the database.");
+#endif
 		return 0;
 	}
 	pDb->BeginTransaction();
@@ -2830,7 +2962,11 @@ int CFormAutoMake::SaveAutoLink()
 	if (pDb->ExecuteSql(strSql) == FALSE)
 	{
 		SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"전체 연동출력을 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the entire interlock output.");
+#endif
 		pDb->RollbackTransaction();
 		return 0;
 	}
@@ -3272,7 +3408,11 @@ int CFormAutoMake::DisplayAutoMake()
 			m_ctrlTree.SetItemData(hItem, (DWORD_PTR)pNewAuto);
 		}
 	}
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"자동생성을 완료했습니다.");
+#else
+	AfxMessageBox(L"You have completed autogeneration.");
+#endif
 	return 1;
 }
 
@@ -3300,7 +3440,11 @@ int CFormAutoMake::DisplayList(HTREEITEM hItem)
 	CDataLocBase * pLoc;
 	CDataEquip * pIn, *pName, *pCont, *pOut;
 	POSITION pos;
+#ifndef ENGLISH_MODE
 	CString strType = L"패턴" , str;
+#else
+	CString strType = L"PATTERN", str;
+#endif
 	CString strIn, strOut, strCont, strName,strEqName,strAddr;
 	CString strB, strBType, strStair, strFloor, strRoom;
 	int nIdx = 0;
@@ -3361,7 +3505,12 @@ int CFormAutoMake::DisplayList(HTREEITEM hItem)
 // 		nIdx++;
 // 	}
 
+#ifndef ENGLISH_MODE
 	strType = L"출력";
+#else
+	strType = L"OUTPUT";
+#endif
+
 	pList = pDev->GetLinkedList();
 	if (pList == nullptr)
 	{
@@ -3399,7 +3548,11 @@ int CFormAutoMake::DisplayList(HTREEITEM hItem)
 				strFloor = pLoc->GetFloorName();
 				strRoom = pLoc->GetRoomName();
 			}
+#ifndef ENGLISH_MODE
 			strType = L"출력";
+#else
+			strType = L"OUTPUT";
+#endif
 			strName = pTemp->GetOutputFullName();
 			strAddr.Format(L"%s", pTemp->GetDevAddress());
 		}
@@ -3408,7 +3561,11 @@ int CFormAutoMake::DisplayList(HTREEITEM hItem)
 			pPtn = m_pRefFasSysData->GetPattern(pDlk->GetTgtFacp());
 			if (pPtn == nullptr)
 				continue; 
+#ifndef ENGLISH_MODE
 			strType = L"패턴";
+#else
+			strType = L"PATTERN";
+#endif
 			strName = pPtn->GetPatternName();
 			strAddr.Format(L"%d", pPtn->GetPatternID());
 		}
@@ -3449,7 +3606,11 @@ int CFormAutoMake::DisplayList(HTREEITEM hItem)
 			continue;
 		strB = strBType = strStair = strFloor = strRoom = L"";
 		
+#ifndef ENGLISH_MODE
 		m_ctrlList.InsertItem(nIdx, L"비상방송");					//_T("종류"), LVCFMT_LEFT, 80);
+#else
+		m_ctrlList.InsertItem(nIdx, L"PUBLIC ADDRESS");					//_T("종류"), LVCFMT_LEFT, 80);
+#endif
 		m_ctrlList.SetItemText(nIdx, 1, pEm->GetEmName());//_T("출력/패턴이름"), LVCFMT_LEFT, 200);
 		m_ctrlList.SetItemText(nIdx, 2, strIn);//_T("입력타입"), LVCFMT_LEFT, 150);
 		m_ctrlList.SetItemText(nIdx, 3, strName);//_T("설비명"), LVCFMT_LEFT, 150);
@@ -3509,8 +3670,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 
 	if (pDBUtil->DBOpen() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddDebug(L"자동생성 오류 : 데이터베이스를 연결하는데 실패했습니다.");
 		AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
+#else
+		GF_AddDebug(L"Autogeneration error: failed to connect to the database.");
+		AfxMessageBox(L"Failed to connect to the database.");
+#endif
 		return 0;
 	}
 
@@ -3519,7 +3685,11 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	COleDateTime dtCur;
 	DWORD_PTR dwStart, dwEnd, dwTemp;
 	dtCur = COleDateTime::GetCurrentTime();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"자동생성 시작: %s", dtCur.Format(L"%H:%M:%S"));
+#else
+	GF_AddDebug(L"Autogeneration started: %s", dtCur.Format(L"%H:%M:%S"));
+#endif
 	dwStart = GetTickCount();
 	dwTemp = dwStart;
 #endif
@@ -3528,8 +3698,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	if (pDBUtil->ReduceDatabase(m_pRefFasSysData->GetPrjName()) == FALSE)
 	{
 		SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_ERROR);
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스를 초기화하는데 실패했습니다.");
 		AfxMessageBox(L"데이터베이스를 초기화하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to initialize the database.");
+		AfxMessageBox(L"Failed to initialize the database.");
+#endif
 		return 0;
 	}
 
@@ -3541,7 +3716,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - SP_GENERATE_LINK 시작: %d",dwEnd- dwTemp);
+#else
+	GF_AddDebug(L"   - SP_GENERATE_LINK started: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 
@@ -3550,8 +3731,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	{
 		SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_ERROR);
 		CString strError; 
+#ifndef ENGLISH_MODE
 		strError.Format(L"자동생성 실패 : SP_GENERATE_LINK을 실행하는데 실패했습니다.\r\n%s"
 		, pDBUtil->GetLastErrorString());
+#else
+		strError.Format(L"Autogeneration failed: failed to execute SP_GENERATE_LINK.\r\n%s"
+		, pDBUtil->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		pDBUtil->ReduceDatabase(m_pRefFasSysData->GetPrjName());
@@ -3559,12 +3745,24 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	}
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - SP_GENERATE_LINK 종료: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - SP_GENERATE_LINK ended: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - SP_GENERATE_PTN_BY_SOURCE 시작: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - SP_GENERATE_PTN_BY_SOURCE started: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 	nProgOffset = g_stConfig.dwTimeOut;
@@ -3575,7 +3773,11 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	{
 		SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_ERROR);
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"자동생성 실패 : SP_GENERATE_PTN_BY_SOURCE을 실행하는데 실패했습니다.\r\n%s"
+#else
+		strError.Format(L"Autogeneration failed: failed to execute SP_GENERATE_PTN_BY_SOURCE.\r\n%s"
+#endif
 			, pDBUtil->GetLastErrorString());
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
@@ -3584,13 +3786,25 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	}
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - SP_GENERATE_PTN_BY_SOURCE 종료: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - SP_GENERATE_PTN_BY_SOURCE ended: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - SP_DELETE_TEMPLINK_PTNITEM 시작: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - SP_DELETE_TEMPLINK_PTNITEM started: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 
@@ -3602,8 +3816,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	{
 		SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"자동생성 실패 : SP_DELETE_TEMPLINK_PTNITEM을 실행하는데 실패했습니다.\r\n%s"
 			,pDBUtil->GetLastErrorString());
+#else
+		strError.Format(L"Autogeneration failed: failed to execute SP_DELETE_TEMPLINK_PTNITEM.\r\n%s"
+			, pDBUtil->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		pDBUtil->ReduceDatabase(m_pRefFasSysData->GetPrjName());
@@ -3612,7 +3831,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - SP_DELETE_TEMPLINK_PTNITEM 종료: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - SP_DELETE_TEMPLINK_PTNITEM ended: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 
@@ -3623,7 +3848,13 @@ int CFormAutoMake::GenerateAutoLinkData2()
 
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - DataMake 시작: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - DataMake started: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 
@@ -3712,14 +3943,22 @@ int CFormAutoMake::GenerateAutoLinkData2()
 
 				if (pNewAuto == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					GF_AddDebug(L"Generation AutoLink Error : %s를 찾을 수 없습니다.", strKey);
+#else
+					GF_AddDebug(L"Generation AutoLink Error: %s was not found.", strKey);
+#endif
 					pDBUtil->MoveNext();
 					continue;
 				}
 				pSrcSys = pNewAuto->GetSysData();
 				if (pSrcSys == nullptr || pSrcSys->GetDataType() != SE_RELAY)
 				{
+#ifndef ENGLISH_MODE
 					GF_AddDebug(L"Generation AutoLink Error : %s의 타입이 디바이스가 아닙니다.", strKey);
+#else
+					GF_AddDebug(L"Generation AutoLink Error: The type of %s is not a device.", strKey);
+#endif
 					pDBUtil->MoveNext();
 					continue;
 				}
@@ -3742,7 +3981,11 @@ int CFormAutoMake::GenerateAutoLinkData2()
 				if(nRelayLinkCnt > 20)
 				{
 					nExceptionCnt ++;
+#ifndef ENGLISH_MODE
 					GF_AddLog(L"** 오류 예상됨 : %s[%s]의 출력 개수가 %d개 입니다.",pSrcDev->GetInputFullName(),pSrcDev->GetDevAddress(),nRelayLinkCnt);
+#else
+					GF_AddLog(L"** Error expected: The number of outputs for %s[%s] is %d.", pSrcDev->GetInputFullName(), pSrcDev->GetDevAddress(), nRelayLinkCnt);
+#endif
 				}
 
 				nRelayLinkCnt = 0;
@@ -3783,17 +4026,28 @@ int CFormAutoMake::GenerateAutoLinkData2()
 
 #if _DBG_MAKE_TIME_
 	dwEnd = GetTickCount();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"   - DataMake 종료: %d",dwEnd - dwTemp);
+#else
+	GF_AddDebug(L"   - DataMake ended: %d", dwEnd - dwTemp);
+#endif
+
 	dwTemp = dwEnd;
 #endif
 
 
 #if _DBG_MAKE_TIME_
 	dtCur = COleDateTime::GetCurrentTime();
+
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"자동생성 종료 : %s", dtCur.Format(L"%H:%M:%S"));
+#else
+	GF_AddDebug(L"Autogeneration ended: %s", dtCur.Format(L"%H:%M:%S"));
+#endif
+
 #endif
 	
-
 	SendMessage(CSWM_PROGRESS_STEP, nIdx + nProgOffset, PROG_RESULT_FINISH);
 	DisplayAutoMake();
 	pDBUtil->ReduceDatabase(m_pRefFasSysData->GetPrjName());
@@ -3806,7 +4060,11 @@ int CFormAutoMake::GenerateAutoLinkData2()
 	{
 		//GF_AddLog(L"** 오류 예상됨 : %s[%s]의 출력 개수가 %d개 입니다.",pSrcDev->GetInputFullName(),pSrcDev->GetDevAddress(),nRelayLinkCnt);
 		CString strMsg;
+#ifndef ENGLISH_MODE
 		strMsg.Format(L"연동 출력이 20개가 넘는 회로가 %d개 있습니다.\n로그 창을 확인하시기 바랍니다.",nExceptionCnt);
+#else
+		strMsg.Format(L"The number of circuits with 20 interlock outputs is %d.\nPlease check the log window.", nExceptionCnt);
+#endif
 		AfxMessageBox(strMsg,MB_OK|MB_ICONERROR);
 	}
 	return 1;
@@ -4906,7 +5164,11 @@ void CFormAutoMake::OnTimer(UINT_PTR nIDEvent)
 		CString str;
 		m_nCurTimerIdx++;
 		nP = (int)(((float)m_nCurTimerIdx / (float)m_nAllCnt) * 100);
+#ifndef ENGLISH_MODE
 		str.Format(L"[%d]%% 작업중(%d/%d) : 연동입력 개수(%d)", nP, m_nCurTimerIdx, m_nAllCnt, m_nAllCnt - m_nTimePrgCnt);
+#else
+		str.Format(L"[%d]% in progress (%d/%d) interlocked input count (%d)", nP, m_nCurTimerIdx, m_nAllCnt, m_nAllCnt - m_nTimePrgCnt);
+#endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlProg.SetPos(nP);
 		if(m_bStopFlag == FALSE)
@@ -4933,12 +5195,21 @@ LRESULT CFormAutoMake::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
 
 		break;
 	case ERR_CHECK_MAKEAUTOLINK:
+#ifndef ENGLISH_MODE
 		if(lp == 0)
 			AutoMakeStart();
 		else if(lp == -1)
 			AfxMessageBox(L"사용자가 취소했습니다.");
 		else
 			AfxMessageBox(L"오류가 발생하여 연동데이터 자동생성을 할 수 없습니다.");
+#else
+		if (lp == 0)
+			AutoMakeStart();
+		else if (lp == -1)
+			AfxMessageBox(L"User canceled.");
+		else
+			AfxMessageBox(L"An error has occurred and the site logic data could not be autogenerated.");
+#endif
 		break;
 	}
 	return 0;

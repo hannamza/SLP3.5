@@ -11,11 +11,19 @@
 
 IMPLEMENT_DYNAMIC(CDlgProgress, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgProgress::CDlgProgress(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_PROGRESS, pParent)
 {
 
 }
+#else
+CDlgProgress::CDlgProgress(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_PROGRESS_EN, pParent)
+{
+
+}
+#endif
 
 CDlgProgress::~CDlgProgress()
 {

@@ -29,6 +29,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgChildEditRelay, CDlgChildBasePage)
 
+#ifndef ENGLISH_MODE
 CDlgChildEditRelay::CDlgChildEditRelay(CWnd* pParent /*=NULL*/)
 	: CDlgChildBasePage(IDD_DLG_CHILD_EDIT_RELAY, pParent)
 	, m_strAddNum(_T(""))
@@ -37,6 +38,16 @@ CDlgChildEditRelay::CDlgChildEditRelay(CWnd* pParent /*=NULL*/)
 	m_pRefFasSysData = nullptr;
 	m_pMainForm = nullptr;
 }
+#else
+CDlgChildEditRelay::CDlgChildEditRelay(CWnd* pParent /*=NULL*/)
+	: CDlgChildBasePage(IDD_DLG_CHILD_EDIT_RELAY_EN, pParent)
+	, m_strAddNum(_T(""))
+	, m_nNum(0)
+{
+	m_pRefFasSysData = nullptr;
+	m_pMainForm = nullptr;
+}
+#endif
 
 CDlgChildEditRelay::~CDlgChildEditRelay()
 {
@@ -989,9 +1000,14 @@ BOOL CDlgChildEditRelay::SetDeviceAddressInfo(CDataDevice * pDev)
 	if (pTemp != nullptr)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"%02d번 수신기 %2d유닛 %02d계통에 %03d로 등록된 회로가 이미 있습니다."
 			, pFacp->GetFacpNum(), pUnit->GetUnitNum() ,pChn->GetChnNum()
 			, m_nNum);
+#else
+		strError.Format(L"There is already a circuit registered as [%03d] in Loop Number [%d] on Unit Number [%02d] of FACP Number [%02d]."
+			, m_nNum, pChn->GetChnNum(), pUnit->GetUnitNum(), pFacp->GetFacpNum());
+#endif
 		AfxMessageBox(strError);
 		return FALSE;
 	}

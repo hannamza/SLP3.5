@@ -69,8 +69,11 @@
 #define CSWM_BASE					WM_USER + 21000
 #define CSWM_PROGRESS_STEP			CSWM_BASE + 1
 
-
+#ifndef ENGLISH_MODE
 #define TXT_DELETE_ITEM				L"삭제된_"
+#else
+#define TXT_DELETE_ITEM				L"DELETED_"
+#endif
 
 
 #define INTYPE_CROSSA		2
@@ -183,6 +186,7 @@ enum
 #define TTYPE_DEV_LINKED_SOURCEITEM		TIMG_DEV_LINKED_SOURCEITEM	
 #define TTYPE_DEV_LINKED_TARGETITEM		TIMG_DEV_LINKED_TARGETITEM	
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_szTreeItemString[] = {
 	_T("프로젝트이름"),	///< TIMG_DEV_PRJNAME	= 0,
 	_T("수신기"),		///< TIMG_DEV_FACP		= 1,
@@ -207,6 +211,32 @@ static TCHAR * g_szTreeItemString[] = {
 	_T("자동로직"),		///< TIMG_DEV_LOGIC		= 20,
 	_T("사용하지않음"),	///< TIMG_DEV_COUNT,
 };
+#else
+static TCHAR * g_szTreeItemString[] = {
+	_T("PROJECT NAME"),	///< TIMG_DEV_PRJNAME	= 0,
+	_T("FACP"),		///< TIMG_DEV_FACP		= 1,
+	_T("UNIT"),			///< TIMG_DEV_UNIT		= 2,
+	_T("LOOP"),			///< TIMG_DEV_CHANNEL	= 3,
+	_T("CIRCUIT"),			///< TIMG_DEV_DEVICE		= 4,
+	_T("INPUT TYPE"),		///< TIMG_DEV_INTYPE		= 5,
+	_T("OUTPUT TYPE"),		///< TIMG_DEV_OUTTYPE	= 6,
+	_T("OUTPUT DESCRIPTION"),		///< TIMG_DEV_CONTENTS	= 7,
+	_T("EQUIPMENT NAME"),		///< TIMG_DEV_EQUIP		= 8,
+	_T("BUILDING"),			///< TIMG_DEV_BUILD		= 9,
+	_T("BUILDING TYPE"),		///< TIMG_DEV_BTYPE		= 10,
+	_T("LINE"),			///< TIMG_DEV_STAIR		= 11,
+	_T("FLOOR"),			///< TIMG_DEV_FLOOR		= 12,
+	_T("ROOM"),			///< TIMG_DEV_ROOM		= 13,
+	_T("NO OUTPUT"),		///< TIMG_DEV_NO_LINK	= 14,
+	_T("PATTERN"),			///< TIMG_DEV_PATTERN	= 15,
+	_T("OUTPUT LIST"),		///< TIMG_DEV_OUTLINKED	= 16,
+	_T("PUMP"),			///< TIMG_DEV_PUMP		= 17,
+	_T("PRESSURE SWITCH"),		///< TIMG_DEV_PSWITCH	= 18,
+	_T("PUBLIC ADDRESS"),		///< TIMG_DEV_EMERGENCY	= 19,
+	_T("AUTO LOGIC"),		///< TIMG_DEV_LOGIC		= 20,
+	_T("NOT USED"),	///< TIMG_DEV_COUNT,
+};
+#endif
 
 enum				   
 {
@@ -230,6 +260,7 @@ enum {
 	ET_ALL,
 };
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_strEquipTypeString[] = {
 	_T("설정안됨"),
 	_T("입력타입"),
@@ -241,6 +272,19 @@ static TCHAR * g_strEquipTypeString[] = {
 	_T("펌프모듈"),
 	NULL
 };
+#else
+static TCHAR * g_strEquipTypeString[] = {
+	_T("NOT SET"),
+	_T("INPUT TYPE"),
+	_T("EQUIPMENT NAME"),
+	_T("OUTPUT TYPE"),
+	_T("OUTPUT DESCRIPTION"),
+	_T("PUMP"),
+	_T("PRESSURE SWITCH"),
+	_T("PUMP MODULE"),
+	NULL
+};
+#endif
 
 enum {
 	LT_NONE = 0,
@@ -272,6 +316,7 @@ enum
 	FACP_TYPE_COUNT,
 };
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_szFacpTypeString[] = {
 	_T("설정안됨"),
 	_T("X2"),
@@ -281,6 +326,17 @@ static TCHAR * g_szFacpTypeString[] = {
 	_T("Reserve"),
 	NULL
 };
+#else
+static TCHAR * g_szFacpTypeString[] = {
+	_T("NOT SET"),
+	_T("X2"),
+	_T("F3"),
+	_T("U4"),
+	_T("F4"),
+	_T("Reserve"),
+	NULL
+};
+#endif
 
 enum 
 {
@@ -310,6 +366,7 @@ enum
 	LOCMAKE_ALL,
 };
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_szPatternTypeString[] = {
 	_T("패턴"),
 	_T("건물"),
@@ -324,6 +381,22 @@ static TCHAR * g_szPatternTypeString[] = {
 	_T("기타패턴"),
 	NULL
 };
+#else
+static TCHAR * g_szPatternTypeString[] = {
+	_T("PATTERN"),
+	_T("BUILDING"),
+	_T("BUILDING TYPE"),
+	_T("LINE"),
+	_T("FLOOR"),
+	_T("ROOM"),
+	_T("INPUT TYPE"),
+	_T("OUTPUT TYPE"),
+	_T("OUTPUT DESCRIPTION"),
+	_T("EQUIPMENT NAME"),
+	_T("UNCLASSIFIED"),
+	NULL
+};
+#endif
 
 // UNIT TYPE
 enum 
@@ -334,12 +407,21 @@ enum
 	UNIT_TYPE_COUNT,
 };
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_szUnitTypeString[] = {
 	_T("설정안됨"),
 	_T("DLD"),
 	_T("PUMP"),
 	NULL
 };
+#else
+static TCHAR * g_szUnitTypeString[] = {
+	_T("NOT SET"),
+	_T("DLD"),
+	_T("PUMP"),
+	NULL
+};
+#endif
 
 
 enum 
@@ -366,6 +448,7 @@ enum
 	LK_TYPE_FACP_RELAY = 9 , //수신기 방송 접점
 };
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_szLinkTypeString[] = {
 	_T("알수없음"),
 	_T("패턴"),
@@ -379,6 +462,21 @@ static TCHAR * g_szLinkTypeString[] = {
 	_T("수신기접점"),
 	NULL
 };
+#else
+static TCHAR * g_szLinkTypeString[] = {
+	_T("UNKNOWN"),
+	_T("PATTERN"),
+	_T("CIRCUIT"),
+	_T("PUBLIC ADDRESS"),
+	_T("PUMP"),
+	_T("G Type"),
+	_T("BELL GROUP"),
+	_T("XA Type"),
+	_T("XB Type"),
+	_T("FACP RELAY"),
+	NULL
+};
+#endif
 
 enum
 {
@@ -388,6 +486,7 @@ enum
 	LOGIC_ALL_AUTO = 3,
 };
 
+#ifndef ENGLISH_MODE
 static TCHAR * g_szLogicTypeString[] = {
 	_T("로직없음"),
 	_T("개별수동"),
@@ -395,6 +494,15 @@ static TCHAR * g_szLogicTypeString[] = {
 	_T("전체자동"),
 	NULL
 };
+#else
+static TCHAR * g_szLogicTypeString[] = {
+	_T("NO LOGIC"),
+	_T("MANUAL EACH"),
+	_T("AUTO EACH"),
+	_T("AUTO ALL"),
+	NULL
+};
+#endif
 
 #pragma pack(push,1)
 

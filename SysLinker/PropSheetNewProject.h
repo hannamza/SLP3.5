@@ -39,6 +39,7 @@ public:
 	CRelayTableData * GetFasSysData() {
 		return m_pFasSysData;
 	};
+	virtual BOOL OnInitDialog();
 };
 
 

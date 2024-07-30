@@ -214,8 +214,11 @@ BOOL CTaskProgressDialog::OnInitDialog()
 	m_Progress.SetStep(m_nStep);
 	m_Progress.SetPos(m_nLower);
 
-
+#ifndef ENGLISH_MODE
 	SetWindowText(L"작업 진행 현황.....");
+#else
+	SetWindowText(L"WORK IN PROGRESS.....");
+#endif
 
 	HICON hIcon[3];
 	m_ImageList.Create(16,16,0,2,2);				// 32, 32 for large icons

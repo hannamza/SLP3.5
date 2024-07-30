@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgMakePwd, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgMakePwd::CDlgMakePwd(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_PASSWORD, pParent)
 	, m_uInputNum(0)
@@ -18,6 +19,15 @@ CDlgMakePwd::CDlgMakePwd(CWnd* pParent /*=NULL*/)
 {
 
 }
+#else
+CDlgMakePwd::CDlgMakePwd(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_PASSWORD_EN, pParent)
+	, m_uInputNum(0)
+	, m_uResult(0)
+{
+
+}
+#endif
 
 CDlgMakePwd::~CDlgMakePwd()
 {

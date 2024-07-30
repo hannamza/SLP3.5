@@ -18,6 +18,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgChildPump, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgChildPump::CDlgChildPump(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_PUMPINFO, pParent)
 	, m_nNum(0)
@@ -30,6 +31,20 @@ CDlgChildPump::CDlgChildPump(CWnd* pParent /*=NULL*/)
 	m_bAddStatus = FALSE;
 	m_pRefChangeData = nullptr;
 }
+#else
+CDlgChildPump::CDlgChildPump(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_PUMPINFO_EN, pParent)
+	, m_nNum(0)
+	, m_strName(_T(""))
+	, m_strLcd(_T(""))
+{
+	m_pRefFasSysData = nullptr;
+	m_pMainForm = nullptr;
+	m_pCurrentData = nullptr;
+	m_bAddStatus = FALSE;
+	m_pRefChangeData = nullptr;
+}
+#endif
 
 CDlgChildPump::~CDlgChildPump()
 {
@@ -77,7 +92,11 @@ BOOL CDlgChildPump::OnInitDialog()
 
 BOOL CDlgChildPump::CreateDlg(CWnd * pParent)
 {
+#ifndef ENGLISH_MODE
 	return Create(IDD_DLG_PUMPINFO , pParent);
+#else
+	return Create(IDD_DLG_PUMPINFO_EN, pParent);
+#endif
 }
 
 
@@ -120,40 +139,64 @@ void CDlgChildPump::OnBnClickedBtnSave()
 	nSel = m_cmbFacp.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"수신기가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"No FACP has been selected.");
+#endif
 		return;
 	}
 
 	nFacpID = (int)m_cmbFacp.GetItemData(nSel);
 	if (nFacpID <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"수신기 정보가 없습니다.");
+#else
+		AfxMessageBox(L"No FACP has been selected.");
+#endif
 		return;
 	}
 
 	nSel = m_cmbType.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"타입이 설정되지 않았습니다. 타입 설정을 해주십시오.");
+#else
+		AfxMessageBox(L"The type has not been set. Please set the type.");
+#endif
 		return;
 	}
 
 	nType = (int)m_cmbType.GetItemData(nSel);
 	if (nType <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"타입정보가 없습니다.");
+#else
+		AfxMessageBox(L"No type information exists.");
+#endif
 		return;
 	}
 
 	if (m_strName == L"")
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"이름을 입력해 주십시오.");
+#else
+		AfxMessageBox(L"Please enter a name.");
+#endif
 		return;
 	}
 
 	if (m_nNum <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"펌프 번호를 입력해 주십시오.");
+#else
+		AfxMessageBox(L"Please enter the pump number.");
+#endif
 		return;
 	}
 
@@ -188,10 +231,18 @@ void CDlgChildPump::OnBnClickedBtnDel()
 	CString strMsg;
 	if (m_pCurrentData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 펌프가 없습니다.");
+#else
+		AfxMessageBox(L"No pumps have been selected.");
+#endif
 		return;
 	}
+#ifndef ENGLISH_MODE
 	strMsg.Format(L"선택된 %s를 삭제하시겠습니까?", m_pCurrentData->GetPumpName());
+#else
+	strMsg.Format(L"Do you want to delete the selected [%s]?", m_pCurrentData->GetPumpName());
+#endif
 	if (AfxMessageBox(strMsg, MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 	if (m_pMainForm)

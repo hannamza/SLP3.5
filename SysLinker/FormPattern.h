@@ -32,7 +32,11 @@ public:
 	int						m_nManualMakeStatus;
 public:
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_FORMPATTERN };
+#else
+	enum { IDD = IDD_FORMPATTERN_EN };
+#endif
 #endif
 #ifdef _DEBUG
 	virtual void AssertValid() const;

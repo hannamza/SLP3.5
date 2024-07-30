@@ -111,7 +111,11 @@ UINT ThreadGetDefaultEquipmentDefinition(LPVOID pParam)
 			theApp.m_bThreadSucceeded = FALSE;
 
 			CString strMsg = _T("");
+#ifndef ENGLISH_MODE
 			strMsg.Format(_T("기본 설비 정의 파일 [%s] 열기에 실패했습니다."), strEquipmentDefinitionFile);
+#else
+			strMsg.Format(_T("Failed to open the default equipment definition file [%s]."), strEquipmentDefinitionFile);
+#endif
 			GF_AddLog(strMsg);
 			strMsg.Format(_T("Failed to open default equipment definition file [%s]."), strEquipmentDefinitionFile);
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
@@ -122,7 +126,11 @@ UINT ThreadGetDefaultEquipmentDefinition(LPVOID pParam)
 		theApp.m_bThreadSucceeded = FALSE;
 
 		CString strMsg = _T("");
+#ifndef ENGLISH_MODE
 		strMsg.Format(_T("기본 설비 정의 파일 [%s]이 없어서 적용하지 않습니다."), strEquipmentDefinitionFile);
+#else
+		strMsg.Format(_T("Not applied because the default equipment definition file [%s] doesn't exist."), strEquipmentDefinitionFile);
+#endif
 		GF_AddLog(strMsg);
 		strMsg.Format(_T("The default equipmemt definition file [%s] does not exist and will not be applied."), strEquipmentDefinitionFile);
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));	
@@ -140,7 +148,11 @@ UINT ThreadCreateNewProject(LPVOID pParam)
 	theApp.m_bThreadSucceeded = TRUE;
 	if (theApp.m_pFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 생성에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to create a project.");
+#endif
 		theApp.CloseProject();
 		theApp.m_bThreadSucceeded = FALSE;
 		theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
@@ -163,7 +175,11 @@ UINT ThreadCreateNewProject(LPVOID pParam)
 	/************************************************************************/
 	if (theApp.CreateProject() <= 0)
 	{
-		GF_AddLog(L"프로젝트를 생성하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"프로젝트 생성에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to create a project.");
+#endif
 		theApp.CloseProject();
 		theApp.m_bThreadSucceeded = FALSE;
 	}
@@ -178,7 +194,11 @@ UINT ThreadOpenProjectDatabase(LPVOID pParam)
 	theApp.m_bThreadSucceeded = TRUE;
 	if (theApp.OpenProjectDatabase(theApp.m_pFasSysData) < 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 데이터베이스를 여는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to open the project database.");
+#endif
 		theApp.m_bThreadSucceeded = FALSE;
 		theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
 		SetEvent(theApp.m_hThreadHandle);
@@ -187,7 +207,11 @@ UINT ThreadOpenProjectDatabase(LPVOID pParam)
 
 	if (theApp.m_pFasSysData->LoadProjectDatabase() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 데이터베이스에서 데이터를 가져오는 데에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the data from the project database.");
+#endif
 		theApp.m_bThreadSucceeded = FALSE;
 	}
 
@@ -437,11 +461,19 @@ BOOL CSysLinkerApp::InitInstance()
 
 	// 주 MDI 프레임 창을 만듭니다.
 	CMainFrame* pMainFrame = new CMainFrame;
+#ifndef ENGLISH_MODE
 	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MAINFRAME))
 	{
 		delete pMainFrame;
 		return FALSE;
 	}
+#else
+	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MAINFRAME_EN))
+	{
+		delete pMainFrame;
+		return FALSE;
+	}
+#endif
 	m_pMainWnd = pMainFrame;
 
 
@@ -522,12 +554,22 @@ void CSysLinkerApp::PreLoadState()
 {
 	BOOL bNameValid;
 	CString strName;
+
+#ifndef ENGLISH_MODE
 	bNameValid = strName.LoadString(IDS_EDIT_MENU);
 	ASSERT(bNameValid);
 	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
 	bNameValid = strName.LoadString(IDS_EXPLORER);
 	ASSERT(bNameValid);
 	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
+#else
+	bNameValid = strName.LoadString(IDS_EDIT_MENU_EN);
+	ASSERT(bNameValid);
+	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT_EN);
+	bNameValid = strName.LoadString(IDS_EXPLORER_EN);
+	ASSERT(bNameValid);
+	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER_EN);
+#endif
 }
 
 void CSysLinkerApp::LoadCustomState()
@@ -568,149 +610,267 @@ int CSysLinkerApp::SetSystemPath()
 
 int CSysLinkerApp::DocumentTemplateInit()
 {
+#ifndef ENGLISH_MODE
 	m_pTempleMakeLink = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CSysLinkerDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CSysLinkerView));
+#else
+	m_pTempleMakeLink = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CSysLinkerDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CSysLinkerView));
+#endif
 	if (!m_pTempleMakeLink)
 		return FALSE;
 	AddDocTemplate(m_pTempleMakeLink);
 
+#ifndef ENGLISH_MODE
 	m_pTempleMakePtn = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormPattern));
+#else
+	m_pTempleMakePtn = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormPattern));
+#endif
 	if (!m_pTempleMakePtn)
 		return FALSE;
 	AddDocTemplate(m_pTempleMakePtn);
 
-
-
+#ifndef ENGLISH_MODE
 	m_pTemplePSwitch = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormPSwitch));
+#else
+	m_pTemplePSwitch = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormPSwitch));
+#endif
 	if (!m_pTemplePSwitch)
 		return FALSE;
 	AddDocTemplate(m_pTemplePSwitch);
 
-
-
+#ifndef ENGLISH_MODE
 	m_pTempleSwitch = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormSwitch));
+#else
+	m_pTempleSwitch = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormSwitch));
+#endif
 	if (!m_pTempleSwitch)
 		return FALSE;
 	AddDocTemplate(m_pTempleSwitch);
 
-
-
+#ifndef ENGLISH_MODE
 	m_pTempleLinkView = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormLinkView));
+#else
+	m_pTempleLinkView = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormLinkView));
+#endif
 	if (!m_pTempleLinkView)
 		return FALSE;
 	AddDocTemplate(m_pTempleLinkView);
 
-
-
+#ifndef ENGLISH_MODE
 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormPump));
+#else
+	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormPump));
+#endif
 	if (!m_pTemplePump)
 		return FALSE;
 	AddDocTemplate(m_pTemplePump);
 
-
+#ifndef ENGLISH_MODE
 	m_pTempleEquip = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormEquip));
+#else
+	m_pTempleEquip = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormEquip));
+#endif
 	if (!m_pTempleEquip)
 		return FALSE;
 	AddDocTemplate(m_pTempleEquip);
 
-
+#ifndef ENGLISH_MODE
 	m_pTempleUser = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormUser));
+#else
+	m_pTempleUser = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormUser));
+#endif
 	if (!m_pTempleUser)
 		return FALSE;
 	AddDocTemplate(m_pTempleUser);
 
+#ifndef ENGLISH_MODE
 	m_pTempleAccess = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormAccess));
+#else
+	m_pTempleAccess = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormAccess));
+#endif
 	if (!m_pTempleAccess)
 		return FALSE;
 	AddDocTemplate(m_pTempleAccess);
 
+#ifndef ENGLISH_MODE
 	m_pTempleEmergency = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormEmergency));
+#else
+	m_pTempleEmergency = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormEmergency));
+#endif
 	if (!m_pTempleEmergency)
 		return FALSE;
 	AddDocTemplate(m_pTempleEmergency);
 
+#ifndef ENGLISH_MODE
 	m_pTempleLocation = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormLocation));
+#else
+	m_pTempleLocation = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormLocation));
+#endif
 	if (!m_pTempleLocation)
 		return FALSE;
 	AddDocTemplate(m_pTempleLocation);
 
+#ifndef ENGLISH_MODE
 	m_pTempleFacp = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormFacp));
+#else
+	m_pTempleFacp = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormFacp));
+#endif
 	if (!m_pTempleFacp)
 		return FALSE;
 	AddDocTemplate(m_pTempleFacp);
 
+#ifndef ENGLISH_MODE
 	m_pTempleUnit = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormUnit));
+#else
+	m_pTempleUnit = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormUnit));
+#endif
 	if (!m_pTempleUnit)
 		return FALSE;
 
+#ifndef ENGLISH_MODE
 	m_pTempleRelayEdit = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormRelayEdit));
+#else
+	m_pTempleRelayEdit = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormRelayEdit));
+#endif
 	if (!m_pTempleRelayEdit)
 		return FALSE;
 
+#ifndef ENGLISH_MODE
 	m_pTempleAutoMake = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormAutoMake));
+#else
+	m_pTempleAutoMake = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormAutoMake));
+#endif
 	if (!m_pTempleAutoMake)
 		return FALSE;
+
+#ifndef ENGLISH_MODE
 	m_pTempleLogicEdit = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormEditLogic));
+#else
+	m_pTempleLogicEdit = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormEditLogic));
+#endif
 	if (!m_pTempleLogicEdit)
 		return FALSE;
+
+#ifndef ENGLISH_MODE
 	m_pTempleLoadRealy = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormLoadRelayTable));
+#else
+	m_pTempleLoadRealy = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormLoadRelayTable));
+#endif
 	if (!m_pTempleLoadRealy)
 		return FALSE;
 
+#ifndef ENGLISH_MODE
 	m_pTempleErrorCheck = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
 		RUNTIME_CLASS(CFormErrorCheck));
+#else
+	m_pTempleErrorCheck = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+		RUNTIME_CLASS(CFormErrorCheck));
+#endif
 	if(!m_pTempleErrorCheck)
 		return FALSE;
 
@@ -735,92 +895,164 @@ CView* CSysLinkerApp::OpenFormView(FormViewStyle iStyle)
 	if (iStyle == FV_MAKELINKER)
 	{
 		pDocTemp = m_pTempleMakeLink;
+#ifndef ENGLISH_MODE
 		strTitle = L"연동데이터 편집";
+#else
+		strTitle = L"EDIT SITE LOGIC DATA";
+#endif
 	}
 	else if (iStyle == FV_MAKEPATTERN)
 	{
 		pDocTemp = m_pTempleMakePtn;
+#ifndef ENGLISH_MODE
 		strTitle = L"패턴데이터 편집";
+#else
+		strTitle = L"EDIT PATTERN DATA";
+#endif
 	}
 	else if (iStyle == FV_PSWITCH)
 	{
 		pDocTemp = m_pTemplePSwitch;
+#ifndef ENGLISH_MODE
 		strTitle = L"압력스위치 편집";
+#else
+		strTitle = L"EDIT PRESSURE SWITCH";
+#endif
 	}
 	else if (iStyle == FV_SWITCH)
 	{
 		pDocTemp = m_pTempleSwitch;
+#ifndef ENGLISH_MODE
 		strTitle = L"스위치 편집";
+#else
+		strTitle = L"EDIT SWITCH";
+#endif
 	}
 	else if (iStyle == FV_LINKVIEW)
 	{
 		pDocTemp = m_pTempleLinkView;
+#ifndef ENGLISH_MODE
 		strTitle = L"연동데이터 보기";
+#else
+		strTitle = L"VIEW SITE LOGIC DATA";
+#endif
 	}
 	else if (iStyle == FV_PUMP)
 	{
 		pDocTemp = m_pTemplePump;
+#ifndef ENGLISH_MODE
 		strTitle = L"펌프데이터 편집";
+#else
+		strTitle = L"EDIT PUMP DATA";
+#endif
 	}
 	else if (iStyle == FV_EQUIP)
 	{
 		pDocTemp = m_pTempleEquip;
+#ifndef ENGLISH_MODE
 		strTitle = L"설비정보 편집";
+#else
+		strTitle = L"EDIT EQUIPMENT INFORMATION";
+#endif
 	}
 	else if (iStyle == FV_USER)
 	{
 		pDocTemp = m_pTempleUser;
+#ifndef ENGLISH_MODE
 		strTitle = L"사용자/사용자그룹 편집";
+#else
+		strTitle = L"EDIT USER/USER GROUP";
+#endif
 	}
 	else if (iStyle == FV_ACCESS)
 	{
 		pDocTemp = m_pTempleAccess;
+#ifndef ENGLISH_MODE
 		strTitle = L"Access 권한 편집";
+#else
+		strTitle = L"EDIT ACCESS PERMISSION";
+#endif
 	}
 	else if (iStyle == FV_EMERGENCY)
 	{
 		pDocTemp = m_pTempleEmergency;
+#ifndef ENGLISH_MODE
 		strTitle = L"비상방송 편집";
+#else
+		strTitle = L"EDIT PUBLIC ADDRESS";
+#endif
 	}
 	else if (iStyle == FV_LOCATION)
 	{
 		pDocTemp = m_pTempleLocation;
+#ifndef ENGLISH_MODE
 		strTitle = L"위치정보 편집";
+#else
+		strTitle = L"EDIT GEOLOCATION INFORMATION";
+#endif
 	}
 	else if (iStyle == FV_FACP)
 	{
 		pDocTemp = m_pTempleFacp;
+#ifndef ENGLISH_MODE
 		strTitle = L"수신기정보 편집";
+#else
+		strTitle = L"EDIT FACP INFORMATION";
+#endif
 	}
 	else if (iStyle == FV_UNIT)
 	{
 		pDocTemp = m_pTempleUnit;
+#ifndef ENGLISH_MODE
 		strTitle = L"유닛정보 편집";
+#else
+		strTitle = L"EDIT UNIT INFORMATION";
+#endif
 	}
 	else if (iStyle == FV_RELAYEDIT)
 	{
 		pDocTemp = m_pTempleRelayEdit;
+#ifndef ENGLISH_MODE
 		strTitle = L"회로 편집";
+#else
+		strTitle = L"EDIT CIRCUIT";
+#endif
 	}
 	else if (iStyle == FV_AUTOMAKE)
 	{
 		pDocTemp = m_pTempleAutoMake;
+#ifndef ENGLISH_MODE
 		strTitle = L"연동데이터 자동생성";
+#else
+		strTitle = L"AUTOGENERATE SITE LOGIC DATA";
+#endif
 	}
 	else if (iStyle == FV_LOGICEDIT)
 	{
 		pDocTemp = m_pTempleLogicEdit;
+#ifndef ENGLISH_MODE
 		strTitle = L"연동데이터 자동생성 로직";
+#else
+		strTitle = L"SITE LOGIC DATA AUTOGENERATION LOGIC";
+#endif
 	}
 	else if (iStyle == FV_LOADRELAYTABLE)
 	{
 		pDocTemp = m_pTempleLoadRealy;
+#ifndef ENGLISH_MODE
 		strTitle = L"중계기 일람표";
+#else
+		strTitle = L"MODULE TABLE";
+#endif
 	}
 	else if(iStyle == FV_ERRORCHECK)
 	{
 		pDocTemp = m_pTempleErrorCheck;
+#ifndef ENGLISH_MODE
 		strTitle = L"오류 검사";
+#else
+		strTitle = L"CHECK FOR ERROR";
+#endif
 	}
 
 	if (pDocTemp == NULL)
@@ -1239,14 +1471,23 @@ void CSysLinkerApp::OnHomeProjectClose()
 	// 2. 화면 초기화
 	// 3. DB분리 , 데이터 할당 해제
 	// 4. 데이터 삭제
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to close the current project?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		return;
+#endif
 
 	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Closing the project. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -1261,12 +1502,20 @@ void CSysLinkerApp::OnHomeProjectClose()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+#else
+		GF_AddLog(L"Successfully closed the project.");
+#endif
 		Log::Trace("The project was successfully closed.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to close the project.");
+#endif
 		Log::Trace("Failed to close the project.");
 	}
 
@@ -1293,14 +1542,23 @@ void CSysLinkerApp::OnHomeProjectNew()
 
 	if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
 	{
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(L"새 프로젝트를 생성하시려면 현재 프로젝트를 닫아야 합니다.\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
+#else
+		if (AfxMessageBox(L"To create a new project, you need to close the current project.\nDo you want to close the current project? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
+			return;
+#endif
 
 		//20240527 GBM start - 스레드로 전환
 #if 1
 		m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 		m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 		CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+#else
+		CString strMsg = _T("Closing the project. Wait for a moment.");
+#endif
 		CProgressBarDlg dlg(strMsg);
 		m_pProgressBarDlg = &dlg;
 
@@ -1315,12 +1573,20 @@ void CSysLinkerApp::OnHomeProjectNew()
 
 		if (m_bThreadSucceeded)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully closed the project.");
+#endif
 			Log::Trace("The project was successfully closed.");
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to close the project.");
+#endif
 			Log::Trace("Failed to close the project.");
 		}
 
@@ -1343,7 +1609,11 @@ void CSysLinkerApp::OnHomeProjectNew()
 	//20240527 GBM start - 스레드로 전환
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("기본 설비 정의를 로드 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Loading the default equipment definition. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -1358,7 +1628,11 @@ void CSysLinkerApp::OnHomeProjectNew()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"기본 설비 정의 로드에 성공했습니다.");
+#else
+		GF_AddLog(L"Successfully loaded the default equipment definition.");
+#endif
 		Log::Trace("Loading of the default equipment definition was successful.");
 	}
 
@@ -1418,7 +1692,11 @@ void CSysLinkerApp::OnHomeProjectNew()
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	strMsg = _T("        새 프로젝트를 생성 중입니다. 잠시 기다려 주세요.");
+#else
+	strMsg = _T("        Creating a new project. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg2(strMsg);
 	m_pProgressBarDlg = &dlg2;
 
@@ -1433,12 +1711,20 @@ void CSysLinkerApp::OnHomeProjectNew()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"새 프로젝트 생성에 성공했습니다.");
+#else
+		GF_AddLog(L"Successfully created a new project.");
+#endif
 		Log::Trace("New project creation was successful.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"새 프로젝트 생성에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to create a new project.");
+#endif
 		Log::Trace("New project creation was failed.");
 	}
 
@@ -1453,10 +1739,18 @@ void CSysLinkerApp::OnHomeProjectNew()
 	m_pFasSysData->SetProjectOpened(TRUE);
 
 	CString strName;
+#ifndef ENGLISH_MODE
 	strName.Format(L"프로젝트명 - %s", m_pFasSysData->GetPrjName());
+#else
+	strName.Format(L"Project Name - %s", m_pFasSysData->GetPrjName());
+#endif
 	AfxGetMainWnd()->SetWindowTextW(strName);
 
+#ifndef ENGLISH_MODE
 	GF_AddLog(L"[%s] 프로젝트를 생성했습니다.", m_pFasSysData->GetPrjName());
+#else
+	GF_AddLog(L"You have created the project [%s].", m_pFasSysData->GetPrjName());
+#endif
 	Log::Trace("[%s] Project Created!", CCommonFunc::WCharToChar(m_pFasSysData->GetPrjName().GetBuffer(0)));
 
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
@@ -1518,14 +1812,23 @@ void CSysLinkerApp::OnHomeProjectOpen()
 
 	if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
 	{
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(L"프로젝트 열기를 하시려면 현재 프로젝트를 닫아야 합니다.\n현재 프로젝트를 닫으시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
+#else
+		if (AfxMessageBox(L"To open a project, you need to close the current project.\nDo you want to close the current project ? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
+			return;
+#endif
 
 		//20240527 GBM start - 스레드로 전환
 #if 1
 		m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 		m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 		CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+#else
+		CString strMsg = _T("Closing the project. Wait for a moment.");
+#endif
 		CProgressBarDlg dlg(strMsg);
 		m_pProgressBarDlg = &dlg;
 
@@ -1540,12 +1843,20 @@ void CSysLinkerApp::OnHomeProjectOpen()
 
 		if (m_bThreadSucceeded)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully closed the project.");
+#endif
 			Log::Trace("The project was successfully closed.");
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to close the project.");
+#endif
 			Log::Trace("Failed to close the project.");
 		}
 
@@ -1574,11 +1885,19 @@ void CSysLinkerApp::OnHomeProjectOpen()
 	DWORD_PTR dwStart, dwEnd;
 	dwStart = GetTickCount();
 	dtCur = COleDateTime::GetCurrentTime();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"Start 시간 : %s", dtCur.Format(L"%H:%M:%S"));
+#else
+	GF_AddDebug(L"Start Time : %s", dtCur.Format(L"%H:%M:%S"));
+#endif
 	if (OpenProject(dlg.GetOpenProjectName(), dlg.GetOpenProjectPath()
 		, dlg.GetOpenProjectVersion(), dlg.IsSelectedVersionTemp()) <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"[%s] 프로젝트를 여는데 실패 했습니다.", dlg.GetOpenProjectName());
+#else
+		GF_AddLog(L"Failed to open the [%s] project.", dlg.GetOpenProjectName());
+#endif
 		return;
 	}
 
@@ -1594,19 +1913,35 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		pMakLinkView->SetRelayTableData(m_pFasSysData);
 
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_OPEN, 0);
+#ifndef ENGLISH_MODE
 	GF_AddLog(L"[%s] 프로젝트를 여는데 성공 했습니다.", dlg.GetOpenProjectName());
+#else
+	GF_AddLog(L"Successfully opened the project [%s].", dlg.GetOpenProjectName());
+#endif
 	Log::Trace("[%s] Project Opened!", CCommonFunc::WCharToChar(dlg.GetOpenProjectName().GetBuffer(0)));
 	dwEnd = GetTickCount();
 	GF_AddDebug(L"OnHomeProjectOpen : %d", dwEnd - dwStart);
 	dtCur = COleDateTime::GetCurrentTime();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"End 시간 : %s", dtCur.Format(L"%H:%M:%S"));
+#else
+	GF_AddDebug(L"End Time : %s", dtCur.Format(L"%H:%M:%S"));
+#endif
 	CString strName;
+#ifndef ENGLISH_MODE
 	strName.Format(L"프로젝트명 - %s", m_pFasSysData->GetPrjName());
+#else
+	strName.Format(L"Project Name - %s", m_pFasSysData->GetPrjName());
+#endif
 	AfxGetMainWnd()->SetWindowTextW(strName);
 
 	if(g_bRequirePtnManualCheck)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴을 수동으로 생성했는지 일람표로 생성했는지 체크되지 않았습니다.\n'수동으로 생성' 또는 '일람표로 생성'을 선택해 주시기 바랍니다.");
+#else
+		AfxMessageBox(L"You have not checked whether the pattern was created manually or from a table.\nPlease select 'Create Manually' or 'Create from Table'.");
+#endif
 		CDlgPatternProperty dlg;
 		dlg.m_pRefFasSysData = m_pFasSysData;
 		dlg.DoModal();
@@ -1622,14 +1957,23 @@ void CSysLinkerApp::OnHomeProjectSave()
 	// 4.
 	if (m_pFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트가 열려있지 않습니다.");
 		GF_AddLog(L"프로젝트가 열려있지 않습니다.");
+#else
+		AfxMessageBox(L"The project is not open.");
+		GF_AddLog(L"The project is not open.");
+#endif
 		return;
 	}
 	// Database 용량 줄이기
 	if (m_pFasSysData->ReduceDatabase() == 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트를 저장하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to save the project.");
+#endif
 		return; 
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -1662,17 +2006,27 @@ void CSysLinkerApp::OnHomeProjectSave()
 	if (GF_IsExistFile(strDBPath) == FALSE)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"프로젝트를 저장하는데 실패했습니다.(데이터베이스 Backup 실패)\r\n"
 			L"'%s'에 같은 이름으로 파일 있습니다. 이 파일을 삭제하고 다시 저장해 주십시오."
 			, strDBPath
 		);
+#else
+		strError.Format(L"Failed to save the project (database backup failed)\nA file with the same name exists in '%s'.Please delete this file and save it again."
+			, strDBPath
+		);
+#endif
 		AfxMessageBox(strError);
 		return ;
 	}
 	if (m_pMainDb->BackupDatabase(m_pFasSysData->GetDBName(), strDBPath) == FALSE)
 	{
 //		AfxMessageBox(L"프로젝트를 저장하는데 실패 했습니다.\n데이터베이스 Backup 실패");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 저장하는데 실패했습니다.\n데이터베이스 Backup 실패");
+#else
+		GF_AddLog(L"Failed to save the project.\nDatabase Backup Failure");
+#endif
 // 		if (m_pMainDb->BackupDatabase(m_pFasSysData->GetDBName(), strDBPath) == FALSE)
 // 		{
 // 			GF_AddLog(L"프로젝트를 저장하는데 실패 했습니다.\n데이터베이스 Backup 실패");
@@ -1683,7 +2037,11 @@ void CSysLinkerApp::OnHomeProjectSave()
 	//////////////////////////////////////////////////////////////////////////
 	// 4. 
 	m_pFasSysData->SetChangeFlag(FALSE);
+#ifndef ENGLISH_MODE
 	GF_AddLog(L"프로젝트를 저장하는데 성공했습니다.");
+#else
+	GF_AddLog(L"Successfully saved the project.");
+#endif
 	//AfxMessageBox(L"프로젝트를 저장하는데 성공했습니다");
 
 }
@@ -1693,8 +2051,13 @@ void CSysLinkerApp::OnHomeProjectTable()
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if (m_pFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트가 열려있지 않습니다.");
 		AfxMessageBox(L"프로젝트가 열려있지 않습니다.");
+#else
+		GF_AddLog(L"The project is not open.");
+		AfxMessageBox(L"The project is not open.");
+#endif
 		return;
 	}
 	OpenFormView(FV_LOADRELAYTABLE);
@@ -1707,7 +2070,11 @@ void CSysLinkerApp::OnBasicEnvset()
 	if (dlg.DoModal() != IDOK)
 		return;
 	ConfigSave();
+#ifndef ENGLISH_MODE
 	GF_AddLog(L"프로그램 환경설정을 저장했습니다.");
+#else
+	GF_AddLog(L"You've saved your program environment setup.");
+#endif
 }
 
 
@@ -1906,12 +2273,15 @@ void CSysLinkerApp::OnFacpReverseLink()
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 	if (m_pFasSysData != nullptr)
 	{
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(L"프로젝트가 열려있습니다. 기존 프로젝트를 닫고 역변환을 시작하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 			return;
+#else
+		if (AfxMessageBox(L"The project is open. Do you want to close the existing project and start the inverse transformation?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+			return;
+#endif
 		CloseProject();
 	}
-
-
 
 	m_pFasSysData = new CRelayTableData;
 
@@ -1937,8 +2307,13 @@ void CSysLinkerApp::OnFacpReverseLink()
 
 	if (CreateProjectFromRom(dlg.m_strRomPath, &dlg.m_ptrList , dlg.m_bFoundRvFile) <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"ROM 파일로부터 프로젝트를 생성하는데 실패했습니다.");
 		AfxMessageBox(L"ROM 파일로부터 프로젝트를 생성하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to create a project from the ROM file.");
+		AfxMessageBox(L"Failed to create a project from the ROM file.");
+#endif
 		return;
 	}
 
@@ -1952,7 +2327,11 @@ void CSysLinkerApp::OnFacpReverseLink()
 	pMakLinkView->SetRelayTableData(m_pFasSysData);
 	m_pFasSysData->SetProjectOpened(TRUE);
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"ROM 파일로부터 프로젝트를 생성하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully created a project from the ROM file.");
+#endif
 }
 
 
@@ -2400,7 +2779,11 @@ int CSysLinkerApp::LoadEquipBaseData()
 		L"ORDER BY A.EQ_TYPE, A.EQ_ID");
 	if (m_pMainDb->OpenQuery(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스 테이블을 여는데 실패했습니다. : TB_EQUIP_MST open failed.");
+#else
+		GF_AddLog(L"Failed to open the database table. : TB_EQUIP_MST open failed.");
+#endif
 		return 0;
 	}
 	nCnt = m_pMainDb->GetRecordCount();
@@ -2855,7 +3238,11 @@ int CSysLinkerApp::CopyBaseFile(CString strPrjName, CString strTargetSymbolPath 
 	if (::CopyFile(strFile, strTarget, FALSE) == FALSE)
 		//if (::CopyFile(strFile, strTarget, FALSE) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		strError.Format(L"DBMS에 데이터 파일을 설정하는데 실패했습니다.ErrorCode:%ld" , GetLastError());
+#else
+		strError.Format(L"Failed to set up the data file in DBMS. Error Code : %ld", GetLastError());
+#endif
 		GF_AddLog(strError + L" -- " + strTarget + L" -- "  + strFile);
 		AfxMessageBox(strError);
 		AfxMessageBox(strTarget + L"---" + strFile);
@@ -2965,12 +3352,20 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 		bRet = CNewDBManager::Instance()->CheckAndCreateGT1DBTables();
 		if (bRet)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully created the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE).");
+#endif
 			Log::Trace("Inserting new DB table succeeded!");
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+#else
+			GF_AddLog(L"Failed to create the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE). Please check the DB.");
+#endif
 			Log::Trace("Inserting new DB table failed!");
 		}
 
@@ -2978,12 +3373,20 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 		bRet = CNewDBManager::Instance()->InsertDatasIntoGT1DBTables();
 		if (bRet)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully added the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data.");
+#endif
 			Log::Trace("GT1 DB table insertion succeeded!");
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+#else
+			GF_AddLog(L"Failed to add the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data. Please check the DB.");
+#endif
 			Log::Trace("GT1 DB table insertion failed!");
 		}
 		//20240222 GBM end
@@ -3056,12 +3459,20 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 			bRet = CNewExcelManager::Instance()->UpdateEquipmentInfo(m_pFasSysData->GetPrjName());
 			if (bRet)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"설비 정의 Sheet에 없어서 추가된 설비 정의를 중계기 일람표에 저장하는 데에 성공했습니다.");
+#else
+				GF_AddLog(L"Successfully saved the added equipment definition to the module table because it was not found in the equipment definition sheet.");
+#endif
 				Log::Trace("We succeeded in saving the added equipment definition to the equipment definition sheet in module table file because it was not in the equipment definition sheet.");
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"설비 정의 Sheet에 없어서 추가된 설비 정의를 중계기 일람표에 저장하는 데에 실패했습니다.");
+#else
+				GF_AddLog(L"Failed to save the added equipment definition to the module table because it was not found in the equipment definition sheet.");
+#endif
 				Log::Trace("We failed to save the added equipment definition to the equipment definition sheet in module table file because it was not in the equipment definition sheet.");
 			}
 		}
@@ -3110,7 +3521,11 @@ int CSysLinkerApp::SaveProjectInfoFile(CString strCurrentPrjRootFolder)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to create the project file.\n");
+#endif
 		return 0;
 	}
 
@@ -3167,7 +3582,11 @@ int CSysLinkerApp::SaveVersionInfoFile(WORD wMajor, WORD wMinor, CString strCurr
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to create the project file.\n");
+#endif
 		return 0;
 	}
 	strtemp.Format(L"%d.%d", m_pFasSysData->GetPrjMajorNum(), m_pFasSysData->GetPrjMinorNum());
@@ -3195,7 +3614,11 @@ int CSysLinkerApp::OpenProjectInfoFile(CRelayTableData * pFasSysData , CString s
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to create the project file.\n");
+#endif
 		return 0;
 	}
 	// Project Version Temp Folder 생성
@@ -3259,7 +3682,11 @@ int CSysLinkerApp::OpenVersionInfoFile(CRelayTableData * pFasSysData , WORD wMaj
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to create the project file.\n");
+#endif
 		return 0;
 	}
 	file.ReadString(strtemp); //GetPrjMajorNum GetPrjMinorNum
@@ -3304,8 +3731,13 @@ int CSysLinkerApp::RegisterBasicDB()
 	if (pDB->AttachMSDB(g_stConfig.szDBName, strDB, strlog) == FALSE)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"프로그램 기초 데이터베이스(%s)를 등록하는데 실패했습니다.\n%s"
 			, g_stConfig.szDBName, pDB->GetLastErrorString());
+#else
+		strError.Format(L"Failed to register the default program database (%s).\n%s"
+			, g_stConfig.szDBName, pDB->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		pDB->DBClose();
@@ -3336,14 +3768,24 @@ int CSysLinkerApp::OpenBaseDatabase()
 			// MainDB 재접속
 			if (RegisterBasicDB() <= 0)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"기초정보 데이터베이스를 서버에 등록하는데 실패했습니다.");
 				AfxMessageBox(L"기초정보 데이터베이스를 서버에 등록하는데 실패했습니다.\r\nMSSQL Server를 설치하거나 서비스틀 실행해주시기 바랍니다.");
+#else
+				GF_AddLog(L"Failed to register the default information database with the server.");
+				AfxMessageBox(L"Failed to register the default information database with the server.\nPlease install MSSQL Server or start the service.");
+#endif
 				return 0;
 			}
 			if (m_pMainDb->DBOpen() == FALSE)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"기초정보 데이터베이스 접속에 실패했습니다.");
 				AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
+#else
+				GF_AddLog(L"Failed to access the default information database.");
+				AfxMessageBox(L"Failed to connect to the database.");
+#endif
 				return 0;
 			}
 		}
@@ -3365,7 +3807,11 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 	{
 		if (OpenBaseDatabase() == 0)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"기초정보 데이터베이스를 여는데 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to open the default information database.");
+#endif
 			return 0;
 		}
 	}
@@ -3385,8 +3831,13 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		if (m_pMainDb->DetachMSDB(pFasSysData->GetDBName()) == FALSE)
 		{
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패했습니다.\n%s"
 				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#else
+			strError.Format(L"Failed to separate the project database (%s).\n%s"
+				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#endif
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
 			return -1;
@@ -3402,8 +3853,13 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		{
 
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"프로젝트 데이터베이스(%s)를 등록하는데 실패했습니다.\n%s"
 				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#else
+			strError.Format(L"Failed to register the project database (%s).\n%s"
+				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#endif
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
 			return -2;
@@ -3416,8 +3872,13 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		{
 
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"프로젝트 데이터베이스(%s)를 복원하는데 실패했습니다.\n%s"
 				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#else
+			strError.Format(L"Failed to restore the project database (%s).\n%s"
+				, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#endif
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
 			return -3;
@@ -3428,8 +3889,13 @@ int CSysLinkerApp::OpenProjectDatabase(CRelayTableData * pFasSysData)
 		, 1433, g_stConfig.szDBUser, g_stConfig.szDBPass) <= 0)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"프로젝트 데이터베이스(%s)를 연결하는데 실패했습니다.\n%s"
 			, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#else
+		strError.Format(L"Failed to connect the project database (%s).\n%s"
+			, pFasSysData->GetDBName(), m_pMainDb->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		return -3;
@@ -3448,8 +3914,13 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 	{
 		if (CopyProjectVersionTemp(strPrjName, strPrjFullPath, dwVer) <= 0)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"프로젝트 정보를 가져오는데 실패했습니다.");
 			AfxMessageBox(L"프로젝트 정보를 가져오는데 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to retrieve the project information.");
+			AfxMessageBox(L"Failed to retrieve the project information.");
+#endif
 			return -1;
 		}
 	}
@@ -3466,7 +3937,11 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("        프로젝트 DB를 여는 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("        Opening the project DB. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -3481,14 +3956,23 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 DB 열기에 성공했습니다.");
+#else
+		GF_AddLog(L"Successfully opened the project DB.");
+#endif
 		Log::Trace("Successfully opened the project DB.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 DB 열기에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to open the project DB.");
+#endif
 		Log::Trace("Failed to open project DB.");
 	}
+
 #else
 	if (OpenProjectDatabase(m_pFasSysData) < 0)
 	{
@@ -3556,11 +4040,19 @@ int CSysLinkerApp::CloseProject()
 
 	if (m_pFasSysData->GetChangeFlag() == TRUE)
 	{
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(L"변경사항이 있습니다.\n프로젝트를 저장하시겠습니까?"
 			, MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			OnHomeProjectSave();
 		}
+#else
+		if (AfxMessageBox(L"There have been changes.\nDo you want to save the project ?"
+			, MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			OnHomeProjectSave();
+		}
+#endif
 	}
 
 	m_pMainDb->DetachMSDB(m_pFasSysData->GetDBName());
@@ -3758,8 +4250,13 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	{
 		if (GetLastError() != ERROR_ALREADY_EXISTS)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"버전 폴더를 생성하는데 실패했습니다.");
 			AfxMessageBox(L"버전 폴더를 생성하는데 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to create a version folder.");
+			AfxMessageBox(L"Failed to create a version folder.");
+#endif
 			return 0;
 		}
 	}
@@ -3774,8 +4271,13 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	);
 	if (CopyFile(strFrom , strTo, FALSE) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"버전정보 파일을 이동하는데 실패했습니다.");
 		AfxMessageBox(L"버전정보 파일을 이동하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to move the version information file.");
+		AfxMessageBox(L"Failed to move the version information file.");
+#endif
 		return 0; 
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -3874,8 +4376,13 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	{
 		if (GetLastError() != ERROR_ALREADY_EXISTS)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"데이터베이스 폴더를 생성하는데 실패했습니다.");
 			AfxMessageBox(L"데이터베이스 폴더를 생성하는데 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to create a database folder.");
+			AfxMessageBox(L"Failed to create a database folder.");
+#endif
 			return 0;
 		}
 	}
@@ -3890,8 +4397,13 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 	{
 		if (GetLastError() != ERROR_ALREADY_EXISTS)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"RELEASE 폴더를 생성하는데 실패했습니다.");
 			AfxMessageBox(L"RELEASE 폴더를 생성하는데 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to create a RELEASE folder.");
+			AfxMessageBox(L"Failed to create a RELEASE folder.");
+#endif
 			return 0;
 		}
 	}

@@ -14,6 +14,7 @@
 #include "../Common/Utils/ExcelWrapper.h"
 #include "../Common/Utils/StdioFileEx.h"
 
+#ifndef ENGLISH_MODE
 TCHAR *szCol[]=
 {
 	L"입력회로",
@@ -28,9 +29,26 @@ TCHAR *szCol[]=
 	L"출력종류",
 	NULL
 };
+#else
+TCHAR *szCol[] =
+{
+	L"INPUT CIRCUIT",
+	L"OUTPUT NAME",
+	L"INPUT TYPE",
+	L"OUTPUT TYPE",
+	L"EQUIPMENT NAME",
+	L"EQUIPMENT NO.",
+	L"OUTPUT DESCRIPTION",
+	L"LOCATION",
+	L"INTERLOCK TYPE",
+	L"OUTPUT TYPE",
+	NULL
+};
+#endif
 
 IMPLEMENT_DYNCREATE(CFormLinkView, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormLinkView::CFormLinkView()
 	: CFormView(IDD_FORMLINKVIEW)
 {
@@ -40,6 +58,17 @@ CFormLinkView::CFormLinkView()
 	m_bStopFlag = FALSE;
 	m_strFullPath = L"";
 }
+#else
+CFormLinkView::CFormLinkView()
+	: CFormView(IDD_FORMLINKVIEW_EN)
+{
+	m_pRefFasSysData = nullptr;
+	m_pExcelThread = nullptr;
+	m_hStop = nullptr;
+	m_bStopFlag = FALSE;
+	m_strFullPath = L"";
+}
+#endif
 
 CFormLinkView::~CFormLinkView()
 {
@@ -144,7 +173,11 @@ int CFormLinkView::GenerateLinkExcel()
 	CExcelWrapper xls;
 	if (xls.Create() == false)
 		return 0;
+#ifndef ENGLISH_MODE
 	strSheet.Format(L"%s 연동출력표", m_pRefFasSysData->GetPrjName());
+#else
+	strSheet.Format(L"%s Interlock Output Table", m_pRefFasSysData->GetPrjName());
+#endif
 	xls.SetSheetName(1, strSheet);
 
 	for (i = 0; szCol[i] != nullptr; i++)
@@ -160,7 +193,11 @@ int CFormLinkView::GenerateLinkExcel()
 		SendMessage(CSWM_PROGRESS_STEP, nIdx, PROG_RESULT_STEP);
 	}
 	SendMessage(CSWM_PROGRESS_STEP, nIdx, PROG_RESULT_FINISH);
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"다음파일명으로\n%s\n저장되었습니다.", m_strFullPath);
+#else
+	strtemp.Format(L"Saved as follows in the\n%s:", m_strFullPath);
+#endif
 	AfxMessageBox(strtemp);
 	return 1;
 }
@@ -191,6 +228,7 @@ void CFormLinkView::OnInitialUpdate()
 
 	m_ctrlTree.SetImageList(&m_ImgDeviceIcons, TVSIL_NORMAL);
 
+#ifndef ENGLISH_MODE
 	m_ctrlRelay.InsertColumn(0, L"출력이름", LVCFMT_LEFT, 300);
 	m_ctrlRelay.InsertColumn(1, L"입력타입", LVCFMT_LEFT, 80);
 	m_ctrlRelay.InsertColumn(2, L"출력타입", LVCFMT_LEFT, 80);
@@ -200,6 +238,17 @@ void CFormLinkView::OnInitialUpdate()
 	m_ctrlRelay.InsertColumn(6, L"위치", LVCFMT_LEFT, 150);
 	m_ctrlRelay.InsertColumn(7, L"연동타입", LVCFMT_LEFT, 80);
 	m_ctrlRelay.InsertColumn(8, L"출력종류", LVCFMT_LEFT, 80);
+#else
+	m_ctrlRelay.InsertColumn(0, L"OUTPUT NAME", LVCFMT_LEFT, 300);
+	m_ctrlRelay.InsertColumn(1, L"INPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelay.InsertColumn(2, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelay.InsertColumn(3, L"EQUIPMENT NAME", LVCFMT_LEFT, 80);
+	m_ctrlRelay.InsertColumn(4, L"EQUIPMENT NO.", LVCFMT_LEFT, 50);
+	m_ctrlRelay.InsertColumn(5, L"OUTPUT DESCRIPTION", LVCFMT_LEFT, 80);
+	m_ctrlRelay.InsertColumn(6, L"LOCATION", LVCFMT_LEFT, 150);
+	m_ctrlRelay.InsertColumn(7, L"INTERLOCK TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelay.InsertColumn(8, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+#endif
 
 // 	m_ctrlRelay.InsertColumn(0, _T("타입"), LVCFMT_LEFT, 80);
 // 	m_ctrlRelay.InsertColumn(1, _T("감지기/중계기"), LVCFMT_LEFT, 300);
@@ -323,21 +372,37 @@ void CFormLinkView::OnBnClickedBtnExcel()
 	CFileException e;
 	char szAsc[2048] = { 0 };
 	CString strDefault = L"*.csv";
+#ifndef ENGLISH_MODE
 	CString strFilter = L"연동 출력표(*.csv)|*.csv|All Files (*.*)|*.*||";
+#else
+	CString strFilter = L"Interlock Output Table(*.csv)|*.csv|All Files (*.*)|*.*||";
+#endif
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트가 닫혀있습니다. 프로젝트를 여신 후 다시 실행 해 주십시오.");
+#else
+		AfxMessageBox(L"The project is closed. Please open the project and run it again.");
+#endif
 		return;
 	}
 
 	nCnt = m_ctrlTree.GetCount();
 	if (nCnt <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"저장할 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"No data to save.");
+#endif
 		return;
 	}
 	strPrjName = m_pRefFasSysData->GetPrjName();
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"%s 연동출력표.csv", strPrjName);
+#else
+	strtemp.Format(L"%s Interlock Output Table.csv", strPrjName);
+#endif
 
 	CFileDialog FileDialog(FALSE, NULL, strtemp, OFN_HIDEREADONLY, strFilter, this);
 	if (FileDialog.DoModal() != IDOK)
@@ -350,8 +415,13 @@ void CFormLinkView::OnBnClickedBtnExcel()
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"연동출력표 파일을 생성하는데 실패했습니다.\n");
 		AfxMessageBox(L"연동출력표 파일을 생성하는데 실패했습니다");
+#else
+		GF_AddLog(L"Failed to generate an interlock output table file.\n");
+		AfxMessageBox(L"Failed to generate an interlock output table file.");
+#endif
 		return ;
 	}
 
@@ -373,7 +443,12 @@ void CFormLinkView::OnBnClickedBtnExcel()
 	WriteCSV(TVI_ROOT, &file);
 	file.Close();
 #endif
+
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"다음파일명으로\n%s\n저장되었습니다.",strPath);
+#else
+	strtemp.Format(L"Saved as follows in the\n%s:", strPath);
+#endif
 	AfxMessageBox(strtemp);
 }
 
@@ -487,7 +562,11 @@ int CFormLinkView::WriteExcelOutput(CDataDevice* pDev, CExcelWrapper * pXls, int
 		pXls->SetItemText(nIdx, 7, pOut->GetOutContentsName());
 		pXls->SetItemText(nIdx, 8, pOut->GetOutputLocationName());
 		pXls->SetItemText(nIdx, 9, g_szLogicTypeString[pLink->GetLogicType()]);
+#ifndef ENGLISH_MODE
 		pXls->SetItemText(nIdx, 10, L"감지기/중계기");
+#else
+		pXls->SetItemText(nIdx, 10, L"DETECTOR/MODULE");
+#endif
 		nIdx++;
 	}
 
@@ -530,7 +609,11 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		if (pOut == nullptr)
 			return nIdx;
 		pXls->SetItemText(nIdx, 1, pInDev->GetInputFullName());
+#ifndef ENGLISH_MODE
 		str.Format(L"%s출력:%s", strPrefix, pOut->GetOutContentsFullName());
+#else
+		str.Format(L"%sOutput:%s", strPrefix, pOut->GetOutContentsFullName());
+#endif
 		strPrefix = str + L"▶";
 		pXls->SetItemText(nIdx, 2, str);
 		pXls->SetItemText(nIdx, 3, pOut->GetInputTypeName());
@@ -540,7 +623,11 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		pXls->SetItemText(nIdx, 7, pOut->GetOutContentsName());
 		pXls->SetItemText(nIdx, 8, pOut->GetOutputLocationName());
 		pXls->SetItemText(nIdx, 9, g_szLogicTypeString[pLnk->GetLogicType()]);
+#ifndef ENGLISH_MODE
 		pXls->SetItemText(nIdx, 10, L"감지기/중계기");
+#else
+		pXls->SetItemText(nIdx, 10, L"DETECTOR/MODULE");
+#endif
 		nIdx++;
 		break;
 	case LK_TYPE_PATTERN:
@@ -548,7 +635,11 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		if (pPtn == nullptr)
 			return nIdx;
 		pXls->SetItemText(nIdx, 1, pInDev->GetInputFullName());
+#ifndef ENGLISH_MODE
 		str.Format(L"%s패턴:%s", strPrefix, pPtn->GetPatternName());
+#else
+		str.Format(L"%sPattern:%s", strPrefix, pPtn->GetPatternName());
+#endif
 		strPrefix = str + L"▶";
 		//strPrefix = strPrefix + L"[" + pPtn->GetPatternName() + L"]";
 		pXls->SetItemText(nIdx, 2, str);
@@ -559,8 +650,13 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		pXls->SetItemText(nIdx, 7, L"");
 		str.Format(L"%d", pPtn->GetPatternID());
 		pXls->SetItemText(nIdx, 8, str);
+#ifndef ENGLISH_MODE
 		pXls->SetItemText(nIdx, 9, L"패턴");
 		pXls->SetItemText(nIdx, 10, L"패턴");
+#else
+		pXls->SetItemText(nIdx, 9, L"Pattern");
+		pXls->SetItemText(nIdx, 10, L"Pattern");
+#endif
 		nIdx++;
 		pDList = pPtn->GetPtnItemList();
 		//WriteLink(pInDev,pLink)
@@ -569,7 +665,11 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		pEm = m_pRefFasSysData->GetEmergency(pLnk->GetTgtFacp());
 		if (pEm == nullptr)
 			return nIdx;
+#ifndef ENGLISH_MODE
 		str.Format(L"%s비방:%s", strPrefix, pEm->GetEmName());
+#else
+		str.Format(L"%sPublic Address:%s", strPrefix, pEm->GetEmName());
+#endif
 		strPrefix = str + L"▶";
 		pXls->SetItemText(nIdx, 1, pInDev->GetInputFullName());
 		pXls->SetItemText(nIdx, 2, str);
@@ -580,8 +680,13 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		pXls->SetItemText(nIdx, 7, L"");
 		str.Format(L"%d", pEm->GetEmID());
 		pXls->SetItemText(nIdx, 8, str);
+#ifndef ENGLISH_MODE
 		pXls->SetItemText(nIdx, 9, L"비상방송");
 		pXls->SetItemText(nIdx, 10, L"비상방송");
+#else
+		pXls->SetItemText(nIdx, 9, L"PUBLIC ADDRESS");
+		pXls->SetItemText(nIdx, 10, L"PUBLIC ADDRESS");
+#endif
 		nIdx++;
 		break;
 	case LK_TYPE_PUMP:
@@ -589,7 +694,11 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		if (pPump == nullptr)
 			return nIdx;
 		pXls->SetItemText(nIdx, 1, pInDev->GetInputFullName());
+#ifndef ENGLISH_MODE
 		str.Format(L"%s펌프:%s", strPrefix, pPump->GetPumpName());
+#else
+		str.Format(L"%sPump:%s", strPrefix, pPump->GetPumpName());
+#endif
 		strPrefix = str + L"▶";
 		pXls->SetItemText(nIdx, 2, str);
 		pXls->SetItemText(nIdx, 3, L"");
@@ -599,8 +708,13 @@ int CFormLinkView::WriteExcelLink(CDataDevice * pInDev, CDataLinked *pLnk, CExce
 		pXls->SetItemText(nIdx, 7, L"");
 		str.Format(L"%d", pPump->GetPumpID());
 		pXls->SetItemText(nIdx, 8, str);
+#ifndef ENGLISH_MODE
 		pXls->SetItemText(nIdx, 9, L"펌프");
 		pXls->SetItemText(nIdx, 10, L"펌프");
+#else
+		pXls->SetItemText(nIdx, 9, L"PUMP");
+		pXls->SetItemText(nIdx, 10, L"PUMP");
+#endif
 		nIdx++;
 		pDList = pPump->GetLinkList();
 		break;
@@ -720,7 +834,11 @@ int CFormLinkView::WriteCSVOutput(CDataDevice* pDev, CStdioFileEx * pFile)
 		strLine += pOut->GetOutContentsName(); strLine += L",";
 		strLine += pOut->GetOutputLocationName(); strLine += L",";
 		strLine += g_szLogicTypeString[pLink->GetLogicType()]; strLine += L",";
+#ifndef ENGLISH_MODE
 		strLine += L"감지기/중계기"; strLine += L"\r\n";
+#else
+		strLine += L"DETECTOR/MODULE"; strLine += L"\r\n";
+#endif
 		pFile->WriteString(strLine);
 	}
 
@@ -761,7 +879,11 @@ int CFormLinkView::WriteCSVLink(CDataDevice * pInDev, CDataLinked *pLnk, CStdioF
 		if (pOut == nullptr)
 			return 1;
 		strLine = pInDev->GetInputFullName(); strLine += L",";
+#ifndef ENGLISH_MODE
 		str.Format(L"%s출력:%s", strPrefix, pOut->GetOutContentsFullName());
+#else
+		str.Format(L"%sOutput:%s", strPrefix, pOut->GetOutContentsFullName());
+#endif
 		strPrefix = str + L"▶";
 		strLine += str; strLine += L",";
 		strLine += pOut->GetInputTypeName(); strLine += L",";
@@ -770,14 +892,22 @@ int CFormLinkView::WriteCSVLink(CDataDevice * pInDev, CDataLinked *pLnk, CStdioF
 		strLine += pOut->GetEqAddIndex(); strLine += L",";
 		strLine += pOut->GetOutContentsName(); strLine += L",";
 		strLine += g_szLogicTypeString[pLnk->GetLogicType()]; strLine += L",";
+#ifndef ENGLISH_MODE
 		strLine += L"감지기/중계기"; strLine += L"\r\n";
+#else
+		strLine += L"DETECTOR/MODULE"; strLine += L"\r\n";
+#endif
 		break;
 	case LK_TYPE_PATTERN:
 		pPtn = m_pRefFasSysData->GetPattern(pLnk->GetTgtFacp());
 		if (pPtn == nullptr)
 			return 1;
 		strLine = pInDev->GetInputFullName(); strLine += L",";
+#ifndef ENGLISH_MODE
 		str.Format(L"%s패턴:%s", strPrefix, pPtn->GetPatternName());
+#else
+		str.Format(L"%sPatterns:%s", strPrefix, pPtn->GetPatternName());
+#endif
 		strPrefix = str + L"▶";
 		strLine += str; strLine += L",";
 		strLine += L",";//3
@@ -787,8 +917,13 @@ int CFormLinkView::WriteCSVLink(CDataDevice * pInDev, CDataLinked *pLnk, CStdioF
 		strLine += L",";//7
 		str.Format(L"%d", pPtn->GetPatternID());
 		strLine += str; strLine += L",";
+#ifndef ENGLISH_MODE
 		strLine += L"패턴"; strLine += L",";
 		strLine += L"패턴"; strLine += L"\r\n";
+#else
+		strLine += L"PATTERN"; strLine += L",";
+		strLine += L"PATTERN"; strLine += L"\r\n";
+#endif
 		pDList = pPtn->GetPtnItemList();
 		//WriteLink(pInDev,pLink)
 		break;
@@ -797,7 +932,11 @@ int CFormLinkView::WriteCSVLink(CDataDevice * pInDev, CDataLinked *pLnk, CStdioF
 		if (pEm == nullptr)
 			return 1;
 		strLine = pInDev->GetInputFullName(); strLine += L",";
+#ifndef ENGLISH_MODE
 		str.Format(L"%s비방:%s", strPrefix, pEm->GetEmName());
+#else
+		str.Format(L"%sPublic Address:%s", strPrefix, pEm->GetEmName());
+#endif
 		strPrefix = str + L"▶";
 		strLine += str; strLine += L",";
 		strLine += L",";//3
@@ -807,15 +946,24 @@ int CFormLinkView::WriteCSVLink(CDataDevice * pInDev, CDataLinked *pLnk, CStdioF
 		strLine += L",";//7
 		str.Format(L"%d", pEm->GetEmID());
 		strLine += str; strLine += L",";
+#ifndef ENGLISH_MODE
 		strLine += L"비상방송"; strLine += L",";
 		strLine += L"비상방송"; strLine += L"\r\n";
+#else
+		strLine += L"PUBLIC ADDRESS"; strLine += L",";
+		strLine += L"PUBLIC ADDRESS"; strLine += L"\r\n";
+#endif
 		break;
 	case LK_TYPE_PUMP:
 		pPump = m_pRefFasSysData->GetPump(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
 		if (pPump == nullptr)
 			return 1;
 		strLine = pInDev->GetInputFullName(); strLine += L",";
+#ifndef ENGLISH_MODE
 		str.Format(L"%s펌프:%s", strPrefix, pPump->GetPumpName());
+#else
+		str.Format(L"%sPump:%s", strPrefix, pPump->GetPumpName());
+#endif
 		strPrefix = str + L"▶";
 		strLine += str; strLine += L",";
 		strLine += L",";//3
@@ -825,8 +973,13 @@ int CFormLinkView::WriteCSVLink(CDataDevice * pInDev, CDataLinked *pLnk, CStdioF
 		strLine += L",";//7
 		str.Format(L"%d", pPump->GetPumpID());
 		strLine += str; strLine += L",";
+#ifndef ENGLISH_MODE
 		strLine += L"펌프"; strLine += L",";
 		strLine += L"펌프"; strLine += L"\r\n";
+#else
+		strLine += L"PUMP"; strLine += L",";
+		strLine += L"PUMP"; strLine += L"\r\n";
+#endif
 		pDList = pPump->GetLinkList();
 		break;
 	default:
@@ -977,7 +1130,11 @@ int CFormLinkView::FillListCtrl(HTREEITEM hItem)
 		m_ctrlRelay.SetItemText(nIdx, 5, pOut->GetOutContentsName());
 		m_ctrlRelay.SetItemText(nIdx, 6, pOut->GetOutputLocationName());
 		m_ctrlRelay.SetItemText(nIdx, 7, g_szLogicTypeString[pLink->GetLogicType()]);
+#ifndef ENGLISH_MODE
 		m_ctrlRelay.SetItemText(nIdx, 8, L"감지기/중계기");
+#else
+		m_ctrlRelay.SetItemText(nIdx, 8, L"DETECTOR/MODULE");
+#endif
 		m_ctrlRelay.SetItemData(nIdx,(DWORD_PTR)pOut);
 		nIdx++;
 	}
@@ -1010,8 +1167,13 @@ int CFormLinkView::FillListCtrl(HTREEITEM hItem)
 			m_ctrlRelay.SetItemText(nIdx, 4, L"");
 			m_ctrlRelay.SetItemText(nIdx, 5, L"");
 			m_ctrlRelay.SetItemText(nIdx, 6, L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelay.SetItemText(nIdx, 7, L"패턴");
 			m_ctrlRelay.SetItemText(nIdx, 8, L"패턴");
+#else
+			m_ctrlRelay.SetItemText(nIdx, 7, L"PATTERN");
+			m_ctrlRelay.SetItemText(nIdx, 8, L"PATTERN");
+#endif
 			m_ctrlRelay.SetItemData(nIdx, (DWORD_PTR)pLink);
 			nIdx++;
 			break;
@@ -1026,8 +1188,13 @@ int CFormLinkView::FillListCtrl(HTREEITEM hItem)
 			m_ctrlRelay.SetItemText(nIdx, 4, L"");
 			m_ctrlRelay.SetItemText(nIdx, 5, L"");
 			m_ctrlRelay.SetItemText(nIdx, 6, L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelay.SetItemText(nIdx, 7, L"비상방송");
 			m_ctrlRelay.SetItemText(nIdx, 8, L"비상방송");
+#else
+			m_ctrlRelay.SetItemText(nIdx, 7, L"PUBLIC ADDRESS");
+			m_ctrlRelay.SetItemText(nIdx, 8, L"PUBLIC ADDRESS");
+#endif
 			m_ctrlRelay.SetItemData(nIdx, (DWORD_PTR)pLink);
 			nIdx++;
 			break;
@@ -1042,8 +1209,13 @@ int CFormLinkView::FillListCtrl(HTREEITEM hItem)
 			m_ctrlRelay.SetItemText(nIdx, 4, L"");
 			m_ctrlRelay.SetItemText(nIdx, 5, L"");
 			m_ctrlRelay.SetItemText(nIdx, 6, L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelay.SetItemText(nIdx, 7, L"펌프");
 			m_ctrlRelay.SetItemText(nIdx, 8, L"펌프");
+#else
+			m_ctrlRelay.SetItemText(nIdx, 7, L"PUMP");
+			m_ctrlRelay.SetItemText(nIdx, 8, L"PUMP");
+#endif
 			m_ctrlRelay.SetItemData(nIdx, (DWORD_PTR)pLink);
 			nIdx++;
 			break;

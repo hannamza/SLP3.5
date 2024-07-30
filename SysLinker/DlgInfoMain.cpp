@@ -11,11 +11,19 @@
 
 IMPLEMENT_DYNAMIC(CDlgInfoMain, CScrollDialog)
 
+#ifndef ENGLISH_MODE
 CDlgInfoMain::CDlgInfoMain(CWnd* pParent /*=NULL*/)
 	: CScrollDialog(IDD_DLG_INFO_MAIN, pParent)
 {
 
 }
+#else
+CDlgInfoMain::CDlgInfoMain(CWnd* pParent /*=NULL*/)
+	: CScrollDialog(IDD_DLG_INFO_MAIN_EN, pParent)
+{
+
+}
+#endif
 
 CDlgInfoMain::~CDlgInfoMain()
 {

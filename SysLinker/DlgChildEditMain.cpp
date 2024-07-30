@@ -17,6 +17,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgChildEditMain, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgChildEditMain::CDlgChildEditMain(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_CHILD_MAIN, pParent)
 {
@@ -29,6 +30,20 @@ CDlgChildEditMain::CDlgChildEditMain(CWnd* pParent /*=NULL*/)
 	m_bPreviewComplete = FALSE;
 	m_nAction = DATA_SAVE;
 }
+#else
+	CDlgChildEditMain::CDlgChildEditMain(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_CHILD_MAIN_EN, pParent)
+{
+	for (int i = 0; i < LOCAL_D_MAX_PAGE; i++)
+		m_pPage[i] = nullptr;
+	m_pMainForm = nullptr;
+	m_pRefFasSysData = nullptr;
+	m_nAddType = -1;
+	m_pRefCurData = nullptr;
+	m_bPreviewComplete = FALSE;
+	m_nAction = DATA_SAVE;
+}
+#endif
 
 CDlgChildEditMain::~CDlgChildEditMain()
 {
@@ -157,7 +172,11 @@ void CDlgChildEditMain::OnBnClickedBtnAdd()
 	CRect rc;
 	CMenu mn , * pContext; 
 	GetDlgItem(IDC_BTN_ADD)->GetWindowRect(&rc);
+#ifndef ENGLISH_MODE
 	mn.LoadMenu(IDR_ADD_MENU);
+#else
+	mn.LoadMenu(IDR_ADD_MENU_EN);
+#endif
 	pContext = mn.GetSubMenu(0);
 	pContext->TrackPopupMenu(TPM_LEFTALIGN, rc.left, rc.bottom, this);
 }
@@ -278,12 +297,21 @@ void CDlgChildEditMain::OnBnClickedBtnSave()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (m_bPreviewComplete == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(L"미리보기 후 저장하는 것을 권장합니다.\n미리보기를 하시겠습니까?"
 			, MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			OnBnClickedBtnPreview();
 			return;
 		}
+#else
+		if (AfxMessageBox(L"It is recommended to preview it before saving.\nDo you want to preview?"
+			, MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			OnBnClickedBtnPreview();
+			return;
+		}
+#endif
 	}
 	if (m_pPage[m_nCurType]->GetChangeData() == FALSE)
 		return;

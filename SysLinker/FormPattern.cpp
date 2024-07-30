@@ -265,6 +265,7 @@ UINT ThreadAddLinkedCircuitToThePattern(LPVOID pParam)
 
 IMPLEMENT_DYNCREATE(CFormPattern, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormPattern::CFormPattern()
 	: CFormView(IDD_FORMPATTERN)
 	, m_strPatternName(_T(""))
@@ -278,6 +279,21 @@ CFormPattern::CFormPattern()
 	m_bAdd = FALSE;
 	m_nManualMakeStatus = -1;
 }
+#else
+CFormPattern::CFormPattern()
+	: CFormView(IDD_FORMPATTERN_EN)
+	, m_strPatternName(_T(""))
+	, m_strPatternCode(_T(""))
+	, m_uPatternID(0)
+	, m_nPtnCount(0)
+{
+	m_pCurItem = nullptr;
+	m_pEditItem = nullptr;
+	m_pRefFasSysData = nullptr;
+	m_bAdd = FALSE;
+	m_nManualMakeStatus = -1;
+}
+#endif
 
 CFormPattern::~CFormPattern()
 {
@@ -379,6 +395,7 @@ void CFormPattern::OnInitialUpdate()
 
 	m_ctrlPtnTree.SetImageList(&m_ImgList, TVSIL_NORMAL);
 
+#ifndef ENGLISH_MODE
 	m_ctrlRelayList.InsertColumn(0, L"출력이름", LVCFMT_LEFT, 300);
 	m_ctrlRelayList.InsertColumn(1, L"입력타입", LVCFMT_LEFT, 80);
 	m_ctrlRelayList.InsertColumn(2, L"출력타입", LVCFMT_LEFT, 80);
@@ -388,6 +405,17 @@ void CFormPattern::OnInitialUpdate()
 	m_ctrlRelayList.InsertColumn(6, L"위치", LVCFMT_LEFT, 150);
 	m_ctrlRelayList.InsertColumn(7,L"출력종류",LVCFMT_LEFT,80);
 	m_ctrlRelayList.InsertColumn(8,L"자동/수동",LVCFMT_LEFT,80);
+#else
+	m_ctrlRelayList.InsertColumn(0, L"OUTPUT NAME", LVCFMT_LEFT, 300);
+	m_ctrlRelayList.InsertColumn(1, L"INPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(2, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(3, L"EQUIPMENT NAME", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(4, L"EQUIPMENT NO.", LVCFMT_LEFT, 50);
+	m_ctrlRelayList.InsertColumn(5, L"OUTPUT DESCRIPTION", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(6, L"LOCATION", LVCFMT_LEFT, 150);
+	m_ctrlRelayList.InsertColumn(7, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(8, L"AUTO/MANUAL", LVCFMT_LEFT, 80);
+#endif
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	int i = 0; 
@@ -439,19 +467,31 @@ void CFormPattern::OnBnClickedBtnSave()
 	nSel = m_cmbPtnType.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 패턴 타입이 없습니다.");
+#else
+		AfxMessageBox(L"No pattern type selected.");
+#endif
 		return;
 	}
 	nType = (int)m_cmbPtnType.GetItemData(nSel);
 
 	if (m_strPatternName.GetLength() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴 이름이 없습니다.");
+#else
+		AfxMessageBox(L"The pattern name doesn't exist.");
+#endif
 		return;
 	}
 	if(m_nManualMakeStatus == -1)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴을 수동으로 생성했는지 일람표로 생성했는지 체크되지 않았습니다.\n'수동으로 생성' 또는 '일람표로 생성'을 선택해 주시기 바랍니다.");
+#else
+		AfxMessageBox(L"You have not checked whether the pattern was created manually or from a table.\nPlease select 'Create Manually' or 'Create from Table'.");
+#endif
 		return;
 	}
 
@@ -481,14 +521,23 @@ void CFormPattern::OnBnClickedBtnDel()
 
 	if (m_pCurItem->nDataType == PTN_PATTERN)
 		return; 
+#ifndef ENGLISH_MODE
 	if(AfxMessageBox(L"선택된 패턴을 삭제하시겠습니까?" , MB_YESNO) == IDNO)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the selected pattern?", MB_YESNO) == IDNO)
+		return;
+#endif
 
 	UpdateData();
 
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("패턴을 삭제하는 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Deleting the pattern. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -511,14 +560,22 @@ void CFormPattern::OnBnClickedBtnDel()
 		CString strMsg = _T("");
 		strMsg.Format(_T("The pattern [%s] was successfully deleted."), ((CDataPattern*)m_pEditItem->pData)->GetPatternName());
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴을 삭제하는데 성공했습니다.");
+#else
+		AfxMessageBox(L"Successfully deleted the pattern.");
+#endif
 	}
 	else
 	{
 		CString strMsg = _T("");
 		strMsg.Format(_T("Failed to delete the pattern [%s]."), ((CDataPattern*)m_pEditItem->pData)->GetPatternName());
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴을 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the pattern.");
+#endif
 	}
 
 	m_ctrlPtnTree.DeleteItem(m_pEditItem->hItem);
@@ -680,12 +737,21 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 	if (nCnt < 0)
 		return;
 
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"패턴 항목을 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the pattern item?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+		return;
+#endif
 
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제하는데 실패했습니다. 프로젝트 설정 정보가 잘못됐습니다.");
+#else
+		AfxMessageBox(L"Failed to delete. Invalid project settings information.");
+#endif
 		return;
 	}
 
@@ -707,7 +773,11 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("선택된 출력 회로를 패턴에서 삭제하는 중입니다.\n                       잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Deleting the selected output circuit from the pattern.\n                        Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -737,10 +807,17 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 		m_ctrlRelayList.DeleteItem(vtSel[i]);
 	}
 	
+#ifndef ENGLISH_MODE
 	if (m_bThreadSucceeded)
 		AfxMessageBox(L"연동 출력 정보를 삭제하는데 성공했습니다.");
 	else
 		AfxMessageBox(L"연동 출력 정보를 삭제하는데 실패했습니다.");
+#else
+	if (m_bThreadSucceeded)
+		AfxMessageBox(L"Successfully deleted the interlock output information.");
+	else
+		AfxMessageBox(L"Failed to delete the interlock output information.");
+#endif
 
 	if (AfxGetMainWnd())
 		AfxGetMainWnd()->SendMessage(UWM_DKP_PATTERN_REFRESH, DATA_ALL, 0);
@@ -992,7 +1069,11 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			m_ctrlRelayList.SetItemText(nIdx, 4, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 5, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 6, L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx,7,L"패턴");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 7, L"PATTERN");
+#endif
 			//m_ctrlRelayList.SetItemText(nIdx,8,L"-");
 			m_ctrlRelayList.SetItemData(nIdx, (DWORD_PTR)plnk);
 			nIdx++;
@@ -1008,7 +1089,11 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			m_ctrlRelayList.SetItemText(nIdx, 4, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 5, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 6, L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx, 7, L"비상방송");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 7, L"비상방송");
+#endif
 			m_ctrlRelayList.SetItemData(nIdx, (DWORD_PTR)plnk);
 			nIdx++;
 			break;
@@ -1023,7 +1108,11 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			m_ctrlRelayList.SetItemText(nIdx, 4, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 5, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 6, L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx, 7, L"펌프");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 7, L"PUMP");
+#endif
 			m_ctrlRelayList.SetItemData(nIdx, (DWORD_PTR)plnk);
 			nIdx++;
 			break;
@@ -1033,13 +1122,21 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 				continue;
 			if(plnk->GetLogicType() == LOGIC_MANUAL)
 			{
+#ifndef ENGLISH_MODE
 				str = L"수동";
+#else
+				str = L"MANUAL";
+#endif
 				crBk = RGB(255,0,0);
 				crText = RGB(255,255,255);
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				str = L"자동";
+#else
+				str = L"AUTO";
+#endif
 				//m_ctrlRelayList.SetCo
 				crBk = RGB(255,255,255);
 				crText = RGB(0,0,0);
@@ -1051,7 +1148,11 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			m_ctrlRelayList.SetItemText(nIdx, 4, pDev->GetEqAddIndex(),crText,crBk);
 			m_ctrlRelayList.SetItemText(nIdx, 5, pDev->GetOutContentsName(),crText,crBk);
 			m_ctrlRelayList.SetItemText(nIdx, 6, pDev->GetOutputLocationName(),crText,crBk);
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx, 7, L"감지기/중계기",crText,crBk);
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 7, L"DETECTOR/MODULE", crText, crBk);
+#endif
 			m_ctrlRelayList.SetItemText(nIdx, 8,str,crText,crBk);
 			m_ctrlRelayList.SetItemData(nIdx,(DWORD_PTR)plnk);
 			nIdx++;
@@ -1077,7 +1178,11 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 	else
 	{
 		m_nManualMakeStatus = -1;
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴을 수동으로 생성했는지 일람표로 생성했는지 체크되지 않았습니다.\n'수동으로 생성' 또는 '일람표로 생성'을 선택해 주시기 바랍니다.");
+#else
+		AfxMessageBox(L"You have not checked whether the pattern was created manually or from a table.\nPlease select 'Create Manually' or 'Create from Table'.");
+#endif
 	}
 
 	m_ctrlRelayList.SetRedraw();
@@ -1165,7 +1270,11 @@ int CFormPattern::AddDatabasePattern(UINT nID , CString strPattern , int nType ,
 	pPtn = m_pRefFasSysData->AddNewPattern(nID, strPattern, nType,1, &ptrList);
 	ChangeTreeItem(DATA_ADD, pPtn->GetPatternType(), pPtn);
 	AddCancel();
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"패턴을 추가하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully added a pattern.");
+#endif
 	return 1;
 }
 
@@ -1200,7 +1309,11 @@ int CFormPattern::SaveDatabasePattern(ST_TREEITEM * pItem, CString strPattern, i
 
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("수정된 패턴 정보를 저장하는 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Saving the edited pattern information. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -1217,7 +1330,12 @@ int CFormPattern::SaveDatabasePattern(ST_TREEITEM * pItem, CString strPattern, i
 
 	pPtn = (CDataPattern*)m_pEditItem->pData;
 	ChangeTreeItem(DATA_SAVE, pPtn->GetPatternType(), pPtn);
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"패턴을 저장하는데 성공했습니다.");
+#else
+
+	AfxMessageBox(L"Successfully saved the pattern.");
+#endif
 	m_pEditItem = nullptr;
 	return 1;
 #else
@@ -1520,8 +1638,13 @@ void CFormPattern::OnTvnOutputDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		m_ctrlRelayList.SetItemText(nIdx, 4, pDev->GetEqAddIndex(),crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 5, pDev->GetOutContentsName(),crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 6, pDev->GetOutputLocationName(),crText,crBk);
+#ifndef ENGLISH_MODE
 		m_ctrlRelayList.SetItemText(nIdx,7,L"감지기/중계기",crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx,8,L"수동",crText,crBk);
+#else
+		m_ctrlRelayList.SetItemText(nIdx, 7, L"DETECTOR/MODULE", crText, crBk);
+		m_ctrlRelayList.SetItemText(nIdx, 8, L"MANUAL", crText, crBk);
+#endif
 		m_ctrlRelayList.SetItemData(nIdx, (DWORD_PTR)plnk);
 		nIdx++;
 		pList->AddTail(plnk);
@@ -2035,7 +2158,11 @@ void CFormPattern::OnContextMenu(CWnd* pWnd, CPoint point)
 	if (nIdx < 0)
 		return;
 
+#ifndef ENGLISH_MODE
 	menu.LoadMenu(IDR_POPUP_PTNLIST);
+#else
+	menu.LoadMenu(IDR_POPUP_PTNLIST_EN);
+#endif
 	pContext = menu.GetSubMenu(0);
 	pContext->TrackPopupMenu(TPM_LEFTALIGN, pt.x, pt.y, this);
 }

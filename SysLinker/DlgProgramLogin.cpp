@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgProgramLogin, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgProgramLogin::CDlgProgramLogin(YAdoDatabase * pMainDB, CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_SLPLOGIN, pParent)
 	, m_strUser(_T(""))
@@ -18,6 +19,15 @@ CDlgProgramLogin::CDlgProgramLogin(YAdoDatabase * pMainDB, CWnd* pParent /*=NULL
 {
 	m_pRefMainDB = pMainDB;
 }
+#else
+CDlgProgramLogin::CDlgProgramLogin(YAdoDatabase * pMainDB, CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_SLPLOGIN_EN, pParent)
+	, m_strUser(_T(""))
+	, m_strPwd(_T(""))
+{
+	m_pRefMainDB = pMainDB;
+}
+#endif
 
 CDlgProgramLogin::~CDlgProgramLogin()
 {
@@ -47,8 +57,13 @@ BOOL CDlgProgramLogin::OnInitDialog()
 	CString strDBName = g_stConfig.szDBName;
 	if (strDBName == L"")
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"환경설정이 설정되지 않았습니다.환경설정을 다시 설정하시고 실행해 주시길 바랍니다.");
 		AfxMessageBox(L"환경설정이 설정되지 않았습니다. \n환경설정을 다시 설정하시고 실행해 주시길 바랍니다.");
+#else
+		GF_AddLog(L"The environment setup has not been set.\nPlease set your environment setup again and run it.");
+		AfxMessageBox(L"The environment setup has not been set.\nPlease set your environment setup again and run it.");
+#endif
 	}
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -68,22 +83,37 @@ void CDlgProgramLogin::OnBnClickedOk()
 	UpdateData();
 	if (m_strUser == L"")
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"사용자 이름이 없습니다.");
 		AfxMessageBox(L"사용자 이름이 없습니다.");
+#else
+		GF_AddLog(L"The username doesn't exist.");
+		AfxMessageBox(L"The username doesn't exist.");
+#endif
 		return;
 	}
 
 	if (m_strPwd == L"")
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"비밀번호가 없습니다.");
 		AfxMessageBox(L"비밀번호가 없습니다.");
+#else
+		GF_AddLog(L"THE PASSWORD DOESN'T EXIST.");
+		AfxMessageBox(L"THE PASSWORD DOESN'T EXIST.");
+#endif
 		return;
 	}
 	CString strDBName = g_stConfig.szDBName;
 	if (strDBName == L"")
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"환경설정이 설정되지 않았습니다. \n환경설정을 다시 설정하시고 실행해 주시길 바랍니다.");
 		AfxMessageBox(L"환경설정이 설정되지 않았습니다. \n환경설정을 다시 설정하시고 실행해 주시길 바랍니다.");
+#else
+		GF_AddLog(L"The environment setup has not been set.\nPlease set your environment setup again and run it.");
+		AfxMessageBox(L"The environment setup has not been set.\nPlease set your environment setup again and run it.");
+#endif
 		return;
 	}
 
@@ -108,16 +138,26 @@ void CDlgProgramLogin::OnBnClickedOk()
 
 		if (m_pRefMainDB->DBOpen() == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"데이터베이스 접속에 실패했습니다.");
 			AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to connect to the database.");
+			AfxMessageBox(L"Failed to connect to the database.");
+#endif
 			return ;
 		}
 	}
 	if (m_pRefMainDB->OpenQuery(strSql) == FALSE)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"사용자 정보를 가져오는데 실패했습니다.\n%s"
 			, m_pRefMainDB->GetLastErrorString());
+#else
+		strError.Format(L"Failed to retrieve the user information.\n%s"
+			, m_pRefMainDB->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		return;
@@ -127,8 +167,13 @@ void CDlgProgramLogin::OnBnClickedOk()
 	m_pRefMainDB->RSClose();
 	if (nCnt <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"아이디 또는 패스워드가 틀립니다.");
 		AfxMessageBox(L"아이디 또는 패스워드가 틀립니다.");
+#else
+		GF_AddLog(L"Invalid ID or password.");
+		AfxMessageBox(L"Invalid ID or password.");
+#endif
 		return;
 	}
 	CDialogEx::OnOK();

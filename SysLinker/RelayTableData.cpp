@@ -386,6 +386,283 @@ L" ,SRC.BD_NAME,SRC.BTYPE_NAME,SRC.STAIR_NAME,SRC.FL_NAME,SRC.RM_NAME,TGT.BD_NAM
 L" ORDER BY SRC.FACP_ID,SRC.UNIT_ID,SRC.CHN_ID,SRC.RLY_ID,TGT.FACP_ID,TGT.UNIT_ID,TGT.CHN_ID,TGT.RLY_ID, X.LG_ID,X.LG_INTYPE_ID , X.LG_EQNAME_ID , X.LG_OUTTYPE_ID,X.LG_OUTCONT_ID \r\n"
 L" END \r\n";
 
+//
+CString g_strSpGenerateLink_eng =
+L" %s PROCEDURE [dbo].[SP_GENERATE_LINK] \r\n"
+L" AS \r\n"
+L" BEGIN \r\n"
+L" SET NOCOUNT ON; \r\n"
+L" DECLARE @nVersionNum%04d int \r\n"
+L" DELETE FROM TB_TEMP_SAVED_LINK \r\n"
+L" INSERT INTO TB_TEMP_SAVED_LINK(SRC_FACP,SRC_UNIT,SRC_CHN,SRC_RLY,TGT_FACP,TGT_UNIT,TGT_CHN,TGT_RLY,LG_ID,INPUT_ID,EQNAME_ID,OUTPUT_ID,OUTCONT_ID \r\n"
+L" ,SRC_BD_NAME,SRC_BTYPE_NAME,SRC_STAIR_NAME,SRC_FL_NAME,SRC_RM_NAME,TGT_BD_NAME,TGT_BTYPE_NAME,TGT_STAIR_NAME,TGT_FL_NAME,TGT_RM_NAME) \r\n"
+L" SELECT SRC.FACP_ID,SRC.UNIT_ID,SRC.CHN_ID,SRC.RLY_ID, TGT.FACP_ID,TGT.UNIT_ID,TGT.CHN_ID,TGT.RLY_ID , X.LG_ID,X.LG_INTYPE_ID , X.LG_EQNAME_ID , X.LG_OUTTYPE_ID,X.LG_OUTCONT_ID \r\n"
+L" ,SRC.BD_NAME,SRC.BTYPE_NAME,SRC.STAIR_NAME,SRC.FL_NAME,SRC.RM_NAME,TGT.BD_NAME,TGT.BTYPE_NAME,TGT.STAIR_NAME,TGT.FL_NAME,TGT.RM_NAME \r\n"
+L" FROM \r\n"
+L" (SELECT A.* , B.BD_NAME , C.BTYPE_NAME , D.STAIR_NAME , E.FL_NAME , F.RM_NAME , E.FL_NUM \r\n"
+L" FROM \r\n"
+L" (SELECT Z.* FROM TB_RELAY_LIST Z \r\n"
+L" WHERE EXISTS  \r\n"
+L" (SELECT * FROM TB_AUTO_LOGIC_V2 Y WHERE Y.LG_OUTTYPE_ID = Z.OUTPUT_ID AND Y.LG_OUTCONT_ID = Z.OUTCONTENTS_ID)) A \r\n"
+L" , TB_LOC_BUILDING B , TB_LOC_BTYPE C , TB_LOC_STAIR D , TB_LOC_FLOOR E, TB_LOC_ROOM  F \r\n"
+L" WHERE A.BD_ID = B.BD_ID \r\n"
+L" AND A.BD_ID = C.BD_ID AND A.BTYPE_ID = C.BTYPE_ID \r\n"
+L" AND A.BD_ID = D.BD_ID AND A.BTYPE_ID = D.BTYPE_ID AND A.STAIR_ID = D.STAIR_ID \r\n"
+L" AND A.BD_ID = E.BD_ID AND A.BTYPE_ID = E.BTYPE_ID AND A.STAIR_ID = E.STAIR_ID AND A.FL_ID = E.FL_ID \r\n"
+L" AND A.BD_ID = F.BD_ID AND A.BTYPE_ID = F.BTYPE_ID AND A.STAIR_ID = F.STAIR_ID AND A.FL_ID = F.FL_ID AND A.RM_ID = F.RM_ID) TGT \r\n"
+L" , \r\n"
+L" (SELECT A.* , B.BD_NAME , C.BTYPE_NAME , D.STAIR_NAME , E.FL_NAME , F.RM_NAME, E.FL_NUM \r\n"
+L" FROM \r\n"
+L" (SELECT Z.* FROM TB_RELAY_LIST Z \r\n"
+L" WHERE EXISTS  \r\n"
+L" (SELECT * FROM TB_AUTO_LOGIC_V2 Y WHERE Y.LG_INTYPE_ID = Z.INPUT_ID AND Y.LG_EQNAME_ID = Z.EQ_ID)) A \r\n"
+L" , TB_LOC_BUILDING B , TB_LOC_BTYPE C , TB_LOC_STAIR D , TB_LOC_FLOOR E, TB_LOC_ROOM  F \r\n"
+L" WHERE A.BD_ID = B.BD_ID \r\n"
+L" AND A.BD_ID = C.BD_ID AND A.BTYPE_ID = C.BTYPE_ID \r\n"
+L" AND A.BD_ID = D.BD_ID AND A.BTYPE_ID = D.BTYPE_ID AND A.STAIR_ID = D.STAIR_ID \r\n"
+L" AND A.BD_ID = E.BD_ID AND A.BTYPE_ID = E.BTYPE_ID AND A.STAIR_ID = E.STAIR_ID AND A.FL_ID = E.FL_ID \r\n"
+L" AND A.BD_ID = F.BD_ID AND A.BTYPE_ID = F.BTYPE_ID AND A.STAIR_ID = F.STAIR_ID AND A.FL_ID = F.FL_ID AND A.RM_ID = F.RM_ID) SRC \r\n"
+L" ,TB_AUTO_LOGIC_V2 X \r\n"
+L" WHERE X.LG_INTYPE_ID = SRC.INPUT_ID AND X.LG_EQNAME_ID = SRC.EQ_ID AND X.LG_OUTTYPE_ID = TGT.OUTPUT_ID AND X.LG_OUTCONT_ID = TGT.OUTCONTENTS_ID \r\n"
+L" AND  \r\n"
+L" ( \r\n"
+L" CASE  \r\n"
+L" WHEN(X.LG_USE_ALL_OUTPUT = 1) \r\n"
+L" THEN \r\n"
+L" 1 \r\n"
+L" WHEN(X.LG_USE_UNDER_BASIC = 0) \r\n"
+L" THEN  \r\n"
+L" IIF( \r\n"
+L" IIF(X.LG_USE_LOC_BUILD_MATCH = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1  \r\n"
+L" AND IIF(X.LG_USE_LOC_BTYPE_MATCH = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_STAIR_MATCH = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_FLOOR_MATCH = 1 \r\n"
+L" , IIF(X.LG_USE_UPPER_FLOOR > 0  \r\n"
+L" ,IIF(SRC.FL_NUM + X.LG_USE_UPPER_FLOOR >= TGT.FL_NUM AND SRC.FL_NUM <= TGT.FL_NUM,1,0) \r\n"
+L" ,IIF(SRC.FL_NAME=TGT.FL_NAME,1,0) \r\n"
+L" ) \r\n"
+L" ,1)=1 \r\n"
+L" AND IIF(X.LG_USE_LOC_ROOM_MATCH = 1 \r\n"
+L" ,IIF(SRC.RM_NAME = TGT.RM_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" , 1,0) \r\n"
+L" ELSE \r\n"
+L" CASE \r\n"
+L" WHEN (SRC.FL_NUM < -1) -- LG_USE_UNDER_BASIC = 1 \r\n"
+L" THEN  \r\n"
+L" CASE \r\n"
+L" WHEN(X.LG_USE_PARKING_BASIC = 1) \r\n"
+L" THEN  \r\n"
+L" IIF(SRC.BD_NAME = 'PARKING LOT' OR SRC.BTYPE_NAME = 'PARKING LOT' OR TGT.BD_NAME = 'PARKING LOT' OR TGT.BTYPE_NAME = 'PARKING LOT' \r\n"
+L" ,IIF(TGT.FL_NUM <= -1,1,0)  \r\n"
+L" ,IIF( \r\n"
+L" IIF(X.LG_USE_UNDER_BUILD_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_BTYPE_CLASSIFY = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_STAIR_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(TGT.FL_NUM <= -1 \r\n"
+L" ,1 \r\n"
+L" ,0) = 1 \r\n"
+L" ,1,0) \r\n"
+L" ) \r\n"
+L" ELSE \r\n"
+L" IIF( \r\n"
+L" IIF(X.LG_USE_UNDER_BUILD_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_BTYPE_CLASSIFY = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_STAIR_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(TGT.FL_NUM <= -1 \r\n"
+L" ,1 \r\n"
+L" ,0) = 1 \r\n"
+L" ,1,0) \r\n"
+L" END  \r\n"
+L" WHEN (SRC.FL_NUM = -1) \r\n"
+L" THEN \r\n"
+L"  CASE  \r\n"
+L"  WHEN(X.LG_USE_PARKING_BASIC = 1) \r\n"
+L"  THEN \r\n"
+L" --지하전체 , 주차장 전체 \r\n"
+L" IIF(SRC.BD_NAME = 'PARKING LOT' OR SRC.BTYPE_NAME = 'PARKING LOT' OR TGT.BD_NAME = 'PARKING LOT' OR TGT.BTYPE_NAME = 'PARKING LOT' \r\n"
+L" ,IIF(TGT.FL_NUM <= 1 , 1, 0) \r\n"
+L" ,IIF( \r\n"
+L" IIF(X.LG_USE_UNDER_BUILD_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_BTYPE_CLASSIFY = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_STAIR_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(TGT.FL_NUM <= -1  \r\n"
+L" , 1 \r\n"
+L" ,IIF(X.LG_USE_UNDER_B1_FLOOR = 1  \r\n"
+L" , IIF(TGT.FL_NUM = 1 ,1 , 0) \r\n"
+L" , IIF(TGT.FL_NUM < 0 , 1, 0)) \r\n"
+L" ) = 1 \r\n"
+L" ,1,0) \r\n"
+L" ) \r\n"
+L"  ELSE --LG_USE_PARKING_BASIC = 0 && LG_USE_UNDER_BASIC=1 \r\n"
+L" IIF( \r\n"
+L" IIF(X.LG_USE_UNDER_BUILD_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_BTYPE_CLASSIFY = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_STAIR_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(TGT.FL_NUM <= -1  \r\n"
+L" , 1 \r\n"
+L" ,IIF(X.LG_USE_UNDER_B1_FLOOR = 1  \r\n"
+L" , IIF(TGT.FL_NUM = 1 ,1 , 0) \r\n"
+L" , IIF(TGT.FL_NUM < 0 , 1, 0)) \r\n"
+L" ) = 1 \r\n"
+L" ,1,0) \r\n"
+L"  END \r\n"
+L" WHEN (SRC.FL_NUM = 1) \r\n"
+L" THEN \r\n"
+L"  CASE  \r\n"
+L"  WHEN(X.LG_USE_PARKING_BASIC = 1) \r\n"
+L"  THEN \r\n"
+L" -- TGT 지상 , 지하구분 , +n층 \r\n"
+L" -- 지하전체 , 주차장 전체 \r\n"
+L" IIF(SRC.BD_NAME = 'PARKING LOT' OR SRC.BTYPE_NAME = 'PARKING LOT' OR TGT.BD_NAME = 'PARKING LOT' OR TGT.BTYPE_NAME = 'PARKING LOT' \r\n"
+L" ,IIF(TGT.FL_NUM <= -1  \r\n"
+L" , 1 \r\n"
+L" , 0) \r\n"
+L" ,IIF(TGT.FL_NUM < 0  \r\n"
+L" , IIF( \r\n"
+L" IIF(X.LG_USE_UNDER_BUILD_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_BTYPE_CLASSIFY = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_STAIR_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(TGT.FL_NUM = -1 \r\n"
+L" , 1 \r\n"
+L" , IIF(X.LG_USE_UNDER_GROUND_FLOOR = 1 \r\n"
+L" ,1 \r\n"
+L" ,0) \r\n"
+L" )=1 \r\n"
+L" ,1,0) \r\n"
+L" , IIF( \r\n"
+L" IIF(X.LG_USE_LOC_BUILD_MATCH = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_BTYPE_MATCH = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_STAIR_MATCH = 1  \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_FLOOR_MATCH = 1 \r\n"
+L" , IIF(X.LG_USE_UPPER_FLOOR > 0  \r\n"
+L" ,IIF(SRC.FL_NUM + X.LG_USE_UPPER_FLOOR >= TGT.FL_NUM AND SRC.FL_NUM <= TGT.FL_NUM,1,0) \r\n"
+L" ,IIF(SRC.FL_NAME=TGT.FL_NAME,1,0) \r\n"
+L" ) \r\n"
+L" ,1)=1 \r\n"
+L" AND IIF(X.LG_USE_LOC_ROOM_MATCH = 1  \r\n"
+L" ,IIF(SRC.RM_NAME = TGT.RM_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" ,1,0) \r\n"
+L" ) \r\n"
+L" ) \r\n"
+L"  ELSE  -- X.LG_USE_PARKING_BASIC = 0 && SRC.FL_NUM = 1 && UNDER_BASIC =1 \r\n"
+L" IIF(TGT.FL_NUM < 0  \r\n"
+L" --,IIF(0 -- ERROR 지상 1층일때 지하 로직에 따라 지하 전체 \r\n"
+L" ,IIF(X.LG_USE_UNDER_GROUND_FLOOR =1 \r\n"
+L" ,IIF( \r\n"
+L" IIF(X.LG_USE_UNDER_BUILD_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_BTYPE_CLASSIFY = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_STAIR_CLASSIFY = 1 \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_UNDER_GROUND_FLOOR = 1 ,1,0) = 1 \r\n"
+L" ,1,0) \r\n"
+L" , 0) \r\n"
+L" ,IIF( \r\n"
+L" IIF(X.LG_USE_LOC_BUILD_MATCH = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_BTYPE_MATCH = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_STAIR_MATCH = 1  \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_FLOOR_MATCH = 1 \r\n"
+L" , IIF(X.LG_USE_UPPER_FLOOR > 0  \r\n"
+L" ,IIF(SRC.FL_NUM + X.LG_USE_UPPER_FLOOR >= TGT.FL_NUM AND SRC.FL_NUM <= TGT.FL_NUM,1,0) \r\n"
+L" ,IIF(SRC.FL_NAME=TGT.FL_NAME,1,0) \r\n"
+L" ) \r\n"
+L" ,1)=1 \r\n"
+L" AND IIF(X.LG_USE_LOC_ROOM_MATCH = 1  \r\n"
+L" ,IIF(SRC.RM_NAME = TGT.RM_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" ,1,0) \r\n"
+L" ) \r\n"
+L"  END \r\n"
+L" WHEN (SRC.FL_NUM > 1) --&& UNDER_BASIC = 1 \r\n"
+L" THEN \r\n"
+L" IIF(TGT.FL_NUM < 0  \r\n"
+L" , 0 \r\n"
+L" ,IIF( \r\n"
+L" IIF(X.LG_USE_LOC_BUILD_MATCH = 1 \r\n"
+L" ,IIF(SRC.BD_NAME=TGT.BD_NAME,1,0)  \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_BTYPE_MATCH = 1  \r\n"
+L" ,IIF(SRC.BTYPE_NAME= TGT.BTYPE_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_STAIR_MATCH = 1  \r\n"
+L" ,IIF(SRC.STAIR_NAME = TGT.STAIR_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" AND IIF(X.LG_USE_LOC_FLOOR_MATCH = 1 \r\n"
+L" , IIF(X.LG_USE_UPPER_FLOOR > 0  \r\n"
+L" ,IIF(SRC.FL_NUM + X.LG_USE_UPPER_FLOOR >= TGT.FL_NUM AND SRC.FL_NUM <= TGT.FL_NUM,1,0) \r\n"
+L" ,IIF(SRC.FL_NAME=TGT.FL_NAME,1,0) \r\n"
+L" ) \r\n"
+L" ,1)=1 \r\n"
+L" AND IIF(X.LG_USE_LOC_ROOM_MATCH = 1  \r\n"
+L" ,IIF(SRC.RM_NAME = TGT.RM_NAME,1,0) \r\n"
+L" ,1) = 1 \r\n"
+L" ,1,0) \r\n"
+L" ) \r\n"
+L" ELSE  \r\n"
+L" 0 \r\n"
+L" END \r\n"
+L" END = 1 \r\n"
+L"  \r\n"
+L" )  \r\n"
+L" GROUP BY SRC.FACP_ID,SRC.UNIT_ID,SRC.CHN_ID,SRC.RLY_ID,TGT.FACP_ID,TGT.UNIT_ID,TGT.CHN_ID,TGT.RLY_ID, X.LG_ID,X.LG_INTYPE_ID , X.LG_EQNAME_ID , X.LG_OUTTYPE_ID,X.LG_OUTCONT_ID \r\n"
+L" ,SRC.BD_NAME,SRC.BTYPE_NAME,SRC.STAIR_NAME,SRC.FL_NAME,SRC.RM_NAME,TGT.BD_NAME,TGT.BTYPE_NAME,TGT.STAIR_NAME,TGT.FL_NAME,TGT.RM_NAME \r\n"
+L" ORDER BY SRC.FACP_ID,SRC.UNIT_ID,SRC.CHN_ID,SRC.RLY_ID,TGT.FACP_ID,TGT.UNIT_ID,TGT.CHN_ID,TGT.RLY_ID, X.LG_ID,X.LG_INTYPE_ID , X.LG_EQNAME_ID , X.LG_OUTTYPE_ID,X.LG_OUTCONT_ID \r\n"
+L" END \r\n";
+//
 
 struct ST_INDEX_ITEM
 {
@@ -758,18 +1035,30 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 							bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
 							if (bRet)
 							{
+#ifndef ENGLISH_MODE
 								GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
+#else
+								GF_AddLog(L"Successfully entered the equipment information into the DB.");
+#endif
 								Log::Trace("Equipment information was successfully entered into the DB!");
 							}
 							else
 							{
+#ifndef ENGLISH_MODE
 								GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다, DB를 확인하세요.");
+#else
+								GF_AddLog(L"Failed to enter the equipment information into the DB.");
+#endif
 								Log::Trace("Failed to input Equipment information into DB!");
 							}
 						}
 						else
 						{
+#ifndef ENGLISH_MODE
 							GF_AddLog(L"새 설비 정보를 DB에 입력하기 전 기존 설비 정보를 삭제하는 데에 실패했습니다, DB를 확인하세요.");
+#else
+							GF_AddLog(L"Failed to delete the existing equipment information before entering new equipment information into the DB. Please check the DB.");
+#endif
 							Log::Trace("Failed to delete existing equipment information before entering new equipment information into DB.!");
 						}
 					}
@@ -1170,9 +1459,15 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		xls.Close();
 		SendProgStep(pPrgTagetWnd, PROG_RESULT_ERROR, nDetailAll, nDetail);
 		//SendProgressStep(pPrgTagetWnd, PROG_RESULT_ERROR, nAllCnt, nAllStep, nDetailAll, nDetail);
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel을 여는데 실패 했습니다.\n"
 			L"연동데이터 Excel 파일의 Validation에러 또는 Excel 파일이 사용 중입니다.\n" 
 			L"해당 파일을 Excel로 여신 다음 오류를 해결하고 다시 시도하여 주십시오.", MB_ICONERROR);
+#else
+		AfxMessageBox(L"Failed to open Excel.\n"
+			L"The site logic data Excel file has a validation error, or the Excel file is in use.\n"
+			L"Please open the file in Excel and troubleshoot the error before trying again.", MB_ICONERROR);
+#endif
 		return 0;
 	}
 	return 1;
@@ -1241,7 +1536,11 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 	{
 		CString strNewType = g_strEquipTypeString[nType];
 		CString strLog;
+#ifndef ENGLISH_MODE
 		strLog.Format(_T("[%s ID - %d : %s]가 설비 정의에 없어 새로 추가됩니다."), strNewType, nWholeID, strEquipName);
+#else
+		strLog.Format(_T("[%s ID - %d : %s] is newly added because it is found not in the equipment definition."), strNewType, nWholeID, strEquipName);
+#endif
 		GF_AddLog(strLog);
 	}
 	//20240408 GBM end
@@ -1261,12 +1560,20 @@ CDataEquip * CRelayTableData::AddNewEquip(CString strEquipName, int nType)
 		if (bRet)
 		{
 			strMsg1.Format(_T("[%s ID - %d : %s] already exists"), strType, nWholeID, strEquipName);
+#ifndef ENGLISH_MODE
 			strMsg2.Format(_T("[%s ID - %d : %s]가 이미 존재합니다."), strType, nWholeID, strEquipName);
+#else
+			strMsg2.Format(_T("[%s ID - %d : %s] already exists."), strType, nWholeID, strEquipName);
+#endif
 		}
 		else
 		{
 			strMsg1.Format(_T("[%s ID - %d : %s] does not exists, It will be added to equipment definition list."), strType, nWholeID, strEquipName);
+#ifndef ENGLISH_MODE
 			strMsg2.Format(_T("[%s ID - %d : %s]가 설비 정의에 존재하지 않습니다. 설비 정의에 추가합니다."), strType, nWholeID, strEquipName);
+#else
+			strMsg2.Format(_T("[%s ID - %d : %s] does not exist in the equipment definition. Add to the equipment definition."), strType, nWholeID, strEquipName);
+#endif
 		}
 
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -2241,8 +2548,11 @@ int CRelayTableData::FillDeviceTreeList(CTreeListCtrl *pCtrl)
 			hParent = hFacp[nFNum];
 			if (hParent == nullptr)
 			{
-
+#ifndef ENGLISH_MODE
 				str.Format(L"FACP정보없음_%02d", nFNum);
+#else
+				str.Format(L"No FACP information_%02d", nFNum);
+#endif
 				hFacp[nFNum] = pCtrl->InsertItem(str, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 				pCtrl->SetItemData(hFacp[nFNum], 0);
 			}
@@ -2266,12 +2576,20 @@ int CRelayTableData::FillDeviceTreeList(CTreeListCtrl *pCtrl)
 				hParent = hFacp[nFNum];
 				if (hParent == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					str.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					str.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hFacp[nFNum] = pCtrl->InsertItem(str, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pCtrl->SetItemData(hFacp[nFNum], 0);
 					hParent = hFacp[nFNum];
 				}
+#ifndef ENGLISH_MODE
 				str.Format(L"Unit정보없음_%02d", nUNum);
+#else
+				str.Format(L"No unit information_%02d", nUNum);
+#endif
 				hUnit[nFNum][nUNum] = pCtrl->InsertItem(str, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 				pCtrl->SetItemData(hFacp[nFNum], 0);
 				hParent = hUnit[nFNum][nUNum];
@@ -2300,7 +2618,11 @@ int CRelayTableData::FillDeviceTreeList(CTreeListCtrl *pCtrl)
 				hParent = hFacp[nFNum];
 				if (hParent == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					str.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					str.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hFacp[nFNum] = pCtrl->InsertItem(str, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pCtrl->SetItemData(hFacp[nFNum], SE_FACP);
 				}
@@ -2308,12 +2630,20 @@ int CRelayTableData::FillDeviceTreeList(CTreeListCtrl *pCtrl)
 				hParent = hFacp[nFNum];
 				if (hUnit[nFNum][nUNum] == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					str.Format(L"Unit정보없음_%02d", nUNum);
+#else
+					str.Format(L"No unit information_%02d", nUNum);
+#endif
 					hUnit[nFNum][nUNum] = pCtrl->InsertItem(str, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 					pCtrl->SetItemData(hFacp[nFNum], SE_UNIT);
 				}
 				hParent = hUnit[nFNum][nUNum];
+#ifndef ENGLISH_MODE
 				str.Format(L"계통정보없음_%02d", nCNum);
+#else
+				str.Format(L"No loop information_%02d", nCNum);
+#endif
 				hChn[nFNum][nUNum][nCNum] = pCtrl->InsertItem(str, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 				pCtrl->SetItemData(hChn[nFNum][nUNum][nCNum], SE_CHANNEL);
 				hParent = hChn[nFNum][nUNum][nCNum];
@@ -2444,8 +2774,11 @@ int CRelayTableData::FillLinkedTreeList(CTreeListCtrl *pCtrl)
 			hParent = hFacp[nFNum];
 			if (hParent == nullptr)
 			{
-
+#ifndef ENGLISH_MODE
 				str.Format(L"FACP정보없음_%02d", nFNum);
+#else
+				str.Format(L"No FACP information_%02d", nFNum);
+#endif
 				hFacp[nFNum] = pCtrl->InsertItem(str, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 				pCtrl->SetItemData(hFacp[nFNum], 0);
 			}
@@ -2469,12 +2802,20 @@ int CRelayTableData::FillLinkedTreeList(CTreeListCtrl *pCtrl)
 				hParent = hFacp[nFNum];
 				if (hParent == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					str.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					str.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hFacp[nFNum] = pCtrl->InsertItem(str, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pCtrl->SetItemData(hFacp[nFNum], 0);
 					hParent = hFacp[nFNum];
 				}
+#ifndef ENGLISH_MODE
 				str.Format(L"Unit정보없음_%02d", nUNum);
+#else
+				str.Format(L"No unit information_%02d", nUNum);
+#endif
 				hUnit[nFNum][nUNum] = pCtrl->InsertItem(str, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 				pCtrl->SetItemData(hFacp[nFNum], 0);
 				hParent = hUnit[nFNum][nUNum];
@@ -2503,7 +2844,11 @@ int CRelayTableData::FillLinkedTreeList(CTreeListCtrl *pCtrl)
 				hParent = hFacp[nFNum];
 				if (hParent == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					str.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					str.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hFacp[nFNum] = pCtrl->InsertItem(str, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pCtrl->SetItemData(hFacp[nFNum], SE_FACP);
 				}
@@ -2511,12 +2856,20 @@ int CRelayTableData::FillLinkedTreeList(CTreeListCtrl *pCtrl)
 				hParent = hFacp[nFNum];
 				if (hUnit[nFNum][nUNum] == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					str.Format(L"Unit정보없음_%02d", nUNum);
+#else
+					str.Format(L"No unit information_%02d", nUNum);
+#endif
 					hUnit[nFNum][nUNum] = pCtrl->InsertItem(str, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 					pCtrl->SetItemData(hFacp[nFNum], SE_UNIT);
 				}
 				hParent = hUnit[nFNum][nUNum];
+#ifndef ENGLISH_MODE
 				str.Format(L"계통정보없음_%02d", nCNum);
+#else
+				str.Format(L"No loop information_%02d", nCNum);
+#endif
 				hChn[nFNum][nUNum][nCNum] = pCtrl->InsertItem(str, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 				pCtrl->SetItemData(hChn[nFNum][nUNum][nCNum], SE_CHANNEL);
 				hParent = hChn[nFNum][nUNum][nCNum];
@@ -2697,14 +3050,23 @@ int CRelayTableData::FillConditionTree(CTreeCtrl* pCtrl , CPtrList * pItemList ,
 	if (bInput)
 	{
 		spRefManager = m_spRefInputEquipManager;
+#ifndef ENGLISH_MODE
 		strEqName = L"입력타입";
+#else
+		strEqName = L"INPUT TYPE";
+#endif
 	}
 	else
 	{
 		spRefManager = m_spRefOutputEquipManager;
+#ifndef ENGLISH_MODE
 		strEqName = L"출력타입";
+#else
+		strEqName = L"OUTPUT TYPE";
+#endif
 	}
 
+#ifndef ENGLISH_MODE
 	strEqName = bInput ? L"입력타입" : L"출력타입";
 	hBuild = pCtrl->InsertItem(L"건물", 0, 0, TVI_ROOT);
 	hBtype = pCtrl->InsertItem(L"건물종류", 0, 0, TVI_ROOT);
@@ -2713,6 +3075,16 @@ int CRelayTableData::FillConditionTree(CTreeCtrl* pCtrl , CPtrList * pItemList ,
 	hRoom = pCtrl->InsertItem(L"실", 0, 0, TVI_ROOT);
 	hType = pCtrl->InsertItem(strEqName, 0, 0, TVI_ROOT);
 	hEquip = pCtrl->InsertItem(L"설비", 0, 0, TVI_ROOT);
+#else
+	strEqName = bInput ? L"INPUT TYPE" : L"OUTPUT TYPE";
+	hBuild = pCtrl->InsertItem(L"BUILDING", 0, 0, TVI_ROOT);
+	hBtype = pCtrl->InsertItem(L"BUILDING TYPE", 0, 0, TVI_ROOT);
+	hStair = pCtrl->InsertItem(L"LINE", 0, 0, TVI_ROOT);
+	hFloor = pCtrl->InsertItem(L"FLOOR", 0, 0, TVI_ROOT);
+	hRoom = pCtrl->InsertItem(L"ROOM", 0, 0, TVI_ROOT);
+	hType = pCtrl->InsertItem(strEqName, 0, 0, TVI_ROOT);
+	hEquip = pCtrl->InsertItem(L"EQUIPMENT", 0, 0, TVI_ROOT);
+#endif
 
 	pList = m_spLocation->GetBuildList();
 	pos = pList->GetHeadPosition();
@@ -2882,7 +3254,11 @@ int CRelayTableData::FillConditionTree(CTreeCtrl* pCtrl , CPtrList * pItemList ,
 	}
 
 	CString strtemp;
+#ifndef ENGLISH_MODE
 	strtemp = strEqName + L"없음";
+#else
+	strtemp = L"No " + strEqName;
+#endif
 	hItem = pCtrl->InsertItem(strtemp,nEqImg,nEqImg,hType);
 	pAddData = new ST_TREEITEM;
 	memset((void*)pAddData,0,sizeof(ST_TREEITEM));
@@ -5594,7 +5970,11 @@ int CRelayTableData::FillDeviceTreeByAddress(CTreeCtrl* pCtrl, CPtrList * pItemL
 				pTData = tmpMap[strTemp];
 				if (pTData == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					strName.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					strName.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hItem = pCtrl->InsertItem(strName, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pTData = new ST_TREEITEM;
 					memset((void*)pTData, 0, sizeof(ST_TREEITEM));
@@ -5624,7 +6004,11 @@ int CRelayTableData::FillDeviceTreeByAddress(CTreeCtrl* pCtrl, CPtrList * pItemL
 				pTData = tmpMap[strTemp];
 				if (pTData == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					strName.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					strName.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hItem = pCtrl->InsertItem(strName, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pTData = new ST_TREEITEM;
 					memset((void*)pTData, 0, sizeof(ST_TREEITEM));
@@ -5643,7 +6027,11 @@ int CRelayTableData::FillDeviceTreeByAddress(CTreeCtrl* pCtrl, CPtrList * pItemL
 				pTData = tmpMap[strTemp];
 				if (pTData == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					strName.Format(L"Unit정보없음_%02d", nUNum);
+#else
+					strName.Format(L"No unit information_%02d", nUNum);
+#endif
 					hItem = pCtrl->InsertItem(strName, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 					pTData = new ST_TREEITEM;
 					memset((void*)pTData, 0, sizeof(ST_TREEITEM));
@@ -5675,7 +6063,11 @@ int CRelayTableData::FillDeviceTreeByAddress(CTreeCtrl* pCtrl, CPtrList * pItemL
 				pTData = tmpMap[strTemp];
 				if (pTData == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					strName.Format(L"FACP정보없음_%02d", nFNum);
+#else
+					strName.Format(L"No FACP information_%02d", nFNum);
+#endif
 					hItem = pCtrl->InsertItem(strName, TIMG_DEV_FACP, TIMG_DEV_FACP, TVI_ROOT);
 					pTData = new ST_TREEITEM;
 					memset((void*)pTData, 0, sizeof(ST_TREEITEM));
@@ -5694,7 +6086,11 @@ int CRelayTableData::FillDeviceTreeByAddress(CTreeCtrl* pCtrl, CPtrList * pItemL
 				pTData = tmpMap[strTemp];
 				if (pTData == nullptr)
 				{
+#ifndef ENGLISH_MODE
 					strName.Format(L"Unit정보없음_%02d", nUNum);
+#else
+					strName.Format(L"No unit information_%02d", nUNum);
+#endif
 					hItem = pCtrl->InsertItem(strName, TIMG_DEV_UNIT, TIMG_DEV_UNIT, hParent);
 					pTData = new ST_TREEITEM;
 					memset((void*)pTData, 0, sizeof(ST_TREEITEM));
@@ -5873,8 +6269,11 @@ int CRelayTableData::FillDeviceTreeByInputType(CTreeCtrl* pCtrl, CPtrList * pIte
 		arr.SetAtGrow(pEq->GetEquipID(), pAddData);
 	}
 	
-
+#ifndef ENGLISH_MODE
 	hEq = pCtrl->InsertItem(L"입력타입없음", TIMG_DEV_INTYPE, TIMG_DEV_INTYPE, hParent);
+#else
+	hEq = pCtrl->InsertItem(L"No Input Type", TIMG_DEV_INTYPE, TIMG_DEV_INTYPE, hParent);
+#endif
 	pAddData = new ST_TREEITEM;
 	memset((void*)pAddData, 0, sizeof(ST_TREEITEM));
 	pAddData->hParent = hParent;
@@ -5952,7 +6351,12 @@ int CRelayTableData::FillDeviceTreeByOutputType(CTreeCtrl* pCtrl, CPtrList * pIt
 		arr.SetAtGrow(pEq->GetEquipID(), pAddData);
 	}
 
+#ifndef ENGLISH_MODE
 	hEq = pCtrl->InsertItem(L"출력타입없음", TIMG_DEV_OUTTYPE, TIMG_DEV_OUTTYPE, hParent);
+#else
+	hEq = pCtrl->InsertItem(L"No Output Type", TIMG_DEV_OUTTYPE, TIMG_DEV_OUTTYPE, hParent);
+#endif
+
 	pAddData = new ST_TREEITEM;
 	memset((void*)pAddData, 0, sizeof(ST_TREEITEM));
 	pAddData->hParent = hParent;
@@ -6032,7 +6436,12 @@ int CRelayTableData::FillDeviceTreeByEquipName(CTreeCtrl* pCtrl, CPtrList * pIte
 		arr.SetAtGrow(pEq->GetEquipID(), pAddData);
 	}
 
+#ifndef ENGLISH_MODE
 	hEq = pCtrl->InsertItem(L"설비이름없음", TIMG_DEV_EQUIP, TIMG_DEV_EQUIP, hParent);
+#else
+	hEq = pCtrl->InsertItem(L"No Equipment Name", TIMG_DEV_EQUIP, TIMG_DEV_EQUIP, hParent);
+#endif
+
 	pAddData = new ST_TREEITEM;
 	memset((void*)pAddData, 0, sizeof(ST_TREEITEM));
 	pAddData->hParent = hParent;
@@ -6178,7 +6587,12 @@ int CRelayTableData::FillDeviceTreeContentsName(CTreeCtrl* pCtrl, CPtrList * pIt
 		arr.SetAtGrow(pEq->GetEquipID(), pAddData);
 	}
 	
+#ifndef ENGLISH_MODE
 	hEq = pCtrl->InsertItem(L"출력내용없음", TIMG_DEV_CONTENTS, TIMG_DEV_CONTENTS, hParent);
+#else
+	hEq = pCtrl->InsertItem(L"No Output", TIMG_DEV_CONTENTS, TIMG_DEV_CONTENTS, hParent);
+#endif
+
 	pAddData = new ST_TREEITEM;
 	memset((void*)pAddData, 0, sizeof(ST_TREEITEM));
 	pAddData->hParent = hParent;
@@ -6252,13 +6666,21 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 	nf=nu = nc = nr = nei = nen = neo = nec = nlb = nlt = nls = nlf = nlr = 0 ;
  	if (m_pDB == nullptr)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"프로젝트의 데이터베이스 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시오.");
+#else
+		AfxMessageBox(L"The project doesn't have any database information.\nOpen the project and restart it.");
+#endif
  		return 0;
  	}
  
  	if (m_pDB->IsOpen() == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"프로젝트 데이터베이스에 접속되지 않았습니다.\n프로젝트를 열고 다시 시작하십시오.");
+#else
+		AfxMessageBox(L"The project database has not been connected.\nOpen the project and restart it.");
+#endif
  		return 0;
  	}
 
@@ -6347,7 +6769,11 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
  
  	if (m_pDB->OpenQuery(strSql) == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"데이터베이스에서 감지기/중계기 정보를 가져오는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to retrieve the detector/module information from the database.");
+#endif
  		return 0;
  	}
 	
@@ -6400,7 +6826,11 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 			{
 				if (m_pDB->GetFieldValue(arr[x], nValue) == FALSE)
 				{
+#ifndef ENGLISH_MODE
 					AfxMessageBox(L"데이터베이스에서 정보를 가져오는데 실패했습니다.");
+#else
+					AfxMessageBox(L"Failed to retrieve the information from the database.");
+#endif
 					return 0;
 				}
 				strTempItem.Format(L"%d", nValue);
@@ -6409,7 +6839,11 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 			{
 				if (m_pDB->GetFieldValue(arr[x], strTempItem) == FALSE)
 				{
+#ifndef ENGLISH_MODE
 					AfxMessageBox(L"데이터베이스에서 정보를 가져오는데 실패했습니다.");
+#else
+					AfxMessageBox(L"Failed to retrieve the information from the database.");
+#endif
 					return 0;
 				}
 			}
@@ -6421,7 +6855,13 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 
 			// 이전 아이디가 같지 않을 때 또는 트리의 상위 아이템이 같지 않을때
 			// 새로 입력한다.
+
+#ifndef ENGLISH_MODE
 			strName = L"구분없음"; 
+#else
+			strName = L"No Distinction";
+#endif
+
 			if (bEqual == FALSE || strTempItem != vtID[x])
 			{
 				bEqual = FALSE;
@@ -6430,64 +6870,113 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 				case TTYPE_DEV_FACP:
 				{
 					CDataFacp * pFacp = GetFacpByID(nValue);
+#ifndef ENGLISH_MODE
 					if (pFacp != nullptr)
 						strName = pFacp->GetFacpName();
 					else
 						strName = L"수신기 정보없음";
+#else
+					if (pFacp != nullptr)
+						strName = pFacp->GetFacpName();
+					else
+						strName = L"No FACP Information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_UNIT:
 				{
 					CDataUnit * pUnit = GetUnitByID(nf, nu);
+#ifndef ENGLISH_MODE
 					if (pUnit != nullptr)
 						strName = pUnit->GetUnitName();
 					else
 						strName = L"유닛 정보없음";
+#else
+					if (pUnit != nullptr)
+						strName = pUnit->GetUnitName();
+					else
+						strName = L"No Unit Information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_CHANNEL:
 				{
 					CDataChannel * pChn = GetChannelByID(nf, nu, nc);
+#ifndef ENGLISH_MODE
 					if (pChn != nullptr)
 						strName = pChn->GetChnName();
 					else
 						strName = L"계통 정보없음";
+#else
+					if (pChn != nullptr)
+						strName = pChn->GetChnName();
+					else
+						strName = L"No Loop Information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_INTYPE:
 				{
 					CDataEquip * peq = GetEquipData(ET_INPUTTYPE, nei);
+#ifndef ENGLISH_MODE
 					if (peq != nullptr)
 						strName = peq->GetEquipName();
 					else
 						strName = L"입력타입 정보없음";
+#else
+					if (peq != nullptr)
+						strName = peq->GetEquipName();
+					else
+						strName = L"No Input Type Information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_OUTTYPE:
 				{
 					CDataEquip * peq = GetEquipData(ET_OUTPUTTYPE, neo);
+#ifndef ENGLISH_MODE
 					if (peq != nullptr)
 						strName = peq->GetEquipName();
 					else
 						strName = L"출력타입 정보없음";
+#else
+					if (peq != nullptr)
+						strName = peq->GetEquipName();
+					else
+						strName = L"No Output Type Information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_CONTENTS:
 				{
 					CDataEquip * peq = GetEquipData(ET_OUTCONTENTS, nec);
+#ifndef ENGLISH_MODE
 					if (peq != nullptr)
 						strName = peq->GetEquipName();
 					else
 						strName = L"출력설명 정보없음";
+#else
+					if (peq != nullptr)
+						strName = peq->GetEquipName();
+					else
+						strName = L"Output Description No Information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_EQUIP:
 				{
 					CDataEquip * peq = GetEquipData(ET_EQNAME, nen);
+#ifndef ENGLISH_MODE
 					if (peq != nullptr)
 						strName = peq->GetEquipName();
 					else
 						strName = L"설비명 정보없음";
+#else
+					if (peq != nullptr)
+						strName = peq->GetEquipName();
+					else
+						strName = L"No equipment name information";
+#endif
 				}
 				break;
 				case TTYPE_DEV_BUILD:
@@ -6531,7 +7020,11 @@ int CRelayTableData::FillDeviceTreeByCustom(CTreeCtrl* pCtrl, CPtrList * pItemLi
 				}
 				break;
 				default:
+#ifndef ENGLISH_MODE
 					strName = L"구분없음";
+#else
+					strName = L"No Distinction";
+#endif
 					break;
 				}
 
@@ -6991,7 +7484,11 @@ int CRelayTableData::OpenPrjDatabase(CString strDBSource , CString strDBName , D
 
 		if (m_pDB->DBOpen() == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to connect to the database.");
+#endif
 			return 0;
 		}
 	}
@@ -7033,13 +7530,21 @@ int CRelayTableData::InsertPrjBaseData()
 	if (CheckColumn(L"TB_PATTERN_ITEM", L"ITEM_TYPE", TRUE, L"SMALLINT") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the ITEM_TYPE column to TB_PATTERN_ITEM in the database.");
+#endif
 		return 0;
 	}
 	if(CheckAddColumn(L"TB_PATTERN_ITEM",L"INSERT_TYPE",TRUE,L"SMALLINT") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the INSERT_TYPE column to TB_PATTERN_ITEM in the database.");
+#endif
 		return 0;
 	}
 	// [2022/11/24 16:55:29 KHS] 
@@ -7053,7 +7558,11 @@ int CRelayTableData::InsertPrjBaseData()
 	if(nRet == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼의 존재를 확인하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to verify the presence of the MANUAL_MAKE column in TB_PATTERN_MST of the database.");
+#endif
 		return 0;
 	}
 	else if(nRet == 2)
@@ -7064,7 +7573,11 @@ int CRelayTableData::InsertPrjBaseData()
 	if(CheckAddColumn(L"TB_PATTERN_MST",L"MANUAL_MAKE",TRUE,L"SMALLINT") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the MANUAL_MAKE column to TB_PATTERN_MST of the database.");
+#endif
 		return 0;
 	}
 
@@ -7079,37 +7592,61 @@ int CRelayTableData::InsertPrjBaseData()
 	if (CheckAddColumn(L"TB_PSWITCH_MST", L"PS_LCD", TRUE, L"varchar(100)") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PS_LCD column to TB_PSWITCH_MST of the database.");
+#endif
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_PUMP_MST", L"PMP_LCD", TRUE, L"varchar(100)") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_LCD column to TB_PUMP_MST in the database.");
+#endif
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_RELAY_LIST", L"RIDX", TRUE, L"int") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the RIDX column to TB_RELAY_LIST in the database.");
+#endif
 		return 0;
 	}
 
 	if (TempFunc_CheckTempSaveTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"자동생성시 사용하는 임시테이블(회로)을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add a temporary table (circuit) used by autogeneration.");
+#endif
 		return 0;
 	}
 	if (TempFunc_CheckTempUsedPtnTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"자동생성시 사용하는 임시테이블(패턴)을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add a temporary table (pattern) used by autogeneration.");
+#endif
 		return 0;
 	}
 	if (TempFunc_CheckFacpContactTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"수신기 접점 테이블을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the FACP relay contact table.");
+#endif
 		return 0;
 	}
 
@@ -7117,7 +7654,11 @@ int CRelayTableData::InsertPrjBaseData()
 	if (TempFunc_CheckAutoLogicTable() == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2 컬럼확인에 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2 컬럼확인에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to check the TB_AUTO_LOGIC_V2 column in the database.");
+#endif
 		return 0;
 	}
 	InsertPrjBaseEquipDB();
@@ -7858,7 +8399,11 @@ int CRelayTableData::InsertPrjBaseAutoLogicDB()
  
  		if (m_pDB->ExecuteSql(strSql) == FALSE)
  		{
+#ifndef ENGLISH_MODE
  			GF_AddLog(L"DataBase 입력 Failed:%s", strSql);
+#else
+			GF_AddLog(L"Database input failed:%s", strSql);
+#endif
  			continue;
  		}
  	}
@@ -9935,7 +10480,11 @@ int CRelayTableData::TempFunc_CheckAutoLogicTable()
 	if (nCnt == 1)
 		return 1;
 
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"자동생성 로직 Database 구조가 변경됐습니다.\n기존 데이터베이스를 백업하겠습니다.");
+#else
+	AfxMessageBox(L"Changed the structure of the autogeneration logic database.\nThe existing database will be backed up.");
+#endif
 	
 	CUt_AutoLogic abk(m_pDB);
 	CString strBakup , strtemp;
@@ -10044,7 +10593,11 @@ int CRelayTableData::TempFunc_CheckAutoLogicTable()
 // 	strSql += L"GO ";
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"TB_AUTO_LOGIC_V2 생성 오류");
+#else
+		AfxMessageBox(L"TB_AUTO_LOGIC_V2 Generation Error");
+#endif
 		return 0;
 	}
 	abk.ChangeOldTableToNewTable();
@@ -10073,7 +10626,11 @@ int CRelayTableData::TempFunc_CheckTempSaveTable()
 	if (nCnt == 1)
 		return 1;
 	
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"연동데이터 자동생성 프로그램이 데이터베이스에 없습니다.\n관리자를 호출하여 데이터베이스에 자동생성 프로그램을 설치하여야 합니다.");
+#else
+	AfxMessageBox(L"The site logic data autogeneration program is not in the database.\nYou need to call the administrator to install the autogeneration program in the database.");
+#endif
 
 	strSql = L"CREATE TABLE [dbo].[TB_TEMP_SAVED_LINK]( ";
 	strSql += L"[SRC_FACP][int] NOT NULL, ";
@@ -10113,7 +10670,11 @@ int CRelayTableData::TempFunc_CheckTempSaveTable()
 	strSql += L") ON[PRIMARY] ";
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"TB_TEMP_SAVED_LINK 생성 오류");
+#else
+		AfxMessageBox(L"TB_TEMP_SAVED_LINK Creation Error");
+#endif
 		return 0;
 	}
 	return 1;
@@ -10161,7 +10722,11 @@ int CRelayTableData::TempFunc_CheckTempUsedPtnTable()
 
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"TB_TEMP_USED_PTN 생성 오류");
+#else
+		AfxMessageBox(L"TB_TEMP_USED_PTN Creation Error");
+#endif
 		return 0;
 	}
 	return 1;
@@ -10187,8 +10752,11 @@ int CRelayTableData::TempFunc_CheckFacpContactTable()
 	if (nCnt == 1)
 		return 1;
 
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"자동생성 로직 Database 구조가 변경됐습니다.\n기존 데이터베이스를 백업하겠습니다.");
-
+#else
+	AfxMessageBox(L"Changed the structure of the autogeneration logic database.\nThe existing database will be backed up.");
+#endif
 
 	strSql = L"CREATE TABLE[dbo].[TB_FACP_CONTACT]( ";
 	strSql += L"[NET_ID][int] NOT NULL, ";
@@ -10207,13 +10775,21 @@ int CRelayTableData::TempFunc_CheckFacpContactTable()
 
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"PK_TB_FACP_CONTACT 생성 오류");
+#else
+		AfxMessageBox(L"PK_TB_FACP_CONTACT CREATION ERROR");
+#endif
 		return 0;
 	}
 	strSql.Format(L"ALTER TABLE [TB_FACP_CONTACT] ADD  CONSTRAINT [DF_TB_FACP_CONTACT_ADD_DATE]  DEFAULT (getdate()) FOR [ADD_DATE]");
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"TB_FACP_CONTACT 생성 오류");
+#else
+		AfxMessageBox(L"TB_FACP_CONTACT CREATION ERROR");
+#endif
 		return 0;
 	}
 	return 1;
@@ -10484,7 +11060,11 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 	if (CheckColumn(L"TB_PATTERN_ITEM", L"ITEM_TYPE", TRUE, L"SMALLINT") == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 ITEM_TYPE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the ITEM_TYPE column to TB_PATTERN_ITEM in the database.");
+#endif
 		return 0;
 	}
 // 	if (CheckAutoLogicColumn(L"TB_AUTO_LOGIC", L"LG_USE_ROOM", TRUE, L"TINYINT") == 0)
@@ -10494,23 +11074,39 @@ int CRelayTableData::LoadProjectDatabase()
 // 	}
 	if (TempFunc_CheckTempSaveTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"자동생성시 사용하는 임시테이블을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add a temporary table used by autogeneration.");
+#endif
 		return 0;
 	}
 	if (TempFunc_CheckTempUsedPtnTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"자동생성시 사용하는 임시테이블(패턴)을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add a temporary table (pattern) used by autogeneration.");
+#endif
 		return 0;
 	}
 	if (TempFunc_CheckFacpContactTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"수신기 접점 테이블을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the FACP relay contact table.");
+#endif
 		return 0;
 	}
 	nRet = TempFunc_CheckStoredProcedure(L"SP_GENERATE_PTN_BY_SOURCE", 1);
 	if (nRet < 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"SP_GENERATE_PTN_BY_SOURCE 존재 유무를 검사하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to check for the presence of SP_GENERATE_PTN_BY_SOURCE.");
+#endif
 		return 0;
 	}
 	else if (nRet > 0)
@@ -10518,7 +11114,11 @@ int CRelayTableData::LoadProjectDatabase()
 		nRet = TempFunc_MakeStoredProcedure(g_strSpGeneratePtnBySource, 1, nRet == 1);
 		if (nRet < 0)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"SP_GENERATE_PTN_BY_SOURCE %s 하는데 실패했습니다.", nRet == 1 ? L"생성" : L"수정");
+#else
+			GF_AddLog(L"Failed to %s SP_GENERATE_PTN_BY_SOURCE.", nRet == 1 ? L"generate" : L"edit");
+#endif
 			return 0;
 		}
 	}
@@ -10527,15 +11127,29 @@ int CRelayTableData::LoadProjectDatabase()
 	nRet = TempFunc_CheckStoredProcedure(L"SP_GENERATE_LINK", 1);
 	if (nRet < 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"SP_GENERATE_LINK 존재 유무를 검사하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to check for the presence of SP_GENERATE_LINK.");
+#endif
 		return 0;
 	}
 	else if (nRet > 0)
 	{
+		//20240711 GBM start - 저장 프로시저 조건 중 '주차장' 영문 대응
+#ifndef ENGLISH_MODE
 		nRet = TempFunc_MakeStoredProcedure(g_strSpGenerateLink, 1, nRet == 1);
+#else
+		nRet = TempFunc_MakeStoredProcedure(g_strSpGenerateLink_eng, 1, nRet == 1);
+#endif
+		//20240711 GBM end
 		if (nRet < 0)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"SP_GENERATE_LINK %s 하는데 실패했습니다.", nRet == 1 ? L"생성" : L"수정");
+#else
+			GF_AddLog(L"Failed to %s SP_GENERATE_LINK.", nRet == 1 ? L"generate" : L"edit");
+#endif
 			return 0;
 		}
 	}
@@ -10543,7 +11157,11 @@ int CRelayTableData::LoadProjectDatabase()
 	nRet = TempFunc_CheckStoredProcedure(L"SP_DELETE_TEMPLINK_PTNITEM", 1);
 	if (nRet < 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"SP_DELETE_TEMPLINK_PTNITEM 존재 유무를 검사하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to check for the presence of SP_DELETE_TEMPLINK_PTNITEM.");
+#endif
 		return 0;
 	}
 	else if (nRet > 0)
@@ -10551,26 +11169,42 @@ int CRelayTableData::LoadProjectDatabase()
 		nRet = TempFunc_MakeStoredProcedure(g_strSpDeleteTempLinkPtnItem, 1, nRet == 1);
 		if (nRet < 0)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"SP_DELETE_TEMPLINK_PTNITEM %s 하는데 실패했습니다.", nRet == 1 ? L"생성" : L"수정");
+#else
+			GF_AddLog(L"Failed to %s SP_DELETE_TEMPLINK_PTNITEM.", nRet == 1 ? L"generate" : L"edit");
+#endif
 			return 0;
 		}
 	}
 
 	if (TempFunc_CheckAutoLogicTable() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"이전버전의 자동생성 로직을 변경하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to change the autogeneration logic for the previous version.");
+#endif
 		return 0;
 	}
 
 	if(TempFunc_CheckIndex() == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"이전버전의 데이터베이스에 인덱스를 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add an index to the older version of the database.");
+#endif
 		return 0;
 	}
 
 	if(CheckAddColumn(L"TB_PATTERN_ITEM",L"INSERT_TYPE",TRUE,L"SMALLINT") == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_ITEM에 INSERT_TYPE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the INSERT_TYPE column to TB_PATTERN_ITEM in the database.");
+#endif
 		return 0;
 	}
 	// [2022/11/24 16:55:29 KHS] 
@@ -10585,7 +11219,11 @@ int CRelayTableData::LoadProjectDatabase()
 	if(nRet == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼이 존재하는지 확인하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼이 존재하는지 확인하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to verify the presence of the MANUAL_MAKE column in TB_PATTERN_MST of the database.");
+#endif
 		return 0;
 	}
 	else if(nRet == 2)
@@ -10595,47 +11233,79 @@ int CRelayTableData::LoadProjectDatabase()
 
 	if(CheckAddColumn(L"TB_PATTERN_MST",L"MANUAL_MAKE",TRUE,L"SMALLINT") == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PATTERN_MST에 MANUAL_MAKE 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the MANUAL_MAKE column to TB_PATTERN_MST of the database.");
+#endif
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_PSWITCH_MST", L"PS_LCD", TRUE, L"varchar(100)") == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_LCD 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PS_LCD column to TB_PSWITCH_MST of the database.");
+#endif
 		return 0;
 	}
 
 	if (CheckAddColumn(L"TB_PUMP_MST", L"PMP_LCD", TRUE, L"varchar(100)") == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_LCD column to TB_PUMP_MST in the database.");
+#endif
 		return 0;
 	}
 
 
 	if (CheckAddColumn(L"TB_RELAY_LIST", L"RIDX", TRUE, L"int") == 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 TB_RELAY_LIST에 RIDX 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the RIDX column to TB_RELAY_LIST in the database.");
+#endif
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : Database 설정 - %d" , dwEnd - dwOrigin);
+#else
+	GF_AddDebug(L"Time Check: Setting Database - %d", dwEnd - dwOrigin);
+#endif
 #endif
 	if (LoadEquip() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 설비정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the equipment information from the database.");
+#endif
 		return 0;
 	}
 	
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 설비정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Equipment Information - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadLocation() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 위치정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the location information from the database.");
+#endif
 		return 0;
 	}
 
@@ -10643,88 +11313,152 @@ int CRelayTableData::LoadProjectDatabase()
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 위치정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Geolocation Information -  %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadPatternMst() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 패턴정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the pattern information from the database.");
+#endif
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 패턴정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Pattern Information - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadFacp() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 수신기정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the FACP information from the database.");
+#endif
 		return 0;
 	}
  
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 기초정보(수신기) 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time check: Retrieving Basic Information (FACP) - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadUnit() <= 0)
  	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 유닛정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the unit information from the database.");
+#endif
  		return 0;
  	}
  
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 기초정보(유닛) 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Basic Information (Units) - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadChannel() <= 0)
  	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 계통정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the loop information from the database.");
+#endif
  		return 0;
  	}
  
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 기초정보(계통) 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Basic Information (Loop) - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadRelay() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 디바이스정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the device information from the database.");
+#endif
 		return 0;
 	}
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 기초정보(회로) 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Basic Information (Circuit) - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadLinkRelay() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 연동정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the interlock information from the database.");
+#endif
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 연동출력정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Interlock Output Information - %d", dwEnd - dwStart);
+#endif
 #endif
 
 	if (LoadPatternItem() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 패턴 내 디바이스정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the device information within the pattern from the database.");
+#endif
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 패턴 Item 정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Pattern Item Information - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadPump() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 펌프 정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the pump information from the database.");
+#endif
 		return 0;
 	}
 
@@ -10732,44 +11466,72 @@ int CRelayTableData::LoadProjectDatabase()
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 펌프정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Pump Information - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadLinkPump() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 펌프 연동 정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the pump interlock information from the database.");
+#endif
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : 펌프 연동 정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Pump Interlock Information - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadPresureSwitch() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 압력 스위치 정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the pressure switch information from the database.");
+#endif
 		return 0;
 	}
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : LoadPresureSwitch 설정 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Setting LoadPresureSwitch - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadLinkPSwitch() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 압력 스위치 연동정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the pressure switch interlock information from the database.");
+#endif
 		return 0;
 	}
-
-	//20240618 GBM start - 사용하지 않는 매서드 주석처리
-#if 0
 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : LoadLinkPSwitch 설정 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Setting LoadLinkPSwitch - %d", dwEnd - dwStart);
 #endif
+#endif
+
+	//20240618 GBM start - 사용하지 않는 매서드 주석처리
+#if 0
 	if (LoadSwtich() <= 0)
 	{
 		GF_AddLog(L"데이터베이스에서 스위치정보를 가져오는데 실패했습니다.");
@@ -10820,35 +11582,60 @@ int CRelayTableData::LoadProjectDatabase()
 
 	if (LoadEmBroadcast() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 비상방송 정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the public address information from the database.");
+#endif
 		return 0;
 	}
 // 
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : LoadEmBroadcast 설정 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Setting LoadEmBroadcast - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadAutMakeLogic() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 자동생성 로직을 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to import autogeneration logic from the database.");
+#endif
 		return 0;
 	}
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : LoadAutMakeLogic 설정 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Setting LoadAutMakeLogic - %d", dwEnd - dwStart);
+#endif
 #endif
 	if (LoadFacpContact() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스에서 접점정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the relay contact information from the database.");
+#endif
 		return 0;
 	}
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"시간 체크 : LoadFacpContact 설정 - %d", dwEnd - dwStart);
 	GF_AddDebug(L"전체 시간 : Database Load 시간 - %d", dwEnd - dwOrigin);
+#else
+	GF_AddDebug(L"Time Check: Setting LoadFacpContact - %d", dwEnd - dwStart);
+	GF_AddDebug(L"Total Time: Database Load Time - %d", dwEnd - dwOrigin);
+#endif
 #endif
 
 	if (m_nAllocRelayIndexType > 0)
@@ -10880,7 +11667,11 @@ int CRelayTableData::LoadProjectDatabase()
 			CString strMsg = _T("");
 			strMsg.Format(_T("Table [%s] does not exist in the database"), strTable);
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 추가정보 테이블이 DB에 존재하지 않습니다. GT1 추가정보를 처리하지 않습니다.", strTable);
+#else
+			GF_AddLog(L"The additional GT1 information table does not exist in the DB. The additional GT1 information is not processed.", strTable);
+#endif
 			break;
 		}
 	}
@@ -10890,12 +11681,20 @@ int CRelayTableData::LoadProjectDatabase()
 		bRet = CNewDBManager::Instance()->GetDataFromGT1DBTables();
 		if (bRet)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"데이터베이스에서 GT1 추가정보를 가져오는 데에 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully retrieved the additional GT1 information from the database.");
+#endif
 			Log::Trace("Successfully retrieved GT1 additional information from database.");
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"데이터베이스에서 GT1 추가정보를 가져오는 데에 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to retrieve the additional GT1 information from the database.");
+#endif
 			Log::Trace("Failed to retrieve GT1 additional information from database.");
 			return 0;
 		}
@@ -11918,7 +12717,11 @@ int CRelayTableData::LoadPatternMst()
 
 	if(nCnt > D_MAX_PATTERN_COUNT)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"패턴개수를 초과 했습니다. 패턴개수 : %d" , nCnt);
+#else
+		GF_AddLog(L"The number of patterns has been exceeded. Pattern Count: %d", nCnt);
+#endif
 	}
 	for (i = 0; i < nCnt; i++)
 	{
@@ -12007,7 +12810,11 @@ int CRelayTableData::LoadPatternItem()
 				pList = pPtn->GetPtnItemList();
 				if(pList != nullptr &&pList->GetCount() > D_MAX_PTNITEM_COUNT)
 				{
+#ifndef ENGLISH_MODE
 					GF_AddLog(L"오류 : 패턴 [%s]의 항목 개수가 %d개로 최대 개수를 초과했습니다." , pPtn->GetPatternName() , pList->GetCount());
+#else
+					GF_AddLog(L"Error: The number of items in pattern [%s] exceeded the maximum number of [%d].", pPtn->GetPatternName(), pList->GetCount());
+#endif
 				}
 			}
 			
@@ -12720,8 +13527,13 @@ int CRelayTableData::ReduceDatabase()
 
 	if (m_pDB->ReduceDatabase(m_strPrjName) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"데이터베이스 용량을 줄이는데 실패했습니다.");
 		AfxMessageBox(L"데이터베이스 용량을 줄이는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to reduce the database volume.");
+		AfxMessageBox(L"Failed to reduce the database volume.");
+#endif
 		return 0; 
 	}
 	return 1; 
@@ -13230,16 +14042,26 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  		pEq = FindEquipData(strIn , ET_INPUTTYPE);
  		if (pEq == nullptr)
  		{
+#ifndef ENGLISH_MODE
  			strtemp.Format(L"입력타입[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n"
  				, strIn);
+#else
+			strtemp.Format(L"Failed to add to the autogeneration logic because the equipment information of input type [%s] was not found.\n"
+				, strIn);
+#endif
  			strErr += strtemp;
  			continue;
  		}
  		nIn = pEq->GetEquipID();
  		if (nIn <= 0)
  		{
+#ifndef ENGLISH_MODE
  			strtemp.Format(L"입력타입[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
  				, strIn);
+#else
+			strtemp.Format(L"Failed to add to the autogeneration logic because the value of the equipment information ID with input type [%s] is not valid.\n"
+				, strIn);
+#endif
  			strErr += strtemp;
  			continue;
  		}
@@ -13249,16 +14071,26 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			pEq = FindEquipData(strName, ET_EQNAME);
  			if (pEq == nullptr)
  			{
+#ifndef ENGLISH_MODE
  				strtemp.Format(L"설비명[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n"
  					, strName);
+#else
+				strtemp.Format(L"The equipment information for [%s] was not found and could not be added to the autogeneration logic.\n"
+					, strName);
+#endif
  				strErr += strtemp;
  				continue;
  			}
  			nName = pEq->GetEquipID();
  			if (nName <= 0)
  			{
+#ifndef ENGLISH_MODE
  				strtemp.Format(L"설비명[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
  					, strName);
+#else
+				strtemp.Format(L"Failed to add to the autogeneration logic because the value of the equipment information ID for [%s] is not valid.\n"
+					, strName);
+#endif
  				strErr += strtemp;
  				continue;
  			}
@@ -13269,16 +14101,26 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			pEq = FindEquipData(strOut, ET_OUTPUTTYPE);
  			if (pEq == nullptr)
  			{
+#ifndef ENGLISH_MODE
  				strtemp.Format(L"출력타입[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n"
  					, strOut);
+#else
+				strtemp.Format(L"Failed to add to the autogeneration logic because the equipment information with output type [%s] was not found.\n"
+					, strOut);
+#endif
  				strErr += strtemp;
  				continue;
  			}
  			nOut = pEq->GetEquipID();
  			if (nOut <= 0)
  			{
+#ifndef ENGLISH_MODE
  				strtemp.Format(L"출력타입[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
  					, strOut);
+#else
+				strtemp.Format(L"Failed to add to the autogeneration logic because the value of the equipment information ID with output type [%s] is not valid.\n"
+					, strOut);
+#endif
  				strErr += strtemp;
  				continue;
  			}
@@ -13289,16 +14131,26 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  			pEq = FindEquipData(stCont, ET_OUTCONTENTS);
  			if (pEq == nullptr)
  			{
+#ifndef ENGLISH_MODE
  				strtemp.Format(L"출력설명[%s]인 설비정보를 찾을 수 없어 자동생성로직에 추가하지 못했습니다.\n" 
  					, stCont);
+#else
+				strtemp.Format(L"Failed to add to the autogeneration logic because the equipment information [%s] was not found.\n"
+					, stCont);
+#endif
  				strErr += strtemp;
  				continue;
  			}
  			nCont = pEq->GetEquipID();
 			if (nCont <= 0)
 			{
+#ifndef ENGLISH_MODE
 				strtemp.Format(L"출력설명[%s]인 설비정보의 아이디가 유효한 값이 아니어서 자동생성로직에 추가하지 못했습니다.\n"
 					, stCont);
+#else
+				strtemp.Format(L"Failed to add to the autogeneration logic because the value of the equipment information ID with output description [%s] is not valid.\n"
+					, stCont);
+#endif
 				strErr += strtemp;
 				continue;
 			}
@@ -13651,8 +14503,13 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			//xls.OpenData(D_MAX_PATTERN_COUNT * 2 + 1 + 1, D_MAX_DEVICE_COUNT + 3 + 1);
 			xls.OpenData(D_MAX_PATTERN_COUNT * 2 + 1 + 1,D_MAX_PATTERN_COUNT + 4 + 1);
 			xls.SetData(1, 1, L"PNO");
+#ifndef ENGLISH_MODE
 			xls.SetData(1, 2, L"비고");
 			xls.SetData(1, 3, L"제어");
+#else
+			xls.SetData(1, 2, L"NOTE");
+			xls.SetData(1, 3, L"CONTROL");
+#endif
 			for (nn = 0; nn < 20; nn++)
 			{
 				str.Format(L"%d", nn + 1);
@@ -13669,8 +14526,13 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 				str.Format(L"P%d", pPtn->GetPatternID());
 				xls.SetData(nRow * 2, 1, str);
 				xls.SetData(nRow * 2, 2, pPtn->GetPatternName());
+#ifndef ENGLISH_MODE
 				xls.SetData(nRow * 2, 3, L"접점제어");
 				xls.SetData(nRow * 2 + 1, 3, L"중계기제어");
+#else
+				xls.SetData(nRow * 2, 3, L"RELAY CONTROL");
+				xls.SetData(nRow * 2 + 1, 3, L"IO MODULE CONTROL");
+#endif
 				
 				pLinkList = pPtn->GetPtnItemList();
 				if (pPtn == nullptr)
@@ -13692,8 +14554,13 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 						strFile.Format(L"%s\\%s_%02d.xlsx",strPath,m_strPrjName,nLastFacp);
 						xls.SaveCopyAs(strFile);
 						xls.Close();
+#ifndef ENGLISH_MODE
 						GF_AddLog(L"패턴 출력표를 생성하는데 실패했습니다. 파일(%s),패턴(%s) 패턴아이템(%d)"
-							,strFile,pPtn->GetPatternName(),nDownCol - D_MAX_PTNITEM_COUNT);
+							, strFile, pPtn->GetPatternName(), nDownCol - D_MAX_PTNITEM_COUNT);
+#else
+						GF_AddLog(L"Failed to generate the pattern output table. File (%s), Pattern (%s) Pattern Items (%d)"
+							, strFile, pPtn->GetPatternName(), nDownCol - D_MAX_PTNITEM_COUNT);
+#endif						
 						return 0;
 					}
 					switch (pLnk->GetLinkType())
@@ -13787,11 +14654,19 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 
 			// Unit Header 생성
 			// 계통 , 번호 , 입력타입, 출력타입 , 제어 , 1~20
+#ifndef ENGLISH_MODE
 			xls.SetData(1, 1, L"계통");
 			xls.SetData(1, 2, L"번호");
 			xls.SetData(1, 3, L"입력타입");
 			xls.SetData(1, 4, L"출력타입");
 			xls.SetData(1, 5, L"제어");
+#else
+			xls.SetData(1, 1, L"LOOP");
+			xls.SetData(1, 2, L"NUMBER");
+			xls.SetData(1, 3, L"INPUT TYPE");
+			xls.SetData(1, 4, L"OUTPUT TYPE");
+			xls.SetData(1, 5, L"CONTROL");
+#endif
 			for (nn = 0; nn < 20; nn++)
 			{
 				str.Format(L"%d",nn + 1);
@@ -13816,9 +14691,13 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 		if (pOutEq)
 			xls.SetData(nRow * 2, 4, pOutEq->GetEquipName());
 
-
+#ifndef ENGLISH_MODE
 		xls.SetData(nRow * 2, 5, L"접점제어");
 		xls.SetData(nRow * 2 + 1, 5, L"중계기제어");
+#else
+		xls.SetData(nRow * 2, 5, L"RELAY CONTROL");
+		xls.SetData(nRow * 2 + 1, 5, L"IO MODULE CONTROL");
+#endif
 
 		xls.SetData(nRow * 2, 26, pDev->GetInputFullName());
 
@@ -14298,8 +15177,12 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			strFnRvRelay.Format(L"%s%s.csv", strPath, FN_RVRELAYINFO);
 			fRvRelay.Open(strFnRvRelay, CFile::modeCreate | CFile::modeReadWrite);
 
-
+#ifndef ENGLISH_MODE
 			strRvLine = L"#RelayIndex,수신기,유닛,계통,회로,입력이름,출력이름,설비명,출력설명,설비번호,입력건물,입력종류,입력계단,입력층,입력실,출력건물,출력종류,출력계단,출력층,출력실,감시화면\n";
+#else
+			strRvLine = L"#RelayIndex,FACP,Unit,Loop,Circuit,InputName,OutputName,EquipmentName,OutputDescription,EquipmentNumber,InputBuilding,InputType,InputLine,InputFloor,InputRoom,OutputBuilding,OutputType,OutputLine,OutputFloor,OutputRoom,MonitoringScreen\n";
+#endif
+
 #if _USE_UNICODE_REVS_INFO_
 			fRvRelay.Write(strRvLine, strRvLine.GetLength());
 #else
@@ -14450,8 +15333,13 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			nDldDataSize = 2 + nPtnItemCount * 3;
 			if (0x0C00 + nDldDataSize >= 0xE400)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다.\n연동데이터 개수(%d), 패턴데이터개수(%d)"
 					, nLastUnit, nLinkCnt, nPtnItemCount);
+#else
+				GF_AddLog(L"The DLD (Unit:%d) download data is too large.\nNumber of site logic data (%d), Number of pattern data (%d)"
+					, nLastUnit, nLinkCnt, nPtnItemCount);
+#endif
 				return 0;
 			}
 			nLastUnit = nUnit;
@@ -14467,8 +15355,13 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			nDldDataSize = 2 + nPtnItemCount * 3;
 			if (0x0C00 + nDldDataSize >= 0xE400)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다.\n연동데이터 개수(%d), 패턴데이터개수(%d)"
 					, nLastUnit, nLinkCnt, nPtnItemCount);
+#else
+				GF_AddLog(L"The DLD (Unit:%d) download data is too large.\nNumber of site logic data (%d), Number of pattern data (%d)"
+					, nLastUnit, nLinkCnt, nPtnItemCount);
+#endif
 				return 0;
 			}
 			nLastUnit = nUnit;
@@ -14734,8 +15627,13 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 
 		if (0x0C00 + nDldDataSize >= 0xE400)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"DLD(Unit:%d) 다운로드 데이터가 너무 큽니다.\n연동데이터 개수(%d), 패턴데이터개수(%d)"
 				, nLastUnit, nLinkCnt, nPtnItemCount);
+#else
+			GF_AddLog(L"The DLD (Unit:%d) download data is too large.\nNumber of site logic data (%d), Number of pattern data (%d)"
+				, nLastUnit, nLinkCnt, nPtnItemCount);
+#endif
 			return 0;
 		}
 		nLastUnit = nUnit;
@@ -14790,7 +15688,11 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 
 		if (!fGT1Appendix.Open(strFilePath, CFile::modeCreate | CFile::modeWrite))
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
+#else
+			GF_AddLog(L"Failed to open the GT1APPENDIX.ROM file.");
+#endif
 			Log::Trace("Failed to open GT1APPENDIX.ROM file");
 			return 0;
 		}
@@ -14813,7 +15715,11 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 	CDataEquip * pEq;
 	strFnEq.Format(L"%s%s.csv", strPath, FN_RVEQUIPINFO);
 	fRvEq.Open(strFnEq, CFile::modeCreate | CFile::modeReadWrite);
+#ifndef ENGLISH_MODE
 	strEqLine = L"#ID,TYPE,이름,설명,SYMBOL\n";
+#else
+	strEqLine = L"#ID,TYPE,NAME,DESCRIPTION,SYMBOL\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
 	fRvEq.Write(szBuff, nTempSize);
 
@@ -14928,7 +15834,11 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 
 	strFn.Format(L"%s%s.csv",strPath,FN_RVLOCATIONINFO);
 	fRv.Open(strFn,CFile::modeCreate | CFile::modeReadWrite);
+#ifndef ENGLISH_MODE
 	strLine = L"#TYPE,건물,건물종류,계단,층,실,이름,기타\n";
+#else
+	strLine = L"#TYPE,BUILDING,BUILDINGTYPE,LINE,FLOOR,ROOM,NAME,OTHER\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
 	fRv.Write(szBuff,nTempSize);
 
@@ -15092,7 +16002,11 @@ int CRelayTableData::MakeRvEmergencyInfo(CString strPath)
 	CDataEmBc * pData;
 	strFn.Format(L"%s%s.csv", strPath, FN_RVEMERGENCYINFO);
 	fRv.Open(strFn, CFile::modeCreate | CFile::modeReadWrite);
+#ifndef ENGLISH_MODE
 	strLine = L"#ID,주소,이름\n";
+#else
+	strLine = L"#ID,ADDRESS,NAME\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
 	fRv.Write(szBuff, nTempSize);
 	if (m_spEmergencyManager == nullptr)
@@ -15134,7 +16048,11 @@ int CRelayTableData::MakeRvPatternInfo(CString strPath)
 	CDataPattern * pData;
 	strFn.Format(L"%s%s.csv", strPath, FN_RVPATTERNINFO);
 	fRv.Open(strFn, CFile::modeCreate | CFile::modeReadWrite);
+#ifndef ENGLISH_MODE
 	strLine = L"#ID,TYPE,이름\n";
+#else
+	strLine = L"#ID,TYPE,NAME\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
 	fRv.Write(szBuff, nTempSize);
 	if (m_spUserAddPattern == nullptr)
@@ -15178,7 +16096,11 @@ int CRelayTableData::MakeRvContactInfo(CString strPath)
 	CDataFacpRelay * pData;
 	strFn.Format(L"%s%s.csv", strPath, FN_RVCONTACTINFO);
 	fRv.Open(strFn, CFile::modeCreate | CFile::modeReadWrite);
+#ifndef ENGLISH_MODE
 	strLine = L"#수신기ID,접점ID,접점번호,접점이름\n";
+#else
+	strLine = L"#FACPID,CONTACTID,CONTACTNUMBER,CONTACTNAME\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
 	fRv.Write(szBuff, nTempSize);
 	if (m_spContactFacp == nullptr)
@@ -15233,7 +16155,11 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 	int nTempSize;
 	strFn.Format(L"%s%s(%s).csv",strPath,FN_MANUALOUTPUT,dt.Format(L"%Y%m%d%H%M%S"));
 	fRv.Open(strFn,CFile::modeCreate | CFile::modeReadWrite);
+#ifndef ENGLISH_MODE
 	strLine = L"#입력타입,입력이름,출력타입,출력이름,입력이름\n";
+#else
+	strLine = L"#INPUTTYPE,INPUTNAME,OUTPUTTYPE,OUTPUTNAME,INPUTNAME\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
 	fRv.Write(szBuff,nTempSize);
 	for(it = m_MapSystemData.begin(); it != m_MapSystemData.end(); it++)
@@ -15269,6 +16195,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					continue;
 
 				pOut = (CDataDevice*)pTempSys->GetSysData();
+#ifndef ENGLISH_MODE
 				strLine.Format(L"%s,%s,%s,%s,%s\n"
 					,g_szLinkTypeString[LK_TYPE_RELEAY]
 					,pDev->GetInputFullName()
@@ -15276,6 +16203,15 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					,pOut->GetOutputFullName()
 					,pOut->GetInputFullName()
 				);
+#else
+				strLine.Format(L"%s,%s,%s,%s,%s\n"
+					, g_szLinkTypeString[LK_TYPE_RELEAY]
+					, pDev->GetInputFullName()
+					, L"OUTPUT CIRCUIT"
+					, pOut->GetOutputFullName()
+					, pOut->GetInputFullName()
+				);
+#endif
 				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
 				fRv.Write(szBuff,nTempSize);
 			}
@@ -15289,8 +16225,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pPtn = GetPattern(pLink->GetTgtFacp());
 					if(pPtn == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s패턴",TXT_DELETE_ITEM);
 						strName.Format(L"패턴 번호 : %d",pLink->GetTgtFacp());
+#else
+						strType.Format(L"%sPATTERN", TXT_DELETE_ITEM);
+						strName.Format(L"Pattern number : %d", pLink->GetTgtFacp());
+#endif
 					}
 					else
 					{
@@ -15302,8 +16243,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pEm = GetEmergency(pLink->GetTgtFacp());
 					if(pEm == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s비상방송",TXT_DELETE_ITEM);
 						strName.Format(L"비상방송 번호 : %d",pLink->GetTgtFacp());
+#else
+						strType.Format(L"%sPUBLIC_ADDRESS", TXT_DELETE_ITEM);
+						strName.Format(L"Public address number : %d", pLink->GetTgtFacp());
+#endif
 					}
 					else
 					{
@@ -15319,8 +16265,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pPmp = GetPump(pLink->GetTgtFacp(),pLink->GetTgtUnit());
 					if(pPmp == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s펌프",TXT_DELETE_ITEM);
 						strName.Format(L"펌프 번호 : %d",pLink->GetTgtUnit());
+#else
+						strType.Format(L"%sPUMP", TXT_DELETE_ITEM);
+						strName.Format(L"Pump number: %d", pLink->GetTgtUnit());
+#endif
 					}
 					else
 					{
@@ -15340,8 +16291,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pContact = GetContactFacp(pLink->GetTgtFacp(),pLink->GetTgtUnit());
 					if(pContact == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s수신기접점",TXT_DELETE_ITEM);
 						strName.Format(L"수신기접점 번호 : %d",pLink->GetTgtUnit());
+#else
+						strType.Format(L"%sFACP_RELAY", TXT_DELETE_ITEM);
+						strName.Format(L"FACP relay contact number: %d", pLink->GetTgtUnit());
+#endif
 					}
 					else
 					{
@@ -15399,12 +16355,21 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					continue;
 
 				pOut = (CDataDevice*)pTempSys->GetSysData();
+#ifndef ENGLISH_MODE
 				strLine.Format(L"%s,%s(%s),%s,%s,%s\n"
 					,g_szLinkTypeString[LK_TYPE_PUMP]
 					,pPmp->GetPumpName(),pPmp->GetPumpLcd()
 					,L"출력회로"
 					,pOut->GetOutputFullName()
 					,pOut->GetInputFullName()
+#else
+				strLine.Format(L"%s,%s(%s),%s,%s,%s\n"
+					, g_szLinkTypeString[LK_TYPE_PUMP]
+					, pPmp->GetPumpName(), pPmp->GetPumpLcd()
+					, L"OUTPUT CIRCUIT"
+					, pOut->GetOutputFullName()
+					, pOut->GetInputFullName()
+#endif
 				);
 				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
 				fRv.Write(szBuff,nTempSize);
@@ -15419,8 +16384,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pPtn = GetPattern(pLink->GetTgtFacp());
 					if(pPtn == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s패턴",TXT_DELETE_ITEM);
 						strName.Format(L"패턴 번호 : %d",pLink->GetTgtFacp());
+#else
+						strType.Format(L"%sPATTERN", TXT_DELETE_ITEM);
+						strName.Format(L"Pattern number: %d", pLink->GetTgtFacp());
+#endif
 					}
 					else
 					{
@@ -15432,8 +16402,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pEm = GetEmergency(pLink->GetTgtFacp());
 					if(pEm == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s비상방송",TXT_DELETE_ITEM);
 						strName.Format(L"비상방송 번호 : %d",pLink->GetTgtFacp());
+#else
+						strType.Format(L"%sPUBLIC_ADDRESS", TXT_DELETE_ITEM);
+						strName.Format(L"Public address number: %d", pLink->GetTgtFacp());
+#endif
 					}
 					else
 					{
@@ -15449,8 +16424,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pPmp = GetPump(pLink->GetTgtFacp(),pLink->GetTgtUnit());
 					if(pPmp == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s펌프",TXT_DELETE_ITEM);
 						strName.Format(L"펌프 번호 : %d",pLink->GetTgtUnit());
+#else
+						strType.Format(L"%sPUMP", TXT_DELETE_ITEM);
+						strName.Format(L"Pump number: %d", pLink->GetTgtUnit());
+#endif
 					}
 					else
 					{
@@ -15470,8 +16450,13 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					pContact = GetContactFacp(pLink->GetTgtFacp(),pLink->GetTgtUnit());
 					if(pContact == nullptr)
 					{
+#ifndef ENGLISH_MODE
 						strType.Format(L"%s수신기접점",TXT_DELETE_ITEM);
 						strName.Format(L"수신기접점 번호 : %d",pLink->GetTgtUnit());
+#else
+						strType.Format(L"%sFACP_RELAY", TXT_DELETE_ITEM);
+						strName.Format(L"FACP relay contact number: %d", pLink->GetTgtUnit());
+#endif
 					}
 					else
 					{
@@ -15634,8 +16619,13 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	nTemp = pList->GetCount();
 	if (nPCnt > D_MAX_LINKITEM_COUNT || nDevCnt > D_MAX_LINKITEM_COUNT)
 	{
+#ifndef ENGLISH_MODE
 	 	GF_AddLog(L"오류 : 한 회선 당 최대 연동데이터 개수는 %d개인데 %s는 Pattern %d개 , 출력 %d로 최대 개수를 초과 했습니다."
 	 		, D_MAX_LINKITEM_COUNT, strName, nPCnt, nDevCnt, nTemp);
+#else
+		GF_AddLog(L"Error: The maximum number of site logic data per line is %d, but the %s exceeds the maximum number of patterns, with %d patterns and %d outputs."
+			, D_MAX_LINKITEM_COUNT, strName, nPCnt, nDevCnt, nTemp);
+#endif
 	 	nRet = 0;
 	}
 
@@ -15674,13 +16664,23 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		CString strMsg = _T("");
 		if (nRelay == 0)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.(%s)", strFacpType, nMaxSize, nSize, strName);			
 			strMsg.Format(_T("수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.(%s)"), strFacpType, nMaxSize, nSize, strName);
+#else
+			GF_AddLog(L"FACP Type (%s) LCD Message size is greater than or equal to %dbytes (Current:%d).(%s)", strFacpType, nMaxSize, nSize, strName);
+			strMsg.Format(_T("FACP Type (%s) LCD Message size is greater than or equal to %dbytes (Current:%d).(%s)"), strFacpType, nMaxSize, nSize, strName);
+#endif
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[회로이름:%02d%02d-%d%03d](이름:%s)", strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
 			strMsg.Format(_T("수신기 Type(%s) Lcd Message 크기가 %dByte(현재:%d) 이상입니다.[회로이름:%02d%02d-%d%03d](이름:%s)"), strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+#else
+			GF_AddLog(L"FACP Type (%s) LCD Message size is greater than or equal to %dbytes (Current: %d). [Circuit No.:%02d%02d-%d%03d] (Name: %s)", strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+			strMsg.Format(_T("FACP Type (%s) LCD Message size is greater than or equal to %dbytes (Current: %d). [Circuit No.:%02d%02d-%d%03d] (Name: %s)"), strFacpType, nMaxSize, nSize, nFacpNum, nUnit, nChn, nRelay, strName);
+#endif
 		}
 		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
 
@@ -15737,8 +16737,13 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	nTemp = m_spPresureSwitch->GetCount();
 	if (nTemp > D_MAX_PUMP_COUNT)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"오류 : 압력 스위치의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 압력스위치 개수를 초과했습니다."
 			, D_MAX_PUMP_COUNT, nTemp);
+#else
+		GF_AddLog(L"Error: The maximum number of pressure switches is %d and the current project has exceeded the maximum number of pressure switches with %d."
+			, D_MAX_PUMP_COUNT, nTemp);
+#endif
 		nRet = 0;
 	}
 
@@ -15796,8 +16801,13 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	nTemp = m_spPump->GetCount();
 	if (nTemp > D_MAX_PUMP_COUNT)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"오류 : 펌프의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 펌프 개수를 초과 했습니다."
 			, D_MAX_PUMP_COUNT, nTemp);
+#else
+		GF_AddLog(L"Error: The maximum number of pumps is %d and the current project has exceeded the maximum number of pumps with %d."
+			, D_MAX_PUMP_COUNT, nTemp);
+#endif
 		nRet = 0;
 	}
 	pos = m_spPump->GetHeadPosition();
@@ -15847,8 +16857,13 @@ UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pF
 	nTemp = m_spUserAddPattern->GetCount();
 	if (nTemp > D_MAX_PATTERN_COUNT)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"오류 : 패턴 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 패턴개수를 초과 했습니다."
 			, D_MAX_PATTERN_COUNT, nTemp);
+#else
+		GF_AddLog(L"Error: The maximum number of patterns is %d and the current project has exceeded the maximum number of patterns with %d."
+			, D_MAX_PATTERN_COUNT, nTemp);
+#endif
 		nRet = 0;
 	}
 	
@@ -15866,8 +16881,13 @@ UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pF
 		nItemCount = pList->GetCount();
 		if (nItemCount > D_MAX_PTNITEM_COUNT)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"오류 : 한 패턴 당 최대 연동 출력 개수는 %d개 이며 [%s] 패턴은 연동된 출력이 %d개로 한 패턴 당 최대 연동 출력 개수를 초과했습니다."
 				, D_MAX_PTNITEM_COUNT, pData->GetPatternName(), nItemCount);
+#else
+			GF_AddLog(L"Error: The maximum number of interlock outputs per pattern is %d and the [%s] pattern has exceeded the maximum number of interlock outputs per pattern with %d interlock outputs."
+				, D_MAX_PTNITEM_COUNT, pData->GetPatternName(), nItemCount);
+#endif
 			nRet = 0; 
 			//continue;
 		}
@@ -16480,8 +17500,13 @@ UINT CRelayTableData::AddEmergencyRom(BYTE * pEmBuff, UINT &uEmOffset)
 	nCnt = m_spEmergencyManager->GetCount();
 	if (nCnt > D_MAX_EMERGENCY_COUNT)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"오류 : 비상방송의 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 비상방송 개수를 초과했습니다."
 			, D_MAX_EMERGENCY_COUNT, nCnt);
+#else
+		GF_AddLog(L"Error: The maximum number of public addresses is %d and the current project has exceeded the maximum number of public addresses with %d."
+			, D_MAX_EMERGENCY_COUNT, nCnt);
+#endif
 		nRet = 0;
 	}
 	pos = m_spEmergencyManager->GetHeadPosition();
@@ -16613,8 +17638,12 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 			CFile fGT1Appendix;
 			if (!fGT1Appendix.Open(strGT1Appendix, CFile::modeRead))
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"GT1APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
-				Log::Trace("Failed to open GT1APPENDIX.ROM file");
+#else
+				GF_AddLog(L"Failed to open GT1APPENDIX.ROM file.");
+#endif
+				Log::Trace("Failed to open GT1APPENDIX.ROM file.");
 				return 0;
 			}
 
@@ -16786,7 +17815,11 @@ int CRelayTableData::LoadFromRvLocInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to import the file.\n");
+#endif
 		return 0;
 	}
 	//strLine = L"#TYPE,건물,건물종류,계단,층,실,이름,기타\n";
@@ -16849,7 +17882,11 @@ int CRelayTableData::LoadFromRvEmergencyInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to import the file.\n");
+#endif
 		return 0;
 	}
 	//strLine = L"#ID,주소,이름\n";
@@ -16897,7 +17934,11 @@ int CRelayTableData::LoadFromRvPatternInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to import the file.\n");
+#endif
 		return 0;
 	}
 	//strLine = L"#ID,TYPE,이름\n";
@@ -16953,7 +17994,11 @@ int CRelayTableData::LoadFromRvContactInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to import the file.\n");
+#endif
 		return 0;
 	}
 	//strLine = L"#수신기ID,접점ID,접점번호,접점이름\n";
@@ -16998,7 +18043,11 @@ int CRelayTableData::LoadFromRvEqInfo(CString strRomPath)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"파일을 가져오는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to import the file.\n");
+#endif
 		return 0;
 	}
 
@@ -17058,7 +18107,11 @@ int CRelayTableData::LoadFromRvRelayInfo(CString strReverseInfo)
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		GF_AddLog(L"Failed to create the project file.\n");
+#endif
 		return 0;
 	}
 	//strRvLine = L"#RelayIndex|,수신기|,유닛|,계통|,회로|, 입력이름 |,출력이름 |,설비명|,출력설명|,설비번호|
@@ -18554,6 +19607,7 @@ BOOL CRelayTableData::CvtStringToLocation(CString strName, CStringArray *pStrArr
  	pStrArr->SetSize(LT_ROOM + 1);
 	
 	str1 = vtRet[0];
+#ifndef ENGLISH_MODE
 	if (!(str1.Find(L"계단") >= 0 || str1.Find(L"층") >= 0 || str1.Find(L"F") >= 0 || str1.Find(L"동") >= 0))
 	{
 		pStrArr->SetAtGrow(0, str1);
@@ -18562,12 +19616,23 @@ BOOL CRelayTableData::CvtStringToLocation(CString strName, CStringArray *pStrArr
 
 	if(str1.Find(L"동") >= 0)
 		pStrArr->SetAtGrow(LT_BUILD, str1);
+#else
+	if (!(str1.Find(L"LINE") >= 0 || str1.Find(L"FLOOR") >= 0 || str1.Find(L"F") >= 0 || str1.Find(L"BUILDING BLOCK") >= 0))
+	{
+		pStrArr->SetAtGrow(0, str1);
+		return TRUE;
+	}
+
+	if (str1.Find(L"BUILDING BLOCK") >= 0)
+		pStrArr->SetAtGrow(LT_BUILD, str1);
+#endif
 
  	if (nSize >= 2)
  	{
  		str = vtRet[1];
  		str2 = str;
  		str.MakeUpper();
+#ifndef ENGLISH_MODE
  		if (str.Find(L"계단") <= 0)
  		{
  			if (str.Find(L"층") >= 0 || str.Find(L"F") >= 0)
@@ -18603,6 +19668,43 @@ BOOL CRelayTableData::CvtStringToLocation(CString strName, CStringArray *pStrArr
 				pStrArr->SetAtGrow(LT_STAIR, str2);
 			}
  		}
+#else
+		if (str.Find(L"LINE") <= 0)
+		{
+			if (str.Find(L"FLOOR") >= 0 || str.Find(L"F") >= 0)
+			{
+				pStrArr->SetAtGrow(LT_FLOOR, str2);
+			}
+			else
+			{
+				// 설비이름 
+				pStrArr->SetAtGrow(0, str2);
+			}
+		}
+		else
+		{
+			if (nSize >= 3)
+			{
+				pStrArr->SetAtGrow(LT_STAIR, str2);
+				str = vtRet[2];
+				str2 = str;
+				str.MakeUpper();
+				if (str.Find(L"FLOOR") >= 0 || str.Find(L"F") >= 0)
+				{
+					pStrArr->SetAtGrow(LT_FLOOR, str2);
+				}
+				else
+				{
+					// 설비이름 
+					pStrArr->SetAtGrow(0, str2);
+				}
+			}
+			else
+			{
+				pStrArr->SetAtGrow(LT_STAIR, str2);
+			}
+		}
+#endif
  	}
 // 	
 // 	for (i = 0; i < nSize; i++)

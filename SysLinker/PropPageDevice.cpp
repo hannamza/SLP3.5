@@ -30,6 +30,7 @@ UINT ThreadParsingModuleTable(LPVOID pParam)
 
 IMPLEMENT_DYNAMIC(CPropPageDevice, CPropertyPage)
 
+#ifndef ENGLISH_MODE
 CPropPageDevice::CPropPageDevice()
 	: CPropertyPage(IDD_PROP_PAGE_DEVICETABLE)
 	, m_strPath(_T(""))
@@ -38,6 +39,16 @@ CPropPageDevice::CPropPageDevice()
 	m_pRefFasSysData = nullptr;
 	m_nListCtrlSelIndex = -1;
 }
+#else
+CPropPageDevice::CPropPageDevice()
+	: CPropertyPage(IDD_PROP_PAGE_DEVICETABLE_EN)
+	, m_strPath(_T(""))
+	, m_strEditPath(_T(""))
+{
+	m_pRefFasSysData = nullptr;
+	m_nListCtrlSelIndex = -1;
+}
+#endif
 
 CPropPageDevice::~CPropPageDevice()
 {
@@ -98,7 +109,11 @@ void CPropPageDevice::OnBnClickedBtnAdd()
 	UpdateData(TRUE);
 	if (m_strPath.GetLength() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"파일 이름이 비어 있습니다.");
+#else
+		AfxMessageBox(L"The file name is empty.");
+#endif
 		return ; 
 	}
 
@@ -108,7 +123,11 @@ void CPropPageDevice::OnBnClickedBtnAdd()
 	nIdx = m_strPath.ReverseFind('.');
 	if (nIdx < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"중계기 일람표에서 수신기 번호를 찾을 수 없습니다.");
+#else
+		AfxMessageBox(L"Cannot find the FACP number in the module table.");
+#endif
 		return;
 	}
 	strFacp = m_strPath.Mid(nIdx - 2, 2);
@@ -118,13 +137,21 @@ void CPropPageDevice::OnBnClickedBtnAdd()
 	}
 	catch (...)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"중계기 일람표에서 수신기 번호를 가져오는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to retrieve the FACP number from the module table.");
+#endif
 		return;
 	}
 
 	if (CheckDuplicate(nValue) == 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
+#else
+		AfxMessageBox(L"The FACP number you entered already exists.");
+#endif
 		return;
 	}
 	m_FacpNumList.AddTail(nValue);
@@ -194,7 +221,11 @@ void CPropPageDevice::OnBnClickedBtnDel()
 	{
 		if (m_nListCtrlSelIndex < 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"선택된 일람표가 없습니다.");
+#else
+			AfxMessageBox(L"No tables have been selected.");
+#endif
 			return;
 		}
 
@@ -247,7 +278,11 @@ void CPropPageDevice::OnBnClickedBtnBrowser()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
+#ifndef ENGLISH_MODE
 	CString strDefault = L"*.xls", strFilter = L"Excel 중계기일람표 (*.xls,*.xlsm,*.xlsx)|*.xls;*.xlsm;*.xlsx||All Files (*.*)|*.*||";
+#else
+	CString strDefault = L"*.xls", strFilter = L"Excel Module Table (*.xls,*.xlsm,*.xlsx)|*.xls;*.xlsm;*.xlsx||All Files (*.*)|*.*||";
+#endif
 	CFileDialog FileDialog(TRUE, NULL, strDefault, OFN_HIDEREADONLY| OFN_ALLOWMULTISELECT, strFilter, this);
 
 	CString str,strPath,strFacp;
@@ -276,14 +311,22 @@ void CPropPageDevice::OnBnClickedBtnBrowser()
 		}
 		catch(...)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"중계기 일람표에서 수신기 번호를 가져오는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to retrieve the FACP number from the module table.");
+#endif
 			continue;
 		}
 
 		m_strEditPath = strPath;
 		if(CheckDuplicate(nValue) == 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
+#else
+			AfxMessageBox(L"The FACP number you entered already exists.");
+#endif
 			return;
 		}
 		m_FacpNumList.AddTail(nValue);
@@ -317,7 +360,11 @@ LRESULT CPropPageDevice::OnWizardNext()
 	CPropSheetNewProject * pSheet = reinterpret_cast<CPropSheetNewProject*>(GetParent());
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("중계기 일람표를 로드 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Loading the module table. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -366,7 +413,11 @@ BOOL CPropPageDevice::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	m_ctrlListCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_ctrlListCtrl.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+#ifndef ENGLISH_MODE
 	m_ctrlListCtrl.InsertColumn(1, _T("파일 경로"), LVCFMT_LEFT, 2000);
+#else
+	m_ctrlListCtrl.InsertColumn(1, _T("FILE PATH"), LVCFMT_LEFT, 2000);
+#endif
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.

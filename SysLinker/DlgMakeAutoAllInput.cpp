@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgMakeAutoAllInput, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgMakeAutoAllInput::CDlgMakeAutoAllInput(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_MAKEAUTO_ALLINPUT, pParent)
 	, m_bMatchBuild(FALSE)
@@ -26,6 +27,23 @@ CDlgMakeAutoAllInput::CDlgMakeAutoAllInput(CWnd* pParent /*=NULL*/)
 	m_pPtrSelOutput = nullptr;
 	m_pPtrSelInput = nullptr;
 }
+#else
+CDlgMakeAutoAllInput::CDlgMakeAutoAllInput(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_MAKEAUTO_ALLINPUT_EN, pParent)
+	, m_bMatchBuild(FALSE)
+	, m_bMatchBtype(FALSE)
+	, m_bMatchEquip(FALSE)
+	, m_bMatchFloor(FALSE)
+	, m_bMatchRoom(FALSE)
+	, m_bMatchStair(FALSE)
+{
+	m_pRefFasSysData = nullptr;
+	m_pPtrInputCondList = nullptr;
+	m_pPtrOutputCondList = nullptr;
+	m_pPtrSelOutput = nullptr;
+	m_pPtrSelInput = nullptr;
+}
+#endif
 
 CDlgMakeAutoAllInput::~CDlgMakeAutoAllInput()
 {

@@ -74,6 +74,8 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\SysLinker.ico"
 
+IDR_MAINFRAME_EN        ICON                    "res\\SysLinker.ico"
+
 IDR_SysLinkerTYPE       ICON                    "res\\SysLinkerDoc.ico"
 
 IDI_FILE_VIEW           ICON                    "res\\file_view.ico"
@@ -290,20 +292,20 @@ END
 
 IDR_MAINFRAME MENU
 BEGIN
-    POPUP "파일(&F)"
+    POPUP "FILE(&F)"
     BEGIN
-        MENUITEM "새로 만들기(&N)\tCtrl+N",          ID_FILE_NEW
-        MENUITEM "열기(&O)...\tCtrl+O",           ID_FILE_OPEN
-        MENUITEM "닫기(&C)",                      ID_FILE_CLOSE
+        MENUITEM "CREATE NEW(&N)\tCtrl+N",      ID_FILE_NEW
+        MENUITEM "OPEN(&O)...\tCtrl+O",         ID_FILE_OPEN
+        MENUITEM "CLOSE(&C)",                   ID_FILE_CLOSE
         MENUITEM SEPARATOR
-        MENUITEM "최근에 사용한 파일",                  ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM "RECENT FILES",                ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "끝내기(&X)",                     ID_APP_EXIT
+        MENUITEM "QUIT&X)",                     ID_APP_EXIT
     END
-    POPUP "보기(&V)"
+    POPUP "VIEW(&V)"
     BEGIN
-        MENUITEM "상태 표시줄(&S)",                  ID_VIEW_STATUS_BAR
-        POPUP "응용 프로그램 모양(&A)"
+        MENUITEM "STATUS BAR(&S)",              ID_VIEW_STATUS_BAR
+        POPUP "APPLICATION LOOK(&A)"
         BEGIN
             MENUITEM "Windows 2000(&2)",            ID_VIEW_APPLOOK_WIN_2000
             MENUITEM "Office XP(&X)",               ID_VIEW_APPLOOK_OFF_XP
@@ -320,9 +322,9 @@ BEGIN
             END
         END
     END
-    POPUP "도움말(&H)"
+    POPUP "HELP(&H)"
     BEGIN
-        MENUITEM "SysLinker 정보(&A)...",         ID_APP_ABOUT
+        MENUITEM "About SysLinker(&A)...",      ID_APP_ABOUT
     END
 END
 
@@ -380,11 +382,11 @@ END
 
 IDR_POPUP_EDIT MENU
 BEGIN
-    POPUP "편집"
+    POPUP "EDIT"
     BEGIN
-        MENUITEM "잘라내기(&T)\tCtrl+X",            ID_EDIT_CUT
-        MENUITEM "복사(&C)\tCtrl+C",              ID_EDIT_COPY
-        MENUITEM "붙여넣기(&P)\tCtrl+V",            ID_EDIT_PASTE
+        MENUITEM "CUT(&T)\tCtrl+X",             ID_EDIT_CUT
+        MENUITEM "COPY(&C)\tCtrl+C",            ID_EDIT_COPY
+        MENUITEM "PASTE(&P)\tCtrl+V",           ID_EDIT_PASTE
     END
 END
 
@@ -406,18 +408,18 @@ END
 
 IDR_POPUP_EXPLORER MENU
 BEGIN
-    POPUP "탐색기"
+    POPUP "EXPLORER"
     BEGIN
-        MENUITEM "열기(&O)",                      ID_OPEN
-        MENUITEM "연결 프로그램(&W)....",             ID_OPEN_WITH
+        MENUITEM "OPEN(&O)",                    ID_OPEN
+        MENUITEM "OPEN WITH(&W)....",           ID_OPEN_WITH
         MENUITEM SEPARATOR
-        MENUITEM "컴파일(&C)",                     ID_DUMMY_COMPILE
+        MENUITEM "COMPILE(&C)",                 ID_DUMMY_COMPILE
         MENUITEM SEPARATOR
-        MENUITEM "잘라내기(&T)\tCtrl+X",            ID_EDIT_CUT
-        MENUITEM "복사(&C)\tCtrl+C",              ID_EDIT_COPY
-        MENUITEM "제거(&R)",                      ID_EDIT_CLEAR
+        MENUITEM "CUT(&T)\tCtrl+X",             ID_EDIT_CUT
+        MENUITEM "COPY(&C)\tCtrl+C",            ID_EDIT_COPY
+        MENUITEM "REMOVE(&R)",                  ID_EDIT_CLEAR
         MENUITEM SEPARATOR
-        MENUITEM "속성(&P)...",                   ID_PROPERTIES
+        MENUITEM "PROPERTY(&P)...",             ID_PROPERTIES
     END
 END
 
@@ -609,7 +611,7 @@ END
 
 IDD_PROP_PAGE_LOCATION DIALOGEX 0, 0, 400, 200
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "위치 정보"
+CAPTION "LOCATION INFORMATION"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LOC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,133,185
@@ -681,40 +683,6 @@ BEGIN
     CONTROL         "",IDC_EMB_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,82,391,114
 END
 
-IDD_DLG_ENV DIALOGEX 0, 0, 321, 187
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "환경설정"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    EDITTEXT        IDC_ENV_PRJPATH,70,10,223,13,ES_AUTOHSCROLL | ES_READONLY
-    PUSHBUTTON      "...",IDC_BTN_BROWSER,295,10,19,13
-    EDITTEXT        IDC_ED_ADDR,88,35,214,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_NAME,88,48,214,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_USER,88,61,214,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_PWD,88,74,214,12,ES_PASSWORD | ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_DBPORT,88,87,214,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_PORT,77,116,87,14,ES_AUTOHSCROLL
-    COMBOBOX        IDC_CMB_BAUDRATE,215,116,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_DATABIT,77,131,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_PARITY,215,132,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_STOPBIT,77,145,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    DEFPUSHBUTTON   "확인",IDOK,109,166,50,14
-    PUSHBUTTON      "취소",IDCANCEL,162,166,50,14
-    LTEXT           "* 접속Port",IDC_STATIC,16,118,35,8
-    LTEXT           "* BaudRate",IDC_ST_SERVER3,173,118,38,8
-    LTEXT           "* Stop Bit",IDC_ST_SERVER4,16,146,32,8
-    LTEXT           "* Parity Bit",IDC_ST_SERVER5,174,134,36,8
-    LTEXT           "* Data Bit",IDC_ST_SERVER6,16,133,32,8
-    GROUPBOX        "Serial 접속 정보",IDC_STATIC,7,107,307,58
-    GROUPBOX        "데이터베이스",IDC_STATIC,7,27,307,78
-    LTEXT           "Database 주소",IDC_STATIC_1,15,37,50,8
-    LTEXT           "Database 이름",IDC_STATIC_2,15,50,50,8
-    LTEXT           "Database 사용자",IDC_STATIC_3,15,64,58,8
-    LTEXT           "Database 패스워드",IDC_STATIC_4,15,76,66,8
-    LTEXT           "프로젝트 위치:",IDC_STATIC,13,13,55,8
-    LTEXT           "Database Port",IDC_STATIC_5,16,90,58,8
-END
-
 IDD_DLG_LOGIN DIALOGEX 0, 0, 447, 178
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "프로젝트 열기"
@@ -775,16 +743,6 @@ BEGIN
     DEFPUSHBUTTON   "확인",IDOK,198,155,50,14
     PUSHBUTTON      "취소",IDCANCEL,252,155,50,14
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,16,295,121
-END
-
-IDD_DLG_LINKRESULT DIALOGEX 0, 0, 449, 276
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "검색 결과"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "확인",IDOK,198,255,50,14
-    PUSHBUTTON      "취소",IDCANCEL,247,255,50,14
-    LTEXT           "Static",IDC_ST_FRAME,7,7,435,240,0,WS_EX_STATICEDGE
 END
 
 IDD_DLG_MAKEAUTO_ONEINPUT DIALOGEX 0, 0, 555, 307
@@ -951,18 +909,18 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 9, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_EQUIP_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,165,266
-    EDITTEXT        IDC_ED_EQUIP_NAME,219,16,158,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_EQUIP_ID,219,47,158,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "설비추가",IDC_BTN_ADD,233,82,36,14
-    PUSHBUTTON      "설비저장",IDC_BTN_SAVE,270,82,36,14
-    PUSHBUTTON      "설비삭제",IDC_BTN_DEL,308,82,36,14
-    LTEXT           "설비이름 : ",IDC_STATIC,181,19,31,8
+    EDITTEXT        IDC_ED_EQUIP_NAME,215,16,162,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_EQUIP_ID,215,47,162,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "추가",IDC_BTN_ADD,233,82,36,14
+    PUSHBUTTON      "저장",IDC_BTN_SAVE,270,82,36,14
+    PUSHBUTTON      "삭제",IDC_BTN_DEL,308,82,36,14
+    LTEXT           "설비이름 : ",IDC_STATIC,181,19,29,8
     LTEXT           "설비타입 : ",IDC_STATIC,181,34,31,8
-    LTEXT           "설비번호 : ",IDC_STATIC,181,49,31,8
+    LTEXT           "설비번호 : ",IDC_STATIC,181,49,28,8
     GROUPBOX        "",IDC_STATIC,177,7,209,93
-    COMBOBOX        IDC_CMB_EQUIPTYPE,219,32,158,263,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_ED_EQUIP_SYMBOL,219,64,138,14,ES_AUTOHSCROLL
-    LTEXT           "설비심볼 : ",IDC_STATIC,181,66,31,8
+    COMBOBOX        IDC_CMB_EQUIPTYPE,215,32,162,263,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_EQUIP_SYMBOL,215,64,142,14,ES_AUTOHSCROLL
+    LTEXT           "설비심볼 : ",IDC_STATIC,181,66,30,8
     PUSHBUTTON      "...",IDC_BTN_BROWSER,358,64,19,14
     LTEXT           "Static",IDC_ST_PREVIEW,179,105,220,168,WS_BORDER,WS_EX_STATICEDGE
 END
@@ -1171,27 +1129,16 @@ BEGIN
     CONTROL         "",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,27,145,142
 END
 
-IDD_DLG_CHILD_MAIN DIALOGEX 0, 0, 584, 176
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    CONTROL         "",IDC_ST_FRAME,"Static",SS_BLACKFRAME,7,7,570,70
-    PUSHBUTTON      "추가   ▼",IDC_BTN_ADD,7,83,50,14,NOT WS_VISIBLE
-    PUSHBUTTON      "저장",IDC_BTN_SAVE,57,83,50,14
-    PUSHBUTTON      "삭제",IDC_BTN_DEL,107,83,50,14
-    PUSHBUTTON      "미리보기",IDC_BTN_PREVIEW,173,83,50,14
-END
-
 IDD_DLG_CHILD_EDIT_UNIT DIALOGEX 0, 0, 570, 70
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "수신기 : ",IDC_STATIC,7,9,30,8
-    LTEXT           "타입 : ",IDC_STATIC,7,39,22,8
+    LTEXT           "FACP : ",IDC_STATIC,7,9,25,8
+    LTEXT           "TYPE : ",IDC_STATIC,7,39,22,8
     COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "유닛 : ",IDC_STATIC,7,26,22,8
+    LTEXT           "UNIT : ",IDC_STATIC,7,26,22,8
     EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
-    LTEXT           "유닛 번호 : ",IDC_STATIC,182,24,39,8
+    LTEXT           "UNIT NO. : ",IDC_STATIC,182,24,39,8
     EDITTEXT        IDC_ED_NUM,234,21,60,14,ES_AUTOHSCROLL
     COMBOBOX        IDC_CMB_TYPE,45,39,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
 END
@@ -1229,7 +1176,7 @@ BEGIN
     COMBOBOX        IDC_CMB_CONTENTS,45,52,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_CMB_OUTTYPE,159,52,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_CMB_PATTERN,273,52,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "수신기 : ",IDC_STATIC,7,7,30,8
+    LTEXT           "수신기 : ",IDC_STATIC,7,7,27,8
     LTEXT           "유닛 : ",IDC_STATIC,121,7,22,8
     LTEXT           "계통 : ",IDC_STATIC,234,7,22,8
     LTEXT           "회로 : ",IDC_STATIC,350,7,22,8
@@ -1279,17 +1226,6 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
 END
 
-IDD_DLG_PROGRESS DIALOGEX 0, 0, 597, 306
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "진행현황"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "확인",IDOK,155,285,50,14
-    PUSHBUTTON      "취소",IDCANCEL,207,285,50,14
-    CONTROL         "",IDC_PROG,"msctls_progress32",WS_BORDER,8,29,582,14
-    LTEXT           "진행형황",IDC_ST_INFO,9,14,30,8
-END
-
 IDD_FORMAUTOMAKE DIALOGEX 0, 0, 558, 264
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 9, "MS Shell Dlg", 0, 0, 0x0
@@ -1314,33 +1250,6 @@ BEGIN
     EDITTEXT        IDC_ED_RESULT,102,59,85,14,ES_AUTOHSCROLL
     LTEXT           "생성된 비밀번호 : ",IDC_STATIC,16,61,73,8
     DEFPUSHBUTTON   "생성",IDC_BTN_MAKE,72,36,50,14
-END
-
-IDD_DLG_LOADROM DIALOGEX 0, 0, 281, 240
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "연동 데이터 역변환"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "생성",IDOK,90,219,50,14
-    PUSHBUTTON      "취소",IDCANCEL,141,219,50,14
-    EDITTEXT        IDC_ED_ROM,51,7,178,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BTN_BROWSER,234,7,39,14
-    LTEXT           "폴더 선택 : ",IDC_STATIC,7,10,39,8
-    LISTBOX         IDC_LIST1,7,26,267,70,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_ED_NAME,81,102,193,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_SITE,81,118,193,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_SITE_MANAGER,81,134,193,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_SITE_MANAGER_PHONE,81,150,193,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ED_PRJ_VERSION2,81,166,193,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
-    EDITTEXT        IDC_ED_DATABASE2,81,182,193,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
-    EDITTEXT        IDC_ED_PRJ_PATH2,81,198,193,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
-    LTEXT           "프로젝트 이름 : ",IDC_STATIC,7,107,54,8
-    LTEXT           "현장 이름 : ",IDC_STATIC,7,123,39,8
-    LTEXT           "현장 담당자 연락처 : ",IDC_STATIC,7,155,70,8
-    LTEXT           "프로젝트 버전 : ",IDC_STATIC,7,171,54,8,NOT WS_VISIBLE
-    LTEXT           "데이터베이스 이름 : ",IDC_STATIC,7,187,68,8,NOT WS_VISIBLE
-    LTEXT           "생성 위치 : ",IDC_STATIC,7,203,39,8,NOT WS_VISIBLE
-    LTEXT           "현장 담당자 : ",IDC_STATIC,7,139,46,8
 END
 
 IDD_FORMEDITLOGIC DIALOGEX 0, 0, 298, 302
@@ -1402,21 +1311,6 @@ FONT 9, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
 END
 
-IDD_DLG_CUSTOM_TREE DIALOGEX 0, 0, 309, 212
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "사용자 정의 트리 보기"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "적용",IDOK,103,196,50,14
-    PUSHBUTTON      "취소",IDCANCEL,157,196,50,14
-    LISTBOX         IDC_LIST_USER,7,26,128,164,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    LISTBOX         IDC_LIST_TYPE,174,26,128,164,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "◀",IDC_BTN_ADD,144,56,23,14
-    PUSHBUTTON      "▶",IDC_BTN_DEL,144,76,23,14
-    LTEXT           "◆ 사용자 정의 보기",IDC_STATIC,10,11,64,8
-    LTEXT           "◆ 전체 보기",IDC_STATIC,175,11,40,8
-END
-
 IDD_DLG_INFO_EDIT_CHN DIALOGEX 0, 0, 570, 70
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -1449,54 +1343,6 @@ BEGIN
     EDITTEXT        IDC_ED_NUM,234,10,60,14,ES_AUTOHSCROLL
 END
 
-IDD_DLG_INFO_EDIT_UNIT DIALOGEX 0, 0, 570, 70
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    LTEXT           "수신기 : ",IDC_STATIC,7,9,30,8
-    LTEXT           "타입 : ",IDC_STATIC,7,39,22,8
-    COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "유닛 : ",IDC_STATIC,7,26,22,8
-    EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
-    LTEXT           "유닛 번호 : ",IDC_STATIC,182,24,39,8
-    EDITTEXT        IDC_ED_NUM,234,21,60,14,ES_AUTOHSCROLL
-    COMBOBOX        IDC_CMB_TYPE,45,39,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-END
-
-IDD_DLG_INFO_EDIT_RELAY DIALOGEX 0, 0, 570, 70
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    COMBOBOX        IDC_CMB_FACP,45,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_UNIT,159,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_CHN,273,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_ED_NUM,387,5,63,12,ES_AUTOHSCROLL
-    COMBOBOX        IDC_CMB_BUILD,45,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_BTYPE,159,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_STAIR,273,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_FLOOR,387,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_ROOM,501,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_INPUTTYPE,45,36,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_EQUIPNAME,159,36,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_ED_ADDNUM,273,36,63,12,ES_AUTOHSCROLL
-    COMBOBOX        IDC_CMB_CONTENTS,45,52,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CMB_OUTTYPE,159,52,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "수신기 : ",-1,7,7,30,8
-    LTEXT           "유닛 : ",-1,121,7,22,8
-    LTEXT           "계통 : ",-1,234,7,22,8
-    LTEXT           "회로 : ",-1,350,7,22,8
-    LTEXT           "건물 : ",-1,7,23,22,8
-    LTEXT           "건물종류 : ",-1,121,23,37,8
-    LTEXT           "계단 : ",-1,234,23,22,8
-    LTEXT           "층 : ",-1,350,23,15,8
-    LTEXT           "실 : ",-1,473,23,15,8
-    LTEXT           "설비명 : ",-1,121,38,30,8
-    LTEXT           "입력타입 : ",-1,7,38,37,8
-    LTEXT           "출력내용 : ",-1,7,54,37,8
-    LTEXT           "출력타입 : ",-1,121,54,37,8
-    LTEXT           "설비번호 : ",-1,234,38,37,8
-END
-
 IDD_DLG_INFO_MAIN DIALOGEX 0, 0, 584, 176
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -1506,15 +1352,6 @@ BEGIN
     PUSHBUTTON      "저장",IDC_BTN_SAVE,57,83,50,14
     PUSHBUTTON      "삭제",IDC_BTN_DEL,107,83,50,14
     PUSHBUTTON      "미리보기",IDC_BTN_PREVIEW,173,83,50,14
-END
-
-IDD_DLGINFOBASEPAGE DIALOG 0, 0, 320, 200
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "대화 상자"
-FONT 9, "MS Shell Dlg"
-BEGIN
-    DEFPUSHBUTTON   "확인",IDOK,209,179,50,14
-    PUSHBUTTON      "취소",IDCANCEL,263,179,50,14
 END
 
 IDD_DLG_VIEW_RELAY DIALOGEX 0, 0, 573, 94
@@ -1853,6 +1690,171 @@ BEGIN
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_MARQUEE | WS_BORDER,46,78,212,14
 END
 
+IDD_DLG_CHILD_MAIN DIALOGEX 0, 0, 584, 176
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_ST_FRAME,"Static",SS_BLACKFRAME,7,7,570,70
+    PUSHBUTTON      "추가   ▼",IDC_BTN_ADD,7,83,50,14,NOT WS_VISIBLE
+    PUSHBUTTON      "저장",IDC_BTN_SAVE,57,83,50,14
+    PUSHBUTTON      "삭제",IDC_BTN_DEL,107,83,50,14
+    PUSHBUTTON      "미리보기",IDC_BTN_PREVIEW,173,83,50,14
+END
+
+IDD_DLG_CUSTOM_TREE DIALOGEX 0, 0, 309, 212
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "사용자 정의 트리 보기"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "적용",IDOK,103,196,50,14
+    PUSHBUTTON      "취소",IDCANCEL,157,196,50,14
+    LISTBOX         IDC_LIST_USER,7,26,128,164,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST_TYPE,174,26,128,164,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "◀",IDC_BTN_ADD,144,56,23,14
+    PUSHBUTTON      "▶",IDC_BTN_DEL,144,76,23,14
+    LTEXT           "◆ 사용자 정의 보기",IDC_STATIC,10,11,64,8
+    LTEXT           "◆ 전체 보기",IDC_STATIC,175,11,40,8
+END
+
+IDD_DLG_ENV DIALOGEX 0, 0, 321, 187
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "환경설정"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_ENV_PRJPATH,70,10,223,13,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,295,10,19,13
+    EDITTEXT        IDC_ED_ADDR,88,35,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_NAME,88,48,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_USER,88,61,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PWD,88,74,214,12,ES_PASSWORD | ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_DBPORT,88,87,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PORT,77,116,87,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_BAUDRATE,215,116,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_DATABIT,77,131,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_PARITY,215,132,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_STOPBIT,77,145,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "확인",IDOK,109,166,50,14
+    PUSHBUTTON      "취소",IDCANCEL,162,166,50,14
+    LTEXT           "* 접속Port",IDC_STATIC,16,118,35,8
+    LTEXT           "* BaudRate",IDC_ST_SERVER3,173,118,38,8
+    LTEXT           "* Stop Bit",IDC_ST_SERVER4,16,146,32,8
+    LTEXT           "* Parity Bit",IDC_ST_SERVER5,174,134,36,8
+    LTEXT           "* Data Bit",IDC_ST_SERVER6,16,133,32,8
+    GROUPBOX        "Serial 접속 정보",IDC_STATIC,7,107,307,58
+    GROUPBOX        "데이터베이스",IDC_STATIC,7,27,307,78
+    LTEXT           "Database 주소",IDC_STATIC_1,15,37,50,8
+    LTEXT           "Database 이름",IDC_STATIC_2,15,50,50,8
+    LTEXT           "Database 사용자",IDC_STATIC_3,15,64,58,8
+    LTEXT           "Database 패스워드",IDC_STATIC_4,15,76,66,8
+    LTEXT           "프로젝트 위치:",IDC_STATIC,13,13,55,8
+    LTEXT           "Database Port",IDC_STATIC_5,16,90,58,8
+END
+
+IDD_DLG_INFO_EDIT_RELAY DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CMB_FACP,45,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_UNIT,159,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_CHN,273,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,387,5,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_BUILD,45,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_BTYPE,159,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_STAIR,273,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_FLOOR,387,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_ROOM,501,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_INPUTTYPE,45,36,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_EQUIPNAME,159,36,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_ADDNUM,273,36,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_CONTENTS,45,52,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUTTYPE,159,52,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "수신기 : ",-1,7,7,30,8
+    LTEXT           "유닛 : ",-1,121,7,22,8
+    LTEXT           "계통 : ",-1,234,7,22,8
+    LTEXT           "회로 : ",-1,350,7,22,8
+    LTEXT           "건물 : ",-1,7,23,22,8
+    LTEXT           "건물종류 : ",-1,121,23,37,8
+    LTEXT           "계단 : ",-1,234,23,22,8
+    LTEXT           "층 : ",-1,350,23,15,8
+    LTEXT           "실 : ",-1,473,23,15,8
+    LTEXT           "설비명 : ",-1,121,38,30,8
+    LTEXT           "입력타입 : ",-1,7,38,37,8
+    LTEXT           "출력내용 : ",-1,7,54,37,8
+    LTEXT           "출력타입 : ",-1,121,54,37,8
+    LTEXT           "설비번호 : ",-1,234,38,37,8
+END
+
+IDD_DLG_INFO_EDIT_UNIT DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "수신기 : ",IDC_STATIC,7,9,30,8
+    LTEXT           "타입 : ",IDC_STATIC,7,39,22,8
+    COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "유닛 : ",IDC_STATIC,7,26,22,8
+    EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
+    LTEXT           "유닛 번호 : ",IDC_STATIC,182,24,39,8
+    EDITTEXT        IDC_ED_NUM,234,21,60,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_TYPE,45,39,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_DLG_LINKRESULT DIALOGEX 0, 0, 449, 276
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "검색 결과"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,198,255,50,14
+    PUSHBUTTON      "취소",IDCANCEL,247,255,50,14
+    LTEXT           "Static",IDC_ST_FRAME,7,7,435,240,0,WS_EX_STATICEDGE
+END
+
+IDD_DLG_LOADROM DIALOGEX 0, 0, 281, 240
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "연동 데이터 역변환"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "생성",IDOK,90,219,50,14
+    PUSHBUTTON      "취소",IDCANCEL,141,219,50,14
+    EDITTEXT        IDC_ED_ROM,51,7,178,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,234,7,39,14
+    LTEXT           "폴더 선택 : ",IDC_STATIC,7,10,39,8
+    LISTBOX         IDC_LIST1,7,26,267,70,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NAME,81,102,193,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE,81,118,193,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE_MANAGER,81,134,193,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE_MANAGER_PHONE,81,150,193,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PRJ_VERSION2,81,166,193,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_DATABASE2,81,182,193,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_PRJ_PATH2,81,198,193,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    LTEXT           "프로젝트 이름 : ",IDC_STATIC,7,107,54,8
+    LTEXT           "현장 이름 : ",IDC_STATIC,7,123,39,8
+    LTEXT           "현장 담당자 연락처 : ",IDC_STATIC,7,155,70,8
+    LTEXT           "프로젝트 버전 : ",IDC_STATIC,7,171,54,8,NOT WS_VISIBLE
+    LTEXT           "데이터베이스 이름 : ",IDC_STATIC,7,187,68,8,NOT WS_VISIBLE
+    LTEXT           "생성 위치 : ",IDC_STATIC,7,203,39,8,NOT WS_VISIBLE
+    LTEXT           "현장 담당자 : ",IDC_STATIC,7,139,46,8
+END
+
+IDD_DLG_PROGRESS DIALOGEX 0, 0, 597, 306
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "진행현황"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,155,285,50,14
+    PUSHBUTTON      "취소",IDCANCEL,207,285,50,14
+    CONTROL         "",IDC_PROG,"msctls_progress32",WS_BORDER,8,29,582,14
+    LTEXT           "진행형황",IDC_ST_INFO,9,14,30,8
+END
+
+IDD_DLGINFOBASEPAGE DIALOG 0, 0, 320, 200
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "대화 상자"
+FONT 9, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "확인",IDOK,209,179,50,14
+    PUSHBUTTON      "취소",IDCANCEL,263,179,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1934,14 +1936,6 @@ BEGIN
         BOTTOMMARGIN, 196
     END
 
-    IDD_DLG_ENV, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 314
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 180
-    END
-
     IDD_DLG_LOGIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1964,14 +1958,6 @@ BEGIN
         RIGHTMARGIN, 302
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
-    END
-
-    IDD_DLG_LINKRESULT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 442
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 269
     END
 
     IDD_DLG_MAKEAUTO_ONEINPUT, DIALOG
@@ -2182,14 +2168,6 @@ BEGIN
         BOTTOMMARGIN, 169
     END
 
-    IDD_DLG_CHILD_MAIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 577
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 169
-    END
-
     IDD_DLG_CHILD_EDIT_UNIT, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2246,14 +2224,6 @@ BEGIN
         BOTTOMMARGIN, 63
     END
 
-    IDD_DLG_PROGRESS, DIALOG
-    BEGIN
-        LEFTMARGIN, 8
-        RIGHTMARGIN, 590
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 299
-    END
-
     IDD_FORMAUTOMAKE, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2268,14 +2238,6 @@ BEGIN
         RIGHTMARGIN, 187
         TOPMARGIN, 7
         BOTTOMMARGIN, 105
-    END
-
-    IDD_DLG_LOADROM, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 274
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 233
     END
 
     IDD_FORMEDITLOGIC, DIALOG
@@ -2302,14 +2264,6 @@ BEGIN
         BOTTOMMARGIN, 193
     END
 
-    IDD_DLG_CUSTOM_TREE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 302
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 205
-    END
-
     IDD_DLG_INFO_EDIT_CHN, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2334,36 +2288,12 @@ BEGIN
         BOTTOMMARGIN, 63
     END
 
-    IDD_DLG_INFO_EDIT_UNIT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 563
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 63
-    END
-
-    IDD_DLG_INFO_EDIT_RELAY, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 563
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 63
-    END
-
     IDD_DLG_INFO_MAIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 577
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
-    END
-
-    IDD_DLGINFOBASEPAGE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 313
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 193
     END
 
     IDD_DLG_VIEW_RELAY, DIALOG
@@ -2509,6 +2439,78 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
     END
+
+    IDD_DLG_CHILD_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 577
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_CUSTOM_TREE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 205
+    END
+
+    IDD_DLG_ENV, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 314
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 180
+    END
+
+    IDD_DLG_INFO_EDIT_RELAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_INFO_EDIT_UNIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_LINKRESULT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 442
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 269
+    END
+
+    IDD_DLG_LOADROM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 274
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 233
+    END
+
+    IDD_DLG_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 8
+        RIGHTMARGIN, 590
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 299
+    END
+
+    IDD_DLGINFOBASEPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2519,8 +2521,6 @@ END
 //
 
 IDR_RIBBON              RT_RIBBON_XML           "res\\ribbon.mfcribbon-ms"
-
-IDR_RIBBON_EN           RT_RIBBON_XML           "res\\ribbon1.mfcribbon-ms"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2563,11 +2563,6 @@ BEGIN
     0
 END
 
-IDD_DLG_ENV AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
 IDD_SYSLINKER_FORM AFX_DIALOG_LAYOUT
 BEGIN
     0
@@ -2584,11 +2579,6 @@ BEGIN
 END
 
 IDD_DIALOG1 AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DLG_LINKRESULT AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -2718,11 +2708,6 @@ BEGIN
     0
 END
 
-IDD_DLG_CHILD_MAIN AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
 IDD_DLG_CHILD_EDIT_UNIT AFX_DIALOG_LAYOUT
 BEGIN
     0
@@ -2743,22 +2728,12 @@ BEGIN
     0
 END
 
-IDD_DLG_PROGRESS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
 IDD_FORMAUTOMAKE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
 
 IDD_DLG_PASSWORD AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DLG_LOADROM AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -2783,11 +2758,6 @@ BEGIN
     0
 END
 
-IDD_DLG_CUSTOM_TREE AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
 IDD_DLG_INFO_EDIT_CHN AFX_DIALOG_LAYOUT
 BEGIN
     0
@@ -2799,16 +2769,6 @@ BEGIN
 END
 
 IDD_DLG_INFO_EDIT_FACP AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DLG_INFO_EDIT_UNIT AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DLG_INFO_EDIT_RELAY AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -2903,6 +2863,46 @@ BEGIN
     0
 END
 
+IDD_DLG_CHILD_MAIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CUSTOM_TREE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_ENV AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_EDIT_RELAY AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_EDIT_UNIT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_LINKRESULT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_LOADROM AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_PROGRESS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2936,8 +2936,14 @@ END
 STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "SysLinker"
+    ID_SORT_INPUTTYPE_EN    "Sort by input type\nSort devices by input type."
     IDR_SysLinkerTYPE       "\nSysLinker\nSysLinker\n\n\nSysLinker.Document\nSysLinker.Document"
     ID_WINDOW_MANAGER       "창(&W)..."
+    ID_SORT_OUTTYPE_EN      "Sort by output type\nSort devices by output type."
+    ID_DKPANE_INPUTRELAY_EN "INPUT VIEW"
+    ID_DKPANE_OUTPUTRELAY_EN "OUTPUT VIEW"
+    IDS_STATUS_PANE1_EN     "WINDOW 1"
+    IDS_STATUS_PANE2_EN     "WINDOW 2"
 END
 
 STRINGTABLE
@@ -2958,22 +2964,22 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_FILE_NEW             "새 문서를 만듭니다.\n새로 만들기"
-    ID_FILE_OPEN            "기존 문서를 엽니다.\n열기"
-    ID_FILE_CLOSE           "활성 문서를 닫습니다.\n닫기"
+    ID_FILE_NEW             "Creates a new document.\nCREATE NEW"
+    ID_FILE_OPEN            "Opens an existing document.\nOPEN"
+    ID_FILE_CLOSE           "Closes the current document.\nCLOSE"
     ID_FILE_SAVE            "활성 문서를 저장합니다.\n저장"
     ID_FILE_SAVE_AS         "활성 문서를 새 이름으로 저장합니다.\n다른 이름으로 저장"
 END
 
 STRINGTABLE
 BEGIN
-    ID_APP_ABOUT            "프로그램 정보, 버전 번호 및 저작권을 표시합니다.\n정보"
-    ID_APP_EXIT             "문서를 저장할지를 묻고 응용 프로그램을 끝냅니다.\n끝내기"
+    ID_APP_ABOUT            "Displays program information, version number, and copyright.\nAbout"
+    ID_APP_EXIT             "Asks if you want to save the document before exiting the application.\nQUIT"
 END
 
 STRINGTABLE
 BEGIN
-    ID_FILE_MRU_FILE1       "현재 문서를 엽니다."
+    ID_FILE_MRU_FILE1       "Opens the current document."
     ID_FILE_MRU_FILE2       "현재 문서를 엽니다."
     ID_FILE_MRU_FILE3       "현재 문서를 엽니다."
     ID_FILE_MRU_FILE4       "현재 문서를 엽니다."
@@ -3011,10 +3017,10 @@ STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "선택 영역을 지웁니다.\n지우기"
     ID_EDIT_CLEAR_ALL       "모두 지웁니다.\n모두 지우기"
-    ID_EDIT_COPY            "선택 영역을 복사하여 클립보드에 넣습니다.\n복사"
-    ID_EDIT_CUT             "선택 영역을 잘라내어 클립보드에 넣습니다.\n잘라내기"
+    ID_EDIT_COPY            "Copies the selection and puts it in the clipboard.\nCOPY"
+    ID_EDIT_CUT             "Cuts the selected area and puts it in the clipboard.\nCUT"
     ID_EDIT_FIND            "지정한 텍스트를 찾습니다.\n찾기"
-    ID_EDIT_PASTE           "클립보드 내용을 삽입합니다.\n붙여넣기"
+    ID_EDIT_PASTE           "Pastes the content from clipboard.\nPASTE"
     ID_EDIT_REPEAT          "마지막 작업을 반복합니다.\n반복"
     ID_EDIT_REPLACE         "특정 텍스트를 다른 텍스트로 바꿉니다.\n바꾸기"
     ID_EDIT_SELECT_ALL      "전체 문서를 선택합니다.\n모두 선택"
@@ -3025,7 +3031,7 @@ END
 STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "도구 모음을 표시하거나 숨깁니다.\n도구 모음 설정/해제"
-    ID_VIEW_STATUS_BAR      "상태 표시줄을 표시하거나 숨깁니다.\n상태 표시줄 설정/해제"
+    ID_VIEW_STATUS_BAR      "Shows or hides the status bar.\nSTATUS BAR"
 END
 
 STRINGTABLE
@@ -3062,6 +3068,8 @@ BEGIN
     IDS_STATUS_PANE2        "창 2"
     IDS_DKPANE_CONTACT      "접점"
     IDC_CONTACTFACP_TREE    "수신기 접점 PANE TREE"
+    ID_SORT_LOCATION_EN     "Sort by location\nSort by the name where the device is located"
+    ID_SORT_ADDRESS_EN      "Sort by address\nSort by device's FACP-UNIT-LOOP-CIRCUIT."
 END
 
 STRINGTABLE
@@ -3096,7 +3104,7 @@ BEGIN
     ID_SORT_OUTTYPE         "출력타입 정렬\n출력타입으로 디바이스를 정렬"
     ID_SORT_EQUIP           "설비명으로 정렬\n설비이름으로 디바이스를 정렬"
     ID_SORT_CUSTOM          "사용자 정렬\n사용자 설정에 맞게 디바이스를 정렬"
-    ID_BASIC_SET_ENV        "프로그램 기동에 필요한 정보를 설정한다."
+    ID_BASIC_SET_ENV        "Set the information required to start the program."
 END
 
 STRINGTABLE
@@ -3109,10 +3117,1999 @@ STRINGTABLE
 BEGIN
     ID_LOAD_CONTACT         "접점 Excel파일 불러오기\n열기"
     ID_LOAD_CONTACTFACP     "접점파일을 불러옵니다\n열기"
-    ID_LOAD_CONTACTFACP2    "접점파일을 불러옵니다\n열기"
+    ID_LOAD_CONTACTFACP_EN  "Import a relay contact file\nOPEN"
+END
+
+STRINGTABLE
+BEGIN
+    ID_SORT_EQUIP_EN        "Sort by equipment name\nSort devices by equipment name."
+    ID_SORT_CUSTOM_EN       "Sort by user settings\nSort devices according to user settings."
+    ID_DKPANE_PATTERN_EN    "PATTERN VIEW"
+    ID_DKPANE_EMERGENCY_EN  "PUBLIC ADDRESS VIEW"
+    ID_DKPANE_PUMP_EN       "PUMP VIEW"
+    ID_DKPANE_PSWITCH_EN    "PSWITCH VIEW"
+    IDS_OUTPUT_WND_EN       "LOG VIEW"
+    ID_DKPANE_CONTACT_EN    "RELAY CONTACT"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_EDIT_MENU_EN        "EDIT"
+    IDS_EXPLORER_EN         "EXPLORER"
+    IDS_DEBUG_TAB_EN        "DEBUG"
 END
 
 #endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 영어 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_CONT_FACP_EN        BITMAP                  "res\\cont_fac.bmp"
+
+IDR_CONTACTFACP_EN      BITMAP                  "res\\contactf.bmp"
+
+IDR_TB_DKPRELAY_SORT_EN BITMAP                  "res\\bmp00002.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_CONT_FACP_EN TOOLBAR 16, 15
+BEGIN
+    BUTTON      ID_LOAD_CONTACTFACP_EN
+END
+
+IDR_CONTACTFACP_EN TOOLBAR 16, 15
+BEGIN
+    BUTTON      ID_LOAD_CONTACT
+END
+
+IDR_TB_DKPRELAY_SORT_EN TOOLBAR 16, 15
+BEGIN
+    BUTTON      ID_SORT_LOCATION_EN
+    BUTTON      ID_SORT_ADDRESS_EN
+    BUTTON      ID_SORT_INPUTTYPE_EN
+    BUTTON      ID_SORT_OUTTYPE_EN
+    BUTTON      ID_SORT_EQUIP_EN
+    BUTTON      ID_SORT_CUSTOM_EN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_ADD_MENU_EN MENU
+BEGIN
+    POPUP "ADD TYPE"
+    BEGIN
+        MENUITEM "ADD FACP",                    32818
+        MENUITEM "ADD UNIT",                    32819
+        MENUITEM "ADD LOOP",                    32820
+        MENUITEM "ADD CIRCUIT",                 32821
+    END
+END
+
+IDR_MAINFRAME_EN MENU
+BEGIN
+    POPUP "??(&F)"
+    BEGIN
+        MENUITEM "?? ???(&N)\tCtrl+N",          ID_FILE_NEW
+        MENUITEM "??(&O)...\tCtrl+O",           ID_FILE_OPEN
+        MENUITEM "??(&C)",                      ID_FILE_CLOSE
+        MENUITEM SEPARATOR
+        MENUITEM "??? ??? ??",                  ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "???(&X)",                     ID_APP_EXIT
+    END
+    POPUP "??(&V)"
+    BEGIN
+        MENUITEM "?? ???(&S)",                  ID_VIEW_STATUS_BAR
+        POPUP "?? ???? ??(&A)"
+        BEGIN
+            MENUITEM "Windows 2000(&2)",            ID_VIEW_APPLOOK_WIN_2000
+            MENUITEM "Office XP(&X)",               ID_VIEW_APPLOOK_OFF_XP
+            MENUITEM "Windows XP(&W)",              ID_VIEW_APPLOOK_WIN_XP
+            MENUITEM "Office 2003(&3)",             ID_VIEW_APPLOOK_OFF_2003
+            MENUITEM "Visual Studio 200&5",         ID_VIEW_APPLOOK_VS_2005
+            MENUITEM "Visual Studio 200&8",         ID_VIEW_APPLOOK_VS_2008
+            POPUP "Office 2007(&7)"
+            BEGIN
+                MENUITEM "?? ???(&B)",                  ID_VIEW_APPLOOK_OFF_2007_BLUE
+                MENUITEM "?? ???(&L)",                  ID_VIEW_APPLOOK_OFF_2007_BLACK
+                MENUITEM "?? ???(&S)",                  ID_VIEW_APPLOOK_OFF_2007_SILVER
+                MENUITEM "??? ???(&A)",                 ID_VIEW_APPLOOK_OFF_2007_AQUA
+            END
+        END
+    END
+    POPUP "???(&H)"
+    BEGIN
+        MENUITEM "SysLinker ??(&A)...",         ID_APP_ABOUT
+    END
+END
+
+IDR_POPUP_EDIT_EN MENU
+BEGIN
+    POPUP "??"
+    BEGIN
+        MENUITEM "????(&T)\tCtrl+X",            ID_EDIT_CUT
+        MENUITEM "??(&C)\tCtrl+C",              ID_EDIT_COPY
+        MENUITEM "????(&P)\tCtrl+V",            ID_EDIT_PASTE
+    END
+END
+
+IDR_POPUP_EMERGENCY_VIEW_EN MENU
+BEGIN
+    POPUP "DKEMERGENCY"
+    BEGIN
+        MENUITEM "GO TO PUBLIC ADDRESS SCREEN", ID_EMBCVIEW_SELECT_ITEM
+    END
+END
+
+IDR_POPUP_EXPLORER_EN MENU
+BEGIN
+    POPUP "???"
+    BEGIN
+        MENUITEM "??(&O)",                      ID_OPEN
+        MENUITEM "?? ????(&W)....",             ID_OPEN_WITH
+        MENUITEM SEPARATOR
+        MENUITEM "???(&C)",                     ID_DUMMY_COMPILE
+        MENUITEM SEPARATOR
+        MENUITEM "????(&T)\tCtrl+X",            ID_EDIT_CUT
+        MENUITEM "??(&C)\tCtrl+C",              ID_EDIT_COPY
+        MENUITEM "??(&R)",                      ID_EDIT_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "??(&P)...",                   ID_PROPERTIES
+    END
+END
+
+IDR_POPUP_PATTERN_VIEW_EN MENU
+BEGIN
+    POPUP "PatternView"
+    BEGIN
+        MENUITEM "GO TO PATTERN SCREEN",        ID_PTNVIEW_SELECT_ITEM
+    END
+END
+
+IDR_POPUP_PTNLINK_EN MENU
+BEGIN
+    POPUP "PTNLinkPopup"
+    BEGIN
+        MENUITEM "DELETE PATTERN",              ID_PTNLK_MENU_DELPTN
+        MENUITEM "SWITCH TO PATTERN VIEW",      ID_PTNVIEW_
+    END
+END
+
+IDR_POPUP_PTNLIST_EN MENU
+BEGIN
+    POPUP "patternlist"
+    BEGIN
+        MENUITEM "DELETE ITEM",                 32844
+        MENUITEM "GO TO THE SCREEN",            ID_ITEM_SELECT_ITEM
+    END
+END
+
+IDR_POPUP_PUMP_VIEW_EN MENU
+BEGIN
+    POPUP "PumpView"
+    BEGIN
+        MENUITEM "GO TO PUMP SCREEN",           ID_PUMPVIEW_SELECT_ITEM
+    END
+END
+
+IDR_POPUP_RELAYLINK_EN MENU
+BEGIN
+    POPUP "RLYLINKMENU"
+    BEGIN
+        MENUITEM "DELETE CIRCUIT",              ID_RLYLK_MENU_DELRLY
+        MENUITEM "CIRCUIT INFORMATION",         ID_RLYLK_MENU_VIEWRELAY
+        MENUITEM "GO TO CIRCUIT LOCATION",      32836
+    END
+END
+
+IDR_POPUP_SORT_EN MENU
+BEGIN
+    POPUP "SORT"
+    BEGIN
+        MENUITEM "SORT IN ALPHABETICAL ORDER(&S)", ID_SORTING_SORTALPHABETIC
+        MENUITEM "SORT BY TYPE(&T)",            ID_SORTING_SORTBYTYPE
+        MENUITEM "SORT BY ACCESS(&E)",          ID_SORTING_SORTBYACCESS
+        MENUITEM "GROUP BY FORMAT(&Y)",         ID_SORTING_GROUPBYTYPE
+    END
+END
+
+IDR_SysLinkerTYPE_EN MENU
+BEGIN
+    POPUP "FILE(&F)"
+    BEGIN
+        MENUITEM "CREATE NEW(&N)\tCtrl+N",      ID_FILE_NEW
+        MENUITEM "OPEN(&O)...\tCtrl+O",         ID_FILE_OPEN
+        MENUITEM "CLOSE(&C)",                   ID_FILE_CLOSE
+        MENUITEM "SAVE(&S)\tCtrl+S",            ID_FILE_SAVE
+        MENUITEM "SAVE AS(&A)...",              ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "RESENT FILES",                ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "QUIT(&X)",                    ID_APP_EXIT
+    END
+    POPUP "EDIT(&E)"
+    BEGIN
+        MENUITEM "UNDO(&U)\tCtrl+Z",            ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "CUT(&T)\tCtrl+X",             ID_EDIT_CUT
+        MENUITEM "COPY(&C)\tCtrl+C",            ID_EDIT_COPY
+        MENUITEM "PASTE(&P)\tCtrl+V",           ID_EDIT_PASTE
+    END
+    POPUP "VIEW(&V)"
+    BEGIN
+        MENUITEM "STATUS BAR(&S)",              ID_VIEW_STATUS_BAR
+        POPUP "APPLICATION LOOK(&A)"
+        BEGIN
+            MENUITEM "Windows 2000(&2)",            ID_VIEW_APPLOOK_WIN_2000
+            MENUITEM "Office XP(&X)",               ID_VIEW_APPLOOK_OFF_XP
+            MENUITEM "Windows XP(&W)",              ID_VIEW_APPLOOK_WIN_XP
+            MENUITEM "Office 2003(&3)",             ID_VIEW_APPLOOK_OFF_2003
+            MENUITEM "Visual Studio 200&5",         ID_VIEW_APPLOOK_VS_2005
+            MENUITEM "Visual Studio 200&8",         ID_VIEW_APPLOOK_VS_2008
+            POPUP "Office 2007(&7)"
+            BEGIN
+                MENUITEM "?? ???(&B)",                  ID_VIEW_APPLOOK_OFF_2007_BLUE
+                MENUITEM "?? ???(&L)",                  ID_VIEW_APPLOOK_OFF_2007_BLACK
+                MENUITEM "?? ???(&S)",                  ID_VIEW_APPLOOK_OFF_2007_SILVER
+                MENUITEM "??? ???(&A)",                 ID_VIEW_APPLOOK_OFF_2007_AQUA
+            END
+        END
+    END
+    POPUP "WINDOW(&W)"
+    BEGIN
+        MENUITEM "NEW WINDOW(&N)",              ID_WINDOW_NEW
+    END
+    POPUP "HELP(&H)"
+    BEGIN
+        MENUITEM "About SYSLINKER(&A)...",      ID_APP_ABOUT
+    END
+END
+
+IDR_THEME_MENU_EN MENU
+BEGIN
+    MENUITEM "Office 2007(Blue Style)(&B)", ID_VIEW_APPLOOK_OFF_2007_BLUE
+    MENUITEM "Office 2007(Black Style)(&L)", ID_VIEW_APPLOOK_OFF_2007_BLACK
+    MENUITEM "Office 2007(Silver Style)(&S)", ID_VIEW_APPLOOK_OFF_2007_SILVER
+    MENUITEM "Office 2007(Sea Blue Style)(&A)", ID_VIEW_APPLOOK_OFF_2007_AQUA
+    MENUITEM "Windows 7(&D)",               ID_VIEW_APPLOOK_WINDOWS_7
+END
+
+IDR_WINDOWS_MENU_EN MENU
+BEGIN
+    MENUITEM "NEW WINDOW(&N)",              ID_WINDOW_NEW
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DLG_ENV_EN DIALOGEX 0, 0, 321, 187
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "ENVIRONMENT SETUP"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_ENV_PRJPATH,70,10,223,13,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,295,10,19,13
+    EDITTEXT        IDC_ED_ADDR,88,35,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_NAME,88,48,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_USER,88,61,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PWD,88,74,214,12,ES_PASSWORD | ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_DBPORT,88,87,214,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PORT,77,116,87,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_BAUDRATE,215,116,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_DATABIT,77,131,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_PARITY,215,132,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_STOPBIT,77,145,87,192,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,109,166,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,162,166,50,14
+    LTEXT           "* Connection Port",IDC_STATIC,16,118,61,8
+    LTEXT           "* BaudRate",IDC_ST_SERVER3,173,118,38,8
+    LTEXT           "* Stop Bit",IDC_ST_SERVER4,16,146,32,8
+    LTEXT           "* Parity Bit",IDC_ST_SERVER5,174,134,36,8
+    LTEXT           "* Data Bit",IDC_ST_SERVER6,16,133,32,8
+    GROUPBOX        "SERIAL CONNECTION INFORMATION",IDC_STATIC,7,107,307,58
+    GROUPBOX        "DATABASE",IDC_STATIC,7,27,307,78
+    LTEXT           "Database Address",IDC_STATIC_1,15,37,67,8
+    LTEXT           "Database Name",IDC_STATIC_2,15,50,50,8
+    LTEXT           "Database User",IDC_STATIC_3,15,64,58,8
+    LTEXT           "Database Password",IDC_STATIC_4,15,76,66,8
+    LTEXT           "PROJECT PATH:",IDC_STATIC,13,13,55,8
+    LTEXT           "Database Port",IDC_STATIC_5,16,90,58,8
+END
+
+IDD_DLG_LINKRESULT_EN DIALOGEX 0, 0, 449, 276
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "SEARCH RESULT"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,255,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,247,255,50,14
+    LTEXT           "Static",IDC_ST_FRAME,7,7,435,240,0,WS_EX_STATICEDGE
+END
+
+IDD_DLG_CHILD_MAIN_EN DIALOGEX 0, 0, 584, 176
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_ST_FRAME,"Static",SS_BLACKFRAME,7,7,570,70
+    PUSHBUTTON      "ADD   ?",IDC_BTN_ADD,7,83,50,14,NOT WS_VISIBLE
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,57,83,50,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,107,83,50,14
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW,173,83,50,14
+END
+
+IDD_DLG_PROGRESS_EN DIALOGEX 0, 0, 597, 306
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PROGRESS"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,155,285,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,207,285,50,14
+    CONTROL         "",IDC_PROG,"msctls_progress32",WS_BORDER,8,29,582,14
+    LTEXT           "PROGRESS",IDC_ST_INFO,9,14,36,8
+END
+
+IDD_DLG_LOADROM_EN DIALOGEX 0, 0, 281, 240
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "INVERSE TRANSFORM DATA"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "CREATE",IDOK,90,219,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,141,219,50,14
+    EDITTEXT        IDC_ED_ROM,51,7,178,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,234,7,39,14
+    LTEXT           "SELECT\nFOLDER : ",IDC_STATIC,7,7,39,17
+    LISTBOX         IDC_LIST1,7,26,267,70,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NAME,90,102,184,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE,91,118,183,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE_MANAGER,91,134,183,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE_MANAGER_PHONE,91,150,183,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PRJ_VERSION2,91,166,183,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_DATABASE2,91,182,183,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_PRJ_PATH2,91,198,183,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+    LTEXT           "PROJECT NAME : ",IDC_STATIC,7,107,64,8
+    LTEXT           "SITE NAME : ",IDC_STATIC,7,123,48,8
+    LTEXT           "SITE REPRESENTATIVE\nCONTACT : ",IDC_STATIC,7,149,79,17
+    LTEXT           "PROJECT VERSION : ",IDC_STATIC,7,169,71,8,NOT WS_VISIBLE
+    LTEXT           "DATABASE NAME : ",IDC_STATIC,7,184,68,8,NOT WS_VISIBLE
+    LTEXT           "GENERATED LOCATION : ",IDC_STATIC,7,200,84,8,NOT WS_VISIBLE
+    LTEXT           "SITE REPRESENTATIVE : ",IDC_STATIC,7,137,84,8
+END
+
+IDD_DLG_CUSTOM_TREE_EN DIALOGEX 0, 0, 309, 212
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "CUSTOM TREE VIEW"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "APPLY",IDOK,103,196,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,157,196,50,14
+    LISTBOX         IDC_LIST_USER,7,26,128,164,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST_TYPE,174,26,128,164,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "<<",IDC_BTN_ADD,144,56,23,14
+    PUSHBUTTON      ">>",IDC_BTN_DEL,144,76,23,14
+    LTEXT           "CUSTOM VIEW",IDC_STATIC,10,11,64,8
+    LTEXT           "VIEW ALL",IDC_STATIC,175,11,40,8
+END
+
+IDD_DLG_INFO_EDIT_UNIT_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "FACP : ",IDC_STATIC,7,9,25,8
+    LTEXT           "TYPE : ",IDC_STATIC,7,39,22,8
+    COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "UNIT : ",IDC_STATIC,7,26,22,8
+    EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
+    LTEXT           "UNIT NO. : ",IDC_STATIC,182,24,39,8
+    EDITTEXT        IDC_ED_NUM,234,21,60,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_TYPE,45,39,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_DLG_INFO_EDIT_RELAY_EN DIALOGEX 0, 0, 671, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CMB_FACP,91,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_UNIT,231,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_CHN,365,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,470,5,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_BUILD,91,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_BTYPE,231,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_STAIR,365,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_FLOOR,470,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_ROOM,567,20,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_INPUTTYPE,91,36,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_EQUIPNAME,231,36,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_ADDNUM,365,36,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_CONTENTS,91,52,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUTTYPE,231,52,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "FACP : ",-1,7,7,25,8
+    LTEXT           "UNIT : ",-1,160,7,22,8
+    LTEXT           "LOOP : ",-1,301,7,29,8
+    LTEXT           "CIRCUIT : ",-1,433,7,35,8
+    LTEXT           "BUILDING : ",-1,7,23,40,8
+    LTEXT           "BUILDING TYPE : ",-1,159,22,65,9
+    LTEXT           "LINE : ",-1,301,23,22,8
+    LTEXT           "FLOOR : ",-1,433,23,31,8
+    LTEXT           "ROOM : ",-1,539,23,27,8
+    LTEXT           "EQUIPMENT NAME : ",-1,159,36,69,10
+    LTEXT           "INPUT TYPE : ",-1,7,38,52,10
+    LTEXT           "OUTPUT DESCRIPTION : ",-1,6,52,83,8
+    LTEXT           "OUTPUT TYPE : ",-1,159,52,58,8
+    LTEXT           "EQUIPMENT NO. : ",-1,301,36,63,9
+END
+
+IDD_DLGINFOBASEPAGE_EN DIALOGEX 0, 0, 320, 200
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "DIALOG BOX"
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,209,179,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,263,179,50,14
+END
+
+IDD_DIALOG_ADMIN_MODE_EN DIALOGEX 0, 0, 172, 115
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "ADMINISTRATOR MODE"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,28,94,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,96,94,50,14
+    LTEXT           "Enter the password to access administrator mode.",IDC_STATIC,33,26,118,18
+    EDITTEXT        IDC_EDIT_PASSWORD,29,54,116,14,ES_PASSWORD | ES_AUTOHSCROLL
+END
+
+IDD_DLG_CHILD_EDIT_CHN_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "FACP : ",IDC_STATIC,7,9,25,8
+    COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "UNIT : ",IDC_STATIC,216,9,22,8
+    COMBOBOX        IDC_CMB_UNIT,256,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "LOOP : ",IDC_STATIC,7,26,22,8
+    EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
+    LTEXT           "LOOP NO. : ",IDC_STATIC,216,26,39,8
+    EDITTEXT        IDC_ED_NUM,256,22,60,14,ES_AUTOHSCROLL
+END
+
+IDD_DLG_CHILD_EDIT_FACP_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "FACP : ",IDC_STATIC,7,15,25,8
+    EDITTEXT        IDC_ED_NAME,45,11,122,14,ES_AUTOHSCROLL
+    LTEXT           "FACP NO. : ",IDC_STATIC,182,13,46,8
+    LTEXT           "TYPE : ",IDC_STATIC,7,30,22,8
+    COMBOBOX        IDC_CMB_TYPE,45,28,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,234,10,60,14,ES_AUTOHSCROLL
+END
+
+IDD_DLG_CHILD_EDIT_RELAY_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CMB_FACP,45,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_UNIT,159,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_CHN,273,5,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,387,5,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_BUILD,45,20,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_BTYPE,159,20,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_STAIR,273,20,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_FLOOR,387,20,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_ROOM,501,20,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_EQUIPNAME,45,36,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_INPUTTYPE,159,36,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_ADDNUM,273,36,63,12,ES_AUTOHSCROLL | WS_DISABLED
+    COMBOBOX        IDC_CMB_CONTENTS,45,52,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUTTYPE,159,52,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_PATTERN,273,52,63,207,CBS_DROPDOWN | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "FACP : ",IDC_STATIC,7,7,25,8
+    LTEXT           "UNIT : ",IDC_STATIC,121,7,22,8
+    LTEXT           "LOOP : ",IDC_STATIC,234,7,26,8
+    LTEXT           "CIRCUIT : ",IDC_STATIC,350,7,35,8
+    LTEXT           "BUILDING : ",IDC_STATIC,7,23,39,8
+    LTEXT           "BUILDING\nTYPE :",IDC_STATIC,121,17,37,15
+    LTEXT           "LINE : ",IDC_STATIC,234,23,22,8
+    LTEXT           "FLOOR : ",IDC_STATIC,350,23,33,8
+    LTEXT           "ROOM : ",IDC_STATIC,473,23,26,8
+    LTEXT           "EQUIPMENT\nTYPE : ",IDC_STATIC,7,33,41,17
+    LTEXT           "INPUT\nTYPE : ",IDC_STATIC,121,32,37,16
+    LTEXT           "OUTPUT\nDESCRIPTION : ",IDC_STATIC,7,48,47,14
+    LTEXT           "OUTPUT\nTYPE :",IDC_STATIC,121,48,37,14
+    LTEXT           "EQUIPMENT\nNO. :",IDC_STATIC,234,34,40,15
+    LTEXT           "PATTERN :",IDC_STATIC,234,54,36,8
+END
+
+IDD_DLG_CHILD_EDIT_UNIT_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "??? : ",IDC_STATIC,7,9,30,8
+    LTEXT           "?? : ",IDC_STATIC,7,39,22,8
+    COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "?? : ",IDC_STATIC,7,26,22,8
+    EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
+    LTEXT           "?? ?? : ",IDC_STATIC,182,24,39,8
+    EDITTEXT        IDC_ED_NUM,234,21,60,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_TYPE,45,39,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_DLG_ERRORCHECK_EN DIALOGEX 0, 0, 565, 263
+STYLE DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "CHECK FOR ERROR"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,53,23,454,14
+    COMBOBOX        IDC_CMB_TYPE,53,39,215,196,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "VIEW",IDC_BTN_VIEW,273,38,50,14
+    CONTROL         "",IDC_LIST_REPORT,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,7,65,551,191
+    LTEXT           "TYPE : ",IDC_STATIC,7,39,22,8
+    LTEXT           "PROGRESS : ",IDC_STATIC,7,26,43,8
+    LTEXT           "TASK",IDC_ST_MESSAGE,7,7,551,8
+    PUSHBUTTON      "STOP",IDC_BTN_STOP,511,22,46,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,325,38,50,14
+END
+
+IDD_DLG_INFO_EDIT_CHN_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "FACP : ",IDC_STATIC,7,9,25,8
+    COMBOBOX        IDC_CMB_FACP,45,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "UNIT : ",IDC_STATIC,216,9,22,8
+    COMBOBOX        IDC_CMB_UNIT,256,7,122,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "LOOP : ",IDC_STATIC,7,26,22,8
+    EDITTEXT        IDC_ED_NAME,45,22,122,14,ES_AUTOHSCROLL
+    LTEXT           "LOOP NO. : ",IDC_STATIC,216,26,39,8
+    EDITTEXT        IDC_ED_NUM,256,22,60,14,ES_AUTOHSCROLL
+END
+
+IDD_DLG_INFO_EDIT_FACP_EN DIALOGEX 0, 0, 570, 70
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "FACP : ",IDC_STATIC,7,15,25,8
+    EDITTEXT        IDC_ED_NAME,45,11,122,14,ES_AUTOHSCROLL
+    LTEXT           "FACP NO. : ",IDC_STATIC,182,13,46,8
+    LTEXT           "TYPE : ",IDC_STATIC,7,30,22,8
+    COMBOBOX        IDC_CMB_TYPE,45,28,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,234,10,60,14,ES_AUTOHSCROLL
+END
+
+IDD_DLG_INFO_MAIN_EN DIALOGEX 0, 0, 584, 176
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_ST_FRAME,"Static",SS_BLACKFRAME,7,7,570,70
+    PUSHBUTTON      "ADD   ?",IDC_BTN_ADD,7,83,50,14,NOT WS_VISIBLE
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,57,83,50,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,107,83,50,14
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW,173,83,50,14
+END
+
+IDD_DLG_LOGIN_EN DIALOGEX 0, 0, 447, 178
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OPEN PROJECT"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_PROJECT_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,176,164
+    EDITTEXT        IDC_ED_NAME,281,17,151,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_ED_CREATEDATE,281,33,151,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_MAKER,281,49,151,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_PRJ_VERSION,281,66,151,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_MODIFYDATE,281,82,151,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_MODIFIER,281,98,151,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
+    EDITTEXT        IDC_ED_USER,281,121,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PWD,281,140,151,14,ES_PASSWORD | ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "LOGIN",IDOK,327,157,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,381,157,50,14
+    LTEXT           "ID",IDC_STATIC,208,127,23,8
+    LTEXT           "PASSWORD",IDC_STATIC,208,141,39,8
+    LTEXT           "PROJECT NAME : ",IDC_STATIC,208,20,65,8
+    LTEXT           "CREATION DATE : ",IDC_STATIC,208,36,65,8,NOT WS_VISIBLE
+    LTEXT           "CREATED BY",IDC_STATIC,208,52,65,8,NOT WS_VISIBLE
+    LTEXT           "PROJECT VERSION : ",IDC_STATIC,208,69,69,8,NOT WS_VISIBLE
+    GROUPBOX        "PROJECT INFO",IDC_STATIC,193,7,247,110,NOT WS_VISIBLE
+    LTEXT           "EDITED DATE : ",IDC_STATIC,207,85,65,8,NOT WS_VISIBLE
+    LTEXT           "MODIFIER : ",IDC_STATIC,207,101,65,8,NOT WS_VISIBLE
+END
+
+IDD_DLG_MAKEAUTO_ALLINPUT_EN DIALOGEX 0, 0, 529, 457
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "SITE LOGIC DATA GENERATION"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "APPLY",IDOK,211,436,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,268,436,50,14
+    CONTROL         "BUILDING",IDC_CHKP_MATCH_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,249,48,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_MATCH_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,153,244,72,19
+    CONTROL         "LINE",IDC_CHKP_MATCH_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,248,48,10
+    CONTROL         "FLOOR",IDC_CHKP_MATCH_FLOOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,264,248,48,10
+    CONTROL         "ROOM",IDC_CHKP_MATCH_ROOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,312,248,48,10
+    CONTROL         "EQUIPMENT NAME",IDC_CHKP_MATCH_EQUIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,360,248,75,10
+    GROUPBOX        "SET INPUT CONDITION",IDC_STATIC,7,7,254,224
+    LTEXT           "Only items with the same input conditions as the selected item will be connected.",IDC_STATIC,134,261,261,10
+    GROUPBOX        "PREVIEW SITE LOGIC DATA",IDC_STATIC,7,238,515,197
+    PUSHBUTTON      "CHECK RESULT",IDC_BTN_PREVIEW_INPUT,17,213,53,14
+    PUSHBUTTON      "CHECK RESULT",IDC_BTN_PREVIEW_OUTPUT,460,213,53,14
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW_LINK,463,244,50,14
+    LTEXT           "Static",IDC_ST_PREVIEW_FRAME,17,272,495,157,0,WS_EX_STATICEDGE
+    GROUPBOX        "OUTPUT CONDITION SETTINGS",IDC_STATIC,267,7,254,225
+    CONTROL         "",IDC_IN_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_CHECKBOXES | WS_BORDER | WS_HSCROLL | WS_TABSTOP,17,17,238,194
+    CONTROL         "",IDC_OUT_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_CHECKBOXES | WS_BORDER | WS_HSCROLL | WS_TABSTOP,275,17,238,194
+END
+
+IDD_DLG_MAKEAUTO_ALLINPUT1_EN DIALOGEX 0, 0, 529, 457
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "SITE LOGIC DATA GENERATION"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "BUILDING",IDC_CHK_IN_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,23,47,10
+    COMBOBOX        IDC_CMB_IN_FROM_BUILD,62,22,71,222,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_IN_TO_BUILD,152,22,71,238,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "FLOOR",IDC_CHK_IN_FLOOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,104,36,10
+    COMBOBOX        IDC_CMB_IN_FROM_FLOOR,62,102,71,222,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_IN_TO_FLOOR,152,102,71,238,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "ROOM",IDC_CHK_IN_ROOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,119,44,10
+    PUSHBUTTON      "...",IDC_BTN_IN_SEARCH_ROOM,84,117,50,14
+    EDITTEXT        IDC_ED_IN_VIEW_ROOM,17,133,237,14,ES_AUTOHSCROLL
+    CONTROL         "INPUT TYPE",IDC_CHK_IN_INPUTTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,151,57,10
+    PUSHBUTTON      "...",IDC_BTN_IN_SEARCH_INPUTTYPE,83,149,50,14
+    EDITTEXT        IDC_ED_IN_VIEW_INPUTTYPE,17,165,237,14,ES_AUTOHSCROLL
+    CONTROL         "EQUIPMENT",IDC_CHK_IN_EQUIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,184,61,10
+    PUSHBUTTON      "...",IDC_BTN_IN_SEARCH_EQUIP,83,181,50,14
+    EDITTEXT        IDC_ED_IN_VIEW_EQUIP,17,197,237,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "APPLY",IDOK,211,436,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,268,436,50,14
+    CONTROL         "BUILDING",IDC_CHKP_MATCH_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,248,47,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_MATCH_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,171,248,65,10
+    CONTROL         "LINE",IDC_CHKP_MATCH_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,238,248,31,10
+    CONTROL         "FLOOR",IDC_CHKP_MATCH_FLOOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,278,248,36,10
+    CONTROL         "ROOM",IDC_CHKP_MATCH_ROOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,317,248,32,10
+    CONTROL         "EQUIPMENT NAME",IDC_CHKP_MATCH_EQUIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,352,248,75,10
+    GROUPBOX        "SET INPUT CONDITION",IDC_STATIC,7,7,254,224
+    GROUPBOX        "OUTPUT CONDITION SETTINGS",IDC_STATIC,267,7,254,225
+    CONTROL         "BUILDING",IDC_CHK_OUT_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,275,23,43,10
+    CONTROL         "FLOOR",IDC_CHK_OUT_FLOOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,275,104,43,10
+    CONTROL         "ROOM",IDC_CHK_OUT_ROOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,275,119,40,10
+    COMBOBOX        IDC_CMB_OUT_FROM_BUILD,320,22,71,222,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUT_TO_BUILD,410,22,71,238,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUT_FROM_FLOOR,320,102,71,222,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUT_TO_FLOOR,410,102,71,238,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "...",IDC_BTN_OUT_SEARCH_ROOM,342,116,50,14
+    EDITTEXT        IDC_ED_OUT_VIEW_ROOM,275,132,237,14,ES_AUTOHSCROLL
+    CONTROL         "INPUT TYPE",IDC_CHK_OUT_OUTPUTTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,275,151,64,10
+    PUSHBUTTON      "...",IDC_BTN_OUT_SEARCH_OUTPUTTYPE,343,148,50,14
+    EDITTEXT        IDC_ED_OUT_VIEW_OUTPUTTYPE,275,164,237,14,ES_AUTOHSCROLL
+    CONTROL         "EQUIPMENT",IDC_CHK_OUT_EQUIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,275,184,53,10
+    PUSHBUTTON      "...",IDC_BTN_OUT_SEARCH_EQUIP,343,180,50,14
+    EDITTEXT        IDC_ED_OUT_VIEW_EQUIP,275,196,237,14,ES_AUTOHSCROLL
+    LTEXT           "Only items with the same input conditions as the selected item will be connected.",IDC_STATIC,131,261,266,10
+    GROUPBOX        "PREVIEW SITE LOGIC DATA",IDC_STATIC,7,238,515,197
+    PUSHBUTTON      "CHECK RESULTS",IDC_BTN_PREVIEW_INPUT,17,213,57,14
+    PUSHBUTTON      "CHECK RESULTS",IDC_BTN_PREVIEW_OUTPUT,457,213,56,14
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW_LINK,463,244,50,14
+    CONTROL         "BUILDING TYPE",IDC_CHK_IN_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,40,65,10
+    PUSHBUTTON      "...",IDC_BTN_IN_SEARCH_BTYPE,84,38,50,14
+    EDITTEXT        IDC_ED_IN_VIEW_BTYPE,18,54,237,14,ES_AUTOHSCROLL
+    CONTROL         "BUILDING TYPE",IDC_CHK_OUT_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,275,40,66,10
+    PUSHBUTTON      "...",IDC_BTN_OUT_SEARCH_BTYPE,341,36,50,14
+    EDITTEXT        IDC_ED_OUT_VIEW_BTYPE,276,52,237,14,ES_AUTOHSCROLL
+    CONTROL         "LINE",IDC_CHK_IN_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,72,31,10
+    PUSHBUTTON      "...",IDC_BTN_IN_SEARCH_STAIR,84,70,50,14
+    EDITTEXT        IDC_ED_IN_VIEW_STAIR,18,86,237,14,ES_AUTOHSCROLL
+    CONTROL         "LINE",IDC_CHK_OUT_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,276,72,31,10
+    PUSHBUTTON      "...",IDC_BTN_OUT_SEARCH_STAIR,341,68,50,14
+    EDITTEXT        IDC_ED_OUT_VIEW_STAIR,276,84,237,14,ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_ST_PREVIEW_FRAME,17,272,495,157,0,WS_EX_STATICEDGE
+END
+
+IDD_DLG_MAKEAUTO_ONEINPUT_EN DIALOGEX 0, 0, 555, 307
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,286,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,498,286,50,14
+    LTEXT           "Static",IDC_ST_FRAME2,33,126,495,157,0,WS_EX_STATICEDGE
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,234,18,293,100
+END
+
+IDD_DLG_MAKEPTN_EN DIALOGEX 0, 0, 403, 230
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "CREATE PATTERN"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "ADD",IDOK,175,72,52,16
+    PUSHBUTTON      "CANCEL",IDCANCEL,231,72,52,16
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,7,7,388,87
+    GROUPBOX        "",IDC_STATIC,159,11,79,59
+    CONTROL         "BUILDING",IDC_CHKP_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,21,50,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,32,79,10
+    CONTROL         "LINE",IDC_CHKP_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,43,31,10
+    CONTROL         "FLOOR",IDC_CHKP_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,54,41,10
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW,119,72,52,16
+    CONTROL         "",IDC_PATTERN_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,97,387,126
+    COMBOBOX        IDC_CMB_TYPE,83,17,69,80,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "PATTERN TYPE : ",IDC_STATIC,21,18,59,9
+END
+
+IDD_DLG_PASSWORD_EN DIALOGEX 0, 0, 194, 112
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "FACP PASSWORD"
+FONT 12, "???", 400, 0, 0x81
+BEGIN
+    PUSHBUTTON      "CLOSE",IDCANCEL,72,91,50,14
+    EDITTEXT        IDC_ED_INPUT,101,14,85,14,ES_AUTOHSCROLL
+    LTEXT           "NUMBER ON FACP : ",IDC_STATIC,15,16,69,8
+    EDITTEXT        IDC_ED_RESULT,102,59,85,14,ES_AUTOHSCROLL
+    LTEXT           "CREATED PASSWORD : ",IDC_STATIC,16,61,77,8
+    DEFPUSHBUTTON   "CREATE",IDC_BTN_MAKE,72,36,50,14
+END
+
+IDD_DLG_PRJVERSION_EN DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PROJECT VERSION"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,252,155,50,14
+END
+
+IDD_DLG_PSWITCH_EN DIALOGEX 0, 0, 214, 107
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CMB_FACP,79,7,128,203,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,110,22,97,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_PSTYPE,80,39,127,203,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NAME,80,54,127,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_DESK,80,68,127,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,31,86,50,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,81,86,50,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,131,86,50,14
+    LTEXT           "PRESSURE SWITCH : ",IDC_STATIC,7,41,69,8
+    LTEXT           "PRESSURE SWITCH NUMBER : ",IDC_STATIC,7,24,101,8
+    LTEXT           "NAME : ",IDC_STATIC,7,57,29,8
+    LTEXT           "FACP : ",IDC_STATIC,7,9,25,8
+    PUSHBUTTON      "CANCEL",IDC_BTN_CANCEL,156,58,50,14,NOT WS_VISIBLE
+    LTEXT           "LCD DISPLAY : ",IDC_STATIC,7,70,66,8
+END
+
+IDD_DLG_PUMPINFO_EN DIALOGEX 0, 0, 214, 106
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CMB_FACP,73,7,134,203,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,73,22,40,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_PSTYPE,73,39,134,203,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NAME,73,54,134,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_DESK,73,69,134,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,31,85,50,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,81,85,50,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,131,85,50,14
+    LTEXT           "PUMP : ",IDC_STATIC,7,41,61,8
+    LTEXT           "PUMP NUMBER : ",IDC_STATIC,7,22,61,8
+    LTEXT           "NAME : ",IDC_STATIC,7,57,61,8
+    LTEXT           "FACP : ",IDC_STATIC,7,9,61,8
+    PUSHBUTTON      "CANCEL",IDC_BTN_CANCEL,157,85,50,14,NOT WS_VISIBLE
+    LTEXT           "LCD DISPLAY : ",IDC_STATIC,7,70,61,8
+END
+
+IDD_DLG_SLPLOGIN_EN DIALOGEX 0, 0, 243, 68
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PROGRAM LOGIN"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,132,47,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,186,47,50,14
+    EDITTEXT        IDC_ED_USER,53,9,182,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PWD,53,28,182,14,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "ID",IDC_STATIC,11,15,23,8
+    LTEXT           "PASSWORD",IDC_STATIC,11,29,39,8
+    PUSHBUTTON      "ENVIRONMENT SETUP",IDC_BTN_ENV,53,47,76,14,NOT WS_VISIBLE
+END
+
+IDD_DLG_TAB_PATTERN_EN DIALOGEX 0, 0, 311, 176
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_AFTER_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,159,27,145,142
+    PUSHBUTTON      "DELETE SELECTION",IDC_BTN_DEL,7,4,70,14
+    PUSHBUTTON      "APPLY",IDC_BTN_SAVE,80,4,71,14
+    CONTROL         "",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,27,145,142
+END
+
+IDD_DLG_TAB_RELAY_EN DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_AFTER_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,157,27,145,142
+    PUSHBUTTON      "DELETE SELECTION",IDC_BTN_DEL,7,4,67,14
+    PUSHBUTTON      "APPLY",IDC_BTN_SAVE,76,4,76,14
+    CONTROL         "",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,27,145,142
+END
+
+IDD_DLG_VERSION_EN DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PROJECT VERSION"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,252,155,50,14
+    CONTROL         "",IDC_VERSION_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,295,145
+END
+
+IDD_DLG_VIEW_RELAY_EN DIALOGEX 0, 0, 573, 94
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "VIEW CIRCUIT INFORMATION"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CMB_FACP,45,7,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_UNIT,159,7,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_CHN,273,7,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_NUM,387,7,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_BUILD,45,22,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_BTYPE,159,22,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_STAIR,273,22,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_FLOOR,387,22,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_ROOM,503,22,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_INPUTTYPE,45,38,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_EQUIPNAME,159,38,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_ADDNUM,273,38,63,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_CONTENTS,45,54,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUTTYPE,159,54,63,207,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "FACP : ",-1,7,9,25,8
+    LTEXT           "UNIT : ",-1,121,9,22,8
+    LTEXT           "LOOP : ",-1,234,9,27,8
+    LTEXT           "CIRCUIT : ",-1,350,9,34,8
+    LTEXT           "BUILDING : ",-1,7,25,39,8
+    LTEXT           "BUILDING\nTYPE : ",-1,121,20,34,16
+    LTEXT           "LINE : ",-1,234,25,22,8
+    LTEXT           "FLOOR : ",-1,350,25,29,8
+    LTEXT           "ROOM : ",-1,473,25,26,8
+    LTEXT           "EQUIPMENT\nNAME : ",-1,121,36,40,16
+    LTEXT           "INPUT\nTYPE : ",-1,7,35,35,16
+    LTEXT           "OUTPUT\nDESCRIPTION : ",-1,6,53,49,19
+    LTEXT           "OUTPUT\nTYPE : ",-1,121,52,37,16
+    LTEXT           "EQUIPMENT NO. : ",-1,234,36,40,15
+    DEFPUSHBUTTON   "OK",IDOK,234,72,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,288,72,50,14
+END
+
+IDD_FORMACCESS_EN DIALOGEX 0, 0, 391, 255
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_ACCESS_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,165,241
+    EDITTEXT        IDC_ED_PTN_NAME,280,16,97,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PTN_CODE,280,32,97,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PTN_ID,280,48,97,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "ADD PERMISSION",IDC_BTN_ADD,176,71,64,14
+    PUSHBUTTON      "SAVE PERMISSION",IDC_BTN_SAVE,242,71,63,14
+    PUSHBUTTON      "DELETE PERMISSION",IDC_BTN_DEL,306,71,72,14
+    CONTROL         "",IDC_SCREEN_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,177,88,207,160
+    LTEXT           "PERMISSION NAME : ",IDC_STATIC,181,18,76,9
+    LTEXT           "PERMISSION DESCRIPTION : ",IDC_STATIC,181,34,97,8
+    LTEXT           "PERMISSION ID : ",IDC_STATIC,181,50,59,8
+    GROUPBOX        "",IDC_STATIC,175,7,209,61
+END
+
+IDD_FORMAUTOMAKE_EN DIALOGEX 0, 0, 558, 264
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DEVICE_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,8,40,169,217
+    CONTROL         "",IDC_RELAY_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,182,40,369,217
+    PUSHBUTTON      "SAVE AS CURRENT",IDC_BTN_SAVE,66,3,65,14
+    PUSHBUTTON      "AUTOGENERATE",IDC_BTN_MAKE,3,3,61,14
+    CONTROL         "",IDC_PROG,"msctls_progress32",WS_BORDER,7,32,544,6
+    PUSHBUTTON      "CANCEL TASK",IDC_BTN_STOP,133,3,68,14
+    LTEXT           "",IDC_ST_MESSAGE,7,20,544,8
+END
+
+IDD_FORMEDITLOGIC3_EN DIALOGEX 0, 0, 552, 322
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    COMBOBOX        IDC_CMB_INTYPE,37,20,59,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_EQNAME,145,20,59,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUTTYPE,241,20,61,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CMB_OUTCONTENTS,354,20,60,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "ALL",IDC_CHK_ALLFLOOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,51,22,10
+    CONTROL         "SAME CIRCUIT OUTPUT",IDC_CHK_SAME_OUTPUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,50,51,89,10
+    CONTROL         "BUILDING",IDC_USE_BUID_MATCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,78,43,10
+    CONTROL         "BUILDING TYPE",IDC_USE_BTYPE_MATCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,70,79,69,10
+    CONTROL         "LINE",IDC_USE_STAIR_MATCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,89,31,10
+    CONTROL         "FLOOR",IDC_USE_LEVEL_MATCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,55,89,34,10
+    CONTROL         "ROOM",IDC_USE_ROOM_MATCH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,98,89,34,10
+    EDITTEXT        IDC_ED_PLUSNFLOOR,83,101,40,14,ES_AUTOHSCROLL
+    CONTROL         "PUBLIC ADDRESS OUTPUT",IDC_CHK_EMERGENCY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,116,101,10
+    CONTROL         "Basement floor logic (output all basement floors for fire)",IDC_CHK_UNDERFLOOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,146,46,193,10
+    GROUPBOX        "",IDC_STATIC,142,52,396,101
+    CONTROL         "Distinguish basement by building: when enabled, this option displays only the basement floors of buildings on fire",IDC_CHK_UNDERFLOOR_CLASS_DONG,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,69,376,10
+    CONTROL         "Distinguish basement by building type: this option displays only the basement floors of building types on fire",IDC_CHK_UNDERFLOOR_CLASS_BTYPE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,83,365,10
+    CONTROL         "Distinguish line: when enabled, this option displays only the lines on fire",IDC_CHK_UNDERFLOOR_CLASS_STAIR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,97,259,10
+    CONTROL         "Display All Basement Floors for Fire on 1st Basement Floor",IDC_CHK_UNDERFLOOR_FIRST_FLOOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,116,202,10
+    CONTROL         "Display Ground Floor for Fire on 1st Basement Floor",IDC_CHK_UNDERFLOOR_B1F,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,128,225,10
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,8,158,36,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,45,158,36,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,83,158,36,14
+    PUSHBUTTON      "IMPORT AUTO LOGIC",IDC_BTN_LOGIC_IMPORT,163,158,79,14
+    PUSHBUTTON      "EXPORT AUTO LOGIC",IDC_BTN_LOGIC_EXPORT,244,158,73,14
+    CONTROL         "",IDC_LOGIC_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,174,538,141
+    GROUPBOX        "SET OUTPUT DESTINATION",IDC_STATIC,7,38,538,118
+    LTEXT           "INPUT\nTYPE",IDC_STATIC,10,17,27,16
+    LTEXT           "OUTPUT\nTYPE",IDC_STATIC,209,16,29,16
+    LTEXT           "EQUIPMENT\nNAME",IDC_STATIC,101,16,43,15
+    LTEXT           "OUTPUT\nDESCRIPTION",IDC_STATIC,306,16,46,16
+    LTEXT           "CONTROL UP TO\n+ N FLOOR(S)",IDC_STATIC,17,99,61,17
+    GROUPBOX        "SET DESTINATION",IDC_STATIC,7,7,538,29
+    GROUPBOX        "MATCHING LOCATION CONDITION",IDC_STATIC,16,65,123,35
+    GROUPBOX        "Location (input and output locations are the same)",IDC_STATIC,147,58,383,56
+    CONTROL         "Include Basement Parking Lot",IDC_CHK_UNDER_PARKING,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,140,107,10
+    LTEXT           "(Apply logic in case of fire on the basement floor or parking lot)",IDC_STATIC,261,141,208,8
+END
+
+IDD_FORMEMERGENCY_EN DIALOGEX 0, 0, 289, 196
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_ED_BUILD,55,7,47,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_STAIR,135,7,47,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_FLOOR,220,7,47,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_NAME,51,30,179,14,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_ED_ADDR,51,46,179,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_NUM,51,62,72,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "IMPORT",IDC_BTN_LOAD,7,84,36,14
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,59,84,36,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,96,84,36,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,134,84,36,14
+    CONTROL         "",IDC_EMERGENCY_LIST,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,102,275,64
+    LTEXT           "NAME : ",IDC_STATIC,13,33,27,8
+    LTEXT           "ADDRESS : ",IDC_STATIC,13,48,39,8
+    LTEXT           "NO. : ",IDC_STATIC,13,64,20,8
+    GROUPBOX        "",IDC_STATIC,7,22,275,58
+    LTEXT           "BUILDING :",IDC_STATIC,14,11,41,8
+    LTEXT           "LINE :",IDC_STATIC,112,10,22,8
+    LTEXT           "FLOOR :",IDC_STATIC,188,10,28,8
+END
+
+IDD_FORMEQUIP_EN DIALOGEX 0, 0, 406, 280
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_EQUIP_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,165,266
+    EDITTEXT        IDC_ED_EQUIP_NAME,256,16,121,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_EQUIP_ID,256,47,121,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,233,82,36,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,270,82,36,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,308,82,36,14
+    LTEXT           "EQUIPMENT NAME : ",IDC_STATIC,181,19,68,8
+    LTEXT           "EQUIPMENT TYPE : ",IDC_STATIC,181,34,69,8
+    LTEXT           "EQUIPMENT NO. : ",IDC_STATIC,181,49,64,8
+    GROUPBOX        "",IDC_STATIC,177,7,209,93
+    COMBOBOX        IDC_CMB_EQUIPTYPE,256,32,121,263,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_EQUIP_SYMBOL,256,64,101,14,ES_AUTOHSCROLL
+    LTEXT           "EQUIPMENT SYMBOL : ",IDC_STATIC,181,66,74,8
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,358,64,19,14
+    LTEXT           "Static",IDC_ST_PREVIEW,179,105,220,168,WS_BORDER,WS_EX_STATICEDGE
+END
+
+IDD_FORMFACP_EN DIALOGEX 0, 0, 390, 250
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_FACP_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,376,133
+    LTEXT           "FACP NAME : ",IDC_STATIC,11,148,46,8
+    LTEXT           "FACP TYPE : ",IDC_STATIC,11,165,43,8
+    LTEXT           "FACP NO. : ",IDC_STATIC,11,181,39,8
+    EDITTEXT        IDC_ED_FACP_NAME,63,145,157,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_FACP_NUM,63,178,157,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CMB_FACP_TYPE,63,162,157,153,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,61,202,50,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,117,202,50,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,173,202,50,14
+END
+
+IDD_FORMLINKVIEW_EN DIALOGEX 0, 0, 558, 320
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "REFRESH",IDC_BTN_REFRESH,456,2,61,14
+    PUSHBUTTON      "SAVE AS EXCEL",IDC_BTN_EXCEL,393,2,60,14
+    CONTROL         "",IDC_DEVICE_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,8,18,169,231
+    CONTROL         "",IDC_RELAY_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,182,18,369,231
+    CONTROL         "",IDC_PROG,"msctls_progress32",NOT WS_VISIBLE | WS_BORDER,7,11,386,6
+    LTEXT           "Static",IDC_ST_MESSAGE,7,0,386,8,NOT WS_VISIBLE
+END
+
+IDD_FORMLOADRELAYTABLE_EN DIALOGEX 0, 0, 481, 272
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TAB,"SysTabControl32",0x0,7,96,467,169,WS_EX_DLGMODALFRAME
+    PUSHBUTTON      "PREVIEW CHANGES",IDC_BTN_PREVIEW,7,50,67,14
+    PUSHBUTTON      "APPLY CHANGES",IDC_BTN_APPLY,75,50,60,14
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,50,78,143,9
+    CONTROL         "Duplicate if the addresses are the same",IDC_RD_ADDR,
+                    "Button",BS_AUTORADIOBUTTON,19,22,151,10
+    CONTROL         "Duplicate if the names are the same",IDC_RD_NAME,"Button",BS_AUTORADIOBUTTON,19,36,153,10
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,173,7,20,14
+    EDITTEXT        IDC_ED_TABLE,65,7,105,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "MODULE TABLE : ",IDC_STATIC,7,9,59,8
+    PUSHBUTTON      "STOP TASK",IDC_BTN_STOP,136,50,59,14
+    CONTROL         "",IDC_PROG_STEP,"msctls_progress32",WS_BORDER,50,66,143,9
+    LTEXT           "PROGRESS :",IDC_ST_PART,7,67,40,8
+    LTEXT           "ALL : ",IDC_ST_ALL,7,78,31,8
+    CONTROL         "",IDC_LIST_NEW_MODULE_TABLE,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,198,7,227,81
+    PUSHBUTTON      "DELETE",IDC_BTN_DELETE,427,7,47,14
+END
+
+IDD_FORMLOCATION_EN DIALOGEX 0, 0, 297, 200
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_LOCATION_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,164,186
+    CONTROL         "",IDC_DEVICE_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,173,37,91,156
+    PUSHBUTTON      "SAVE CHANGES",IDC_BTN_SAVE,175,7,57,14
+END
+
+IDD_FORMPATTERN_EN DIALOGEX 0, 0, 498, 292
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PATTERN_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,165,241
+    EDITTEXT        IDC_ED_PTN_NAME,245,9,203,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PTN_ID,236,25,36,14,ES_AUTOHSCROLL | ES_READONLY
+    COMBOBOX        IDC_CMB_PTN_TYPE,348,25,100,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_PTN_CNT,236,42,36,14,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "CREATE MANUALLY",IDC_RD_MANAUL_MAKE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,285,43,74,10
+    CONTROL         "CREATE FROM TABLE",IDC_RD_TABLE_MAKE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,367,42,84,10
+    PUSHBUTTON      "ADD PATTERN",IDC_BTN_ADD,177,64,50,14
+    PUSHBUTTON      "SAVE PATTERN",IDC_BTN_SAVE,228,64,53,14
+    PUSHBUTTON      "DELETE PATTERN",IDC_BTN_DEL,281,64,60,14
+    PUSHBUTTON      "ADD CIRCUIT",IDC_BTN_RELAY_ADD,395,78,95,14,NOT WS_VISIBLE
+    PUSHBUTTON      "DELETE SELECTED CIRCUIT",IDC_BTN_RELAY_DEL,363,64,95,14
+    CONTROL         "",IDC_RELAY_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,181,88,231,160
+    EDITTEXT        IDC_ED_PTN_CODE,464,121,26,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
+    LTEXT           "PATTERN NAME : ",IDC_STATIC,183,12,59,8
+    LTEXT           "???? : ",IDC_STATIC,365,123,31,8,NOT WS_VISIBLE
+    LTEXT           "PATTERN ID: ",IDC_STATIC,183,27,50,8
+    GROUPBOX        "",IDC_STATIC,177,0,279,61
+    LTEXT           "PATTERN TYPE : ",IDC_STATIC,286,27,54,8
+    LTEXT           "TOTAL COUNT :",IDC_STATIC,183,44,54,8
+END
+
+IDD_FORMUNIT_EN DIALOGEX 0, 0, 415, 309
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_UNIT_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,165,241
+    EDITTEXT        IDC_ED_UNIT_NAME,230,31,147,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_UNIT_ID,230,63,147,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,223,104,36,14
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,260,104,36,14
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,298,104,36,14
+    CONTROL         "",IDC_UNIT_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,177,121,207,127
+    LTEXT           "UNIT NAME : ",IDC_STATIC,181,34,47,8
+    LTEXT           "UNIT TYPE : ",IDC_STATIC,181,49,47,8
+    LTEXT           "UNIT ID : ",IDC_STATIC,181,65,35,8
+    GROUPBOX        "",IDC_STATIC,175,7,209,95
+    COMBOBOX        IDC_CMB_UNIT_TYPE,230,47,147,263,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ED_UNIT_NUM,230,80,147,14,ES_AUTOHSCROLL
+    LTEXT           "UNIT NO. : ",IDC_STATIC,181,82,37,8
+    LTEXT           "FACP : ",IDC_STATIC,182,17,25,8
+    COMBOBOX        IDC_CMB_FACP,230,15,146,263,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_PATTERN_PROPERTY_EN DIALOGEX 0, 0, 413, 233
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "PATTERN PROPERTY"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,303,212,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,356,212,50,14
+    CONTROL         "",IDC_PATTERN_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,16,399,121
+END
+
+IDD_PROP_PAGE_DEVICETABLE_EN DIALOGEX 0, 0, 400, 201
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "SELECT MODULE TABLE"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_ED_PATH,57,7,262,14,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "...",IDC_BTN_BROWSER,322,7,36,14
+    PUSHBUTTON      "ADD",IDC_BTN_ADD,321,21,36,14,NOT WS_VISIBLE
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,357,7,36,14
+    LTEXT           "SELECT FILE",IDC_STATIC,7,9,44,8
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,35,386,153
+END
+
+IDD_PROP_PAGE_EMERGENCY_EN DIALOGEX 0, 0, 400, 200
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "SET ADDRESS FOR PUBLIC ADDRESS"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,3,0,391,78
+    CONTROL         "BUILDING",IDC_CHKE_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,10,45,10
+    GROUPBOX        "",IDC_STATIC,50,10,66,28
+    CONTROL         "BUILDING TYPE",IDC_CHKE_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,10,63,10
+    CONTROL         "BUILDING",IDC_CHKE_BTYPE_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,57,25,50,10
+    GROUPBOX        "",IDC_STATIC,120,10,72,42
+    CONTROL         "LINE",IDC_CHKE_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,124,10,31,10
+    CONTROL         "BUILDING",IDC_CHKE_STAIR_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,128,25,45,10
+    CONTROL         "BUILDING TYPE",IDC_CHKE_STAIR_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,128,37,62,10
+    GROUPBOX        "",IDC_STATIC,194,10,77,53
+    CONTROL         "FLOOR",IDC_CHK_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,198,10,35,10
+    CONTROL         "BUILDING",IDC_CHK_LEVEL_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,203,25,49,10
+    CONTROL         "BUILDING TYPE",IDC_CHK_LEVEL_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,203,37,66,10
+    CONTROL         "LINE",IDC_CHK_LEVEL_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,203,49,31,10
+    GROUPBOX        "",IDC_STATIC,274,10,78,65
+    CONTROL         "ROOM",IDC_CHK_ROOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,278,10,34,10
+    CONTROL         "BUILDING",IDC_CHK_ROOM_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,283,25,47,10
+    CONTROL         "BUILDING TYPE",IDC_CHK_ROOM_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,283,37,65,10
+    CONTROL         "LINE",IDC_CHK_ROOM_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,283,49,31,10
+    CONTROL         "FLOOR",IDC_CHK_ROOM_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,283,61,34,10
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW,164,61,52,16
+    CONTROL         "",IDC_EMB_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,82,391,114
+END
+
+IDD_PROP_PAGE_FACP_EN DIALOGEX 0, 0, 400, 200
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "FACP LIST"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "FACP",IDC_STATIC,8,12,23,8
+    LTEXT           "Static",IDC_ST_FRAME,7,26,385,168,0,WS_EX_STATICEDGE
+END
+
+IDD_PROP_PAGE_LOCATION_EN DIALOGEX 0, 0, 400, 200
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "?? ??"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LOC_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | WS_BORDER | WS_HSCROLL | WS_TABSTOP,7,7,133,185
+    CONTROL         "",IDC_DEVICE_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,145,7,247,185
+END
+
+IDD_PROP_PAGE_PATTERN_EN DIALOGEX 0, 0, 494, 200
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "PATTERN INFORMATION"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,7,0,480,87
+    CONTROL         "PATTERN",IDC_CHK_PATTERN,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,11,7,42,10
+    CONTROL         "BUILDING",IDC_CHKP_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,58,7,44,10
+    GROUPBOX        "",IDC_STATIC,104,10,66,28
+    CONTROL         "BUILDING TYPE",IDC_CHK_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,106,7,63,10
+    CONTROL         "BUILDING",IDC_CHKP_BTYPE_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,111,21,45,10
+    GROUPBOX        "",IDC_STATIC,172,8,71,39
+    CONTROL         "LINE",IDC_CHKP_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,176,7,31,10
+    CONTROL         "BUILDING",IDC_CHKP_STAIR_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,180,21,46,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_STAIR_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,180,32,63,10
+    GROUPBOX        "",IDC_STATIC,245,8,77,50
+    CONTROL         "FLOOR",IDC_CHK_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,249,7,37,10
+    CONTROL         "BUILDING",IDC_CHKP_LEVEL_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,254,21,43,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_LEVEL_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,254,32,65,10
+    CONTROL         "LINE",IDC_CHKP_LEVEL_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,254,43,31,10
+    GROUPBOX        "",IDC_STATIC,324,8,72,58
+    CONTROL         "ROOM",IDC_CHKP_ROOM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,328,7,37,10
+    CONTROL         "BUILDING",IDC_CHKP_ROOM_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,333,21,46,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_ROOM_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,333,32,62,10
+    CONTROL         "LINE",IDC_CHKP_ROOM_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,333,43,31,10
+    CONTROL         "FLOOR",IDC_CHKP_ROOM_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,333,54,37,10
+    GROUPBOX        "",IDC_STATIC,398,8,83,59
+    CONTROL         "EQUIPMENT NAME",IDC_CHK_EQUIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,402,7,73,10
+    CONTROL         "BUILDING",IDC_CHK_EQUIP_BUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,407,21,46,10
+    CONTROL         "BUILDING TYPE",IDC_CHKP_EQUIP_BTYPE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,407,32,62,10
+    CONTROL         "LINE",IDC_CHKP_EQUIP_STAIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,407,43,31,10
+    CONTROL         "FLOOR",IDC_CHK_EQUIP_LEVEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,407,54,40,10
+    PUSHBUTTON      "PREVIEW",IDC_BTN_PREVIEW,219,65,52,16
+    CONTROL         "",IDC_PATTERN_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,90,481,106
+END
+
+IDD_PROP_PAGE_PRJINFO_EN DIALOGEX 0, 0, 400, 200
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "PROJECT INFORMANTION SETTINGS"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_ED_NAME,141,10,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE,141,30,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_CREATEDATE,141,50,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_MAKER,141,70,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE_MANAGER,141,89,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_SITE_MANAGER_PHONE,141,109,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PRJ_VERSION,141,128,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_DATABASE,141,147,151,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ED_PRJ_PATH,141,166,151,14,ES_AUTOHSCROLL
+    LTEXT           "PROJECT NAME : ",IDC_STATIC,18,14,61,8
+    LTEXT           "SITE NAME : ",IDC_STATIC,18,34,42,8
+    LTEXT           "CREATION DATE : ",IDC_STATIC,18,54,65,8
+    LTEXT           "CREATED BY : ",IDC_STATIC,18,74,50,8
+    LTEXT           "SITE REPRESENTATIVE CONTACT : ",IDC_STATIC,18,113,120,8
+    LTEXT           "PROJECT VERSION : ",IDC_STATIC,18,132,68,8
+    LTEXT           "DATABASE NAME : ",IDC_STATIC,18,151,68,8
+    LTEXT           "GENERATED LOCATION : ",IDC_STATIC,18,171,108,8
+    LTEXT           "SITE REPRESENTATIVE : ",IDC_STATIC,18,93,85,8
+END
+
+IDD_SYSLINKER_FORM_EN DIALOGEX 0, 0, 531, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE,470,170,54,16,NOT WS_VISIBLE
+    CONTROL         "CURRENTLY SELECTED DEVICE",IDC_ST_DEVICE,"Static",SS_LEFTNOWORDWRAP | SS_CENTERIMAGE | SS_SUNKEN | SS_WORDELLIPSIS | WS_GROUP,7,7,517,31
+    CONTROL         "",IDC_ST_FRAME,"Static",SS_BLACKFRAME,6,18,449,60
+    PUSHBUTTON      "ADD   +",IDC_BTN_ADD,6,82,43,13
+    PUSHBUTTON      "SAVE",IDC_BTN_SAVE2,49,82,43,13
+    PUSHBUTTON      "DELETE",IDC_BTN_DEL,92,82,43,13
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DLG_ENV_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 314
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 180
+    END
+
+    IDD_DLG_LINKRESULT_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 442
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 269
+    END
+
+    IDD_DLG_CHILD_MAIN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 577
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_PROGRESS_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 8
+        RIGHTMARGIN, 590
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 299
+    END
+
+    IDD_DLG_LOADROM_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 274
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 233
+    END
+
+    IDD_DLG_CUSTOM_TREE_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 205
+    END
+
+    IDD_DLG_INFO_EDIT_UNIT_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_INFO_EDIT_RELAY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 664
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLGINFOBASEPAGE_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_DIALOG_ADMIN_MODE_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 165
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 108
+    END
+
+    IDD_DLG_CHILD_EDIT_CHN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_CHILD_EDIT_FACP_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_CHILD_EDIT_RELAY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_CHILD_EDIT_UNIT_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_ERRORCHECK_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 558
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 256
+    END
+
+    IDD_DLG_INFO_EDIT_CHN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_INFO_EDIT_FACP_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 563
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 63
+    END
+
+    IDD_DLG_INFO_MAIN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 577
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_LOGIN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 440
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 171
+    END
+
+    IDD_DLG_MAKEAUTO_ALLINPUT_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 522
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 450
+    END
+
+    IDD_DLG_MAKEAUTO_ALLINPUT1_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 522
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 450
+    END
+
+    IDD_DLG_MAKEAUTO_ONEINPUT_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 548
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 300
+    END
+
+    IDD_DLG_MAKEPTN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 396
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 223
+    END
+
+    IDD_DLG_PASSWORD_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 187
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 105
+    END
+
+    IDD_DLG_PRJVERSION_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_PSWITCH_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 207
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 100
+    END
+
+    IDD_DLG_PUMPINFO_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 207
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 99
+    END
+
+    IDD_DLG_SLPLOGIN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 236
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 61
+    END
+
+    IDD_DLG_TAB_PATTERN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 304
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_TAB_RELAY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_VERSION_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DLG_VIEW_RELAY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 566
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    IDD_FORMACCESS_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 384
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 248
+    END
+
+    IDD_FORMAUTOMAKE_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 551
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 257
+    END
+
+    IDD_FORMEDITLOGIC3_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 545
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 315
+    END
+
+    IDD_FORMEMERGENCY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 282
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 189
+    END
+
+    IDD_FORMEQUIP_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 399
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 273
+    END
+
+    IDD_FORMFACP_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 383
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 243
+    END
+
+    IDD_FORMLINKVIEW_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 551
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 313
+    END
+
+    IDD_FORMLOADRELAYTABLE_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 474
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 265
+    END
+
+    IDD_FORMLOCATION_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_FORMPATTERN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 490
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 285
+    END
+
+    IDD_FORMUNIT_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 408
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 302
+    END
+
+    IDD_PATTERN_PROPERTY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 406
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
+    END
+
+    IDD_PROP_PAGE_DEVICETABLE_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 393
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 197
+    END
+
+    IDD_PROP_PAGE_EMERGENCY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 394
+        BOTTOMMARGIN, 196
+    END
+
+    IDD_PROP_PAGE_FACP_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 392
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 195
+    END
+
+    IDD_PROP_PAGE_LOCATION_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 392
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 192
+    END
+
+    IDD_PROP_PAGE_PATTERN_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 488
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 196
+    END
+
+    IDD_PROP_PAGE_PRJINFO_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 393
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 194
+    END
+
+    IDD_SYSLINKER_FORM_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 524
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Ribbon
+//
+
+IDR_RIBBON_EN           RT_RIBBON_XML           "res\\ribbon1.mfcribbon-ms"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DLG_ENV_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_LINKRESULT_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CHILD_MAIN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_PROGRESS_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_LOADROM_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CUSTOM_TREE_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_EDIT_UNIT_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_EDIT_RELAY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG_ADMIN_MODE_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CHILD_EDIT_CHN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CHILD_EDIT_FACP_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CHILD_EDIT_RELAY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CHILD_EDIT_UNIT_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_ERRORCHECK_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_EDIT_CHN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_EDIT_FACP_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_INFO_MAIN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_LOGIN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_MAKEAUTO_ALLINPUT_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_MAKEAUTO_ALLINPUT1_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_MAKEAUTO_ONEINPUT_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_MAKEPTN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_PASSWORD_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_PRJVERSION_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_PSWITCH_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_PUMPINFO_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_SLPLOGIN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_TAB_PATTERN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_TAB_RELAY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_VERSION_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_VIEW_RELAY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLGINFOBASEPAGE_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMACCESS_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMAUTOMAKE_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMEDITLOGIC3_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMEMERGENCY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMEQUIP_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMFACP_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMLINKVIEW_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMLOADRELAYTABLE_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMLOCATION_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMPATTERN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMUNIT_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PATTERN_PROPERTY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROP_PAGE_DEVICETABLE_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROP_PAGE_EMERGENCY_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROP_PAGE_FACP_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROP_PAGE_LOCATION_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROP_PAGE_PATTERN_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROP_PAGE_PRJINFO_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SYSLINKER_FORM_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    ID_LOAD_CONTACTFACP     "Import a relay contact file\nOPEN"
+END
+
+STRINGTABLE
+BEGIN
+    ID_FILE_NEW             "Creates a new document."
+    ID_FILE_OPEN            "Opens an existing document."
+    ID_FILE_CLOSE           "Closes the current document."
+END
+
+STRINGTABLE
+BEGIN
+    ID_FILE_MRU_FILE1       "Opens the current document."
+END
+
+STRINGTABLE
+BEGIN
+    ID_APP_ABOUT            "Displays program information, version number, and copyright."
+    ID_APP_EXIT             "Asks if you want to save the document before exiting the application."
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_COPY            "Copies the selection and puts it in the clipboard."
+    ID_EDIT_CUT             "Cuts the selected area and puts it in the clipboard."
+    ID_EDIT_PASTE           "Pastes the content from clipboard."
+    ID_EDIT_UNDO            "Undoes the last action."
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_STATUS_BAR      "Shows or hides the status bar."
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_NEW           "Opens a different window for the current document."
+END
+
+#endif    // 영어 resources
 /////////////////////////////////////////////////////////////////////////////
 
 

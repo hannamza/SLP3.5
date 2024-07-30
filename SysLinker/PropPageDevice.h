@@ -17,7 +17,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_PROP_PAGE_DEVICETABLE };
+#else
+	enum { IDD = IDD_PROP_PAGE_DEVICETABLE_EN };
+#endif
 #endif
 
 protected:

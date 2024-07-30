@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgEnv, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgEnv::CDlgEnv(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_ENV, pParent)
 	, m_nSerialPort(0)
@@ -24,6 +25,21 @@ CDlgEnv::CDlgEnv(CWnd* pParent /*=NULL*/)
 {
 
 }
+#else
+CDlgEnv::CDlgEnv(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_ENV_EN, pParent)
+	, m_nSerialPort(0)
+	, m_strAddr(_T(""))
+	, m_strName(_T(""))
+	, m_strPwd(_T(""))
+	, m_strUser(_T(""))
+
+	, m_strPrjPath(_T(""))
+	, m_nDBPort(0)
+{
+
+}
+#endif
 
 CDlgEnv::~CDlgEnv()
 {
@@ -95,9 +111,15 @@ BOOL CDlgEnv::OnInitDialog()
 	m_cmbDataBit.SetCurSel(0);
 
 	//parity
+#ifndef ENGLISH_MODE
 	m_cmbParityBit.InsertString(0, L"짝수");
 	m_cmbParityBit.InsertString(1, L"홀수");
 	m_cmbParityBit.InsertString(2, L"없음");
+#else
+	m_cmbParityBit.InsertString(0, L"EVEN");
+	m_cmbParityBit.InsertString(1, L"ODD");
+	m_cmbParityBit.InsertString(2, L"NONE");
+#endif
 
 	m_cmbParityBit.SetItemData(0, 2);
 	m_cmbParityBit.SetItemData(1, 1);
@@ -213,7 +235,11 @@ void CDlgEnv::OnBnClickedOk()
 	nSel = m_cmbBaudrate.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"통신속도가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"The communication speed has not been selected.");
+#endif
 		return;
 	}
 	g_stConfig.nBaudrate = (int)m_cmbBaudrate.GetItemData(nSel);
@@ -221,7 +247,11 @@ void CDlgEnv::OnBnClickedOk()
 	nSel = m_cmbDataBit.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Databit가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"Databit has not been selected.");
+#endif
 		return;
 	}
 	g_stConfig.nDataBit = (int)m_cmbDataBit.GetItemData(nSel);
@@ -229,7 +259,11 @@ void CDlgEnv::OnBnClickedOk()
 	nSel = m_cmbStopBit.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Stopbit가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"Stopbit has not been selected.");
+#endif
 		return;
 	}
 	g_stConfig.nStopbit = (int)m_cmbStopBit.GetItemData(nSel);
@@ -237,7 +271,11 @@ void CDlgEnv::OnBnClickedOk()
 	nSel = m_cmbParityBit.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Paritybit가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"Paritybit has not been selected.");
+#endif
 		return;
 	}
 	g_stConfig.nParitybit = (int)m_cmbParityBit.GetItemData(nSel);

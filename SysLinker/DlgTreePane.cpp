@@ -160,7 +160,11 @@ void CDlgTreePane::RemoveAllData()
 int CDlgTreePane::FillPSwitchTree()
 {
 	m_ctrlTree.DeleteAllItems();
+#ifndef ENGLISH_MODE
 	HTREEITEM hRoot = m_ctrlTree.InsertItem(L"압력스위치 연동", 0, 0, TVI_ROOT);
+#else
+	HTREEITEM hRoot = m_ctrlTree.InsertItem(L"INTERLOCK PRESSURE SWITCH", 0, 0, TVI_ROOT);
+#endif
 	m_ctrlTree.SetItemData(hRoot, 0);
 	if (m_pRefFasSysData == nullptr)
 		return 0;
@@ -214,7 +218,11 @@ int CDlgTreePane::FillPSwitchTree()
 int CDlgTreePane::FillPumpTree()
 {
 	m_ctrlTree.DeleteAllItems();
+#ifndef ENGLISH_MODE
 	HTREEITEM hRoot = m_ctrlTree.InsertItem(L"펌프 연동", 0, 0, TVI_ROOT);
+#else
+	HTREEITEM hRoot = m_ctrlTree.InsertItem(L"INTERLOCK PUMP", 0, 0, TVI_ROOT);
+#endif
 	m_ctrlTree.SetItemData(hRoot, 0);
 	if (m_pRefFasSysData == nullptr)
 		return 0;

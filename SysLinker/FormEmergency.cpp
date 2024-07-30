@@ -43,6 +43,7 @@ UINT ThreadDeleteEB(LPVOID pParam)
 
 IMPLEMENT_DYNCREATE(CFormEmergency, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormEmergency::CFormEmergency()
 	: CFormView(IDD_FORMEMERGENCY)
 	, m_strName(_T(""))
@@ -56,6 +57,21 @@ CFormEmergency::CFormEmergency()
 	//m_pCurrentData = nullptr;
 	//m_nCurSel = -1;
 }
+#else
+CFormEmergency::CFormEmergency()
+	: CFormView(IDD_FORMEMERGENCY_EN)
+	, m_strName(_T(""))
+	, m_strAddr(_T(""))
+	, m_nNum(0)
+	, m_strBuild(_T(""))
+	, m_strStair(_T(""))
+	, m_strFloor(_T(""))
+{
+	m_bAdd = FALSE;
+	//m_pCurrentData = nullptr;
+	//m_nCurSel = -1;
+}
+#endif
 
 CFormEmergency::~CFormEmergency()
 {
@@ -123,9 +139,15 @@ void CFormEmergency::OnInitialUpdate()
 	CFormView::OnInitialUpdate();
 
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+#ifndef ENGLISH_MODE
 	m_ctrlList.InsertColumn(0, _T("번호"), LVCFMT_CENTER, 50);
 	m_ctrlList.InsertColumn(1, _T("이름"), LVCFMT_CENTER, 250);
 	m_ctrlList.InsertColumn(2, _T("주소"), LVCFMT_CENTER, 250);
+#else
+	m_ctrlList.InsertColumn(0, _T("NUMBER"), LVCFMT_CENTER, 50);
+	m_ctrlList.InsertColumn(1, _T("NAME"), LVCFMT_CENTER, 250);
+	m_ctrlList.InsertColumn(2, _T("ADDRESS"), LVCFMT_CENTER, 250);
+#endif
 	m_ctrlList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	InitList();
 	theApp.SetFormViewInitComplete(FV_EMERGENCY);
@@ -231,7 +253,13 @@ void CFormEmergency::OnBnClickedBtnSave()
 
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("비상방송 정보를 저장 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Saving the public address information. Wait for a moment.");
+#endif
+	
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -246,12 +274,20 @@ void CFormEmergency::OnBnClickedBtnSave()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"비상방송 정보 저장에 성공했습니다.");
+#else
+		AfxMessageBox(L"Successfully saved the public address information.");
+#endif
 		Log::Trace("Emergency broadcast information was saved successfully.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"비상방송 정보 저장에 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to save the public address information.");
+#endif
 		Log::Trace("Failed to save emergency broadcast information.");
 	}
 #else
@@ -275,18 +311,30 @@ void CFormEmergency::OnBnClickedBtnDel()
 	int nSel = m_ctrlList.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 비상방송 정보가 없습니다.");
+#else
+		AfxMessageBox(L"No public address information has been selected.");
+#endif
 		return;
 	}
-
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"선택된 비상방송 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the selected public address information?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		return;
+#endif
 
 	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("비상방송 정보를 삭제 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Deleting the public address information. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -301,12 +349,20 @@ void CFormEmergency::OnBnClickedBtnDel()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"비상방송 정보 삭제에 성공했습니다.");
+#else
+		AfxMessageBox(L"Successfully deleted the public address information.");
+#endif
 		Log::Trace("Emergency broadcast information was deleted successfully.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"비상방송 정보를 삭제 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the public address information.");
+#endif
 		Log::Trace("Failed to delete emergency broadcast information.");
 	}
 #else
@@ -402,19 +458,31 @@ int CFormEmergency::DataDelete()
 	int nSel = m_ctrlList.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 비상방송 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"No public address data has been selected.");
+#endif
 		return 0;
 	}
 	CRelayTableData * pTable = theApp.GetRelayTableData();
 	if (pTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"The project information doesn't exist.\nFailed to delete the data.");
+#endif
 		return 0;
 	}
 	YAdoDatabase * pDB = pTable->GetPrjDB();
 	if (pDB == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트에 데이터베이스 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"The project doesn't have any database information.\nFailed to delete the data.");
+#endif
 		return 0;
 	}
 
@@ -424,7 +492,11 @@ int CFormEmergency::DataDelete()
 	pData = (CDataEmBc*)m_ctrlList.GetItemData(nSel);
 	if (pData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"비상방송 정보가 없습니다.");
+#else
+		AfxMessageBox(L"No public address information.");
+#endif
 		return 0;
 	}
 	strSql.Format(L"SELECT * FROM TB_EM_BC WHERE EM_ID=%d "
@@ -433,7 +505,11 @@ int CFormEmergency::DataDelete()
 
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터베이스에서 비상방송 데이터를 가져오는데 실패했습니다. \n데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to retrieve the public address data from the database.\nFailed to delete the data.");
+#endif
 		return 0;
 	}
 
@@ -441,7 +517,11 @@ int CFormEmergency::DataDelete()
 	pDB->RSClose();
 	if (nCnt <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"해당 비상방송 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"No corresponding public address data.");
+#endif
 		return 0;
 	}
 
@@ -452,7 +532,11 @@ int CFormEmergency::DataDelete()
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
 		pDB->RollbackTransaction();
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the data.");
+#endif
 		return 0;
 	}
 
@@ -465,7 +549,11 @@ int CFormEmergency::DataDelete()
 	if (spManager == nullptr)
 	{
 		pDB->RollbackTransaction();
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the data.");
+#endif
 		return 0;
 	}
 	spManager->RemoveEmergency(pData->GetEmID());
@@ -484,12 +572,20 @@ int CFormEmergency::DataDelete()
 	if (bRet)
 	{
 		strMsg1.Format(_T("The emergency broadcast [ID : %d, Name : %s, Address : %s] has been successfully deleted from the module table file."), nNum, strRemarks, strCommContent);
+#ifndef ENGLISH_MODE
 		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에서 삭제하는 데에 성공했습니다."), nNum, strRemarks, strCommContent);
+#else
+		strMsg2.Format(_T("Successfully deleted the public address [Number: %d, Name: %s, Address: %s] from the module table."), nNum, strRemarks, strCommContent);
+#endif
 	}
 	else
 	{
 		strMsg1.Format(_T("Deleting the emergency broadcast [ID : %d, Name : %s, Address : %s] from the module table file failed."), nNum, strRemarks, strCommContent);
+#ifndef ENGLISH_MODE
 		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에서 삭제하는 데에 실패했습니다."), nNum, strRemarks, strCommContent);
+#else
+		strMsg2.Format(_T("Failed to delete the public address [Number: %d, Name: %s, Address: %s] from the module table."), nNum, strRemarks, strCommContent);
+#endif
 	}
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -513,20 +609,32 @@ int CFormEmergency::DataMultiDelete()
 	nCnt = m_ctrlList.GetSelectedCount();
 	if (nCnt < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 비상방송 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"No public address data has been selected.");
+#endif
 		return 0;
 	}
 
 	CRelayTableData * pTable = theApp.GetRelayTableData();
 	if (pTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"The project information doesn't exist.\nFailed to delete the data.");
+#endif
 		return 0;
 	}
 	YAdoDatabase * pDB = pTable->GetPrjDB();
 	if (pDB == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트에 데이터베이스 정보가 없습니다. \n데이터를 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"The project doesn't have any database information.\nFailed to delete the data.");
+#endif
 		return 0;
 	}
 
@@ -549,7 +657,11 @@ int CFormEmergency::DataMultiDelete()
 		pData = (CDataEmBc*)m_ctrlList.GetItemData(vtSel[i]);
 		if (pData == nullptr)
 		{
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 비상방송 정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve the public address information.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -559,7 +671,11 @@ int CFormEmergency::DataMultiDelete()
 		);
 		if (pDB->OpenQuery(strSql) == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 비상방송 정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve the public address information from the database.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -574,7 +690,11 @@ int CFormEmergency::DataMultiDelete()
 
 		if (pDB->ExecuteSql(strSql) == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 비상방송 정보를 삭제하는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to delete the public address information from the database.";
+#endif
 			bError = TRUE;
 			break;;
 		}
@@ -600,7 +720,11 @@ int CFormEmergency::DataMultiDelete()
 		m_ctrlList.DeleteItem(vtSel[i]);
 	}
 	InitData();
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"데이터를 삭제하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully deleted the data.");
+#endif
 	return 1;
 }
 int CFormEmergency::DataAdd()
@@ -626,7 +750,11 @@ int CFormEmergency::DataAdd()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 추가하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to add the data.");
+#endif
 		return 0;
 	}
 	pData = new CDataEmBc;
@@ -635,7 +763,11 @@ int CFormEmergency::DataAdd()
 	spManager = pTable->GetEmergencyManager();
 	if (spManager == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 추가하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to add the data.");
+#endif
 		return 0;
 	}
 	spManager->AddTail(pData);
@@ -671,12 +803,20 @@ int CFormEmergency::DataAdd()
 	if (bRet)
 	{
 		strMsg1.Format(_T("The new emergency broadcast [ID : %d, Name : %s, Address : %s] has been successfully added to the module table file."), nNum, strRemarks, strCommContent);
+#ifndef ENGLISH_MODE
 		strMsg2.Format(_T("새 비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 추가하는 데에 성공했습니다."), nNum, strRemarks, strCommContent);
+#else
+		strMsg2.Format(_T("Successfully added the new public address [Number: %d, Name: %s, Address: %s] to the module table."), nNum, strRemarks, strCommContent);
+#endif
 	}
 	else
 	{
 		strMsg1.Format(_T("Adding the emergency broadcast [ID : %d, Name : %s, Address : %s] to the module table file failed."), nNum, strRemarks, strCommContent);
+#ifndef ENGLISH_MODE
 		strMsg2.Format(_T("새 비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 추가하는 데에 실패했습니다."), nNum, strRemarks, strCommContent);
+#else
+		strMsg2.Format(_T("Failed to add the new public address [Number: %d, Name: %s, Address: %s] to the module table."), nNum, strRemarks, strCommContent);
+#endif
 	}
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -706,7 +846,11 @@ int CFormEmergency::DataSave()
 	nSel = m_ctrlList.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 비상방송이 없습니다.");
+#else
+		AfxMessageBox(L"No public address has been selected.");
+#endif
 		return 0; 
 	}
 	pData = (CDataEmBc*)m_ctrlList.GetItemData(nSel);
@@ -725,7 +869,11 @@ int CFormEmergency::DataSave()
 
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터베이스에서 비상방송정보를 가져오는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to retrieve the public address information from the database.");
+#endif
 		return 0;
 	}
 
@@ -735,8 +883,13 @@ int CFormEmergency::DataSave()
 	{
 		if (m_bAdd == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			if (AfxMessageBox(L"기존 데이터가 없습니다. 새로 추가하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 				return 0;
+#else
+			if (AfxMessageBox(L"No existing data. Do you want to add a new one?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+				return 0;
+#endif
 		}
 		return DataAdd();
 	}
@@ -765,14 +918,22 @@ int CFormEmergency::DataSave()
 	int nIdx = FindItem(m_nNum);
 	if (nIdx < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"입력한 비상방송 아이디의 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"The public address ID you entered does not have data.");
+#endif
 		return 0;
 	}
 	pData = (CDataEmBc *)m_ctrlList.GetItemData(nIdx);
 
 	if (pData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"입력한 비상방송 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"No public address data entered.");
+#endif
 		return 0;
 	}
 	strSql.Format(L"UPDATE TB_EM_BC SET EM_NAME='%s' , EM_ADDR='%s' , EM_ID=%d "
@@ -783,7 +944,11 @@ int CFormEmergency::DataSave()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to edit the data.");
+#endif
 		return 0;
 	}
 
@@ -809,12 +974,20 @@ int CFormEmergency::DataSave()
 	if (bRet)
 	{
 		strMsg1.Format(_T("The new emergency broadcast [ID : %d, Name : %s, Address : %s] has been successfully modified in the module table file."), nNum, strRemarks, strCommContent);
+#ifndef ENGLISH_MODE
 		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 수정하는 데에 성공했습니다."), nNum, strRemarks, strCommContent);
+#else
+		strMsg2.Format(_T("Successfully edited the public address [Number: %d, Name: %s, Address: %s] from the module table."), nNum, strRemarks, strCommContent);
+#endif
 	}
 	else
 	{
 		strMsg1.Format(_T("Failed to modify the emergency broadcast [ID : %d, Name : %s, Address : %s] in the module table file failed."), nNum, strRemarks, strCommContent);
+#ifndef ENGLISH_MODE
 		strMsg2.Format(_T("비상방송 [번호 : %d, 이름 : %s, 주소 : %s]를 중계기 일람표에 수정하는 데에 실패했습니다."), nNum, strRemarks, strCommContent);
+#else
+		strMsg2.Format(_T("Failed to edit the public address [Number: %d, Name: %s, Address: %s] from the module table."), nNum, strRemarks, strCommContent);
+#endif
 	}
 
 	Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -863,19 +1036,34 @@ int CFormEmergency::FindItem(int nID)
 void CFormEmergency::OnBnClickedBtnLoad()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"기존 비상방송 데이터가 모두 삭제됩니다.\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		return; 
 	}
+#else
+	if (AfxMessageBox(L"All existing public address data will be deleted.\nDo you still want to proceed ? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	{
+		return;
+	}
+#endif
 
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시오.");
+#else
+		AfxMessageBox(L"Please log in to your project or create a new one before proceeding.");
+#endif
 		return; 
 	}
 	CExcelWrapper xls;
+#ifndef ENGLISH_MODE
 	CString strDefault = L"*.xls", strFilter = L"비상방송 데이터(*.xls)|*.xls|All Files (*.*)|*.*||";
+#else
+	CString strDefault = L"*.xls", strFilter = L"Public Address Data(*.xls)|*.xls|All Files (*.*)|*.*||";
+#endif
 	CFileDialog FileDialog(TRUE, NULL, strDefault, OFN_HIDEREADONLY, strFilter, this);
 	int i,nSheetCnt;
 	BOOL bRead = FALSE;
@@ -893,7 +1081,11 @@ void CFormEmergency::OnBnClickedBtnLoad()
 	CString strPath = FileDialog.GetPathName();
 	if (xls.Open(strPath) == false)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel파일을 여는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to open the Excel file.");
+#endif
 		return;
 	}
 
@@ -914,7 +1106,11 @@ void CFormEmergency::OnBnClickedBtnLoad()
 
 	if (bRead == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel파일 내에 'EB' Sheet가 없습니다.");
+#else
+		AfxMessageBox(L"There is no 'EB' sheet in the Excel file.");
+#endif
 		return;
 	}
 

@@ -149,9 +149,16 @@ enum UBCM_DATAINT //< WPARAM에 INT TYPE
 };
 static const UINT UDBC_ALLDATA_INIT = RegisterWindowMessage(L"F923ECC4-6E7C-4448-8245-BFE9E078AE2B"); //< 프로젝트 열기/닫기/생성 일때
 
+#ifndef ENGLISH_MODE
 #define CHANGETREE_INPUT_TEXT			_T("입력")
 #define CHANGETREE_OUTPUT_TEXT			_T("출력")
 #define CHANGETREE_PATTERN_TEXT			_T("사용하는패턴")
+#else
+#define CHANGETREE_INPUT_TEXT			_T("INPUT")
+#define CHANGETREE_OUTPUT_TEXT			_T("OUTPUT")
+#define CHANGETREE_PATTERN_TEXT			_T("PATTERN IN USE")
+#endif
+
 enum 
 {
 	DATA_ADD = 1, 
@@ -228,6 +235,7 @@ enum
 	CHK_CNT,
 };
 
+#ifndef ENGLISH_MODE
 static CString g_strErrChkText[CHK_CNT] = {
 	L"전체",
 	L"패턴내 출력개수 초과",
@@ -238,6 +246,18 @@ static CString g_strErrChkText[CHK_CNT] = {
 	L"사용되지 않는 출력",
 	L"출력없는 입력",
 };
+#else
+static CString g_strErrChkText[CHK_CNT] = {
+	L"ALL",
+	L"EXCEEDED THE OUTPUT COUNT FOR THE PATTERN",
+	L"CHARACTER LIMIT EXCEEDED",
+	L"DUPLICATE FLOOR NUMBER",
+	L"NO INPUT TYPE",
+	L"EXCEEDED THE INTERLOCK OUTPUT COUNT",
+	L"UNUSED OUTPUT",
+	L"INPUT WITHOUT OUTPUT",
+};
+#endif
 
 struct ST_ERRCHECK
 {

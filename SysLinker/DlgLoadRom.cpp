@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgLoadRom, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgLoadRom::CDlgLoadRom(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_LOADROM, pParent)
 	, m_strPrjName(_T(""))
@@ -25,6 +26,22 @@ CDlgLoadRom::CDlgLoadRom(CWnd* pParent /*=NULL*/)
 	m_pRefRelayTable = nullptr;
 	m_bFoundRvFile = FALSE;
 }
+#else
+CDlgLoadRom::CDlgLoadRom(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_LOADROM_EN, pParent)
+	, m_strPrjName(_T(""))
+	, m_strDBName(_T(""))
+	, m_strPrjPath(_T(""))
+	, m_strPrjVersion(_T(""))
+	, m_strSiteName(_T(""))
+	, m_strSiteManager(_T(""))
+	, m_strSitePhone(_T(""))
+	, m_strRomPath(_T(""))
+{
+	m_pRefRelayTable = nullptr;
+	m_bFoundRvFile = FALSE;
+}
+#endif
 
 CDlgLoadRom::~CDlgLoadRom()
 {
@@ -202,13 +219,21 @@ void CDlgLoadRom::OnBnClickedBtnBrowser()
 	UpdateData(FALSE);
 	if (m_ptrList.GetCount() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"ROM 파일이 없습니다.");
+#else
+		AfxMessageBox(L"The ROM file doesn't exist.");
+#endif
 		return;
 	}
 
 	if (m_bFoundRvFile == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(_T("역변환 정보 파일이 없습니다."));
+#else
+		AfxMessageBox(_T("The inverse transformation information file doesn't exist."));
+#endif
 	}
 }
 
@@ -219,7 +244,11 @@ void CDlgLoadRom::OnBnClickedOk()
 	UpdateData();
 	if (m_strPrjName.GetLength() == 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 이름이 비었습니다.");
+#else
+		AfxMessageBox(L"The project name is empty.");
+#endif
 		return;
 	}
 // 	if (m_strSiteName.GetLength() == 0)
@@ -245,13 +274,21 @@ void CDlgLoadRom::OnBnClickedOk()
 
 	if (m_ptrList.GetCount() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"ROM 파일이 없습니다.");
+#else
+		AfxMessageBox(L"The ROM file doesn't exist.");
+#endif
 		return;
 	}
 
 	if (m_pRefRelayTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 기초 정보가 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"The basic project information has not been set.");
+#endif
 		return;
 	}
 	m_pRefRelayTable->SetProjectInfo(m_strPrjName, m_strSiteName, COleDateTime::GetCurrentTime(), L"admin"

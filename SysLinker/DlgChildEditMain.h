@@ -19,7 +19,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_CHILD_MAIN };
+#else
+	enum { IDD = IDD_DLG_CHILD_MAIN_EN };
+#endif
 #endif
 
 protected:
@@ -48,7 +52,11 @@ public:
 // 	CDlgChildEditFacp	*	m_pFacpPage;
 public:
 	void SetTreeItem(ST_TREEITEM * pCurItem, ST_TREEITEM * pNewItem) { m_pRefCurData = pCurItem; m_pRefNewData = pNewItem; };
+#ifndef ENGLISH_MODE
 	BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_MAIN, pParent); }
+#else
+	BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_MAIN_EN, pParent); }
+#endif
 	void SetMainWindow(CFormView * pMainForm) { m_pMainForm = pMainForm; }
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSize(UINT nType, int cx, int cy);

@@ -160,7 +160,11 @@ void CDkPanePattern::OnContextMenu(CWnd* pWnd, CPoint point)
 	pWndTree->SetFocus();
 	
 	CMenu menu, *pContext;
+#ifndef ENGLISH_MODE
 	menu.LoadMenu(IDR_POPUP_PATTERN_VIEW);
+#else
+	menu.LoadMenu(IDR_POPUP_PATTERN_VIEW_EN);
+#endif
 	pContext = menu.GetSubMenu(0);
 	pContext->TrackPopupMenu(TPM_LEFTALIGN, point.x, point.y, this);
 
@@ -207,7 +211,11 @@ int CDkPanePattern::InitTree()
 {
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"감지기/중계기의 정보가 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"The detector/module's information has not been set.");
+#endif
 		return 0;
 	}
 	RemoveAllTreeData();

@@ -57,9 +57,15 @@ BOOL CDlgInputChange::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	VERIFY(m_ctrlInputList.m_cImageList.Create(IDB_CHECKBOXES, 16, 3, RGB(255, 0, 255)));
 	m_ctrlInputList.m_HeaderCtrl.SetImageList(&m_ctrlInputList.m_cImageList);
+#ifndef ENGLISH_MODE
 	m_ctrlInputList.InsertColumn(0, _T("이전 회로"), LVCFMT_LEFT, 350);
 	m_ctrlInputList.InsertColumn(1, _T("새 회로"), LVCFMT_LEFT, 350);
 	m_ctrlInputList.InsertColumn(2, _T("수정"), LVCFMT_LEFT, 70);
+#else
+	m_ctrlInputList.InsertColumn(0, _T("PREVIOUS CIRCUIT"), LVCFMT_LEFT, 350);
+	m_ctrlInputList.InsertColumn(1, _T("NEW CIRCUIT"), LVCFMT_LEFT, 350);
+	m_ctrlInputList.InsertColumn(2, _T("EDIT"), LVCFMT_LEFT, 70);
+#endif
 	m_ctrlInputList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	int i;
@@ -150,7 +156,11 @@ void CDlgInputChange::DisplayCompareResult(
 
 		m_ctrlInputList.InsertItem(nIdx, pItem->m_pOldCopyDev->GetInputFullName(),crFore,crBack);
 		m_ctrlInputList.SetItemText(nIdx,1, pItem->m_pNewCopyDev->GetInputFullName(), crFore, crBack);
+#ifndef ENGLISH_MODE
 		m_ctrlInputList.SetItemText(nIdx, 2, L"변경");
+#else
+		m_ctrlInputList.SetItemText(nIdx, 2, L"CHANGE");
+#endif
 		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);	
 		m_ctrlInputList.SetItemData(nIdx, (DWORD_PTR)pItem);
 		nIdx++;
@@ -173,7 +183,11 @@ void CDlgInputChange::DisplayCompareResult(
 
 		m_ctrlInputList.InsertItem(nIdx, pItem->m_pOldCopyDev->GetInputFullName(), crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 1, L"", crFore, crBack);
+#ifndef ENGLISH_MODE
 		m_ctrlInputList.SetItemText(nIdx, 2, L"삭제");
+#else
+		m_ctrlInputList.SetItemText(nIdx, 2, L"DELETE");
+#endif
 		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);	
 		m_ctrlInputList.SetItemData(nIdx, (DWORD_PTR)pItem);
 		nIdx++;
@@ -196,7 +210,11 @@ void CDlgInputChange::DisplayCompareResult(
 
 		m_ctrlInputList.InsertItem(nIdx, L"", crFore, crBack);
 		m_ctrlInputList.SetItemText(nIdx, 1, pItem->m_pNewCopyDev->GetInputFullName(), crFore, crBack);
+#ifndef ENGLISH_MODE
 		m_ctrlInputList.SetItemText(nIdx, 2, L"추가");
+#else
+		m_ctrlInputList.SetItemText(nIdx, 2, L"ADD");
+#endif
 		m_ctrlInputList.SetCheckbox(nIdx, 2, 1);	
 		m_ctrlInputList.SetItemData(nIdx, (DWORD_PTR)pItem);
 		nIdx++;

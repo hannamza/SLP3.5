@@ -63,6 +63,7 @@ void CTempPtn::AddTempDevice(CDataDevice * pRefDev,int nInsertType)
 	m_ptrTempPntItemList.AddTail(pItem);
 }
 
+#ifndef ENGLISH_MODE
 CFormLoadRelayTable::CFormLoadRelayTable()
 	: CFormView(IDD_FORMLOADRELAYTABLE)
 	, m_strPath(_T(""))
@@ -81,6 +82,26 @@ CFormLoadRelayTable::CFormLoadRelayTable()
 	m_nJobIndex = 0; 
 	m_nListCtrlSelIndex = -1;
 }
+#else
+CFormLoadRelayTable::CFormLoadRelayTable()
+	: CFormView(IDD_FORMLOADRELAYTABLE_EN)
+	, m_strPath(_T(""))
+{
+	m_pDlgInput = nullptr;
+	m_pDlgOutput = nullptr;
+	m_pDlgPattern = nullptr;
+	m_nCompareType = CMP_NAME;
+	m_pNewRelayTable = nullptr;
+	m_bStopFlag = FALSE;
+	m_pRelayThread = nullptr;
+	m_bPreview = FALSE;
+	m_bDiffMaking = FALSE;
+	m_bNewFileLoaded = FALSE;
+	m_nProgJobCount = 0;
+	m_nJobIndex = 0;
+	m_nListCtrlSelIndex = -1;
+}
+#endif
 
 CFormLoadRelayTable::~CFormLoadRelayTable()
 {
@@ -157,9 +178,15 @@ void CFormLoadRelayTable::OnInitialUpdate()
 	m_ctrlProgAll.SetRange(0, 100);
 	m_ctrlProgDetail.SetRange(0, 100);
 
+#ifndef ENGLISH_MODE
 	m_ctrlTab.InsertItem(0, L"입력");
 	m_ctrlTab.InsertItem(1, L"출력");
 	m_ctrlTab.InsertItem(2, L"패턴");
+#else
+	m_ctrlTab.InsertItem(0, L"INPUT");
+	m_ctrlTab.InsertItem(1, L"OUTPUT");
+	m_ctrlTab.InsertItem(2, L"PATTERN");
+#endif
 
 	if (m_pDlgInput == nullptr)
 		m_pDlgInput = new CDlgInputChange;
@@ -184,7 +211,11 @@ void CFormLoadRelayTable::OnInitialUpdate()
 
 	m_ctrlList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_ctrlList.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+#ifndef ENGLISH_MODE
 	m_ctrlList.InsertColumn(1, _T("파일 경로"), LVCFMT_LEFT, 2000);
+#else
+	m_ctrlList.InsertColumn(1, _T("FILE PATH"), LVCFMT_LEFT, 2000);
+#endif
 
 	SetButtonState();
 }
@@ -211,11 +242,15 @@ void CFormLoadRelayTable::SetTabPos()
 
 	CRect rc, rcTab , rcPrg;
 	GetClientRect(&rc);
-	rc.DeflateRect(4, 135, 4, 4);
+	//20240718 GBM start - 영문 버전 컨트롤 가림 오류 수정
+	//rc.DeflateRect(4, 135, 4, 4);
+	rc.DeflateRect(4, 185, 4, 4);
+	//20240718 GBM end
 
 	m_ctrlTab.MoveWindow(&rc);
 	rcTab = rc;
-	rcTab = CRect(0, 22, rc.Width()-8, rc.Height() -4);
+	rcTab = CRect(0, 72, rc.Width() - 8, rc.Height() - 4);
+
 	if (m_pDlgOutput && m_pDlgOutput->GetSafeHwnd())
 		m_pDlgOutput->MoveWindow(&rcTab);
 	if (m_pDlgPattern && m_pDlgPattern->GetSafeHwnd())
@@ -264,7 +299,11 @@ void CFormLoadRelayTable::OnBnClickedBtnPreview()
 	UpdateData();
 	if(CheckUpdateCondition() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴 정보중 에 수동/자동 생성 여부를 설정하지 않았습니다.\n수동/자동 여부를 설정하고 다시 실행해 주십시오.");
+#else
+		AfxMessageBox(L"You have not set whether to manually or automatically create the pattern information.\nPlease set Manual/Automatic and run it again.");
+#endif
 		return;
 	}
 	
@@ -370,25 +409,41 @@ LRESULT CFormLoadRelayTable::OnProgressEvent(WPARAM wp, LPARAM lp)
 void CFormLoadRelayTable::OnBnClickedBtnApply()
 {
 	//20240408 GBM start - 새 중계기 일람표 적용 시 프로그램 자동 종료
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트 업데이트를 성공하면 자동으로 프로그램이 종료됩니다.\n"
 		L"진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 	{
 		return;
 	}
+#else
+	if (AfxMessageBox(L"When the project is successfully updated using the new module table, the program will automatically exit.\n"
+		L"Do you want to proceed?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+	{
+		return;
+	}
+#endif
 	//20240408 GBM end
 
 	int nModuleTableCount = 0;
 	nModuleTableCount = m_ctrlList.GetItemCount();
 	if (nModuleTableCount == 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 중계기 일람표가 없습니다.");
+#else
+		AfxMessageBox(L"No module table selected.");
+#endif
 		return;
 	}
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(CheckUpdateCondition() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"패턴 정보중에 수동/자동 생성 여부를 설정하지 않았습니다.\n수동/자동 여부를 설정하고 다시 실행해 주십시오.");
+#else
+		AfxMessageBox(L"You have not set whether to create manually or automatically in the pattern information.\nPlease set Manual/Automatic and run it again.");
+#endif
 		return;
 	}
 
@@ -404,7 +459,11 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 	strtemp = pOldTable->GetProjectVersionPath();
 	if(strtemp.GetLength() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트의 디렉토리 위치정보가 없어 적용하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to apply because the project doesn't have a directory location.");
+#endif
 		return;
 	}
 
@@ -451,7 +510,11 @@ void CFormLoadRelayTable::OnBnClickedRdName()
 void CFormLoadRelayTable::OnBnClickedBtnBrowser()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+#ifndef ENGLISH_MODE
 	CString strDefault = L"*.xls", strFilter = L"Excel 중계기일람표 (*.xls,*.xlsm,*.xlsx)|*.xls;*.xlsm;*.xlsx||All Files (*.*)|*.*||";
+#else
+	CString strDefault = L"*.xls", strFilter = L"Excel Module Table (*.xls,*.xlsm,*.xlsx)|*.xls;*.xlsm;*.xlsx||All Files (*.*)|*.*||";
+#endif
 	CFileDialog FileDialog(TRUE, NULL, strDefault, OFN_HIDEREADONLY| OFN_ALLOWMULTISELECT, strFilter, this);
 	CString strFile,strPath;
 	TCHAR buffer[4096] = { 0 }; //버퍼
@@ -484,13 +547,21 @@ void CFormLoadRelayTable::OnBnClickedBtnBrowser()
 			}
 			catch (...)
 			{
+#ifndef ENGLISH_MODE
 				AfxMessageBox(L"중계기 일람표에서 수신기 번호를 가져오는데 실패했습니다.");
+#else
+				AfxMessageBox(L"Failed to retrieve the FACP number from the module table.");
+#endif
 				continue;
 			}
 
 			if (CheckDuplicate(nFacp) == 0)
 			{
+#ifndef ENGLISH_MODE
 				AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
+#else
+				AfxMessageBox(L"The FACP number you entered already exists.");
+#endif
 				return;
 			}
 
@@ -516,13 +587,21 @@ void CFormLoadRelayTable::OnBnClickedBtnBrowser()
 		}
 		catch (...)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"중계기 일람표에서 수신기 번호를 가져오는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to retrieve the FACP number from the module table.");
+#endif
 			return;
 		}
 
 		if (CheckDuplicate(nFacp) == 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"입력한 수신기 번호는 이미 있습니다.");
+#else
+			AfxMessageBox(L"The FACP number you entered already exists.");
+#endif
 			return;
 		}
 
@@ -568,8 +647,13 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			nRet = me->ApplyDiffDataProc();
 			if (nRet > 0)
 			{
+#ifndef ENGLISH_MODE
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 성공했습니다.\n"
 					L"프로그램이 자동으로 종료되면 다시 실행해 주시기 바랍니다.");
+#else
+				AfxMessageBox(L"Successfully updated the project using the new module table.\n"
+					L"When the program automatically exits, please run it again.");
+#endif
 
 				Log::Trace("The new module file has been successfully applied and this program ends!");
 
@@ -577,7 +661,11 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 실패했습니다.");
+#else
+				AfxMessageBox(L"Failed to update the project using the new module table.");
+#endif
 				Log::Trace("Applying the new module file failed!");
 			}
 #else
@@ -645,7 +733,11 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 		pNewTable = LoadNewRelayTable();
 		if (pNewTable == 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"Excel 파일을 읽어오는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to read the Excel file.");
+#endif
 			return -1;
 		}
 	}
@@ -770,7 +862,11 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 		);
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_FINISH, 0, 0);
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"미리보기를 완료했습니다.");
+#else
+	AfxMessageBox(L"Preview complete.");
+#endif
 
 #ifdef _DEBUG
 // 	CDataDevice * pDevTemp;
@@ -808,7 +904,11 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		pNewTable = LoadNewRelayTable();
 		if (pNewTable == 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"Excel 파일을 읽어오는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to read the Excel file.");
+#endif
 			m_pNewRelayTable->SendProgStep(this, PROG_RESULT_ERROR, 0, 0);
 			return -1;
 		}
@@ -888,24 +988,41 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		bRet = CNewDBManager::Instance()->CheckAndCreateGT1DBTables();
 		if (bRet)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully created the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE).");
+#endif
 			Log::Trace("Inserting new DB table succeeded!");
 		}
 		else
 		{
+			
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+#else
+			GF_AddLog(L"Failed to create the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE). Please check the DB.");
+#endif
 			Log::Trace("Inserting new DB table failed!");
 		}
 
 		bRet = CNewDBManager::Instance()->InsertDatasIntoGT1DBTables();
 		if (bRet)
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+#else
+			GF_AddLog(L"Successfully added the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data.");
+#endif
 			Log::Trace("GT1 DB table insertion succeeded!");
 		}
 		else
 		{
+#ifndef ENGLISH_MODE
 			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+#else
+			GF_AddLog(L"Failed to add the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data. Please check the DB.");
+#endif
 			Log::Trace("GT1 DB table insertion failed!");
 		}
 
@@ -915,12 +1032,20 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
 	if (bRet)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"설비 정보를 DB에 입력하는 데에 성공했습니다.");
+#else
+		GF_AddLog(L"Successfully entered the equipment information into the DB.");
+#endif
 		Log::Trace("Equipment information was successfully entered into the DB!");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"설비 정보를 DB에 입력하는 데에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to enter the equipment information into the DB.");
+#endif
 		Log::Trace("Failed to input facility information into DB!");
 	}
 
@@ -940,12 +1065,20 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 			bRet = CNewExcelManager::Instance()->UpdateEquipmentInfo(theApp.m_pFasSysData->GetPrjName());
 			if (bRet)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 성공했습니다.");
+#else
+				GF_AddLog(L"Successfully saved the new equipment definition to the module table.");
+#endif
 				Log::Trace("Successfully saved equipment information to new module table file!");
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"새 설비 정의를 중계기 일람표에 저장하는 데에 실패했습니다.");
+#else
+				GF_AddLog(L"Failed to save the new equipment definition to the module table.");
+#endif
 				Log::Trace("Failed to save equipment information to new module table file!");
 			}
 
@@ -955,7 +1088,11 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"새 중계기 일람표를 복사하는 데에 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to copy the new module table.");
+#endif
 		Log::Trace("Failed to copy new module table file!");
 	}
 #endif
@@ -1139,7 +1276,11 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 
 
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_FINISH, 0, 0);
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"새로운 일람표 적용을 완료했습니다.");
+#else
+	AfxMessageBox(L"Applied the new table.");
+#endif
 	return 1;
 }
 
@@ -1694,7 +1835,11 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 
 	if(m_arrPath.GetCount() <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 일람표가 없습니다.");
+#else
+		AfxMessageBox(L"No tables have been selected.");
+#endif
 		return nullptr;
 	}
 	
@@ -4657,7 +4802,11 @@ void CFormLoadRelayTable::OnBnClickedBtnDelete()
 	{
 		if (m_nListCtrlSelIndex < 0)
 		{
+#ifndef ENGLISH_MODE
 			AfxMessageBox(L"선택된 일람표가 없습니다.");
+#else
+			AfxMessageBox(L"No tables have been selected.");
+#endif
 			return;
 		}
 

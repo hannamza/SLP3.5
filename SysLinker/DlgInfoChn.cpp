@@ -17,6 +17,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgInfoChn, CDlgInfoBasePage)
 
+#ifndef ENGLISH_MODE
 CDlgInfoChn::CDlgInfoChn(CWnd* pParent /*=NULL*/)
 	: CDlgInfoBasePage(IDD_DLG_INFO_EDIT_CHN, pParent)
 	, m_strName(_T(""))
@@ -24,6 +25,15 @@ CDlgInfoChn::CDlgInfoChn(CWnd* pParent /*=NULL*/)
 {
 
 }
+#else
+CDlgInfoChn::CDlgInfoChn(CWnd* pParent /*=NULL*/)
+	: CDlgInfoBasePage(IDD_DLG_INFO_EDIT_CHN_EN, pParent)
+	, m_strName(_T(""))
+	, m_nNum(0)
+{
+
+}
+#endif
 
 CDlgInfoChn::~CDlgInfoChn()
 {
@@ -271,9 +281,15 @@ BOOL CDlgInfoChn::GetChangeData()
 		if (m_pRefFasSysData->GetChannelByNum(pFacp->GetFacpNum(), pUnit->GetUnitNum(), m_nNum) != nullptr)
 		{
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"%02d번 수신기 %2d유닛에 %d로 등록된 계통이 이미 있습니다.\n"
 				L"현재 계통에 속해 있는 모든 회로를 이동하시겠습니까?"
 				, pFacp->GetFacpNum(), pUnit->GetUnitNum(), m_nNum);
+#else
+			strError.Format(L"There is already a loop registered as [%d] in Unit Number [%02d] of FACP Number [%02d].\n"
+				L"Do you want to move all circuits that belong to the loop?"
+				, m_nNum, pUnit->GetUnitNum(), pFacp->GetFacpNum());
+#endif
 			if (AfxMessageBox(strError, MB_ICONQUESTION | MB_YESNO) != IDYES)
 				return FALSE;
 		}

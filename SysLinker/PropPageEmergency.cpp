@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CPropPageEmergency, CPropertyPage)
 
+#ifndef ENGLISH_MODE
 CPropPageEmergency::CPropPageEmergency()
 	: CPropertyPage(IDD_PROP_PAGE_EMERGENCY)
 	, m_bBuild(FALSE)
@@ -30,8 +31,29 @@ CPropPageEmergency::CPropPageEmergency()
 	, m_bRoomLevel(FALSE)
 {
 	m_pRefFasSysData = nullptr;
-
 }
+#else
+CPropPageEmergency::CPropPageEmergency()
+	: CPropertyPage(IDD_PROP_PAGE_EMERGENCY_EN)
+	, m_bBuild(FALSE)
+	, m_bBtype(FALSE)
+	, m_bBtypeBuild(FALSE)
+	, m_bStair(FALSE)
+	, m_bStairBuild(FALSE)
+	, m_bStairBtype(FALSE)
+	, m_bLevel(FALSE)
+	, m_bLevelBuild(FALSE)
+	, m_bLevelBType(FALSE)
+	, m_bLevelStair(FALSE)
+	, m_bRoom(FALSE)
+	, m_bRoomBuild(FALSE)
+	, m_bRoomBType(FALSE)
+	, m_bRoomStair(FALSE)
+	, m_bRoomLevel(FALSE)
+{
+	m_pRefFasSysData = nullptr;
+}
+#endif
 
 CPropPageEmergency::~CPropPageEmergency()
 {

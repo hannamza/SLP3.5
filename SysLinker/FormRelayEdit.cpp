@@ -307,12 +307,20 @@ LRESULT CFormRelayEdit::OnEditDlgDataChange(WPARAM wp, LPARAM lp)
 
 	if (nRet <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"실패");
+#else
+		AfxMessageBox(L"FAILURE");
+#endif
 		return 0;
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"성공");
+#else
+		AfxMessageBox(L"SUCCESS");
+#endif
 	}
 	return 1;
 }

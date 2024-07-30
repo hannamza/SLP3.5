@@ -13,6 +13,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgLogIn, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgLogIn::CDlgLogIn(YAdoDatabase * pMainDB , CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_LOGIN, pParent)
 	, m_strUser(_T(""))
@@ -33,6 +34,28 @@ CDlgLogIn::CDlgLogIn(YAdoDatabase * pMainDB , CWnd* pParent /*=NULL*/)
 	m_wMinor = 0;
 	m_bVersionTempSelected = FALSE;
 }
+#else
+CDlgLogIn::CDlgLogIn(YAdoDatabase * pMainDB, CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_LOGIN_EN, pParent)
+	, m_strUser(_T(""))
+	, m_strPwd(_T(""))
+	, m_strPrjName(_T(""))
+	, m_strCreateDate(_T(""))
+	, m_strMaker(_T(""))
+	, m_strPrjVersion(_T(""))
+	, m_strModifyDate(_T(""))
+	, m_strModifier(_T(""))
+{
+	m_pRefMainDB = pMainDB;
+	m_nSelectPrjType = 0;
+	m_strOpenPrjPath = L"";
+	m_strOpenPrjName = L"";
+	//m_strOpenDBName = L"";
+	m_wMajor = 1;
+	m_wMinor = 0;
+	m_bVersionTempSelected = FALSE;
+}
+#endif
 
 CDlgLogIn::~CDlgLogIn()
 {
@@ -97,30 +120,50 @@ void CDlgLogIn::OnBnClickedOk()
 	hItem = m_ctrlProject.GetSelectedItem();
 	if (hItem == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"선택된 버전이 없습니다.");
 		AfxMessageBox(L"선택된 버전이 없습니다.");
+#else
+		GF_AddLog(L"No version has been selected.");
+		AfxMessageBox(L"No version has been selected.");
+#endif
 		return;
 	}
 
 	pInfo = (ST_TEMP_PRJINFO*)m_ctrlProject.GetItemData(hItem);
 	if (pInfo == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"선택된 버전의 데이터가 없습니다.");
 		AfxMessageBox(L"선택된 버전의 데이터가 없습니다.");
+#else
+		GF_AddLog(L"The selected data version doesn't exist.");
+		AfxMessageBox(L"The selected data version doesn't exist.");
+#endif
 		return;
 	}
 
 	if (m_strUser == L"")
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"사용자 이름이 없습니다.");
 		AfxMessageBox(L"사용자 이름이 없습니다.");
+#else
+		GF_AddLog(L"The username doesn't exist.");
+		AfxMessageBox(L"The username doesn't exist.");
+#endif
 		return;
 	}
 
 	if (m_strPwd == L"")
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"비밀번호가 없습니다.");
 		AfxMessageBox(L"비밀번호가 없습니다.");
+#else
+		GF_AddLog(L"THE PASSWORD DOESN'T EXIST.");
+		AfxMessageBox(L"THE PASSWORD DOESN'T EXIST.");
+#endif
 		return;
 	}
 
@@ -295,8 +338,13 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 		if (m_pRefMainDB->DetachMSDB(m_strOpenPrjName) == FALSE)
 		{
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"프로젝트 데이터베이스(%s)를 분리하는데 실패했습니다.\n%s"
 				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
+#else
+			strError.Format(L"Failed to separate the project database (%s).\n%s"
+				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
+#endif
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
 			return -1;
@@ -313,8 +361,13 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 		{
 
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"프로젝트 데이터베이스(%s)를 등록하는데 실패했습니다.\n%s"
 				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
+#else
+			strError.Format(L"Failed to register the project database (%s).\n%s"
+				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
+#endif
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
 			return 0;
@@ -327,8 +380,13 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 		{
 
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"프로젝트 데이터베이스(%s)를 복원하는데 실패했습니다.\n%s"
 				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
+#else
+			strError.Format(L"Failed to restore the project database (%s).\n%s"
+				, m_strOpenPrjName, m_pRefMainDB->GetLastErrorString());
+#endif
 			GF_AddLog(strError);
 			AfxMessageBox(strError);
 			return 0;
@@ -340,8 +398,13 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 	if (pDB->DBOpen() == FALSE)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"프로젝트 데이터베이스(%s)를 접속하는데 실패했습니다.\n%s"
 			, m_strOpenPrjName, pDB->GetLastErrorString());
+#else
+		strError.Format(L"Failed to access the project database (%s).\n%s"
+			, m_strOpenPrjName, pDB->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		delete pDB;
@@ -359,8 +422,13 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"사용자 정보를 가져오는데 실패했습니다.\n%s"
 			, pDB->GetLastErrorString());
+#else
+		strError.Format(L"Failed to retrieve the user information.\n%s"
+			, pDB->GetLastErrorString());
+#endif
 		GF_AddLog(strError);
 		AfxMessageBox(strError);
 		pDB->DBClose();
@@ -375,8 +443,13 @@ int CDlgLogIn::CheckLogin(CString strDBPath, CString strUser, CString strPwd)
 
 	if (nCnt <= 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"아이디 또는 패스워드가 틀립니다.");
 		AfxMessageBox(L"아이디 또는 패스워드가 틀립니다.");
+#else
+		GF_AddLog(L"Invalid ID or password.");
+		AfxMessageBox(L"Invalid ID or password.");
+#endif
 		return -1;
 	}
 
@@ -551,7 +624,11 @@ ST_TEMP_PRJINFO * CDlgLogIn::SetVersionInfo(ST_TEMP_PRJINFO * pParentInfo
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		USERLOG(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		USERLOG(L"Failed to create the project file.\n");
+#endif
 		return nullptr;
 	}
 
@@ -600,7 +677,11 @@ ST_TEMP_PRJINFO *   CDlgLogIn::SetProjectInfo(CString strPrjPath , CString strPr
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		USERLOG(L"프로젝트 파일을 생성하는데 실패했습니다.\n");
+#else
+		USERLOG(L"Failed to create the project file.\n");
+#endif
 		return 0;
 	}
 	pInfo = new ST_TEMP_PRJINFO;

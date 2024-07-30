@@ -14,6 +14,7 @@
 
 // CFormEditLogic
 
+#ifndef ENGLISH_MODE
 TCHAR *szAutoCol[] =
 {
 	L"순번",
@@ -39,9 +40,37 @@ TCHAR *szAutoCol[] =
 	L"주차장로직",
 	NULL
 };
+#else
+TCHAR *szAutoCol[] =
+{
+	L"ORDER",
+	L"INPUT CIRCUIT",
+	L"EQUIPMENT NAME",
+	L"OUTPUT TYPE",
+	L"OUTPUT DESCRIPTION",
+	L"PUBLIC ADDRESS OUTPUT",
+	L"ALL FLOOR",
+	L"OUTPUT CIRCUIT",
+	L"+ N FLOOR(S)",
+	L"BUILDINGS MATCH",
+	L"BUILDING TYPES MATCH",
+	L"LINES MATCH",
+	L"FLOORS MATCH",
+	L"ROOMS MATCH",
+	L"BASEMENT LOGIC",
+	L"BASEMENT BUILDINGS MATCH",
+	L"BASEMENT BUILDING TYPES MATCH",
+	L"BASEMENT LINE MATCH",
+	L"FIRE ON BASEMENT AND GROUND FLOORS",
+	L"FIRE ON BASEMENT FLOOR",
+	L"PARKING LOT LOGIC",
+	NULL
+};
+#endif
 
 IMPLEMENT_DYNCREATE(CFormEditLogic, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormEditLogic::CFormEditLogic()
 	: CFormView(IDD_FORMEDITLOGIC3)
 	, m_bAllFloor(FALSE)
@@ -64,6 +93,30 @@ CFormEditLogic::CFormEditLogic()
 	m_bAdd = FALSE;
 	m_pCurItem = nullptr;
 }
+#else
+CFormEditLogic::CFormEditLogic()
+	: CFormView(IDD_FORMEDITLOGIC3_EN)
+	, m_bAllFloor(FALSE)
+	, m_bEmergency(FALSE)
+	, m_bOutput(FALSE)
+	, m_nPluseNFloor(0)
+	, m_bMatchBuild(FALSE)
+	, m_bMatchBType(FALSE)
+	, m_bMatchStair(FALSE)
+	, m_bMatchFloor(FALSE)
+	, m_bMatchRoom(FALSE)
+	, m_bUnderBasic(FALSE)
+	, m_bUnderClassBuild(FALSE)
+	, m_bUnderClassBType(FALSE)
+	, m_bUnderClassStair(FALSE)
+	, m_bUnder1F(FALSE)
+	, m_bUnderB1F(FALSE)
+	, m_bUnderParking(FALSE)
+{
+	m_bAdd = FALSE;
+	m_pCurItem = nullptr;
+}
+#endif
 
 CFormEditLogic::~CFormEditLogic()
 {
@@ -275,12 +328,20 @@ void CFormEditLogic::OnBnClickedBtnDel()
 	int nSel = m_ctrlLogic.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 자동생성 로직 정보가 없습니다.");
+#else
+		AfxMessageBox(L"No autogeneration logic information has been selected.");
+#endif
 		return;
 	}
-
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"선택된 자동생성 로직 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the selected autogeneration logic information?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		return;
+#endif
 
 	//DataDelete();
 	DataMultiDelete();
@@ -295,13 +356,21 @@ int CFormEditLogic::DataAdd()
 	CRelayTableData * pTable = theApp.GetRelayTableData();
 	if (pTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시오.");
+#else
+		AfxMessageBox(L"The project information doesn't exist.\nOpen the project and restart it.");
+#endif
 		return 0;
 	}
 	YAdoDatabase * pDB = pTable->GetPrjDB();
 	if (pDB == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트의 데이터베이스 정보가 없습니다.\n프로젝트를 열고 다시 시작하십시오.");
+#else
+		AfxMessageBox(L"The project database information doesn't exist.\nOpen the project and restart it.");
+#endif
 		return 0;
 	}
 	UpdateData();
@@ -309,14 +378,22 @@ int CFormEditLogic::DataAdd()
 	nSel = m_cmbInType.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"입력 타입이 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"The input type has not been set.");
+#endif
 		return 0; 
 	}
 	
 	pEq = (CDataEquip *)m_cmbInType.GetItemData(nSel);
 	if (pEq == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"입력 타입의 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"The data for the input type doesn't exist.");
+#endif
 		return 0;
 	}
 	nInType = pEq->GetEquipID();
@@ -324,14 +401,22 @@ int CFormEditLogic::DataAdd()
 	nSel = m_cmbContents.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"출력내용이 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"The output description has not been set.");
+#endif
 		return 0;
 	}
 
 	pEq = (CDataEquip *)m_cmbContents.GetItemData(nSel);
 	if (pEq == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"출력내용의 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"The data for the output description doesn't exist.");
+#endif
 		return 0;
 	}
 	nCont = pEq->GetEquipID();
@@ -366,18 +451,30 @@ int CFormEditLogic::DataAdd()
  	);
  	if (pDB->OpenQuery(strSql) == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to open the autogeneration logic table from the database.");
+#endif
  		return 0;
  	}
  	nCnt = pDB->GetRecordCount();
  
  	if (nCnt > 0)
  	{
+#ifndef ENGLISH_MODE
  		if (AfxMessageBox(L"이미 자동생성 로직이 있습니다.\n기존정보를 변경하시겠습니까?"
  			, MB_YESNO | MB_ICONQUESTION) == IDYES)
  			return DataSave();
  		else
  			return 0;
+#else
+		if (AfxMessageBox(L"You already have an autogeneration logic.\nDo you want to change the existing information ?"
+			, MB_YESNO | MB_ICONQUESTION) == IDYES)
+			return DataSave();
+		else
+			return 0;
+#endif
  	}
  
  	nID = GetWholeID();
@@ -400,7 +497,11 @@ int CFormEditLogic::DataAdd()
  
  	if (pDB->ExecuteSql(strSql) == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"데이터를 추가하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to add the data.");
+#endif
  		return 0;
  	}
  
@@ -474,7 +575,11 @@ int CFormEditLogic::DataAdd()
  	m_ctrlLogic.SetItemData(nCnt, (DWORD_PTR)pLogic);
  	AddCancel();
 
+#ifndef ENGLISH_MODE
 	AfxMessageBox(L"자동 연동 로직을 추가하는데 성공했습니다.");
+#else
+	AfxMessageBox(L"Successfully added the automatic interlock logic.");
+#endif
 	return 1;
 }
 
@@ -498,7 +603,11 @@ int CFormEditLogic::DataSave()
  	nIdx = m_ctrlLogic.GetNextItem(-1, LVNI_SELECTED);
  	if (nIdx < 0)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"선택된 자동생성 로직이 없습니다.");
+#else
+		AfxMessageBox(L"No autogeneration logic has been selected.");
+#endif
  		return 0;
  	}
  	pData = (CDataAutoLogic*)m_ctrlLogic.GetItemData(nIdx);
@@ -542,7 +651,11 @@ int CFormEditLogic::DataSave()
  	);
  	if (pDB->OpenQuery(strSql) == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to open the autogeneration logic table from the database.");
+#endif
  		return 0;
  	}
  	nCnt = pDB->GetRecordCount();
@@ -551,8 +664,13 @@ int CFormEditLogic::DataSave()
  	{
  		if (m_bAdd == FALSE)
  		{
+#ifndef ENGLISH_MODE
  			if (AfxMessageBox(L"자동생성 로직이 없습니다. 새로 추가하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
  				return 0;
+#else
+			if (AfxMessageBox(L"No autogeneration logic. Do you want to add a new one?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+				return 0;
+#endif
  		}
  		return DataAdd();
  	}
@@ -573,7 +691,11 @@ int CFormEditLogic::DataSave()
  
  	if (pDB->ExecuteSql(strSql) == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to edit the data.");
+#endif
  		return 0;
  	}
  
@@ -641,7 +763,11 @@ int CFormEditLogic::DataDelete()
  	nIdx = m_ctrlLogic.GetNextItem(-1, LVNI_SELECTED);
  	if (nIdx < 0)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"선택된 자동생성 로직이 없습니다.");
+#else
+		AfxMessageBox(L"No autogeneration logic has been selected.");
+#endif
  		return 0;
  	}
  	pData = (CDataAutoLogic*)m_ctrlLogic.GetItemData(nIdx);
@@ -686,7 +812,11 @@ int CFormEditLogic::DataDelete()
  
  	if (pDB->OpenQuery(strSql) == FALSE)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"데이터베이스에서 자동생성 로직 테이블을 여는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to open the autogeneration logic table from the database.");
+#endif
  		return 0;
  	}
  	nCnt = pDB->GetRecordCount();
@@ -699,7 +829,11 @@ int CFormEditLogic::DataDelete()
  		);
  		if (pDB->ExecuteSql(strSql) == FALSE)
  		{
+#ifndef ENGLISH_MODE
  			AfxMessageBox(L"자동생성 로직을 삭제하는데 실패했습니다.");
+#else
+			AfxMessageBox(L"Failed to delete autogeneration logic.");
+#endif
  			return 0;
  		}
  	}
@@ -721,14 +855,22 @@ int CFormEditLogic::DataMultiDelete()
  	CRelayTableData * pTable = theApp.GetRelayTableData();
  	if (pTable == nullptr)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"프로젝트가 열려있지 않았습니다.");
+#else
+		AfxMessageBox(L"The project is not open.");
+#endif
  		return 0;
  	}
  
  	YAdoDatabase * pDB = pTable->GetPrjDB();
  	if (pDB == nullptr)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"프로젝트 데이터베이스가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project database has not been connected.");
+#endif
  		return 0;
  	}
  
@@ -742,7 +884,11 @@ int CFormEditLogic::DataMultiDelete()
  	nCnt = m_ctrlLogic.GetSelectedCount();
  	if(nCnt <=0)
  	{
+#ifndef ENGLISH_MODE
  		AfxMessageBox(L"선택된 자동생성 로직이 없습니다.");
+#else
+		AfxMessageBox(L"No autogeneration logic has been selected.");
+#endif
  		return 0;
  	}
  	pos = m_ctrlLogic.GetFirstSelectedItemPosition();
@@ -760,7 +906,11 @@ int CFormEditLogic::DataMultiDelete()
  		if (pData == nullptr)
  		{
  			//AfxMessageBox(L"삭제하는데 실패 했습니다. 연동 출력에 대한 정보를 가져오는데 실패 했습니다.");
+#ifndef ENGLISH_MODE
  			strError = L"삭제하는데 실패했습니다. 자동생성 로직에 대한 정보를 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to retrieve information about the autogeneration logic.";
+#endif
  			bError = TRUE;
  			break;;
  		}
@@ -773,7 +923,11 @@ int CFormEditLogic::DataMultiDelete()
  
  		if (pDB->OpenQuery(strSql) == FALSE)
  		{
+#ifndef ENGLISH_MODE
  			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 자동생성 로직을 가져오는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to import autogeneration logic from the database.";
+#endif
  			bError = TRUE;
  			break;
  		}
@@ -788,7 +942,11 @@ int CFormEditLogic::DataMultiDelete()
  		);
  		if (pDB->ExecuteSql(strSql) == FALSE)
  		{
+#ifndef ENGLISH_MODE
  			strError = L"삭제하는데 실패했습니다. 데이터베이스에서 자동생성 로직을 삭제하는데 실패했습니다.";
+#else
+			strError = L"Failed to delete. Failed to delete the autogeneration logic from the database.";
+#endif
  			bError = TRUE;
  			break;;
  		}
@@ -815,7 +973,11 @@ int CFormEditLogic::DataMultiDelete()
  		pData = nullptr;
  	}
  	// List Delete
+#ifndef ENGLISH_MODE
  	AfxMessageBox(L"자동생성 로직을 삭제하는데 성공 했습니다.");
+#else
+	AfxMessageBox(L"Successfully deleted the autogeneration logic.");
+#endif
 	return 1;
 }
 
@@ -941,7 +1103,10 @@ void CFormEditLogic::OnSize(UINT nType, int cx, int cy)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	CRect rc;
 	rc.left = 4;
-	rc.top = 270;
+	//20240718 GBM start - 영문 버전에서 리스트와 버튼 겹치는 오류 수정
+	//rc.top = 270;
+	rc.top = 320;
+	//20240718 GBM end
 	rc.right = cx - 4;
 	rc.bottom = cy - 4;
 
@@ -1185,20 +1350,34 @@ void CFormEditLogic::SetCheckUnderFloor(bool bUnderFloor)
 void CFormEditLogic::OnBnClickedBtnLogicImport()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"기존 자동생성 로직이 모두 삭제됩니다.\n그래도 진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		return;
 	}
+#else
+	if (AfxMessageBox(L"All existing autogeneration logics will be deleted.\nDo you still want to proceed ? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	{
+		return;
+	}
+#endif
 
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시오.");
+#else
+		AfxMessageBox(L"Please log in to your project or create a new one before proceeding.");
+#endif
 		return;
 	}
 	CExcelWrapper xls;
+#ifndef ENGLISH_MODE
 	CString strDefault = L"*.xls", strFilter = L"자동생성 데이터(*.xls)|*.xls|All Files (*.*)|*.*||";
+#else
+	CString strDefault = L"*.xls", strFilter = L"Autogenerated Data(*.xls)|*.xls|All Files (*.*)|*.*||";
+#endif
 	CFileDialog FileDialog(TRUE, NULL, strDefault, OFN_HIDEREADONLY, strFilter, this);
 	int i, nSheetCnt;
 	BOOL bRead = FALSE;
@@ -1224,7 +1403,11 @@ void CFormEditLogic::OnBnClickedBtnLogicImport()
 	CString strPath = FileDialog.GetPathName();
 	if (xls.Open(strPath) == false)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel파일을 여는데 실패 했습니다.");
+#else
+		AfxMessageBox(L"Failed to open the Excel file.");
+#endif
 		return;
 	}
 
@@ -1243,7 +1426,11 @@ void CFormEditLogic::OnBnClickedBtnLogicImport()
 
 	if (bRead == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"Excel파일 내에 'LOGIC' Sheet가 없습니다.");
+#else
+		AfxMessageBox(L"There is no 'LOGIC' sheet in the Excel file.");
+#endif
 		return;
 	}
 	
@@ -1251,7 +1438,11 @@ void CFormEditLogic::OnBnClickedBtnLogicImport()
 	strSql.Format(L"DELETE FROM TB_AUTO_LOGIC_V2 ");
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터베이스에서 자동생성 로직을 삭제하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the autogeneration logic from the database.");
+#endif
 		return;
 	}
 
@@ -1272,11 +1463,19 @@ void CFormEditLogic::OnBnClickedBtnLogicExport()
 	CDataAutoLogic * pAuto;
 	int i = 0, nCnt , nRow=1;
 	POSITION pos;
+#ifndef ENGLISH_MODE
 	CString strDefault = L"*.xlsx", strFilter = L"자동생성로직(*.xlsx)|*.xlsx|All Files (*.*)|*.*||";
+#else
+	CString strDefault = L"*.xlsx", strFilter = L"Autogenerated Logic(*.xlsx)|*.xlsx|All Files (*.*)|*.*||";
+#endif
 	CRelayTableData * pRelayTable = theApp.GetRelayTableData();
 	if (pRelayTable == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트에 로그인하거나 새로 생성한 후에 진행해 주십시오.");
+#else
+		AfxMessageBox(L"Please log in to your project or create a new one before proceeding.");
+#endif
 		return;
 	}
 
@@ -1285,13 +1484,21 @@ void CFormEditLogic::OnBnClickedBtnLogicExport()
 	spRefAutoLogic = pRelayTable->GetAutoLogicManager();
 	if (spRefAutoLogic == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"자동생성 로직이 없습니다.");
+#else
+		AfxMessageBox(L"No autogeneration logic.");
+#endif
 		return;
 	}
 	nCnt = spRefAutoLogic->GetSize();
 	if (nCnt <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"저장할 데이터가 없습니다.");
+#else
+		AfxMessageBox(L"No data to save.");
+#endif
 		return;
 	}
 	CFileDialog FileDialog(FALSE, NULL, strDefault, OFN_HIDEREADONLY, strFilter, this);
@@ -1304,8 +1511,11 @@ void CFormEditLogic::OnBnClickedBtnLogicExport()
 
 
 	strPrjName = pRelayTable->GetPrjName();
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"%s 자동생성로직", strPrjName);
-
+#else
+	strtemp.Format(L"%s Autogeneration Logic", strPrjName);
+#endif
 	xls.SetSheetName(1, L"LOGIC");
 
 	for (i = 0; szAutoCol[i] != nullptr; i++)
@@ -1323,7 +1533,11 @@ void CFormEditLogic::OnBnClickedBtnLogicExport()
 
 	xls.SaveCopyAs(strPath);
 	xls.Close();
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"다음파일명으로\n%s\n저장되었습니다.", strPath);
+#else
+	strtemp.Format(L"Saved as follows in the\n[%s]:", strPath);
+#endif
 	AfxMessageBox(strtemp);
 }
 

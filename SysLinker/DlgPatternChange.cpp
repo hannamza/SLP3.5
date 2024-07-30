@@ -64,9 +64,15 @@ BOOL CDlgPatternChange::OnInitDialog()
 
 	VERIFY(m_ctrlRelayList.m_cImageList.Create(IDB_CHECKBOXES, 16, 3, RGB(255, 0, 255)));
 	m_ctrlRelayList.m_HeaderCtrl.SetImageList(&m_ctrlRelayList.m_cImageList);
+#ifndef ENGLISH_MODE
 	m_ctrlRelayList.InsertColumn(0, _T("이전회로"), LVCFMT_LEFT, 350);
 	m_ctrlRelayList.InsertColumn(1, _T("새 회로"), LVCFMT_LEFT, 350);
 	m_ctrlRelayList.InsertColumn(2, _T("수정"), LVCFMT_LEFT, 70);
+#else
+	m_ctrlRelayList.InsertColumn(0, _T("PREVIOUS CIRCUIT"), LVCFMT_LEFT, 350);
+	m_ctrlRelayList.InsertColumn(1, _T("NEW CIRCUIT"), LVCFMT_LEFT, 350);
+	m_ctrlRelayList.InsertColumn(2, _T("EDIT"), LVCFMT_LEFT, 70);
+#endif
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 // 	int i;
@@ -140,7 +146,11 @@ void CDlgPatternChange::DisplayCompareResult(
 	suL.stParam.wAllCnt = pPatternList->GetCount();
 	m_ctrlPatternTree.DeleteAllItems();
 	m_ctrlRelayList.DeleteAllItems();
+#ifndef ENGLISH_MODE
 	hRoot = m_ctrlPatternTree.InsertItem(L"패턴", 0, 0, TVI_ROOT);
+#else
+	hRoot = m_ctrlPatternTree.InsertItem(L"PATTERN", 0, 0, TVI_ROOT);
+#endif
 	pos = pPatternList->GetHeadPosition();
 	while (pos)
 	{
@@ -152,7 +162,11 @@ void CDlgPatternChange::DisplayCompareResult(
 		{
 			if(pUpdate->m_nOldPID <= 0)
 				continue;
+#ifndef ENGLISH_MODE
 			pUpdate->m_strOldPtnName += L"- 전체삭제";
+#else
+			pUpdate->m_strOldPtnName += L"- DELETE ALL";
+#endif
 		}
 		else
 		{
@@ -200,7 +214,11 @@ int CDlgPatternChange::DisplayList(HTREEITEM hItem)
 
 			m_ctrlRelayList.InsertItem(nIdx,pItem->m_pOldCopyDev->GetOutputFullName());
 			m_ctrlRelayList.SetItemText(nIdx,1,L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx,2,L"삭제");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 2, L"DELETE");
+#endif
 			//m_ctrlRelayList.SetCheckbox(nIdx, 2, pItem->m_bChangeFlag);
 			m_ctrlRelayList.SetItemData(nIdx,(DWORD_PTR)pItem);
 			m_ctrlRelayList.SetEnabled(nIdx,pItem->m_bEditable);
@@ -222,7 +240,11 @@ int CDlgPatternChange::DisplayList(HTREEITEM hItem)
 
 			m_ctrlRelayList.InsertItem(nIdx,pItem->m_pOldCopyDev->GetOutputFullName());
 			m_ctrlRelayList.SetItemText(nIdx,1,pItem->m_pNewCopyDev->GetOutputFullName());
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx,2,L"변경");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 2, L"CHANGE");
+#endif
 			//m_ctrlRelayList.SetCheckbox(nIdx, 2, pItem->m_bChangeFlag);
 			m_ctrlRelayList.SetItemData(nIdx,(DWORD_PTR)pItem);
 			m_ctrlRelayList.SetEnabled(nIdx,pItem->m_bEditable);
@@ -240,7 +262,11 @@ int CDlgPatternChange::DisplayList(HTREEITEM hItem)
 
 			m_ctrlRelayList.InsertItem(nIdx,L"");
 			m_ctrlRelayList.SetItemText(nIdx,1,pItem->m_pNewCopyDev->GetOutputFullName());
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx,2,L"추가");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 2, L"ADD");
+#endif
 			//m_ctrlRelayList.SetCheckbox(nIdx, 2, pItem->m_bChangeFlag);
 			m_ctrlRelayList.SetItemData(nIdx,(DWORD_PTR)pItem);
 			m_ctrlRelayList.SetEnabled(nIdx,pItem->m_bEditable);
@@ -258,7 +284,11 @@ int CDlgPatternChange::DisplayList(HTREEITEM hItem)
 
 			m_ctrlRelayList.InsertItem(nIdx,pItem->m_pOldCopyDev->GetOutputFullName());
 			m_ctrlRelayList.SetItemText(nIdx,1,L"");
+#ifndef ENGLISH_MODE
 			m_ctrlRelayList.SetItemText(nIdx,2,L"삭제");
+#else
+			m_ctrlRelayList.SetItemText(nIdx, 2, L"DELETE");
+#endif
 			//m_ctrlRelayList.SetCheckbox(nIdx, 2, pItem->m_bChangeFlag);
 			m_ctrlRelayList.SetItemData(nIdx,(DWORD_PTR)pItem);
 			m_ctrlRelayList.SetEnabled(nIdx,pItem->m_bEditable);

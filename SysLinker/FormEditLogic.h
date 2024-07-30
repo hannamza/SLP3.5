@@ -19,7 +19,11 @@ protected:
 
 public:
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_FORMEDITLOGIC3 };
+#else
+	enum { IDD = IDD_FORMEDITLOGIC3_EN };
+#endif
 #endif
 #ifdef _DEBUG
 	virtual void AssertValid() const;

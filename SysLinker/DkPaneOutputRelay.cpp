@@ -20,6 +20,7 @@ CDkPaneOutputRelay::~CDkPaneOutputRelay()
 	RemoveAllTreeData();
 }
 
+#ifndef ENGLISH_MODE
 BEGIN_MESSAGE_MAP(CDkPaneOutputRelay, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
@@ -34,6 +35,22 @@ BEGIN_MESSAGE_MAP(CDkPaneOutputRelay, CDockablePane)
 	ON_COMMAND(ID_SORT_OUTTYPE, &CDkPaneOutputRelay::OnSortOuttype)
 	ON_TVN_DROPED_ITEM(IDC_OUTVIEW_TREE, OnTvnOutputDropedItem)
 END_MESSAGE_MAP()
+#else
+BEGIN_MESSAGE_MAP(CDkPaneOutputRelay, CDockablePane)
+	ON_WM_CREATE()
+	ON_WM_SIZE()
+	ON_WM_CONTEXTMENU()
+	ON_WM_PAINT()
+	ON_WM_SETFOCUS()
+	ON_COMMAND(ID_SORT_ADDRESS_EN, &CDkPaneOutputRelay::OnSortAddress)
+	ON_COMMAND(ID_SORT_CUSTOM_EN, &CDkPaneOutputRelay::OnSortCustom)
+	ON_COMMAND(ID_SORT_EQUIP_EN, &CDkPaneOutputRelay::OnSortEquip)
+	ON_COMMAND(ID_SORT_INPUTTYPE_EN, &CDkPaneOutputRelay::OnSortInputtype)
+	ON_COMMAND(ID_SORT_LOCATION_EN, &CDkPaneOutputRelay::OnSortLocation)
+	ON_COMMAND(ID_SORT_OUTTYPE_EN, &CDkPaneOutputRelay::OnSortOuttype)
+	ON_TVN_DROPED_ITEM(IDC_OUTVIEW_TREE, OnTvnOutputDropedItem)
+END_MESSAGE_MAP()
+#endif
 
 
 int CDkPaneOutputRelay::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -57,8 +74,14 @@ int CDkPaneOutputRelay::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_ctrlOutTree.SetCursorResourceID(IDC_DROPADD_CURSOR);
 	m_ctrlOutTree.SetAllowDragFlag(TRUE);
 	// 이미지를 로드합니다.
+
+#ifndef ENGLISH_MODE
 	m_TbOutputRelay.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, IDR_TB_DKPRELAY_SORT);
 	m_TbOutputRelay.LoadToolBar(IDR_TB_DKPRELAY_SORT, 0, 0, TRUE /* 잠금 */);
+#else
+	m_TbOutputRelay.Create(this, AFX_DEFAULT_TOOLBAR_STYLE, IDR_TB_DKPRELAY_SORT_EN);
+	m_TbOutputRelay.LoadToolBar(IDR_TB_DKPRELAY_SORT_EN, 0, 0, TRUE /* 잠금 */);
+#endif
 
 	OnChangeVisualStyle();
 

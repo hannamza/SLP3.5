@@ -10,11 +10,19 @@
 
 IMPLEMENT_DYNCREATE(CFormFacp, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormFacp::CFormFacp()
 	: CFormView(IDD_FORMFACP)
 {
 
 }
+#else
+CFormFacp::CFormFacp()
+	: CFormView(IDD_FORMFACP_EN)
+{
+
+}
+#endif
 
 CFormFacp::~CFormFacp()
 {

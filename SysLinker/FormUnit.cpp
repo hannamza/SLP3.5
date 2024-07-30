@@ -10,11 +10,19 @@
 
 IMPLEMENT_DYNCREATE(CFormUnit, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormUnit::CFormUnit()
 	: CFormView(IDD_FORMUNIT)
 {
 
 }
+#else
+CFormUnit::CFormUnit()
+	: CFormView(IDD_FORMUNIT_EN)
+{
+
+}
+#endif
 
 CFormUnit::~CFormUnit()
 {

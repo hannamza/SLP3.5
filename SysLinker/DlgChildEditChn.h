@@ -15,7 +15,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_CHILD_EDIT_CHN };
+#else
+	enum { IDD = IDD_DLG_CHILD_EDIT_CHN_EN };
+#endif
 #endif
 
 protected:
@@ -29,7 +33,11 @@ public:
 	int m_nNum;
 	
 public:
+#ifndef ENGLISH_MODE
 	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_CHN, pParent); }
+#else
+	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_CHN_EN, pParent); }
+#endif
 	virtual void DisplayItem(ST_TREEITEM * pData , ST_TREEITEM * pNewData);
 	virtual void PrjDataInit(int nInitType);
 	virtual BOOL GetChangeData();

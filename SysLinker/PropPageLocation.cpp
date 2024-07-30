@@ -14,12 +14,21 @@
 
 IMPLEMENT_DYNAMIC(CPropPageLocation, CPropertyPage)
 
+#ifndef ENGLISH_MODE
 CPropPageLocation::CPropPageLocation()
 	: CPropertyPage(IDD_PROP_PAGE_LOCATION)
 {
 	m_pRefFasSysData = nullptr;
 
 }
+#else
+CPropPageLocation::CPropPageLocation()
+	: CPropertyPage(IDD_PROP_PAGE_LOCATION_EN)
+{
+	m_pRefFasSysData = nullptr;
+
+}
+#endif
 
 CPropPageLocation::~CPropPageLocation()
 {
@@ -54,12 +63,19 @@ BOOL CPropPageLocation::OnInitDialog()
 	m_ImgLocation.Create(IDB_BMP_DEVICE_ICON, 16, 8, RGB(0, 255, 255));
 	m_ctrlLocTree.SetImageList(&m_ImgLocation, TVSIL_NORMAL);
 
-
+#ifndef ENGLISH_MODE
 	m_ctrlDeviceList.InsertColumn(0, _T("감지기/중계기"), LVCFMT_CENTER, 120);
 	m_ctrlDeviceList.InsertColumn(1, _T("수신기"), LVCFMT_CENTER, 50);
 	m_ctrlDeviceList.InsertColumn(2, _T("유닛"), LVCFMT_CENTER, 50);
 	m_ctrlDeviceList.InsertColumn(3, _T("계통"), LVCFMT_CENTER, 50);
 	m_ctrlDeviceList.InsertColumn(4, _T("회로"), LVCFMT_CENTER, 50);
+#else
+	m_ctrlDeviceList.InsertColumn(0, _T("DETECTOR/MODULE"), LVCFMT_CENTER, 120);
+	m_ctrlDeviceList.InsertColumn(1, _T("FACP"), LVCFMT_CENTER, 50);
+	m_ctrlDeviceList.InsertColumn(2, _T("UNIT"), LVCFMT_CENTER, 50);
+	m_ctrlDeviceList.InsertColumn(3, _T("LOOP"), LVCFMT_CENTER, 50);
+	m_ctrlDeviceList.InsertColumn(4, _T("CIRCUIT"), LVCFMT_CENTER, 50);
+#endif
 	m_ctrlDeviceList.SetExtendedStyle(LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 
 	return TRUE;  // return TRUE unless you set the focus to a control

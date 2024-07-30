@@ -16,7 +16,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_CHILD_EDIT_UNIT };
+#else
+	enum { IDD = IDD_DLG_CHILD_EDIT_UNIT_EN };
+#endif
 #endif
 public:
 	CComboBox m_cmbFacp;
@@ -29,7 +33,11 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+#ifndef ENGLISH_MODE
 	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_UNIT, pParent); }
+#else
+	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_UNIT_EN, pParent); }
+#endif
 	virtual void DisplayItem(ST_TREEITEM * pData, ST_TREEITEM * pNewData);
 	virtual BOOL GetChangeData();
 	virtual void PrjDataInit(int nInitType);

@@ -36,7 +36,11 @@ bool CExcelWrapper::Create(bool bVisible /*= false*/, int nWorkSheet /*= 1*/,
     m_ExcelApp.CreateDispatch(L"Excel.Application");
     if (!m_ExcelApp)
     {
+#ifndef ENGLISH_MODE
         AfxMessageBox(L"엑셀 시작이 실패하였습니다.");
+#else
+		AfxMessageBox(L"Failed to start Excel.");
+#endif
         return false;
     }
 
@@ -77,7 +81,11 @@ bool CExcelWrapper::Open(CString& strFile, bool bVisible /*= false*/, int nWorkS
     m_ExcelApp.CreateDispatch(L"Excel.Application");
     if (!m_ExcelApp)
     {
-        AfxMessageBox(L"엑셀 시작이 실패하였습니다.");
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"엑셀 시작이 실패하였습니다.");
+#else
+		AfxMessageBox(L"Failed to start Excel.");
+#endif
         return false;
     }
 	m_ExcelApp.put_Visible(bVisible);

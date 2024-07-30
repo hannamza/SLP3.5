@@ -15,7 +15,11 @@ public:
 	YAdoDatabase *		m_pRefMainDB;
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_SLPLOGIN };
+#else
+	enum { IDD = IDD_DLG_SLPLOGIN_EN};
+#endif
 #endif
 
 protected:

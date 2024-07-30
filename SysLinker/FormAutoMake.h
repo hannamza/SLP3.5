@@ -27,7 +27,11 @@ protected:
 
 public:
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_FORMAUTOMAKE };
+#else
+	enum { IDD = IDD_FORMAUTOMAKE_EN };
+#endif
 #endif
 #ifdef _DEBUG
 	virtual void AssertValid() const;

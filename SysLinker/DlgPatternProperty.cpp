@@ -15,11 +15,19 @@
 
 IMPLEMENT_DYNAMIC(CDlgPatternProperty, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgPatternProperty::CDlgPatternProperty(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_PATTERN_PROPERTY, pParent)
 {
 	m_pRefFasSysData = nullptr;
 }
+#else
+CDlgPatternProperty::CDlgPatternProperty(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_PATTERN_PROPERTY_EN, pParent)
+{
+	m_pRefFasSysData = nullptr;
+}
+#endif
 
 CDlgPatternProperty::~CDlgPatternProperty()
 {
@@ -49,8 +57,13 @@ BOOL CDlgPatternProperty::OnInitDialog()
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	VERIFY(m_ctrlPatternList.m_cImageList.Create(IDB_CHECKBOXES,16,3,RGB(255,0,255)));
 	m_ctrlPatternList.m_HeaderCtrl.SetImageList(&m_ctrlPatternList.m_cImageList);
+#ifndef ENGLISH_MODE
 	m_ctrlPatternList.InsertColumn(0,_T("패턴"),LVCFMT_LEFT,350);
 	m_ctrlPatternList.InsertColumn(1,_T("자동"),LVCFMT_LEFT,80);
+#else
+	m_ctrlPatternList.InsertColumn(0, _T("PATTERN"), LVCFMT_LEFT, 350);
+	m_ctrlPatternList.InsertColumn(1, _T("AUTO"), LVCFMT_LEFT, 80);
+#endif
 	m_ctrlPatternList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	int i;
@@ -80,7 +93,11 @@ void CDlgPatternProperty::OnBnClickedOk()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project has not been connected.");
+#endif
 		return;
 	}
 
@@ -91,13 +108,21 @@ void CDlgPatternProperty::OnBnClickedOk()
 	pDB = m_pRefFasSysData->GetPrjDB();
 	if(pDB == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스 정보를 가져오는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to import the project database information.");
+#endif
 		return;
 	}
 
 	if(pDB->IsOpen() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 데이터베이스가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project database has not been connected.");
+#endif
 		return;
 	}
 

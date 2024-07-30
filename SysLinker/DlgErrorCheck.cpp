@@ -22,6 +22,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgErrorCheck, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgErrorCheck::CDlgErrorCheck(int nCheckType,CRelayTableData * pRefFasSysData,CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_ERRORCHECK, pParent)
 {
@@ -33,6 +34,19 @@ CDlgErrorCheck::CDlgErrorCheck(int nCheckType,CRelayTableData * pRefFasSysData,C
 	m_nWarningCnt = 0;
 	m_pRefFasSysData = pRefFasSysData;
 }
+#else
+CDlgErrorCheck::CDlgErrorCheck(int nCheckType, CRelayTableData * pRefFasSysData, CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_ERRORCHECK_EN, pParent)
+{
+	m_nCheckType = nCheckType;
+	m_bStopFlag = FALSE;
+	m_pNotifyWnd = nullptr;
+	m_nErrorCnt = 0;
+	m_nAllCnt = 0;
+	m_nWarningCnt = 0;
+	m_pRefFasSysData = pRefFasSysData;
+}
+#endif
 
 CDlgErrorCheck::~CDlgErrorCheck()
 {
@@ -70,9 +84,15 @@ BOOL CDlgErrorCheck::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+#ifndef ENGLISH_MODE
 	m_ctrlReport.InsertColumn(0,_T("오류종류"),LVCFMT_LEFT,70);
 	m_ctrlReport.InsertColumn(1,_T("분류"),LVCFMT_LEFT,150);
 	m_ctrlReport.InsertColumn(2,_T("내용"),LVCFMT_LEFT,350);
+#else
+	m_ctrlReport.InsertColumn(0, _T("ERROR TYPE"), LVCFMT_LEFT, 70);
+	m_ctrlReport.InsertColumn(1, _T("SORT"), LVCFMT_LEFT, 150);
+	m_ctrlReport.InsertColumn(2, _T("DESCRIPTION"), LVCFMT_LEFT, 350);
+#endif
 	m_ctrlReport.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	SetPosition();
@@ -90,7 +110,11 @@ BOOL CDlgErrorCheck::OnInitDialog()
 
 BOOL CDlgErrorCheck::CreateChkDlg(CWnd * pParent)
 {
+#ifndef ENGLISH_MODE
 	return Create(IDD_DLG_ERRORCHECK,pParent);
+#else
+	return Create(IDD_DLG_ERRORCHECK_EN, pParent);
+#endif
 }
 
 void CDlgErrorCheck::StartErrorCheck(int nCheckType,CWnd * pTargetWnd)
@@ -156,7 +180,11 @@ void CDlgErrorCheck::OnBnClickedBtnView()
 	nSel = m_cmbType.GetCurSel();
 	if(nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 아이템이 없습니다.");
+#else
+		AfxMessageBox(L"No items have been selected.");
+#endif
 		return;
 	}
 	nType = m_cmbType.GetItemData(nSel);
@@ -268,7 +296,11 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 	{
 	case PROG_RESULT_CANCEL:
 		GetDlgItem(IDC_BTN_VIEW)->EnableWindow(TRUE);
+#ifndef ENGLISH_MODE
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"사용자가 취소했습니다.");
+#else
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"User canceled.");
+#endif
 		m_ctrlProg.SetPos(100);
 		m_ctrlReport.Complete();
 		if(m_pNotifyWnd && m_pNotifyWnd->GetSafeHwnd())
@@ -276,7 +308,11 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 		break;
 	case PROG_RESULT_ERROR:
 		GetDlgItem(IDC_BTN_VIEW)->EnableWindow(TRUE);
+#ifndef ENGLISH_MODE
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"생성 중 오류가 발생했습니다.");
+#else
+		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(L"An error has occurred during creation.");
+#endif
 		m_ctrlProg.SetPos(100);
 		m_ctrlReport.Complete();
 		if(m_pNotifyWnd && m_pNotifyWnd->GetSafeHwnd())
@@ -284,14 +320,22 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 		break;
 	case PROG_RESULT_STEP:
 		nP = (int)(((float)wp / (float)m_nAllCnt) * 100);
+#ifndef ENGLISH_MODE
 		str.Format(L"[%d]%% (%d/%d) 검사 중 - 오류 %d, 경고 %d",nP,wp,m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
+#else
+		str.Format(L"Checked [%d]%% ([%d]/[%d]) - [%d] Error(s), [%d] Warning(s)", nP, wp, m_nAllCnt, m_nErrorCnt, m_nWarningCnt);
+#endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlProg.SetPos(nP);
 		break;
 	case PROG_RESULT_FINISH:
 		GetDlgItem(IDC_BTN_VIEW)->EnableWindow(TRUE);
 		//str.Format(L"%d개의 데이터를 검사했습니다.",m_nAllCnt);
+#ifndef ENGLISH_MODE
 		str.Format(L"전체 %d개의 데이터 중 오류 %d개,경고 %d개를 발견했습니다.",m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
+#else
+		str.Format(L"We found [%d] error(s) and [%d] warning(s) out of a total of [%d] pieces of data.", m_nAllCnt, m_nErrorCnt, m_nWarningCnt);
+#endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlReport.Complete();
 		m_ctrlProg.SetPos(100);
@@ -341,8 +385,13 @@ int CDlgErrorCheck::ProcErrorCheck()
 
 	if(pDBUtil->DBOpen() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddDebug(L"자동생성 오류 : 데이터베이스를 연결하는 데에 실패했습니다.");
 		AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
+#else
+		GF_AddDebug(L"Autogeneration error: failed to connect to the database.");
+		AfxMessageBox(L"Failed to connect to the database.");
+#endif
 		return 0;
 
 	}
@@ -377,7 +426,11 @@ int CDlgErrorCheck::ProcErrorCheck()
 	COleDateTime dtCur;
 	DWORD_PTR dwStart,dwEnd,dwTemp;
 	dtCur = COleDateTime::GetCurrentTime();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"오류 검사 시작: %s",dtCur.Format(L"%H:%M:%S"));
+#else
+	GF_AddDebug(L"Error check start time: %s", dtCur.Format(L"%H:%M:%S"));
+#endif
 	dwStart = GetTickCount();
 	dwTemp = dwStart;
 #endif
@@ -411,7 +464,11 @@ int CDlgErrorCheck::ProcErrorCheck()
 			if(nItemCnt >= D_MAX_PTNITEM_COUNT)
 			{
 				// Error 확인 - 리스트 입력
+#ifndef ENGLISH_MODE
 				strDesc.Format(L"패턴 : %s 개수초과 - %d개" , pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
+#else
+				strDesc.Format(L"Pattern : %s count limit exceeded - [%d] patterns", pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
+#endif
 				InsertErrorList(CHK_PATTERN_CNT,nItemCnt,pPtn,strDesc);
 			}
 			nOffset ++;
@@ -450,9 +507,15 @@ int CDlgErrorCheck::ProcErrorCheck()
 				pDBUtil->MoveNext();
 				continue; 
 			}
+#ifndef ENGLISH_MODE
 			strDesc.Format(L"\"%s %s %s %s\" 층번호 중복 : %d "
 				,pLoc->GetBuildName() ,pLoc->GetBTypeName() ,pLoc->GetStairName() ,strName
 				,nFlNum);
+#else
+			strDesc.Format(L"\"%s %s %s %s\" floor number duplicate: %d "
+				, pLoc->GetBuildName(), pLoc->GetBTypeName(), pLoc->GetStairName(), strName
+				, nFlNum);
+#endif
 			InsertErrorList(CHK_LEVEL_DUP,nSize,pLoc,strDesc);
 			pDBUtil->MoveNext();
 		}
@@ -504,28 +567,44 @@ int CDlgErrorCheck::ProcErrorCheck()
 		if (nFacpType == GT1)
 		{
 			nLimit = 80;
+#ifndef ENGLISH_MODE
 			strFacpType = _T("[GT1 수신기]");
+#else
+			strFacpType = _T("[GT1 FACP]");
+#endif
 		}
 		else
 		{
 			nLimit = 40;
+#ifndef ENGLISH_MODE
 			strFacpType = _T("[F3 수신기]");
+#else
+			strFacpType = _T("[F3 FACP]");
+#endif
 		}			
 		//20240424 GBM end
 
 		if(nSize > nLimit)
 		{
-			
+#ifndef ENGLISH_MODE
 			strDesc.Format(L"[%s] \"%s\" 글자수 초과(%d) "
 				,strFacpType ,pDev->GetInputFullName(),nSize);
-			
+#else
+			strDesc.Format(L"[%s] \"%s\" character length exceeded(%d) "
+				, strFacpType, pDev->GetInputFullName(), nSize);
+#endif	
 			InsertErrorList(CHK_TEXT_CNT,nSize,pDev,strDesc);
 		}
 
 		if(pDev->GetEqInput() == nullptr)
 		{
+#ifndef ENGLISH_MODE
 			strDesc.Format(L"\"%s\" 입력 타입 없음"
 				,pDev->GetInputFullName());
+#else
+			strDesc.Format(L"No \"%s\" input type"
+				, pDev->GetInputFullName());
+#endif
 			InsertErrorList(CHK_NOINPUT,0,pDev,strDesc);
 		}
 
@@ -555,8 +634,13 @@ int CDlgErrorCheck::ProcErrorCheck()
 				if(GetContactNRelayCount(pDev,nRCnt,nCCnt) == FALSE)
 				{
 					// Warning - 출력 없음
+#ifndef ENGLISH_MODE
 					strDesc.Format(L"\"%s\" 출력없음:접점(%d) 출력(%d)"
 						,pDev->GetInputFullName(),nRCnt,nCCnt);
+#else
+					strDesc.Format(L"No \"%s\" output: contact (%d) Output (%d)"
+						, pDev->GetInputFullName(), nRCnt, nCCnt);
+#endif
 					InsertErrorList(CHK_INPUT_WITHOUT_OUTPUT,0,pDev,strDesc);
 				}
 				else
@@ -565,23 +649,38 @@ int CDlgErrorCheck::ProcErrorCheck()
 					{
 						// 5. 출력 없는 입력 - 점점 + 회로
 						// Warning 출력 없음 - 
+#ifndef ENGLISH_MODE
 						strDesc.Format(L"\"%s\" 출력없음:접점(%d) 출력(%d)"
 							,pDev->GetInputFullName(),nRCnt,nCCnt);
+#else
+						strDesc.Format(L"No \"%s\" output: contact (%d) Output (%d)"
+							, pDev->GetInputFullName(), nRCnt, nCCnt);
+#endif
 						InsertErrorList(CHK_INPUT_WITHOUT_OUTPUT,0,pDev,strDesc);
 					}
 					else
 					{
 						if(nCCnt > D_MAX_LINKITEM_COUNT)
 						{
+#ifndef ENGLISH_MODE
 							strDesc.Format(L"\"%s\" 연동출력 접점 개수초과:접점(%d) 출력(%d)"
 								,pDev->GetInputFullName(),nRCnt,nCCnt);
+#else
+							strDesc.Format(L"\"%s\" interlock output relay contact limit exceeded: contact (%d) output (%d)"
+								, pDev->GetInputFullName(), nRCnt, nCCnt);
+#endif
 							InsertErrorList(CHK_OUTPUT_CNT,nCCnt,pDev,strDesc);
 						}
 
 						if(nRCnt > D_MAX_LINKITEM_COUNT)
 						{
+#ifndef ENGLISH_MODE
 							strDesc.Format(L"\"%s\" 연동출력 회로 개수초과:접점(%d) 출력(%d)"
 								,pDev->GetInputFullName(),nRCnt,nCCnt);
+#else
+							strDesc.Format(L"\"%s\" interlock output circuit limit exceeded: contact (%d) output (%d)"
+								, pDev->GetInputFullName(), nRCnt, nCCnt);
+#endif
 							InsertErrorList(CHK_OUTPUT_CNT,nRCnt,pDev,strDesc);
 						}
 					}
@@ -623,8 +722,13 @@ int CDlgErrorCheck::ProcErrorCheck()
 			if(pDBUtil->OpenQuery(strSql) == false)
 			{
 				// Warning 입력
+#ifndef ENGLISH_MODE
 				strDesc.Format(L"입력이름:\"%s\" - 출력이름:\"%s\" 사용되지 않는 출력"
 					,pDev->GetInputFullName(),pDev->GetOutputFullName());
+#else
+				strDesc.Format(L"Input Name: \"%s\" - Output Name: \"%s\" unused outputs"
+					, pDev->GetInputFullName(), pDev->GetOutputFullName());
+#endif
 				InsertErrorList(CHK_NOUSE_OUTPUT,nRCnt,pDev,strDesc);
 			}
 			else
@@ -636,8 +740,13 @@ int CDlgErrorCheck::ProcErrorCheck()
 					if(nItemCnt <= 0)
 					{
 						// Warning 입력
+#ifndef ENGLISH_MODE
 						strDesc.Format(L"입력이름:\"%s\" - 출력이름:\"%s\" 사용되지 않는 출력"
 							,pDev->GetInputFullName(),pDev->GetOutputFullName());
+#else
+						strDesc.Format(L"Input Name: \"%s\" - Output Name: \"%s\" unused outputs"
+							, pDev->GetInputFullName(), pDev->GetOutputFullName());
+#endif
 						InsertErrorList(CHK_NOUSE_OUTPUT,nRCnt,pDev,strDesc);
 					}
 					pDBUtil->MoveNext();
@@ -649,7 +758,11 @@ int CDlgErrorCheck::ProcErrorCheck()
 
 #if _DBG_MAKE_TIME_
 	dtCur = COleDateTime::GetCurrentTime();
+#ifndef ENGLISH_MODE
 	GF_AddDebug(L"오류 검사 종료 : %s",dtCur.Format(L"%H:%M:%S"));
+#else
+	GF_AddDebug(L"Error check end time: %s", dtCur.Format(L"%H:%M:%S"));
+#endif
 #endif
 
 
@@ -859,7 +972,11 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 	int nCnt = m_ctrlReport.GetItemCount();
 	if(nCnt <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"오류 검색 결과가 없습니다.");
+#else
+		AfxMessageBox(L"No errors have been found.");
+#endif
 		return ; 
 	}
 	int nTempSize = 0;
@@ -868,11 +985,18 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 	COleDateTime dtCur;
 	CString strtemp,strPrjName,strPath,strLine;
 	CString strDefault = L"*.csv";
+#ifndef ENGLISH_MODE
 	CString strFilter = L"오류 검사 결과(*.csv)|*.csv|All Files (*.*)|*.*||";
+#else
+	CString strFilter = L"Error check results(*.csv)|*.csv|All Files (*.*)|*.*||";
+#endif
 	strPrjName = m_pRefFasSysData->GetPrjName();
 	dtCur = COleDateTime::GetCurrentTime();
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"%s_오류검사결과(%4d%02d%02d).csv",strPrjName ,dtCur.GetYear(),dtCur.GetMonth(),dtCur.GetDay());
-
+#else
+	strtemp.Format(L"%s_Error_check_results(%4d%02d%02d).csv", strPrjName, dtCur.GetYear(), dtCur.GetMonth(), dtCur.GetDay());
+#endif
 	CFileDialog FileDialog(FALSE,NULL,strtemp,OFN_HIDEREADONLY,strFilter,this);
 	if(FileDialog.DoModal() != IDOK)
 		return;
@@ -882,12 +1006,21 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 	{
 		////////////////////////////////////////////////////////////////////////////
 		// Project File 생성 실패
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"오류검사결과 파일을 생성하는데 실패했습니다.\n");
 		AfxMessageBox(L"오류검사결과 파일을 생성하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to create the error check file.\n");
+		AfxMessageBox(L"Failed to create the error check file.");
+#endif
 		return;
 	}
 
+#ifndef ENGLISH_MODE
 	strLine = L"#오류종류,오류분류,내용\n";
+#else
+	strLine = L"#errortype,errorclassification,content\n";
+#endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,2048);
 	file.Write(szBuff,nTempSize);
 	for(int i = 0; i < nCnt; i ++)
@@ -901,6 +1034,10 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 		file.Write(szBuff,nTempSize);
 	}
 	file.Close();
+#ifndef ENGLISH_MODE
 	strtemp.Format(L"다음 파일명으로\n[%s]\n저장되었습니다.",strPath);
+#else
+	strtemp.Format(L"The file has been saved as [%s].", strPath);
+#endif
 	AfxMessageBox(strtemp);
 }

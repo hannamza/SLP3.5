@@ -56,7 +56,7 @@ CDkPaneInputRelay::~CDkPaneInputRelay()
 	RemoveAllTreeData();
 }
 
-
+#ifndef ENGLISH_MODE
 BEGIN_MESSAGE_MAP(CDkPaneInputRelay, CDockablePane)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
@@ -75,6 +75,26 @@ BEGIN_MESSAGE_MAP(CDkPaneInputRelay, CDockablePane)
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
+#else
+BEGIN_MESSAGE_MAP(CDkPaneInputRelay, CDockablePane)
+	ON_WM_CREATE()
+	ON_WM_SIZE()
+	ON_WM_CONTEXTMENU()
+	ON_WM_PAINT()
+	ON_WM_SETFOCUS()
+	ON_COMMAND(ID_SORT_ADDRESS_EN, &CDkPaneInputRelay::OnSortAddress)
+	ON_COMMAND(ID_SORT_CUSTOM_EN, &CDkPaneInputRelay::OnSortCustom)
+	ON_COMMAND(ID_SORT_EQUIP_EN, &CDkPaneInputRelay::OnSortEquip)
+	ON_COMMAND(ID_SORT_INPUTTYPE_EN, &CDkPaneInputRelay::OnSortInputtype)
+	ON_COMMAND(ID_SORT_LOCATION_EN, &CDkPaneInputRelay::OnSortLocation)
+	ON_COMMAND(ID_SORT_OUTTYPE_EN, &CDkPaneInputRelay::OnSortOuttype)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_INPUTVIEW_TREE, &CDkPaneInputRelay::OnTvnSelchangedLocTree)
+	ON_TVN_CHECK_ITEM(IDC_INPUTVIEW_TREE, &CDkPaneInputRelay::OnTvnCheckChangeLocTree)
+	ON_TVN_CHECK_PROC_END(IDC_INPUTVIEW_TREE, &CDkPaneInputRelay::OnTvnCheckProcEndLocTree)
+	ON_WM_CLOSE()
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+#endif
 
 
 
@@ -102,8 +122,14 @@ int CDkPaneInputRelay::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // 만들지 못했습니다.
 	}
 	// 이미지를 로드합니다.
+
+#ifndef ENGLISH_MODE
 	m_TbInputRelay.Create(this, AFX_DEFAULT_TOOLBAR_STYLE| CBRS_TOOLTIPS, IDR_TB_DKPRELAY_SORT);
 	m_TbInputRelay.LoadToolBar(IDR_TB_DKPRELAY_SORT, 0, 0, TRUE /* 잠금 */);
+#else
+	m_TbInputRelay.Create(this, AFX_DEFAULT_TOOLBAR_STYLE | CBRS_TOOLTIPS, IDR_TB_DKPRELAY_SORT_EN);
+	m_TbInputRelay.LoadToolBar(IDR_TB_DKPRELAY_SORT_EN, 0, 0, TRUE /* 잠금 */);
+#endif
 
 	OnChangeVisualStyle();
 
@@ -312,7 +338,11 @@ int CDkPaneInputRelay::InitTree()
 {
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"감지기/중계기의 정보가 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"The detector/module's information has not been set.");
+#endif
 		return 0; 
 	}
 //	m_bPreventSelect = TRUE;

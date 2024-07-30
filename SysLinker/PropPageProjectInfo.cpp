@@ -12,6 +12,7 @@
 
 IMPLEMENT_DYNAMIC(CPropPageProjectInfo, CPropertyPage)
 
+#ifndef ENGLISH_MODE
 CPropPageProjectInfo::CPropPageProjectInfo()
 	: CPropertyPage(IDD_PROP_PAGE_PRJINFO)
 	, m_strPrjName(_T(""))
@@ -27,6 +28,23 @@ CPropPageProjectInfo::CPropPageProjectInfo()
 	m_pRefFasSysData = nullptr;
 
 }
+#else
+CPropPageProjectInfo::CPropPageProjectInfo()
+	: CPropertyPage(IDD_PROP_PAGE_PRJINFO_EN)
+	, m_strPrjName(_T(""))
+	, m_strCreateDate(_T(""))
+	, m_strDBName(_T(""))
+	, m_strMaker(_T(""))
+	, m_strPrjPath(_T(""))
+	, m_strPrjVersion(_T(""))
+	, m_strSiteName(_T(""))
+	, m_strSiteManager(_T(""))
+	, m_strSitePhone(_T(""))
+{
+	m_pRefFasSysData = nullptr;
+
+}
+#endif
 
 CPropPageProjectInfo::~CPropPageProjectInfo()
 {
@@ -174,7 +192,11 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"프로젝트 정보를 초기화하는데 실패했습니다. 처음부터 다시 시작하여 주십시오.");
+#else
+		AfxMessageBox(L"Failed to initialize the project information. Please restart from the beginning.");
+#endif
 		CPropertyPage::OnCancel();
 		return 0;
 	}
@@ -213,6 +235,7 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 
 	if (bFind == TRUE)
 	{
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(L"같은 이름의 프로젝트가 이미 존재합니다.\n"
 			L"기존 프로젝트를 삭제하고 새로 생성하시겠습니까?" , MB_ICONQUESTION|MB_YESNO) == IDYES)
 		{
@@ -245,6 +268,40 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 		}
 		else
 			return -1;
+#else
+		if (AfxMessageBox(L"A project with the same name already exists.\n"
+			L"Delete an existing project and create a new one?", MB_ICONQUESTION | MB_YESNO) == IDYES)
+		{
+			// 폴더 삭제
+			CString strError = L"";
+			YAdoDatabase * pDB = nullptr;
+			pDB = theApp.GetMainDatabase();
+			if (pDB == nullptr)
+			{
+				AfxMessageBox(L"You don't have permission to use the program.\nPlease restart the program and log in before trying again.");
+				return -1;
+			}
+			if (pDB->IsAttachedDatabase(strtemp) == TRUE)
+			{
+				if (pDB->DetachMSDB(strtemp) == FALSE)
+				{
+					CString strError;
+					strError.Format(L"Failed to separate the project database (%s).\n%s"
+						, strtemp, pDB->GetLastErrorString());
+					AfxMessageBox(strError);
+					return -1;
+				}
+			}
+			strError = GF_DeleteDir(strFullPath);
+			if (strError.GetLength() > 0)
+			{
+				AfxMessageBox(strError);
+				return -1;
+			}
+		}
+		else
+			return -1;
+#endif
 	}
 
 	

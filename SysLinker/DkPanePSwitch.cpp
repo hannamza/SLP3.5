@@ -188,7 +188,11 @@ int CDkPanePSwitch::InitTree()
 {
 	if (m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"감지기/중계기의 정보가 설정되지 않았습니다.");
+#else
+		AfxMessageBox(L"The detector/module's information has not been set.");
+#endif
 		return 0;
 	}
 	RemoveAllTreeData();

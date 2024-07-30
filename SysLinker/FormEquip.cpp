@@ -49,6 +49,7 @@ enum
 
 IMPLEMENT_DYNCREATE(CFormEquip, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormEquip::CFormEquip()
 	: CFormView(IDD_FORMEQUIP)
 	, m_strName(_T(""))
@@ -59,6 +60,18 @@ CFormEquip::CFormEquip()
 	m_pCurrentData = nullptr;
 	m_bAdd = FALSE;
 }
+#else
+CFormEquip::CFormEquip()
+	: CFormView(IDD_FORMEQUIP_EN)
+	, m_strName(_T(""))
+	, m_nNum(0)
+	, m_strSymbol(_T(""))
+{
+	m_pRefFasSysData = nullptr;
+	m_pCurrentData = nullptr;
+	m_bAdd = FALSE;
+}
+#endif
 
 CFormEquip::~CFormEquip()
 {
@@ -267,7 +280,11 @@ void CFormEquip::OnBnClickedBtnSave()
 	
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("설비 정보를 저장 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Saving equipment information. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -282,12 +299,20 @@ void CFormEquip::OnBnClickedBtnSave()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"설비 정보 저장에 성공했습니다.");
+#else
+		AfxMessageBox(L"Successfully saved the equipment information.");
+#endif
 		Log::Trace("The equipment information was saved successfully.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"설비 정보 저장에 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to save the equipment information.");
+#endif
 		Log::Trace("Failed to save the equipment information.");
 	}
 #else
@@ -319,18 +344,30 @@ void CFormEquip::OnBnClickedBtnDel()
 
 	if (m_pCurrentData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 설비 정보가 없습니다.");
+#else
+		AfxMessageBox(L"No equipment information selected.");
+#endif
 		return;
 	}
-
+#ifndef ENGLISH_MODE
 	if (AfxMessageBox(L"선택된 설비 정보를 삭제하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
+#else
+	if (AfxMessageBox(L"Do you want to delete the selected equipment information?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		return;
+#endif
 
 	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
 	CString strMsg = _T("설비 정보를 삭제 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Deleting the equipment information. Wait for a moment.");
+#endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
 
@@ -345,12 +382,20 @@ void CFormEquip::OnBnClickedBtnDel()
 
 	if (m_bThreadSucceeded)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"설비 정보 삭제에 성공했습니다.");
+#else
+		AfxMessageBox(L"Successfully deleted the equipment information.");
+#endif
 		Log::Trace("The equipment information was deleted successfully.");
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"설비 정보 삭제에 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to delete the equipment information.");
+#endif
 		Log::Trace("Failed to delete the equipment information.");
 	}
 #else
@@ -423,7 +468,11 @@ int CFormEquip::FillEquipTree()
 	CString strTypeName, strDesc, strName, strSymbol;
 	std::shared_ptr <CManagerEquip> spManager = nullptr;
 
+#ifndef ENGLISH_MODE
 	hRoot = m_ctrlTree.InsertItem(L"설비 정보",0,0, TVI_ROOT);
+#else
+	hRoot = m_ctrlTree.InsertItem(L"Equipment Information", 0, 0, TVI_ROOT);
+#endif
 	if (m_pRefFasSysData == nullptr)
 		return 0; 
 
@@ -499,11 +548,11 @@ int CFormEquip::DisplayEquip(HTREEITEM hItem)
 
 int CFormEquip::DataDelete()
 {
-	//20240422 GBM start - 편집 여부 체크
-	int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-	int nID = m_nNum;
-	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
-		return 0;
+	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록함
+// 	int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+// 	int nID = m_nNum;
+// 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
+// 		return 0;
 	//20240422 GBM end
 
 	YAdoDatabase * pDB = m_pRefFasSysData->GetPrjDB();
@@ -581,12 +630,20 @@ int CFormEquip::DataDelete()
 			if (bRet)
 			{
 				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition has been successfully deleted from the module table file."), strType, nIndex, m_strName);
+#ifndef ENGLISH_MODE
 				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 삭제하는 데에 성공했습니다."), strType, nIndex, m_strName);
+#else
+				strMsg2.Format(_T("Successfully deleted the equipment definition [%s ID - %d: %s] from the module table file."), strType, nIndex, m_strName);
+#endif
 			}
 			else
 			{
 				strMsg1.Format(_T("Deleting the new equipment [%s ID - %d : %s] definition from the module table file failed."), strType, nIndex, m_strName);
+#ifndef ENGLISH_MODE
 				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 삭제하는 데에 실패했습니다."), strType, nIndex, m_strName);
+#else
+				strMsg2.Format(_T("Failed to delete the equipment definition [%s ID - %d: %s] from the module table file."), strType, nIndex, m_strName);
+#endif
 			}
 
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -619,9 +676,9 @@ int CFormEquip::DataAdd()
 		return 0;
 	nType = (int)m_cmbType.GetItemData(nSel);
 
-	//20240422 GBM start - 편집 여부 체크
-	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
-		return 0;
+	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함
+// 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
+// 		return 0;
 	//20240422 GBM end
 	
 	strSql.Format(L"INSERT TB_EQUIP_MST(EQ_ID,EQ_TYPE , EQ_NAME ,EQ_DESC,EQ_SYMBOL,ADD_USER) "
@@ -633,7 +690,11 @@ int CFormEquip::DataAdd()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to edit the data.");
+#endif
 		return 0;
 	}
 
@@ -684,12 +745,20 @@ int CFormEquip::DataAdd()
 			if (bRet)
 			{
 				strMsg1.Format(_T("The new equipment [%s ID - %d : %s] definition has been successfully added to the module table file."), strType, nID, m_strName);
+#ifndef ENGLISH_MODE
 				strMsg2.Format(_T("새 설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에 추가하는 데에 성공했습니다."), strType, nID, m_strName);
+#else
+				strMsg2.Format(_T("Successfully added the new equipment definition [%s ID - %d : %s] to the module table file."), strType, nID, m_strName);
+#endif
 			}
 			else
 			{
 				strMsg1.Format(_T("Adding the new equipment [%s ID - %d : %s] definition to the module table file failed."), strType, nID, m_strName);
+#ifndef ENGLISH_MODE
 				strMsg2.Format(_T("새 설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에 추가하는 데에 실패했습니다."), strType, nID, m_strName);
+#else
+				strMsg2.Format(_T("Failed to add the new equipment definition [%s ID - %d: %s] to the module table file."), strType, nID, m_strName);
+#endif
 			}
 
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -740,8 +809,13 @@ int CFormEquip::DataSave()
 	{
 		if (m_bAdd == FALSE)
 		{
+#ifndef ENGLISH_MODE
 			if (AfxMessageBox(L"기존 데이터가 없습니다. 새로 추가하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 				return 0;
+#else
+			if (AfxMessageBox(L"No existing data. Do you want to add a new one?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+				return 0;
+#endif
 		}
 		return DataAdd();
 	}
@@ -749,27 +823,40 @@ int CFormEquip::DataSave()
 	{
 		if (m_bAdd)
 		{
-			//20240422 GBM start - 편집 여부 체크
-			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-			int nID = m_nNum;
-			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
-				return 0;
+			//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함
+// 			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+// 			int nID = m_nNum;
+// 			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
+// 				return 0;
 			//20240422 GBM end
 
+#ifndef ENGLISH_MODE
 			if (AfxMessageBox(L"이미 데이터가 있습니다. 기존데이터를 수정하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 				return 0;
+#else
+			if (AfxMessageBox(L"You already have the data. Do you want to edit existing data?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+				return 0;
+#endif
 			std::shared_ptr <CManagerEquip> spManager = nullptr;
 			spManager = m_pRefFasSysData->GetEquipManager(nType);
 			if (spManager == nullptr)
 			{
+#ifndef ENGLISH_MODE
 				AfxMessageBox(L"데이터를 가져오는데 실패했습니다.");
+#else
+				AfxMessageBox(L"Failed to retrieve the data.");
+#endif
 				return 0;
 			}
 
 			m_pCurrentData = spManager->GetEquip(nID);
 			if (m_pCurrentData == nullptr)
 			{
+#ifndef ENGLISH_MODE
 				AfxMessageBox(L"데이터를 가져오는데 실패했습니다.");
+#else
+				AfxMessageBox(L"Failed to retrieve the data.");
+#endif
 				return 0;
 			}
 		}
@@ -783,7 +870,11 @@ int CFormEquip::DataSave()
 
 	if (pDB->ExecuteSql(strSql) == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 수정하는데 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to edit the data.");
+#endif
 		return 0;
 	}
 
@@ -830,12 +921,20 @@ int CFormEquip::DataSave()
 			if (bRet)
 			{
 				strMsg1.Format(_T("The equipment [%s ID - %d : %s] definition was successfully modified in the module table file."), strType, nID, m_strName);
+#ifndef ENGLISH_MODE
 				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 수정하는 데에 성공했습니다."), strType, nID, m_strName);
+#else
+				strMsg2.Format(_T("Successfully edited the equipment definition [%s ID - %d : %s] in the module table file."), strType, nID, m_strName);
+#endif
 			}
 			else
 			{
 				strMsg1.Format(_T("Failed to modify the equipment [%s ID - %d : %s] in the module table file."), strType, nID, m_strName);
+#ifndef ENGLISH_MODE
 				strMsg2.Format(_T("설비 정의 [%s ID - %d : %s]를 중계기 일람표 파일에서 수정하는 데에 실패했습니다."), strType, nID, m_strName);
+#else
+				strMsg2.Format(_T("Failed to edit the equipment definition [%s ID - %d : %s] in the module table file."), strType, nID, m_strName);
+#endif
 			}
 
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg1.GetBuffer(0)));
@@ -884,7 +983,11 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::NMS)
 			{
+#ifndef ENGLISH_MODE
 				strMsg.Format(_T("[입력 타입 ID : %d]는 추가할 수 없습니다."), nID);
+#else
+				strMsg.Format(_T("You cannot add [Input Type ID: %d]."), nID);
+#endif
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -893,7 +996,11 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
 			{
+#ifndef ENGLISH_MODE
 				strMsg.Format(_T("[출력 타입 ID : %d]는 추가할 수 없습니다."), nID);
+#else
+				strMsg.Format(_T("You cannot add [Output Type ID: %d]."), nID);
+#endif
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -926,7 +1033,11 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::NMS)
 			{
+#ifndef ENGLISH_MODE
 				strMsg.Format(_T("[입력 타입 ID : %d]는 삭제할 수 없습니다."), nID);
+#else
+				strMsg.Format(_T("You cannot delete [Input Type ID: %d]."), nID);
+#endif
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -935,7 +1046,11 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
 			{
+#ifndef ENGLISH_MODE
 				strMsg.Format(_T("[출력 타입 ID : %d]는 삭제할 수 없습니다."), nID);
+#else
+				strMsg.Format(_T("You cannot delete [Output Type ID: %d]."), nID);
+#endif
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
@@ -945,7 +1060,11 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 		{
 			if (nID == 3)
 			{
+#ifndef ENGLISH_MODE
 				strMsg.Format(_T("[출력 회로 ID : %d] 밸브는 삭제할 수 없습니다."), nID);
+#else
+				strMsg.Format(_T("You cannot delete [Output Circuit ID: %d] valves."), nID);
+#endif
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}

@@ -64,15 +64,26 @@ BOOL CDlgChildChangeView::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+#ifndef ENGLISH_MODE
 	m_ctrlTab.InsertItem(0, L"패턴");
+#else
+	m_ctrlTab.InsertItem(0, L"Pattern");
+#endif
+
 	m_ctrlTab.InsertItem(1, L"Address");
 
 	if (m_pTabPattern == nullptr)
 		m_pTabPattern = new CDlgRETabPattern;
 	if (m_pTabRelay == nullptr)
 		m_pTabRelay = new CDlgRETabRelay;
+
+#ifndef ENGLISH_MODE
 	m_pTabPattern->Create(IDD_DLG_TAB_PATTERN, &m_ctrlTab);
 	m_pTabRelay->Create(IDD_DLG_TAB_RELAY, &m_ctrlTab);
+#else
+	m_pTabPattern->Create(IDD_DLG_TAB_PATTERN_EN, &m_ctrlTab);
+	m_pTabRelay->Create(IDD_DLG_TAB_RELAY_EN, &m_ctrlTab);
+#endif
 
 	m_pTabPattern->ShowWindow(SW_SHOW);
 	m_pTabRelay->ShowWindow(SW_HIDE);

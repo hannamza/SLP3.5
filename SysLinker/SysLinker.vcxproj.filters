@@ -1173,6 +1173,15 @@
     <Image Include="res\RB_LINKER_SMALL_EDIT.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="res\cont_fac.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\contactf.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\bmp00002.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\ribbon.mfcribbon-ms">

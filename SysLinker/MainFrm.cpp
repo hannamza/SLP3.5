@@ -128,7 +128,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableMDITabbedGroups(TRUE, mdiTabParams);
 
 	m_wndRibbonBar.Create(this);
+#ifndef ENGLISH_MODE
 	m_wndRibbonBar.LoadFromResource(IDR_RIBBON);
+#else
+	m_wndRibbonBar.LoadFromResource(IDR_RIBBON_EN);
+#endif
 
 	if (!m_wndStatusBar.Create(this))
 	{
@@ -138,10 +142,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CString strTitlePane1;
 	CString strTitlePane2;
+#ifndef ENGLISH_MODE
 	bNameValid = strTitlePane1.LoadString(IDS_STATUS_PANE1);
 	ASSERT(bNameValid);
 	bNameValid = strTitlePane2.LoadString(IDS_STATUS_PANE2);
 	ASSERT(bNameValid);
+#else
+	bNameValid = strTitlePane1.LoadString(IDS_STATUS_PANE1_EN);
+	ASSERT(bNameValid);
+	bNameValid = strTitlePane2.LoadString(IDS_STATUS_PANE2_EN);
+	ASSERT(bNameValid);
+#endif
 	m_wndStatusBar.AddElement(new CMFCRibbonStatusBarPane(ID_STATUSBAR_PANE1, strTitlePane1, TRUE), strTitlePane1);
 	m_wndStatusBar.AddExtendedElement(new CMFCRibbonStatusBarPane(ID_STATUSBAR_PANE2, strTitlePane2, TRUE), strTitlePane2);
 
@@ -232,7 +243,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// 창 제목 표시줄에서 문서 이름 및 응용 프로그램 이름의 순서를 전환합니다.
 	// 문서 이름이 축소판 그림과 함께 표시되므로 작업 표시줄의 기능성이 개선됩니다.
 	ModifyStyle(0, FWS_PREFIXTITLE);
+#ifndef ENGLISH_MODE
 	GF_AddLog(L"SLP3 프로그램이 정상 기동됐습니다.");
+#else
+	GF_AddLog(L"The SLP3 program has been started successfully.");
+#endif
 }
 
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
@@ -250,6 +265,8 @@ BOOL CMainFrame::CreateDockingWindows()
 	BOOL bNameValid;
 
 	// 클래스 뷰를 만듭니다.
+#ifndef ENGLISH_MODE
+
 	CString strClassView;
 	bNameValid = strClassView.LoadString(ID_DKPANE_INPUTRELAY);
 	ASSERT(bNameValid);
@@ -324,6 +341,84 @@ BOOL CMainFrame::CreateDockingWindows()
 		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
 		return FALSE; // 만들지 못했습니다.
 	}
+
+#else
+
+	CString strClassView;
+	bNameValid = strClassView.LoadString(ID_DKPANE_INPUTRELAY_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkInputRelay.Create(strClassView, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_INPUTRELAY_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+
+	CString strOut;
+	bNameValid = strOut.LoadString(ID_DKPANE_OUTPUTRELAY_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkOutputRelay.Create(strOut, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_OUTPUTRELAY_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+	CString strPattern;
+	bNameValid = strPattern.LoadString(ID_DKPANE_PATTERN_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkPattern.Create(strPattern, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_PATTERN_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+	// 속성 창을 만듭니다.
+
+	CString strEm;
+	bNameValid = strEm.LoadString(ID_DKPANE_EMERGENCY_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkEmergency.Create(strEm, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_EMERGENCY_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+
+	CString strPump;
+	bNameValid = strPump.LoadString(ID_DKPANE_PUMP_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkPump.Create(strPump, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_PUMP_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+#if _USE_PSWITCH_
+	CString strPSwitch;
+	bNameValid = strPSwitch.LoadString(ID_DKPANE_PSWITCH_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkPSwitch.Create(strPSwitch, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_PSWITCH_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+#endif
+
+#if _USE_OUTPUTWND_
+	CString strOutputWnd;
+	bNameValid = strOutputWnd.LoadString(IDS_OUTPUT_WND_EN);
+	ASSERT(bNameValid);
+	if (!m_wndOutput.Create(strOutputWnd, this, CRect(0, 0, 100, 100), TRUE, IDS_OUTPUT_WND_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_BOTTOM | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("출력 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+#endif
+
+	CString strContact;
+	bNameValid = strContact.LoadString(ID_DKPANE_CONTACT_EN);
+	ASSERT(bNameValid);
+	if (!m_wndDkContact.Create(strContact, this, CRect(0, 0, 200, 200), TRUE, ID_DKPANE_CONTACT_EN, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_RIGHT | CBRS_FLOAT_MULTI))
+	{
+		TRACE0("클래스 뷰 창을 만들지 못했습니다.\n");
+		return FALSE; // 만들지 못했습니다.
+	}
+#endif
 
 	SetDockingWindowIcons(theApp.m_bHiColorIcons);
 	return TRUE;
@@ -1000,6 +1095,7 @@ void CMainFrame::OnFacpCreateLink()
 
 		//인증 여부 초기화
 		CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
+#ifndef ENGLISH_MODE
 		if (AfxMessageBox(_T("관리자 모드(ROM 인증 모드)로 진행하시겠습니까?"), MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			CDlgAdminMode dlg;
@@ -1033,18 +1129,62 @@ void CMainFrame::OnFacpCreateLink()
 			GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
 			Log::Trace("Proceed with creating a unauthorized ROM file.");
 		}
+#else
+		if (AfxMessageBox(_T("Do you want to proceed to the administrator mode (ROM authentication mode)?"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			CDlgAdminMode dlg;
+			if (dlg.DoModal() == IDOK)
+			{
+				CString strPassword = ADMIN_MODE_PASSWORD;
+				CString strUserInputPassword = _T("");
+				strUserInputPassword = dlg.m_strEditPassword;
+
+				if (strUserInputPassword.Compare(strPassword) == 0)
+				{
+					AfxMessageBox(_T("Admin mode verified. Proceeds to generate the ROM file for authentication."));
+					GF_AddLog(L"Admin mode verified. Proceeds to generate the ROM file for authentication.");
+					Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
+					CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
+				}
+				else
+				{
+					AfxMessageBox(_T("Invalid password."));
+					return;
+				}
+			}
+			else
+			{
+				GF_AddLog(L"Proceeds to create a generic ROM file.");
+				Log::Trace("Proceed with creating a unauthorized ROM file.");
+			}
+		}
+		else
+		{
+			GF_AddLog(L"Proceeds to create a generic ROM file.");
+			Log::Trace("Proceed with creating a unauthorized ROM file.");
+		}
+#endif
 
 		//20240415 GBM end
 	}
 	//20240618 GBM end
 
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+#ifndef ENGLISH_MODE
 	if(AfxMessageBox(L"연동데이터를 현재 상태로 컴파일합니다.\nYes : 오류검사 후 컴파일\nNo:오류검사 없이 컴파일",MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
 		CreateFacpLink();
 	}
 	else
 		StartErrorCheck(ERR_CHECK_CREATELINK,this);
+#else
+	if (AfxMessageBox(L"Compiles the site logic data to the current state.\nYes: Compile with error check\nNo : Compile without error check", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	{
+		CreateFacpLink();
+	}
+	else
+		StartErrorCheck(ERR_CHECK_CREATELINK, this);
+#endif
 }
 
 void CMainFrame::OnUpdateFacpCreateLink(CCmdUI *pCmdUI)
@@ -1066,8 +1206,13 @@ int CMainFrame::CreateFacpLink()
 	//CRelayTableData * pRefTable = m_pRefFasSysData;
 	if(m_pRefFasSysData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시오.");
 		AfxMessageBox(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시오.");
+#else
+		GF_AddLog(L"The project is closed. Please open the project and try again.");
+		AfxMessageBox(L"The project is closed. Please open the project and try again.");
+#endif
 		return 0;
 	}
 	CString strPrjPath,strFullPath,strDBPath;
@@ -1084,7 +1229,11 @@ int CMainFrame::CreateFacpLink()
 	nRet = m_pRefFasSysData->MakeLinkData(strPath);
 	if(nRet > 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동데이터 생성 성공)");
+#else
+		GF_AddLog(L"Successfully compiled the project (site logic data generation succeeded)");
+#endif
 		//	AfxMessageBox(L"프로젝트를 컴파일 하는데 성공했습니다.");
 
 		//20240703 GBM start - 중계기 일람표 편집 기능 Disable
@@ -1125,12 +1274,20 @@ int CMainFrame::CreateFacpLink()
 			bRet = CNewExcelManager::Instance()->UpdateProjectInfo(strWin32AppProjectName);
 			if (bRet)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"중계기 일람표 파일에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#else
+				GF_AddLog(L"Successfully updated the project number in the module table file [project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#endif
 				strMsg.Format(_T("Successfully updated project number in Module Table file.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"중계기 일람표 파일에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#else
+				GF_AddLog(L"Failed to update the project number in the module table file. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#endif
 				strMsg.Format(_T("Failed to update project number in Module Table file.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
@@ -1139,12 +1296,20 @@ int CMainFrame::CreateFacpLink()
 			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
 			if (bRet)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#else
+				GF_AddLog(L"Successfully updated the project number in the database [Project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#endif
 				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#else
+				GF_AddLog(L"Failed to update the project number in the database. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#endif
 				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
@@ -1189,12 +1354,20 @@ int CMainFrame::CreateFacpLink()
 			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
 			if (bRet)
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#else
+				GF_AddLog(L"Successfully updated the project number in the database [Project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#endif
 				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			else
 			{
+#ifndef ENGLISH_MODE
 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#else
+				GF_AddLog(L"Failed to update the project number in the database. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+#endif
 				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
@@ -1208,16 +1381,26 @@ int CMainFrame::CreateFacpLink()
 			strPath += L"\\";
 		strPath += L"*.*";
 		//GF_DeleteDir(strPath);
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동데이터 생성 실패)");
 		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
+#else
+		GF_AddLog(L"Failed to compile the project. (Failed to generate Data)");
+		AfxMessageBox(L"Failed to compile the project.", MB_OK | MB_ICONSTOP);
+#endif
 		return 0;
 		//AfxMessageBox(L"프로젝트를 컴파일 하는데 실패했습니다.");
 	}
 	nRet = m_pRefFasSysData->MakeConstructorTable(strPath);
 	if(nRet > 0)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동출력표 생성 성공)");
 		AfxMessageBox(L"프로젝트를 컴파일하는데 성공했습니다.",MB_OK | MB_ICONINFORMATION);
+#else
+		GF_AddLog(L"Successfully compiled the project (interlock output table generation succeeded)");
+		AfxMessageBox(L"Successfully compiled the project.", MB_OK | MB_ICONINFORMATION);
+#endif
 		return 1;
 	}
 	else
@@ -1226,8 +1409,13 @@ int CMainFrame::CreateFacpLink()
 			strPath += L"\\";
 		strPath += L"*.*";
 		//GF_DeleteDir(strPath);
-		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동출력표 생성 실패)");
-		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동데이터 생성 실패)");
+		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.", MB_OK | MB_ICONSTOP);
+#else
+		GF_AddLog(L"Failed to compile the project. (Failed to generate Data)");
+		AfxMessageBox(L"Failed to compile the project.", MB_OK | MB_ICONSTOP);
+#endif
 		return 0; 
 	}
 }
@@ -1256,6 +1444,7 @@ LRESULT CMainFrame::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
 	case ERR_CHECK_SIMPLE:
 		break;
 	case ERR_CHECK_CREATELINK:
+#ifndef ENGLISH_MODE
  		if(lp == 0)
 			PostMessage(UWM_ERRORCHECK_CREATELINK,wp,lp);
  		else if(lp == -1)
@@ -1264,6 +1453,16 @@ LRESULT CMainFrame::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
  // 			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
  		else
  			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
+#else
+		if (lp == 0)
+			PostMessage(UWM_ERRORCHECK_CREATELINK, wp, lp);
+		else if (lp == -1)
+			AfxMessageBox(L"User canceled.");
+		// 		else if(lp == -2)
+		// 			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
+		else
+			AfxMessageBox(L"Could not compile due to error.");
+#endif
 
 		break;
 	case ERR_CHECK_MAKEAUTOLINK:

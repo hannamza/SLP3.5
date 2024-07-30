@@ -13,7 +13,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLGINFOBASEPAGE };
+#else
+	enum { IDD = IDD_DLGINFOBASEPAGE_EN };
+#endif
 #endif
 protected:
 	CRelayTableData		*	m_pRefFasSysData;

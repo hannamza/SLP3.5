@@ -14,7 +14,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_INFO_EDIT_FACP };
+#else
+	enum { IDD = IDD_DLG_INFO_EDIT_FACP_EN };
+#endif
 #endif
 public:
 	CString m_strName;
@@ -25,7 +29,11 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+#ifndef ENGLISH_MODE
 	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_INFO_EDIT_FACP, pParent); }
+#else
+	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_INFO_EDIT_FACP_EN, pParent); }
+#endif
 	virtual void DisplayItem(ST_TREEITEM * pData, ST_TREEITEM * pNewData);
 	virtual BOOL GetChangeData();
 	virtual void PrjDataInit(int nInitType);

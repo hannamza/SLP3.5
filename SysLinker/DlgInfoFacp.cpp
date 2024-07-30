@@ -14,6 +14,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgInfoFacp, CDlgInfoBasePage)
 
+#ifndef ENGLISH_MODE
 CDlgInfoFacp::CDlgInfoFacp(CWnd* pParent /*=NULL*/)
 	: CDlgInfoBasePage(IDD_DLG_INFO_EDIT_FACP, pParent)
 	, m_strName(_T(""))
@@ -21,6 +22,15 @@ CDlgInfoFacp::CDlgInfoFacp(CWnd* pParent /*=NULL*/)
 {
 
 }
+#else
+CDlgInfoFacp::CDlgInfoFacp(CWnd* pParent /*=NULL*/)
+	: CDlgInfoBasePage(IDD_DLG_INFO_EDIT_FACP_EN, pParent)
+	, m_strName(_T(""))
+	, m_nNum(0)
+{
+
+}
+#endif
 
 CDlgInfoFacp::~CDlgInfoFacp()
 {
@@ -168,9 +178,15 @@ BOOL CDlgInfoFacp::GetChangeData()
 		if (nSameAddress == 0 && m_pRefFasSysData->GetFacpByNum(m_nNum) != nullptr)
 		{
 			CString strError;
+#ifndef ENGLISH_MODE
 			strError.Format(L"수신기 번호 %d로 등록된 수신기가 이미 있습니다."
 				L"현재 수신기에 속해 있는 모든 유닛/계통/회로를 이동하시겠습니까?"
 				, m_nNum);
+#else
+			strError.Format(L"There is already a registered FACP with FACP Number [%d]."
+				L"Do you want to move all units/loops/circuits that belong to the FACP?"
+				, m_nNum);
+#endif
 			if (AfxMessageBox(strError, MB_ICONQUESTION | MB_YESNO) != IDYES)
 				return FALSE;
 

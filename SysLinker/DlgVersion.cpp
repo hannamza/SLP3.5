@@ -11,6 +11,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgVersion, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgVersion::CDlgVersion(CString strPrjName, CString strPrjPath, CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_VERSION, pParent)
 {
@@ -21,6 +22,18 @@ CDlgVersion::CDlgVersion(CString strPrjName, CString strPrjPath, CWnd* pParent /
 	m_strPrjPath = strPrjPath;
 	m_strPrjName = strPrjName;
 }
+#else
+CDlgVersion::CDlgVersion(CString strPrjName, CString strPrjPath, CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_VERSION_EN, pParent)
+{
+	m_wMajor = 1;
+	m_wMinor = 0;
+	m_wLastMajor = 1;
+	m_wLastMinor = 0;
+	m_strPrjPath = strPrjPath;
+	m_strPrjName = strPrjName;
+}
+#endif
 
 CDlgVersion::~CDlgVersion()
 {
@@ -44,9 +57,15 @@ END_MESSAGE_MAP()
 BOOL CDlgVersion::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+#ifndef ENGLISH_MODE
 	m_ctrlVersionList.InsertColumn(0, _T("수정날짜"), LVCFMT_LEFT, 30);
 	m_ctrlVersionList.InsertColumn(1, _T("버전"), LVCFMT_LEFT, 80);
 	m_ctrlVersionList.InsertColumn(2, _T("수정자"), LVCFMT_LEFT, 80);
+#else
+	m_ctrlVersionList.InsertColumn(0, _T("EDITED DATE"), LVCFMT_LEFT, 30);
+	m_ctrlVersionList.InsertColumn(1, _T("VERSION"), LVCFMT_LEFT, 80);
+	m_ctrlVersionList.InsertColumn(2, _T("MODIFIER"), LVCFMT_LEFT, 80);
+#endif
 	m_ctrlVersionList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
@@ -64,7 +83,11 @@ void CDlgVersion::OnBnClickedOk()
 	nSel = m_ctrlVersionList.GetNextItem(-1, LVNI_SELECTED);
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 버전이 없습니다.");
+#else
+		AfxMessageBox(L"No version has been selected.");
+#endif
 		return;
 	}
 	dwVersion = (int)m_ctrlVersionList.GetItemData(nSel);

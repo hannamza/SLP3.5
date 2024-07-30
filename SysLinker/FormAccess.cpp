@@ -10,11 +10,19 @@
 
 IMPLEMENT_DYNCREATE(CFormAccess, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormAccess::CFormAccess()
 	: CFormView(IDD_FORMACCESS)
 {
 
 }
+#else
+CFormAccess::CFormAccess()
+	: CFormView(IDD_FORMACCESS_EN)
+{
+
+}
+#endif
 
 CFormAccess::~CFormAccess()
 {

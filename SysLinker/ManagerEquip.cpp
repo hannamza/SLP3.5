@@ -6,6 +6,7 @@
 #include "ManagerEquip.h"
 #include "DataEquip.h"
 
+#ifndef ENGLISH_MODE
 TCHAR *g_szInputType[] = {
 	L"자탐감지기",
 	L"A교차감지기",
@@ -28,7 +29,32 @@ TCHAR *g_szInputType[] = {
 	L"AN연식 교차B",
 	NULL
 };
+#else
+TCHAR *g_szInputType[] = {
+	L"SELF-DETECTOR",
+	L"A CROSS DETECTOR",
+	L"B CROSS DETECTOR",
+	L"GENERAL DETECTOR",
+	L"FIRE RELAY CONTACT",
+	L"HEAT-BASED ANALOG",
+	L"SMOKE-BASED ANALOG",
+	L"HEAT-BASED ADDRESS TYPE",
+	L"SMOKE-BASED ADDRESS TYPE",
+	L"SUPERVISORY (UNLATCH)",
+	L"SUPERVISORY (LATCH)",
+	L"CONFIRM",
+	L"CONFIRM POWER",
+	L"GAS LEAKS",
+	L"NOT USED",
+	L"AN HEAT-BASED CROSS A",
+	L"AN HEAT-BASED CROSS B",
+	L"AN SMOKE-BASED CROSS A",
+	L"AN SMOKE-BASED CROSS B",
+	NULL
+};
+#endif
 
+#ifndef ENGLISH_MODE
 TCHAR *g_szOutType[] = { 
 	L"비상방송",
 	L"지 구 벨",
@@ -45,8 +71,26 @@ TCHAR *g_szOutType[] = {
 	L"유도등정지",
 	NULL
 };
+#else
+TCHAR *g_szOutType[] = {
+	L"PUBLIC ADDRESS",
+	L"ZONE BELL",
+	L"SIREN",
+	L"PRE-ACTION VALVE",
+	L"SMOKE VENT WINDOW",
+	L"FIRE DOOR",
+	L"FIRE SHUTTER",
+	L"SMOKE DAMPER",
+	L"SUPPLY FAN",
+	L"EXHAUST FAN",
+	L"FIRE HYDRANT",
+	L"SMOKE CONTROL DAMPER",
+	L"EMERGENCY EXIT SIGN OFF",
+	NULL
+};
+#endif
 
-
+#ifndef ENGLISH_MODE
 TCHAR *g_szOutContents[] = { 
 	L"경종",
 	L"싸 이 렌",
@@ -71,6 +115,32 @@ TCHAR *g_szOutContents[] = {
 	L"비상개폐",
 	L"로비폰",
 NULL };
+#else
+TCHAR *g_szOutContents[] = {
+	L"BELL",
+	L"SIREN",
+	L"PRE-ACTION VALVE",
+	L"SUPPLY SMOKE DAMPER",
+	L"EXHAUST DAMPER",
+	L"SMD",
+	L"STROBE",
+	L"EMERGENCY LIGHT",
+	L"P / L",
+	L"DOOR",
+	L"AUTOMATIC DOOR CLOSER",
+	L"SMOKE WINDOW CLOSE",
+	L"SMOKE WINDOW",
+	L"SUPPLY FAN",
+	L"EXHAUST FAN",
+	L"1ST CLOSURE",
+	L"2ND CLOSURE",
+	L"FIRE DOOR",
+	L"AUTOMATIC DOOR",
+	L"ROOF DOOR",
+	L"EMERGENCY OPEN/CLOSE",
+	L"LOBBY PHONE",
+	NULL };
+#endif
 
 // CManagerEquip
 

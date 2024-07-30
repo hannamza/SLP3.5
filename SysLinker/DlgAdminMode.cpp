@@ -10,12 +10,21 @@
 
 IMPLEMENT_DYNAMIC(CDlgAdminMode, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgAdminMode::CDlgAdminMode(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DIALOG_ADMIN_MODE, pParent)
 	, m_strEditPassword(_T(""))
 {
 
 }
+#else
+CDlgAdminMode::CDlgAdminMode(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DIALOG_ADMIN_MODE_EN, pParent)
+	, m_strEditPassword(_T(""))
+{
+
+}
+#endif
 
 CDlgAdminMode::~CDlgAdminMode()
 {

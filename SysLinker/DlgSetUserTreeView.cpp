@@ -11,11 +11,19 @@
 
 IMPLEMENT_DYNAMIC(CDlgSetUserTreeView, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgSetUserTreeView::CDlgSetUserTreeView(BOOL bViewType, CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_CUSTOM_TREE, pParent)
 {
 	m_bViewOutputType = bViewType;
 }
+#else
+CDlgSetUserTreeView::CDlgSetUserTreeView(BOOL bViewType, CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_CUSTOM_TREE_EN, pParent)
+{
+	m_bViewOutputType = bViewType;
+}
+#endif
 
 CDlgSetUserTreeView::~CDlgSetUserTreeView()
 {

@@ -19,11 +19,19 @@
 
 IMPLEMENT_DYNCREATE(CFormLocation, CFormView)
 
+#ifndef ENGLISH_MODE
 CFormLocation::CFormLocation()
 	: CFormView(IDD_FORMLOCATION)
 {
 	m_bModified = FALSE;
 }
+#else
+CFormLocation::CFormLocation()
+	: CFormView(IDD_FORMLOCATION_EN)
+{
+	m_bModified = FALSE;
+}
+#endif
 
 CFormLocation::~CFormLocation()
 {
@@ -77,9 +85,13 @@ void CFormLocation::OnInitialUpdate()
 	m_ImgLocation.Create(IDB_BMP_DEVICE_ICON, 16, 8, RGB(0, 255, 255));
 	m_ctrlLocTree.SetImageList(&m_ImgLocation, TVSIL_NORMAL);
 
-
+#ifndef ENGLISH_MODE
 	m_ctrlDeviceList.InsertColumn(0, L"층이름", LVCFMT_LEFT, 200);
 	m_ctrlDeviceList.InsertColumn(1, L"층번호", LVCFMT_LEFT, 80);
+#else
+	m_ctrlDeviceList.InsertColumn(0, L"FLOOR NAME", LVCFMT_LEFT, 200);
+	m_ctrlDeviceList.InsertColumn(1, L"FLOOR NUMBER", LVCFMT_LEFT, 80);
+#endif
 
 	m_ctrlDeviceList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
@@ -323,9 +335,15 @@ int CFormLocation::SaveLevelInfo()
 		if(strCur == strPrev)
 		{
 			bDuplicate = TRUE;
+#ifndef ENGLISH_MODE
 			strtemp.Format(L"   - '%s'의 층번호[%s]가 이전 층번호[%s]와 중복됩니다.\n"
 				,m_ctrlDeviceList.GetItemText(i,0),strCur,strPrev
 			);
+#else
+			strtemp.Format(L"   - The floor number [%s] for '%s' is a duplicate of the previous floor number [%s].\n"
+				, strCur, m_ctrlDeviceList.GetItemText(i, 0), strPrev
+			);
+#endif
 			strError += strtemp;
 		}
 		strPrev = strCur;
@@ -333,9 +351,15 @@ int CFormLocation::SaveLevelInfo()
 
 	if(bDuplicate)
 	{
+#ifndef ENGLISH_MODE
 		strtemp.Format(L"중복되는 층번호가 있습니다.\n%s"
 			,strError
 		);
+#else
+		strtemp.Format(L"There is a duplicate floor number.\n%s"
+			, strError
+		);
+#endif
 		AfxMessageBox(strtemp,MB_OK | MB_ICONWARNING);
 		//return 0; 
 	}
@@ -346,8 +370,13 @@ int CFormLocation::SaveLevelInfo()
 
 	if(pDBUtil->DBOpen() == FALSE)
 	{
+#ifndef ENGLISH_MODE
 		GF_AddDebug(L"층번 저장 오류 : 데이터베이스를 연결하는데 실패했습니다.");
 		AfxMessageBox(L"데이터베이스 접속에 실패했습니다.");
+#else
+		GF_AddDebug(L"Floor number save error: Failed to connect to the database.");
+		AfxMessageBox(L"Failed to connect to the database.");
+#endif
 		return 0;
 
 	}
@@ -392,12 +421,21 @@ int CFormLocation::SaveLevelInfo()
 			pDBUtil->DBClose();
 			delete pDBUtil;
 			pDBUtil = nullptr;
+#ifndef ENGLISH_MODE
 			strError.Format(L"'%s'의 층번호[%d]를 변경중 데이터베이스 오류가 발생했습니다."
 				,m_ctrlDeviceList.GetItemText(i,0),nFNum
 			);
 			strtemp.Format(L"층번호를 변경 중에 오류가 발생했습니다.\n%s"
 				,strError
 			);
+#else
+			strError.Format(L"A database error has occurred while changing the floor number [%d] for '%s'."
+				, nFNum, m_ctrlDeviceList.GetItemText(i, 0)
+			);
+			strtemp.Format(L"An error has occurred while changing the floor number.\n%s"
+				, strError
+			);
+#endif
 			AfxMessageBox(strtemp,MB_OK | MB_ICONERROR);
 			return 0; 
 		}
@@ -449,6 +487,7 @@ void CFormLocation::OnBnClickedBtnSave()
 	if(SaveLevelInfo() == 0)
 	{
 		//AfxMessageBox(L"층번호를 수정하는데 실패했습니다.",MB_OK | MB_ICONERROR);
+#ifndef ENGLISH_MODE
 		if(AfxMessageBox(L"변경 되기 전의 층 정보를 다시 가져올까요?",MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			m_bModified = FALSE;
@@ -466,10 +505,33 @@ void CFormLocation::OnBnClickedBtnSave()
 		{
 
 		}
+#else
+		if (AfxMessageBox(L"Do you want to restore the floor information with no changes applied?", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			m_bModified = FALSE;
+			GetDlgItem(IDC_BTN_SAVE)->EnableWindow(FALSE);
+			m_bModified = FALSE;
+			CDataLocBase * pLoc;
+			HTREEITEM hSel = m_ctrlLocTree.GetSelectedItem();
+			pLoc = (CDataLocBase *)m_ctrlLocTree.GetItemData(hSel);
+			if (pLoc == nullptr)
+				return;
+
+			FillLevelList(pLoc);
+		}
+		else
+		{
+
+		}
+#endif
 	}
 	else
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"층번호를 수정하는데 성공했습니다.",MB_OK|MB_ICONINFORMATION);
+#else
+		AfxMessageBox(L"Successfully edited the floor number.", MB_OK | MB_ICONINFORMATION);
+#endif
 	}
 }
 
@@ -518,6 +580,7 @@ void CFormLocation::OnNMClickLocationTree(NMHDR *pNMHDR,LRESULT *pResult)
  
  	if(m_bModified)
  	{
+#ifndef ENGLISH_MODE
  		if(AfxMessageBox(L"변경 사항이 있습니다. 저장하시겠습니까?",MB_YESNO | MB_ICONQUESTION) == IDYES)
  		{
  			// SAVE
@@ -528,6 +591,18 @@ void CFormLocation::OnNMClickLocationTree(NMHDR *pNMHDR,LRESULT *pResult)
  				return;
  			}
  		}
+#else
+		if (AfxMessageBox(L"There have been changes. Do you want to save this?", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			// SAVE
+			if (SaveLevelInfo() == 0)
+			{
+				AfxMessageBox(L"Failed to save the changes.");
+				*pResult = 1;
+				return;
+			}
+		}
+#endif
 		m_bModified = FALSE;
  	}
  

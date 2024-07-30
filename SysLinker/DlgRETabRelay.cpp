@@ -20,6 +20,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgRETabRelay, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgRETabRelay::CDlgRETabRelay(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_TAB_RELAY, pParent)
 {
@@ -30,6 +31,18 @@ CDlgRETabRelay::CDlgRETabRelay(CWnd* pParent /*=NULL*/)
 	m_pRefMapChangeDevice = nullptr;
 	m_nAction = DATA_SAVE;
 }
+#else
+CDlgRETabRelay::CDlgRETabRelay(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_TAB_RELAY_EN, pParent)
+{
+	m_pRefCurData = nullptr;
+	m_pRefNewData = nullptr;
+	m_pRefFasSysData = nullptr;
+	m_pRefChangeList = nullptr;
+	m_pRefMapChangeDevice = nullptr;
+	m_nAction = DATA_SAVE;
+}
+#endif
 
 CDlgRETabRelay::~CDlgRETabRelay()
 {
@@ -81,9 +94,15 @@ BOOL CDlgRETabRelay::OnInitDialog()
 	m_pRefFasSysData = theApp.GetRelayTableData();
 	m_ImageTree.Create(IDB_BMP_DEVICE_ICON, 16, 8, RGB(0, 255, 255));
 	m_ctrlTree.SetImageList(&m_ImageTree, TVSIL_NORMAL);
+#ifndef ENGLISH_MODE
 	m_ctrlAfterList.InsertColumn(0, _T("기존 감지기/중계기"), LVCFMT_LEFT, 250);
 	m_ctrlAfterList.InsertColumn(1, _T("새 감지기/중계기"), LVCFMT_LEFT, 250);
 	m_ctrlAfterList.InsertColumn(2, _T("변경"),120);
+#else
+	m_ctrlAfterList.InsertColumn(0, _T("EXISTING DETECTOR/MODULE"), LVCFMT_LEFT, 250);
+	m_ctrlAfterList.InsertColumn(1, _T("NEW DETECTOR/MODULE"), LVCFMT_LEFT, 250);
+	m_ctrlAfterList.InsertColumn(2, _T("CHANGE"), 120);
+#endif
 	m_ctrlAfterList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0
 		, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES);
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -132,7 +151,11 @@ void CDlgRETabRelay::OnBnClickedBtnDel()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (m_nAction == DATA_DEL)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"삭제 시에는 영향을 받는 항목을 삭제할 수 없습니다.");
+#else
+		AfxMessageBox(L"Once deleted, you can't delete the affected items.");
+#endif
 		return;
 	}
 	int i, nCnt , nChk; 

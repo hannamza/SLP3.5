@@ -17,6 +17,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgChildPSwitch, CDialogEx)
 
+#ifndef ENGLISH_MODE
 CDlgChildPSwitch::CDlgChildPSwitch(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DLG_PSWITCH, pParent)
 	, m_nNum(0)
@@ -29,6 +30,20 @@ CDlgChildPSwitch::CDlgChildPSwitch(CWnd* pParent /*=NULL*/)
 	m_bAddStatus = FALSE;
 	m_pRefChangeData = nullptr;
 }
+#else
+CDlgChildPSwitch::CDlgChildPSwitch(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_DLG_PSWITCH_EN, pParent)
+	, m_nNum(0)
+	, m_strName(_T(""))
+	, m_strLcd(_T(""))
+{
+	m_pRefFasSysData = nullptr;
+	m_pMainForm = nullptr;
+	m_pCurrentData = nullptr;
+	m_bAddStatus = FALSE;
+	m_pRefChangeData = nullptr;
+}
+#endif
 
 CDlgChildPSwitch::~CDlgChildPSwitch()
 {
@@ -88,7 +103,11 @@ void CDlgChildPSwitch::OnBnClickedCancel()
 
 BOOL CDlgChildPSwitch::CreateDlg(CWnd * pParent)
 {
+#ifndef ENGLISH_MODE
 	return Create(IDD_DLG_PSWITCH, pParent);
+#else
+	return Create(IDD_DLG_PSWITCH_EN, pParent);
+#endif
 }
 
 void CDlgChildPSwitch::SetPSwitch(CDataPS * pData)
@@ -143,45 +162,73 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 
 	if (m_pRefChangeData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"임시저장 위치가 초기화되지 않았습니다. 프로그램을 재기동 해주십시오.");
+#else
+		AfxMessageBox(L"The temporary save location has not been initialized. Please restart the program.");
+#endif
 		return;
 	}
 	nSel = m_cmbFacp.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"수신기가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"No FACP has been selected.");
+#endif
 		return;
 	}
 
 	nFacpID = (int)m_cmbFacp.GetItemData(nSel);
 	if (nFacpID <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"수신기 정보가 없습니다.");
+#else
+		AfxMessageBox(L"No FACP information is available.");
+#endif
 		return;
 	}
 
 	nSel = m_cmbType.GetCurSel();
 	if (nSel < 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"타입이 설정되지 않았습니다. 타입 설정을 해주십시오.");
+#else
+		AfxMessageBox(L"The type has not been set. Please set the type.");
+#endif
 		return;
 	}
 
 	nType = (int)m_cmbType.GetItemData(nSel);
 	if (nType <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"타입정보가 없습니다.");
+#else
+		AfxMessageBox(L"No type information exists.");
+#endif
 		return;
 	}
 
 	if (m_strName == L"")
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"이름을 입력해 주십시오.");
+#else
+		AfxMessageBox(L"Please enter a name.");
+#endif
 		return;
 	}
 	if (m_nNum <= 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"압력 스위치 번호를 입력해 주십시오.");
+#else
+		AfxMessageBox(L"Please enter the pressure switch number.");
+#endif
 		return;
 	}
 	nPcb = m_nNum / 4 + 1;
@@ -205,7 +252,11 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 	}
 	if (lRet == 0)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"데이터를 수정하는 데에 실패했습니다.");
+#else
+		AfxMessageBox(L"Failed to edit the data.");
+#endif
 		return;
 	}
 	SetAddButtonEnable(TRUE);
@@ -219,10 +270,18 @@ void CDlgChildPSwitch::OnBnClickedBtnDel()
 	CString strMsg;
 	if (m_pCurrentData == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 압력 스위치가 없습니다.");
+#else
+		AfxMessageBox(L"No pressure switch has been selected.");
+#endif
 		return; 
 	}
+#ifndef ENGLISH_MODE
 	strMsg.Format(L"선택된 %s를 삭제하시겠습니까?" , m_pCurrentData->GetPSwitchName());
+#else
+	strMsg.Format(L"Do you want to delete the selected [%s]?", m_pCurrentData->GetPSwitchName());
+#endif
 	if (AfxMessageBox(strMsg, MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return; 
 

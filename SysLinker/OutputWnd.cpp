@@ -72,9 +72,15 @@ int COutputWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BOOL bNameValid;
 
 	// 탭에 목록 창을 연결합니다.
+#ifndef ENGLISH_MODE
 	bNameValid = strTabName.LoadString(IDS_DEBUG_TAB);
 	ASSERT(bNameValid);
 	m_wndTabs.AddTab(&m_wndLog, L"로그", (UINT)1);
+#else
+	bNameValid = strTabName.LoadString(IDS_DEBUG_TAB_EN);
+	ASSERT(bNameValid);
+	m_wndTabs.AddTab(&m_wndLog, L"LOG", (UINT)1);
+#endif
 	m_wndTabs.AddTab(&m_wndOutputDebug, strTabName, (UINT)1);
 
 	// 출력 탭을 더미 텍스트로 채웁니다.
@@ -185,12 +191,20 @@ void COutputList::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 
 void COutputList::OnEditCopy()
 {
+#ifndef ENGLISH_MODE
 	MessageBox(_T("출력 복사"));
+#else
+	MessageBox(_T("COPY OUTPUT"));
+#endif
 }
 
 void COutputList::OnEditClear()
 {
+#ifndef ENGLISH_MODE
 	MessageBox(_T("출력 지우기"));
+#else
+	MessageBox(_T("CLEAR OUTPUT"));
+#endif
 }
 
 void COutputList::OnViewOutput()

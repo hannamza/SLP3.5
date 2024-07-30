@@ -18,6 +18,7 @@
 
 IMPLEMENT_DYNAMIC(CDlgChildEditUnit, CDlgChildBasePage)
 
+#ifndef ENGLISH_MODE
 CDlgChildEditUnit::CDlgChildEditUnit(CWnd* pParent /*=NULL*/)
 	: CDlgChildBasePage(IDD_DLG_CHILD_EDIT_UNIT, pParent)
 	, m_strName(_T(""))
@@ -25,6 +26,15 @@ CDlgChildEditUnit::CDlgChildEditUnit(CWnd* pParent /*=NULL*/)
 {
 
 }
+#else
+CDlgChildEditUnit::CDlgChildEditUnit(CWnd* pParent /*=NULL*/)
+	: CDlgChildBasePage(IDD_DLG_CHILD_EDIT_UNIT_EN, pParent)
+	, m_strName(_T(""))
+	, m_nNum(0)
+{
+
+}
+#endif
 
 CDlgChildEditUnit::~CDlgChildEditUnit()
 {
@@ -233,9 +243,15 @@ BOOL CDlgChildEditUnit::GetChangeData()
 	if (m_pRefFasSysData->GetUnitByNum(pFacp->GetFacpNum(), m_nNum) != nullptr)
 	{
 		CString strError;
+#ifndef ENGLISH_MODE
 		strError.Format(L"%02d번 수신기에 %d로 등록된 유닛이 이미 있습니다."
 			L"현재 유닛에 속해 있는 모든 계통/회로를 이동하시겠습니까?"
 			, pFacp->GetFacpNum(), m_nNum);
+#else
+		strError.Format(L"There is already a unit registered as [%02d] on FACP [%02d]."
+			L"Do you want to move all loops/circuits that belong to the FACP?"
+			, m_nNum, pFacp->GetFacpNum());
+#endif
 		if(AfxMessageBox(strError , MB_YESNO|MB_ICONQUESTION) != IDYES)
 			return FALSE;
 	}

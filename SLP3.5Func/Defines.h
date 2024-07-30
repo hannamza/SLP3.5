@@ -1,8 +1,5 @@
 #pragma once
 
-// 영문화 플래그
-//#define ENGLISH_MODE	
-
 // 중계기 일람표 업데이트 플래그 - 편집에 따라 GT1 추가 정보 / 설비 정의 / 비상방송 / 패턴 (중계기 일람표 상, 수동 패턴 제외)를 갱신시키는 기능 Enable / disable
 //#define MODULE_TABLE_UPDATE_MODE
 
@@ -58,7 +55,11 @@
 #define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!");
 
 // 기본 DB 설비 회로 정의 파일 이름
+#ifndef ENGLISH_MODE
 #define EQUIPMENT_INFO_EXCEL_FILE_NAME	_T("equipment.xlsx")
+#else
+#define EQUIPMENT_INFO_EXCEL_FILE_NAME	_T("equipment_en.xlsx")
+#endif
 
 // 수신기 타입
 enum {

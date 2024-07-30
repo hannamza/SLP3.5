@@ -13,7 +13,11 @@ public:
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_INFO_MAIN };
+#else
+	enum { IDD = IDD_DLG_INFO_MAIN_EN };
+#endif
 #endif
 
 protected:

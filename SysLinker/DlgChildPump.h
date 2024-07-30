@@ -16,7 +16,11 @@ public:
 	BOOL					m_bAddStatus;
 	// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum { IDD = IDD_DLG_PUMPINFO };
+#else
+	enum { IDD = IDD_DLG_PUMPINFO_EN };
+#endif
 #endif
 	int m_nNum;
 	CComboBox m_cmbType;

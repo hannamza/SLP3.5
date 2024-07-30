@@ -66,7 +66,11 @@ protected: // serialization에서만 만들어집니다.
 
 public:
 #ifdef AFX_DESIGN_TIME
+#ifndef ENGLISH_MODE
 	enum{ IDD = IDD_SYSLINKER_FORM };
+#else
+	enum{ IDD = IDD_SYSLINKER_FORM_EN };
+#endif
 #endif
 
 // 특성입니다.

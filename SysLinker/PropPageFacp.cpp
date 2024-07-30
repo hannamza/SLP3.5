@@ -11,12 +11,21 @@
 
 IMPLEMENT_DYNAMIC(CPropPageFacp, CPropertyPage)
 
+#ifndef ENGLISH_MODE
 CPropPageFacp::CPropPageFacp()
 	: CPropertyPage(IDD_PROP_PAGE_FACP)
 {
 	m_pRefFasSysData = nullptr;
 
 }
+#else
+CPropPageFacp::CPropPageFacp()
+	: CPropertyPage(IDD_PROP_PAGE_FACP_EN)
+{
+	m_pRefFasSysData = nullptr;
+
+}
+#endif
 
 CPropPageFacp::~CPropPageFacp()
 {
@@ -76,6 +85,7 @@ BOOL CPropPageFacp::OnInitDialog()
 	);
 
 	m_ctrlTreeList.SetImageList(&m_ImgDeviceIcons, TVSIL_NORMAL);
+#ifndef ENGLISH_MODE
 	m_ctrlTreeList.InsertColumn(0, _T("수신기") , LVCFMT_LEFT , 300);
 	m_ctrlTreeList.InsertColumn(1, _T("입력타입"), LVCFMT_LEFT, 80);
 	m_ctrlTreeList.InsertColumn(2, _T("출력타입"), LVCFMT_LEFT, 80);
@@ -83,6 +93,15 @@ BOOL CPropPageFacp::OnInitDialog()
 	m_ctrlTreeList.InsertColumn(4, _T("번호"), LVCFMT_LEFT, 50);
 	m_ctrlTreeList.InsertColumn(5, _T("출력내용"), LVCFMT_LEFT, 80);
 	m_ctrlTreeList.InsertColumn(6, _T("패턴"), LVCFMT_LEFT, 80);
+#else
+	m_ctrlTreeList.InsertColumn(0, _T("FACP"), LVCFMT_LEFT, 300);
+	m_ctrlTreeList.InsertColumn(1, _T("INPUT TYPE"), LVCFMT_LEFT, 80);
+	m_ctrlTreeList.InsertColumn(2, _T("OUTPUT TYPE"), LVCFMT_LEFT, 80);
+	m_ctrlTreeList.InsertColumn(3, _T("EQUIPMENT NAME"), LVCFMT_LEFT, 80);
+	m_ctrlTreeList.InsertColumn(4, _T("NUMBER"), LVCFMT_LEFT, 50);
+	m_ctrlTreeList.InsertColumn(5, _T("OUTPUT DESCRIPTION"), LVCFMT_LEFT, 80);
+	m_ctrlTreeList.InsertColumn(6, _T("PATTERN"), LVCFMT_LEFT, 80);
+#endif
 	m_ctrlTreeList.SetExtendedStyle(TVS_EX_ITEMLINES | TVS_EX_ITEMLINES | TVS_EX_ALTERNATECOLOR
 		| TVS_EX_SUBSELECT | TVS_EX_SUBSELECT) ;
 	m_ctrlTreeList.SetUserDataSize(USER_DATA_SIZE);
