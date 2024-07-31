@@ -155,7 +155,7 @@ public:
 	void SetPrjVersion(WORD wMajor, WORD wMinor) { m_dwPrjVersion = MAKELPARAM(wMinor, wMajor); m_wPrjMinorNum = wMinor; m_wPrjMajorNum = wMajor; }
 	int ProcessDeviceTableList(CWnd *pPrgTagetWnd = NULL);
 	int ProcessDeviceTable(CString strPath,int &nRelayIndex , int nAllCnt , int nAllStep, BOOL bEIInit, CWnd *pPrgTagetWnd = NULL);
-	void VersionUp(BOOL bMajor = FALSE) { if (bMajor) m_wPrjMajorNum++; else m_wPrjMinorNum++; }
+	void VersionUp(BOOL bMajor = FALSE) { if (bMajor) { m_wPrjMajorNum++; m_wPrjMinorNum = 0; } else m_wPrjMinorNum++; }
 	//////////////////////////////////////////////////////////////////////////
 	// Add Data : 
 	void AddUnitMap(CString strKey , CDataUnit *pUnit) { m_MapUnitNum[strKey] = pUnit; };

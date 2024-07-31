@@ -828,8 +828,6 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	//20240308 GBM start - GT1 Sheet 존재 여부 확인, 중계기 일람표 파일이 여러 개일 경우 한번만 처리
 	CNewExcelManager::Instance()->bExistFT = FALSE;
 	CNewExcelManager::Instance()->bExistUT = FALSE;
-	CNewExcelManager::Instance()->bExistPI = FALSE;
-	CNewExcelManager::Instance()->bExistEI = FALSE;
 	//20240308 GBM end
 
 	nCnt = m_strFileNameList.GetCount();
@@ -858,11 +856,11 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	//20240408 GBM end
 
 	//20240604 GBM start - GT1 수신기가 아닐 경우 설비 정의 Sheet가 존재해도 플래그가 True가 안될 경우가 있어 다른 Sheet의 존재 여부로 판단
-	if (CNewExcelManager::Instance()->bExistEI == FALSE)
-	{
-		if (CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT)
-			CNewExcelManager::Instance()->bExistEI = TRUE;
-	}
+// 	if (CNewExcelManager::Instance()->bExistEI == FALSE)
+// 	{
+// 		if (CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT)
+// 			CNewExcelManager::Instance()->bExistEI = TRUE;
+// 	}
 	//20240604 GBM end
 
 	m_nLastRelayIndex = nRelayIdx;
@@ -999,6 +997,8 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 
 		nSheetCnt = xls.GetSheetCount();
 
+		//20240730 GBM start - 설비 정의 연계를 하지 않도록 했으므로 주석처리
+#if 0
 		//20240408 GBM start - 중계기 일람표를 열면 가장 먼저 설비 정의를 찾아서 먼저 파싱 후 기본 DB에 넣은 후 메모리 적용을 먼저한 후에 아래에서 설비 정의에 따른 회로 정보 처리가 이루어지도록 함
 		//첫번째 수신기가 GT1이면 중계기 일람표 상의 설비 정의를 먼저 적용하고 이후 수신기가 F3 수신기라면 새 설비 정의를 추가하는 과정에서 F3 설비 정의를 추가하도록 하고,
 		//첫번째 수신기가 F3이면 이미 DB 정보로 설비 정보를 초기화한 이후이므로 이후 수신기가 GT1 수신기라도 파싱하지 않고 새 설비 정의를 추가하는 과정에서 추가하도록 함
@@ -1067,6 +1067,8 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				}
 			}
 		}
+#endif
+		//20240730 GBM end
 
 		//설비 정의 초기화는 한번만 되어야 하는데 중계기 일람표가 여러 개일 경우, 
 		//첫번째 중계기 일람표에 설비 정의 Sheet가 있으면 이를 적용하고 설비 정의에 없는 회로가 들어오면 정의를 추가 (GT1 설비 정의 -> 기존 F3 설비 정의의 순서)
@@ -1146,22 +1148,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				continue;
 			}
 
-			//20240312 GBM start - 프로젝트 정보, 수신기 Type, Unit Type 파싱
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_PROJECT_INFO) == 0)
-			{
-				if (CNewExcelManager::Instance()->bExistPI == FALSE)
-				{
-					CNewExcelManager::Instance()->bExistPI = TRUE;
-					BOOL bRet = FALSE;
-					bRet = CNewExcelManager::Instance()->ParsingProjectInfo(&xls);
-					if (!bRet)
-					{
-						Log::Trace("Project Info Excel Parsing Failed!");
-					}
-				}
-				continue;
-			}
-
+			//20240312 GBM start - 수신기 Type, Unit Type 파싱
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
 			{
 				if (CNewExcelManager::Instance()->bExistFT == FALSE)
@@ -11657,7 +11644,8 @@ int CRelayTableData::LoadProjectDatabase()
 	CNewDBManager::Instance()->SetDBAccessor(m_pDB);
 
 	//최초부터 GT1 프로젝트인지 혹은 중계기 일람표 변경으로 인해 GT1 프로젝트가 되었는지에 따라 GT1 추가 테이블이 존재하면 Select를 해서 정보를 가져오고 그렇지 않으면 가져오지 않음
-	for (int i = TB_FACP_TYPE; i <= TB_PROJECT_INFO; i++)
+	//-> 20240731 GBM 프로젝트 테이블 제외 
+	for (int i = TB_FACP_TYPE; i <= TB_UNIT_TYPE; i++)
 	{
 		CString strTable = _T(""); 
 		strTable = g_lpszNewTable[i];
@@ -15239,9 +15227,9 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 				if (bAuthorized)
 					strAuthorized = _T("A");
 
-				strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
-				strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
-				strEmergency.Format(L"%sEMER%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+				strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+				strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+				strEmergency.Format(L"%sEMER%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			}
 			else
 			{
@@ -15566,9 +15554,9 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			if (bAuthorized)
 				strAuthorized = _T("A");
 
-			strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
-			strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
-			strEmergency.Format(L"%sEMER%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum + 1, strAuthorized);
+			strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+			strEmergency.Format(L"%sEMER%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 		}
 		else
 		{
@@ -15669,7 +15657,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 
 	if (bGT1TypeExist)
 	{
-		CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
+		//기존에는 ROM파일 생성 시 증가시켰지만 현재는 프로젝트 저장 시 증가시키므로 주석 처리
+		//CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
 
 		int nModuleTableVerNum = -1;
 		int nLinkedDataVerNum = -1;

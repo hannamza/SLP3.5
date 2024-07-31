@@ -72,6 +72,7 @@ public:
 	int GetSelectProjectType() { return m_nSelectPrjType; }
 	CString GetOpenProjectPath() { return m_strOpenPrjPath; }
 	DWORD GetOpenProjectVersion() { return MAKELPARAM(m_wMinor,m_wMajor); }
+	CString GetOpenProjectVersionString();
 	CString GetOpenProjectName() { return m_strOpenPrjName; }
 	BOOL	IsSelectedVersionTemp() { return m_bVersionTempSelected; }
 	CString GetLogInUser() { return m_strUser; }

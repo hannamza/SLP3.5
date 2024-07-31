@@ -382,6 +382,8 @@ CSysLinkerApp::CSysLinkerApp()
 	m_bProgramLogin = FALSE;
 
 	m_pDlgProg = nullptr;
+
+	m_bModuleTableChanged = FALSE;
 }
 
 // 유일한 CSysLinkerApp 개체입니다.
@@ -1890,6 +1892,18 @@ void CSysLinkerApp::OnHomeProjectOpen()
 #else
 	GF_AddDebug(L"Start Time : %s", dtCur.Format(L"%H:%M:%S"));
 #endif
+	//20240730 GBM start - 별도의 DB가 아닌 프로젝트 정보 파일로 프로젝트 정보를 넣음
+	memset(&CNewInfo::Instance()->m_gi.projectInfo, NULL, sizeof(PROJECT_INFO));
+	sprintf(CNewInfo::Instance()->m_gi.projectInfo.projectName, CCommonFunc::WCharToChar(dlg.GetOpenProjectName().GetBuffer(0)));
+	CString strVersion, strMajor, strMinor;
+	strVersion = dlg.GetOpenProjectVersionString();
+	AfxExtractSubString(strMajor, strVersion, 0, '.');
+	AfxExtractSubString(strMinor, strVersion, 1, '.');
+	CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum = _wtoi(strMajor);
+	CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum = _wtoi(strMinor);
+	CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
+	//20240730 GBM end
+
 	if (OpenProject(dlg.GetOpenProjectName(), dlg.GetOpenProjectPath()
 		, dlg.GetOpenProjectVersion(), dlg.IsSelectedVersionTemp()) <= 0)
 	{
@@ -1979,7 +1993,17 @@ void CSysLinkerApp::OnHomeProjectSave()
 	//////////////////////////////////////////////////////////////////////////
 	// 1. 편집되고 있는 프로젝트(Version_temp) 정보 변경
 	CString strPrjPath , strFullPath , strDBPath;
-	m_pFasSysData->VersionUp();
+
+	if (!m_bModuleTableChanged)
+		m_pFasSysData->VersionUp();
+	else
+		m_pFasSysData->VersionUp(TRUE);
+
+	//20240730 GBM start - 프로젝트 저장 시 Minor 번호 증가 적용
+	CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum = m_pFasSysData->m_wPrjMajorNum;
+	CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum = m_pFasSysData->m_wPrjMinorNum;
+	//20240730 GBM end
+
 	m_pFasSysData->SetPrjModifier(m_pFasSysData->GetCurrentUser());
 	m_pFasSysData->SetPrjModifyDate(COleDateTime::GetCurrentTime());
 
@@ -3343,7 +3367,8 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 	else
 	{
 		// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
-		bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
+		// -> 수신기 타입과 유닛 타입만 사용
+		bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT;
 	}
 	
 	if (bRet)
@@ -3353,18 +3378,18 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 		if (bRet)
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
 #else
-			GF_AddLog(L"Successfully created the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE).");
+			GF_AddLog(L"Successfully created the GT1 information table (FACP TYPE, UNIT TYPE).");
 #endif
 			Log::Trace("Inserting new DB table succeeded!");
 		}
 		else
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
 #else
-			GF_AddLog(L"Failed to create the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE). Please check the DB.");
+			GF_AddLog(L"Failed to create the GT1 information table (FACP TYPE, UNIT TYPE). Please check the DB.");
 #endif
 			Log::Trace("Inserting new DB table failed!");
 		}
@@ -3374,18 +3399,18 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 		if (bRet)
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
 #else
-			GF_AddLog(L"Successfully added the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data.");
+			GF_AddLog(L"Successfully added the GT1 information table (FACP TYPE, UNIT TYPE) data.");
 #endif
 			Log::Trace("GT1 DB table insertion succeeded!");
 		}
 		else
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
 #else
-			GF_AddLog(L"Failed to add the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data. Please check the DB.");
+			GF_AddLog(L"Failed to add the GT1 information table (FACP TYPE, UNIT TYPE) data. Please check the DB.");
 #endif
 			Log::Trace("GT1 DB table insertion failed!");
 		}
@@ -3546,12 +3571,12 @@ int CSysLinkerApp::SaveProjectInfoFile(CString strCurrentPrjRootFolder)
 	file.WriteString(m_pFasSysData->GetPrjMaker() + L"\n");
 	strtemp.Format(L"%d.%d", m_pFasSysData->GetPrjMajorNum(), m_pFasSysData->GetPrjMinorNum());
 	file.WriteString(strtemp + L"\n");
-//	file.WriteString(m_pFasSysData->GetPrjPath() + L"\n");
+	//file.WriteString(m_pFasSysData->GetPrjPath() + L"\n");	
 	file.WriteString(m_pFasSysData->GetDBName() + L"\n");
 	file.WriteString(m_pFasSysData->GetDBUser() + L"\n");
 	file.WriteString(m_pFasSysData->GetDBPwd() + L"\n");
 	file.WriteString(m_pFasSysData->GetPrjCreateDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");
-// 	file.WriteString(m_pFasSysData->GetPrjModifyDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");
+// 	file.WriteString(m_pFasSysData->GetPrjModifyDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");	//20240731 GBM - 프로젝트 수정 시간 적용 (주석 해제)
 // 	file.WriteString(m_pFasSysData->GetPrjModifier() + L"\n");
 	file.Close();
 

@@ -308,5 +308,13 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 	m_pRefFasSysData->SetProjectInfo(m_strPrjName, m_strSiteName, COleDateTime::GetCurrentTime()
 		, m_strMaker, m_strSitePhone, m_strDBName);
 
+	//20240730 GBM start - 별도의 DB가 아닌 프로젝트 정보 파일로 프로젝트 정보를 넣음
+	memset(&CNewInfo::Instance()->m_gi.projectInfo, NULL, sizeof(PROJECT_INFO));
+	sprintf(CNewInfo::Instance()->m_gi.projectInfo.projectName, CCommonFunc::WCharToChar(m_strPrjName.GetBuffer(0)));
+	CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum = 1;
+	CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum = 0;
+	CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
+	//20240730 GBM end
+
 	return CPropertyPage::OnWizardNext();
 }

@@ -107,6 +107,8 @@ public:
 	CString				m_strEquipmentDefinitionFile;
 	//20240523 GBM end
 
+	BOOL m_bModuleTableChanged;		// 중계기 일람표 갱신 여부 플래그 -> 갱신 시 프로젝트 Major 번호를 증가시킴
+
 	virtual void PreLoadState();
 	virtual void LoadCustomState();
 	virtual void SaveCustomState();

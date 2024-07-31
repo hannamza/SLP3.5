@@ -1322,56 +1322,57 @@ int CMainFrame::CreateFacpLink()
 
 #else	//중계기 일람표를 갱신하지 않더라도(MODULE_TABLE_UPDATE_MODE undefined) 프로젝트 정보 DB는 반드시 갱신해야 함
 
+		//20240730 GBM start - 프로젝트 DB 대신 기존의 프로젝트 파일의 버전 정보를 사용 아래 주석처리
 		//20240305 GBM start - 연동데이터 생성이 성공한 시점에 프로젝트 번호 업데이트 및 중계기 일람표 적용
-
 		//수신기 타입 정보에서 GT1 타입이 하나도 없으면 아래 행정을 하지 않음 (F3만 있으면 의미가 없기 때문)
-		BOOL bGT1TypeExist = FALSE;
-		for (int i = 0; i < MAX_FACP_COUNT; i++)
-		{
-			if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
-			{
-				bGT1TypeExist = TRUE;
-				break;
-			}
-		}
-
-		if (bGT1TypeExist)
-		{
-			int nModuleTableVerNum = -1;
-			int nLinkedDataVerNum = -1;
-			bool bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
-			CString strAuthorized = _T("");
-			if (bAuthorized)
-			{
-				strAuthorized = _T("A");
-			}
-			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
-			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
-			BOOL bRet = FALSE;
-			CString strMsg = _T("");
-
-			//프로젝트 버전 DB 적용
-			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
-			if (bRet)
-			{
-#ifndef ENGLISH_MODE
-				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-#else
-				GF_AddLog(L"Successfully updated the project number in the database [Project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-#endif
-				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-			}
-			else
-			{
-#ifndef ENGLISH_MODE
-				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-#else
-				GF_AddLog(L"Failed to update the project number in the database. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-#endif
-				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-			}
-			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
-		}
+// 		BOOL bGT1TypeExist = FALSE;
+// 		for (int i = 0; i < MAX_FACP_COUNT; i++)
+// 		{
+// 			if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
+// 			{
+// 				bGT1TypeExist = TRUE;
+// 				break;
+// 			}
+// 		}
+// 
+// 		if (bGT1TypeExist)
+// 		{
+// 			int nModuleTableVerNum = -1;
+// 			int nLinkedDataVerNum = -1;
+// 			bool bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
+// 			CString strAuthorized = _T("");
+// 			if (bAuthorized)
+// 			{
+// 				strAuthorized = _T("A");
+// 			}
+// 			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+// 			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+// 			BOOL bRet = FALSE;
+// 			CString strMsg = _T("");
+// 
+// 			//프로젝트 버전 DB 적용
+// 			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
+// 			if (bRet)
+// 			{
+// #ifndef ENGLISH_MODE
+// 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+// #else
+// 				GF_AddLog(L"Successfully updated the project number in the database [Project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+// #endif
+// 				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+// 			}
+// 			else
+// 			{
+// #ifndef ENGLISH_MODE
+// 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+// #else
+// 				GF_AddLog(L"Failed to update the project number in the database. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+// #endif
+// 				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+// 			}
+// 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+// 		}
+		//20240730 GBM end
 #endif
 		//20240703 GBM end
 	}

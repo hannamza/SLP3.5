@@ -235,7 +235,7 @@ BOOL CNewDBManager::DeleteEquipmentCircuitInfoFromEquipmentInfoTable()
 
 BOOL CNewDBManager::CheckAndCreateGT1DBTables()
 {
-	for (int nTable = TB_FACP_TYPE; nTable <= TB_PROJECT_INFO; nTable++)
+	for (int nTable = TB_FACP_TYPE; nTable <= TB_UNIT_TYPE; nTable++)
 	{
 		BOOL bTableExist = FALSE;
 		BOOL bTableCreate = FALSE;
@@ -355,8 +355,10 @@ BOOL CNewDBManager::InsertDatasIntoGT1DBTables()
 	if (!InsertDataIntoUnitTypeTable())
 		return FALSE;
 
-	if (!InsertDataIntoProjectInfoTable())
-		return FALSE;
+	//20240731 GBM start - 프로젝트 테이블 생성 안함
+// 	if (!InsertDataIntoProjectInfoTable())
+// 		return FALSE;
+	//20240731 GBM end
 
 	return TRUE;
 }
@@ -489,8 +491,10 @@ BOOL CNewDBManager::GetDataFromGT1DBTables()
 	if (!GetDataFromUnitTypeTable())
 		return FALSE;
 
-	if (!GetDataFromProjectInfoTable())
-		return FALSE;
+	//20240731 GBM start - 프로젝트 테이블 제외
+// 	if (!GetDataFromProjectInfoTable())
+// 		return FALSE;
+	//20240731 GBM end
 
 	return TRUE;
 }

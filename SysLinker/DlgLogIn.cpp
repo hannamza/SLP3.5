@@ -546,8 +546,6 @@ int CDlgLogIn::FillProjectTree(CString strPath)
 				pInfo = SetProjectInfo(strSubPath ,strPrjName);
 				pInfo->hItem = hItem;
 				pInfo->hParent = TVI_ROOT;
-				pInfo->wMajor = 1;
-				pInfo->wMinor = 0;
 				pInfo->bVerTemp = 1;
 				m_ctrlProject.SetItemData(hItem, (DWORD_PTR)pInfo);
 				AddVersion(strSubPath , pInfo);
@@ -700,15 +698,34 @@ ST_TEMP_PRJINFO *   CDlgLogIn::SetProjectInfo(CString strPrjPath , CString strPr
 	file.ReadString(strtemp); //GetPrjMaker
 	pInfo->strCreator = strtemp;
 	file.ReadString(strtemp); //GetPrjMajorNum GetPrjMinorNum
+
+	//20240730 GBM start - 프로젝트 번호 연동
+	CString strMajor, strMinor;
+	AfxExtractSubString(strMajor, strtemp, 0, '.');
+	AfxExtractSubString(strMinor, strtemp, 1, '.');
+	pInfo->wMajor = _wtoi(strMajor);
+	pInfo->wMinor = _wtoi(strMinor);
+	//20240730 GBM end
+
 	file.ReadString(strtemp); //GetPrjPath
 	file.ReadString(strtemp); //GetDBName
 	file.ReadString(strtemp); //GetDBUser
+
+	//20240731 GBM start - write / read 짝을 맞출 수 있으나 기존 현장의 호환성 때문에 고치지 않고 생성 날짜만 적용
+#if 1
+	file.ReadString(strtemp); //GetDBPwd -> 실제로는 이게 생성 날짜
+	pInfo->strDateCreate = strtemp;
+	file.ReadString(strtemp); //GetPrjCreateDate
+#else
 	file.ReadString(strtemp); //GetDBPwd
 	file.ReadString(strtemp); //GetPrjCreateDate
 	pInfo->strDateCreate = strtemp;
+#endif
+	//20240731 GBM end
+
 	pInfo->strModifier = pInfo->strCreator;
 	pInfo->strDateModify = pInfo->strDateCreate;
-	// 	file.ReadString(strtemp); //GetPrjModifyDate
+	//file.ReadString(strtemp); //GetPrjModifyDate
 // 	file.ReadString(strtemp); //GetPrjModifier
 	file.Close();
 	return pInfo;
@@ -720,9 +737,16 @@ int CDlgLogIn::DisplayPrjInfo(ST_TEMP_PRJINFO * pInfo)
 	m_strPrjName = pInfo->strName;
 	m_strCreateDate = pInfo->strDateCreate;
 	m_strMaker = pInfo->strCreator;
-	//m_strPrjVersion.Format(L"%d.%d" , pInfo->wMajor , pInfo->wMinor);		//20240306 GBM - 표시되는 버전이 항상 1.0이므로 의미가 없어 표시를 안하게 함
+	m_strPrjVersion.Format(L"%d.%d" , pInfo->wMajor , pInfo->wMinor);
 	m_strModifyDate = pInfo->strDateModify;
-	m_strModifier = pInfo->strDateModify;
+	m_strModifier = pInfo->strCreator;
 	UpdateData(FALSE);
 	return 0;
+}
+
+CString CDlgLogIn::GetOpenProjectVersionString()
+{
+	CString strVersion = _T("");
+	strVersion.Format(_T("%d.%d"), m_wMajor, m_wMinor);
+	return strVersion;
 }

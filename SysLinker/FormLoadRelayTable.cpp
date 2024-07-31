@@ -447,6 +447,7 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 		return;
 	}
 
+	theApp.m_bModuleTableChanged = TRUE;
 	theApp.OnHomeProjectSave();
 	// [2022/11/15 10:21:28 KHS] 
 	// 변경된 일람표를 version_temp\Relaytable에 복사한다.
@@ -981,17 +982,18 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	CNewDBManager::Instance()->SetDBAccessor(theApp.m_pFasSysData->m_pDB);
 
 	// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
+	// 20240731 GBM - 설비 정의 / 프로젝트 테이블 제외
 	BOOL bRet = FALSE;
-	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT && CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistEI;
+	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT;
 	if (bRet)
 	{
 		bRet = CNewDBManager::Instance()->CheckAndCreateGT1DBTables();
 		if (bRet)
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 생성이 성공했습니다.");
 #else
-			GF_AddLog(L"Successfully created the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE).");
+			GF_AddLog(L"Successfully created the GT1 information table (FACP TYPE, UNIT TYPE).");
 #endif
 			Log::Trace("Inserting new DB table succeeded!");
 		}
@@ -999,9 +1001,9 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		{
 			
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 생성이 실패했습니다, DB를 확인하세요.");
 #else
-			GF_AddLog(L"Failed to create the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE). Please check the DB.");
+			GF_AddLog(L"Failed to create the GT1 information table (FACP TYPE, UNIT TYPE). Please check the DB.");
 #endif
 			Log::Trace("Inserting new DB table failed!");
 		}
@@ -1010,18 +1012,18 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		if (bRet)
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 데이터 추가에 성공했습니다.");
 #else
-			GF_AddLog(L"Successfully added the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data.");
+			GF_AddLog(L"Successfully added the GT1 information table (FACP TYPE, UNIT TYPE) data.");
 #endif
 			Log::Trace("GT1 DB table insertion succeeded!");
 		}
 		else
 		{
 #ifndef ENGLISH_MODE
-			GF_AddLog(L"GT1 정보 테이블 (프로젝트, 수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
+			GF_AddLog(L"GT1 정보 테이블 (수신기 TYPE, UNIT TYPE) 데이터 추가에 실패했습니다, DB를 확인하세요.");
 #else
-			GF_AddLog(L"Failed to add the GT1 information table (PROJECT, FACP TYPE, UNIT TYPE) data. Please check the DB.");
+			GF_AddLog(L"Failed to add the GT1 information table (FACP TYPE, UNIT TYPE) data. Please check the DB.");
 #endif
 			Log::Trace("GT1 DB table insertion failed!");
 		}
@@ -1262,7 +1264,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 
 	InsertNewEmBroadcast(pDB,m_pNewRelayTable);
 	m_pNewRelayTable->SendProgStep(this,PROG_RESULT_DETAIL_COMPLETE,0,0);
-	// 새 패턴 중 디바이스 정보가 없는것 삭제- TB)PATTERN_ITEM에만 있는거 삭제
+	// 새 패턴 중 디바이스 정보가 없는것 삭제- TB_PATTERN_ITEM에만 있는거 삭제
     DelDeprecatedPatternItemDB(pDB);
 
 	// Index 생성 [9/20/2022 KHS]
