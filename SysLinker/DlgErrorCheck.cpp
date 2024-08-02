@@ -334,7 +334,7 @@ LRESULT CDlgErrorCheck::OnMakeProgress(WPARAM wp,LPARAM lp)
 #ifndef ENGLISH_MODE
 		str.Format(L"전체 %d개의 데이터 중 오류 %d개,경고 %d개를 발견했습니다.",m_nAllCnt,m_nErrorCnt,m_nWarningCnt);
 #else
-		str.Format(L"We found [%d] error(s) and [%d] warning(s) out of a total of [%d] pieces of data.", m_nAllCnt, m_nErrorCnt, m_nWarningCnt);
+		str.Format(L"We found [%d] error(s) and [%d] warning(s) out of a total of [%d] pieces of data.", m_nErrorCnt, m_nWarningCnt, m_nAllCnt);
 #endif
 		GetDlgItem(IDC_ST_MESSAGE)->SetWindowText(str);
 		m_ctrlReport.Complete();

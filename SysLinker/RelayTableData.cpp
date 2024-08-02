@@ -1148,7 +1148,24 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				continue;
 			}
 
-			//20240312 GBM start - 수신기 Type, Unit Type 파싱
+			//20240312 GBM start - 수신기 Type, Unit Type 파싱 -> 20240801 GBM - 프로그램팀이 정의한 수신기 / 유닛 타입 파싱으로 변경
+#if 1
+			if (strSheetName.CompareNoCase(EXCEL_SHEET_NEW_FACP_UNIT_TYPE) == 0)
+			{
+				if ((CNewExcelManager::Instance()->bExistFT == FALSE) && (CNewExcelManager::Instance()->bExistUT == FALSE))
+				{
+					CNewExcelManager::Instance()->bExistFT = TRUE;
+					CNewExcelManager::Instance()->bExistUT = TRUE;
+					BOOL bRet = FALSE;
+					bRet = CNewExcelManager::Instance()->ParsingNewFacpUintType(&xls);
+					if (!bRet)
+					{
+						Log::Trace("New FACP / Unit Type Info Excel Parsing Failed!");
+					}
+				}
+				continue;
+			}
+#else
 			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
 			{
 				if (CNewExcelManager::Instance()->bExistFT == FALSE)
@@ -1178,7 +1195,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				}
 				continue;
 			}
-
+#endif
 			//20240312 GBM end
 
 			str = strSheetName;
@@ -1188,6 +1205,11 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 			nTemp = strUp1.Find(strUp2);
 			if (nTemp < 0)
 				continue;
+#ifdef _DEBUG
+			nTemp = str.Find(_T("unit_type"));
+			if (nTemp != -1)
+				continue;
+#endif
 			str.Delete(nTemp, 4);
 			str.Replace(L"Unit" , L"");
 			nUNum = _wtoi(str);

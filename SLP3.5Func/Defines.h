@@ -39,20 +39,23 @@
 // 프로젝트 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_PROJECT_INFO	_T("project")
 
-// 수신기 타입 정보 Excel Sheet -> 추후 변경 예정
+// (기존) 수신기 타입 정보 Excel Sheet -> 추후 변경 예정 
 #define EXCEL_SHEET_FACP_TYPE _T("facp_type")
 
-// 유닛 타입 정보 Excel Sheet -> 추후 변경 예정
+// (기존) 유닛 타입 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_UNIT_TYPE _T("unit_type")
 
 // CCTV 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_CCTV	_T("cctv")
 
+// (새 - 프로그램팀 정의) 수신기 타입 / 유닛 타입 정보 Excel Sheet
+#define EXCEL_SHEET_NEW_FACP_UNIT_TYPE	_T("INFO")
+
 // 설비 회로 정의 (입력타입, 설비명, 출력타입, 출력회로) 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_EQUIPMENT_INFO	_T("equipment")
 
 // 관리자 모드 (ROM 인증 모드) Password
-#define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!");
+#define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!")
 
 // 기본 DB 설비 회로 정의 파일 이름
 #ifndef ENGLISH_MODE
@@ -75,7 +78,8 @@ enum {
 	F3_광센서_중계반,
 	GT1_광센서_중계반,
 	REDBOX,
-	피난사다리
+	피난사다리,
+	NMS
 }UNIT_TYPE;
 
 // 패턴 편집 타입 (중계기 일람표 상의 패턴 삭제, 해당 패턴 출력 회로 추가, 해당 패턴 출력 회로 삭제만 중계기 일람표에 반영, 수동 패턴은 제외)
@@ -307,6 +311,24 @@ namespace EXCEL_ENUM_CIRCUIT_INFO {
 		COLUMN_EQUIPMENT_NAME,
 		COLUMN_EQUIPMENT_NUMBER,
 		COLUMN_OUTPUT_CONTENT
+	}COLUMNS;
+}
+
+// 새 수신기 및 유닛 타입 (프로그램팀 정의) Excel Cell 위치 정의
+namespace EXCEL_ENUM_NEW_FACP_UNIT_TYPE {
+	//Row
+	enum {
+		ROW_HEADER = 1,
+		ROW_LIST_START
+	}ROWS;
+
+	//Column
+	enum 
+	{
+		COLUMN_FACP_NUMBER = 1,
+		COLUMN_FACP_TYPE,
+		COLUMN_UNIT_NUMBER,
+		COLUMN_UNIT_TYPE
 	}COLUMNS;
 }
 

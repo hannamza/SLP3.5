@@ -122,6 +122,44 @@ BOOL CNewExcelManager::ParsingUnitType(CExcelWrapper* xls)
 	return TRUE;
 }
 
+BOOL CNewExcelManager::ParsingNewFacpUintType(CExcelWrapper* xls)
+{
+	int nFacpNum = -1;
+	int nFacpType = -1;
+	int nUnitNum = -1;
+	int nUnitType = -1;
+	int nRoopCount = MAX_FACP_COUNT * MAX_UNIT_COUNT;
+	CString strTemp;
+	
+	for (int i = EXCEL_ENUM_NEW_FACP_UNIT_TYPE::ROW_LIST_START; i < nRoopCount + EXCEL_ENUM_NEW_FACP_UNIT_TYPE::ROW_LIST_START; i++)
+	{
+		strTemp = _T("");
+
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_NEW_FACP_UNIT_TYPE::COLUMN_FACP_NUMBER);
+		//수신기 번호가 없으면 더이상 정보가 없는 것으로 판단하고 루프 종료
+		if (strTemp.IsEmpty())
+		{
+			Log::Trace("There is no more new FACP / unit type information. (Total new FACP / Unit Type Info Count : %d)", i - EXCEL_ENUM_NEW_FACP_UNIT_TYPE::ROW_LIST_START);
+			break;
+		}
+		nFacpNum = _wtoi(strTemp);
+
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_NEW_FACP_UNIT_TYPE::COLUMN_FACP_TYPE);
+		nFacpType = _wtoi(strTemp);
+
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_NEW_FACP_UNIT_TYPE::COLUMN_UNIT_NUMBER);
+		nUnitNum = _wtoi(strTemp);
+
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_NEW_FACP_UNIT_TYPE::COLUMN_UNIT_TYPE);
+		nUnitType = _wtoi(strTemp);
+
+		CNewInfo::Instance()->m_gi.facpType[nFacpNum] = nFacpType;
+		CNewInfo::Instance()->m_gi.unitType[nFacpNum][nUnitNum] = nUnitType;
+	}
+
+	return TRUE;
+}
+
 BOOL CNewExcelManager::ParsingEquipmentInfo(CExcelWrapper* xls)
 {
 	int nNumber = -1;

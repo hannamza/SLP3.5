@@ -29,6 +29,9 @@ public:
 	// Unit Type ÆÄ½Ì
 	BOOL ParsingUnitType(CExcelWrapper* xls);
 
+	// »õ ¼ö½Å±â / Unit Type ÆÄ½Ì
+	BOOL ParsingNewFacpUintType(CExcelWrapper* xls);
+
 	// ¼³ºñ Á¤ÀÇ ÆÄ½Ì
 	BOOL ParsingEquipmentInfo(CExcelWrapper* xls);
 
