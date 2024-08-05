@@ -357,10 +357,28 @@ void CFormLoadRelayTable::OnBnClickedBtnPreview()
 // 		return;
 // 	}
 // 
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+#ifndef ENGLISH_MODE
+	CString strMsg = _T("변경 항목 미리보기를 진행하는 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Previewing changes is in progress. Wait for a moment.");
+#endif
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
  	// Thread Start
 	m_bStopFlag = FALSE;
 	m_pRelayThread = AfxBeginThread((AFX_THREADPROC)Thread_RelayProc,
  		(LPVOID)this);
+
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
 }
 
 
@@ -486,11 +504,28 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 		strTarget = strPath + strFile;
 		CopyFile(strSrc,strTarget,FALSE);
 	}
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+#ifndef ENGLISH_MODE
+	CString strMsg = _T("변경 사항을 적용 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Changes are being applied. Wait for a moment.");
+#endif
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
 	
 	m_bDiffMaking = FALSE;
 	m_bStopFlag = FALSE;
 	m_pRelayThread = AfxBeginThread((AFX_THREADPROC)Thread_RelayProc,
 		(LPVOID)this);
+
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
 }
 
 
@@ -634,6 +669,10 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 	if ((CFormLoadRelayTable *)NULL == me)
 	{
 		me->SendMessage(CSWM_PROGRESS_STEP, 0, 0);
+
+		me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+		SetEvent(me->m_hThreadHandle);
+
 		return 0;
 	}
 
@@ -683,9 +722,14 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 #endif
 			//20240408 GBM end
 		}
+
+		me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+		SetEvent(me->m_hThreadHandle);
 	}
 	catch (...)
 	{
+		me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+		SetEvent(me->m_hThreadHandle);
 	}
 	// 	if(nRet == 1)
 	// 		me->SendMessage(CSWM_PROGRESS_STEP, 100, PROG_RESULT_FINISH);

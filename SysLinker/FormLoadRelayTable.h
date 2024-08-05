@@ -3,6 +3,7 @@
 #include "afxwin.h"
 #include "MapSystemData.h"
 #include "DataPattern.h"
+#include "ProgressBarDlg.h"
 
 /*
 // 1.5이전 버전에서 PATTERN ITEM DB에 있는데 RELAY TABLE에 있는건 그대로 유지 - 연동데이터 생성 시 오류 발생[5/16/2022 KHS]
@@ -142,6 +143,8 @@ public:
 	CList<int> m_FacpNumList;
 	BOOL CheckDuplicate(int nValue);
 	void SetButtonState();
+	CProgressBarDlg* m_pProgressBarDlg;
+	HANDLE m_hThreadHandle;
 	//20240408 GBM end
 
 protected:

@@ -1206,8 +1206,9 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 			if (nTemp < 0)
 				continue;
 #ifdef _DEBUG
-			nTemp = str.Find(_T("unit_type"));
-			if (nTemp != -1)
+			int nTemp2 = 0;
+			nTemp2 = str.Find(_T("unit_type"));
+			if (nTemp2 != -1)
 				continue;
 #endif
 			str.Delete(nTemp, 4);
