@@ -109,6 +109,7 @@ BOOL CPropSheetNewProject::OnInitDialog()
 	CWnd* pBackBtn = GetDlgItem(ID_WIZBACK);
 	CWnd* pNextBtn = GetDlgItem(ID_WIZNEXT);
 	CWnd* pCancelBtn = GetDlgItem(IDCANCEL);
+	CWnd* pFinishBtn = GetDlgItem(ID_WIZFINISH);
 
 	if (pBackBtn != nullptr)
 	{
@@ -123,6 +124,11 @@ BOOL CPropSheetNewProject::OnInitDialog()
 	if (pCancelBtn != nullptr)
 	{
 		pCancelBtn->SetWindowText(_T("Cancel"));
+	}
+
+	if (pFinishBtn != nullptr)
+	{
+		pFinishBtn->SetWindowText(_T("Finish"));
 	}
 #endif
 

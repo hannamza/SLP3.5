@@ -679,7 +679,12 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 	try
 	{
 		if (me->IsDiffMake() == TRUE)
+		{
 			nRet = me->MakeDiffDataProc();
+
+			me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+			SetEvent(me->m_hThreadHandle);
+		}
 		else
 		{	
 			//20240408 GBM start - 중계기 일람표 갱신 시 프로그램을 종료하라는 메세지 대신 자동으로 종료하도록 함
@@ -697,7 +702,10 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 
 				Log::Trace("The new module file has been successfully applied and this program ends!");
 
-				theApp.m_pMainWnd->SendMessage(WM_CLOSE);
+				me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+				SetEvent(me->m_hThreadHandle);
+
+				theApp.m_pMainWnd->PostMessage(WM_CLOSE);
 			}
 			else
 			{
@@ -722,9 +730,6 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 #endif
 			//20240408 GBM end
 		}
-
-		me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
-		SetEvent(me->m_hThreadHandle);
 	}
 	catch (...)
 	{
