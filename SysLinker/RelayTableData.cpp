@@ -17073,14 +17073,24 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	/************************************************************************/
  	/* 입력타입    0~ 99 : 100개 글자수 32                                                          */
  	/************************************************************************/
+
+	int nItemCount = 0;
+#ifndef VIETNAM_EXHIBITION_MODE
+	nItemCount = MAX_EQUIP_INFO_ITEM_COUNT;
+#else
+	nItemCount = 17;
+#endif
+
  	spRefManager = m_spRefInputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
- 	memset(pMsgBuff + uMsgOffset,0,(32 * MAX_EQUIP_INFO_ITEM_COUNT));
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
  
+	int nItem = 0;
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
+		nItem++;
  		pEquip = spRefManager->GetNext(pos);
  		if(pEquip == nullptr)
  			continue;
@@ -17096,20 +17106,37 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		nCopyPos = pEquip->GetEquipID() * 32;
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos ,szStrBuff,32);
  		strName.ReleaseBuffer();
+
+		if (nItem == nItemCount)
+			break;
  	}
+
+#ifndef VIETNAM_EXHIBITION_MODE
  	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
+#else
+	uMsgOffset += (32 * nItemCount);
+#endif
  
  	/************************************************************************/
  	/* 출력타입 - 연동정지 0~ 99 : 100개 글자수 32                                                             */
  	/************************************************************************/
+
+#ifndef VIETNAM_EXHIBITION_MODE
+	nItemCount = MAX_EQUIP_INFO_ITEM_COUNT;
+#else
+	nItemCount = 57;
+#endif
+
  	spRefManager = m_spRefOutputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
  
- 	memset(pMsgBuff + uMsgOffset,0,(32 * MAX_EQUIP_INFO_ITEM_COUNT));
+	nItem = 0;
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
+		nItem++;
  		pEquip = spRefManager->GetNext(pos);
  		if(pEquip == nullptr)
  			continue;
@@ -17127,8 +17154,15 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		nCopyPos = pEquip->GetEquipID() * 32;
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
  		strName.ReleaseBuffer();
+
+		if (nItem == nItemCount)
+			break;
  	}
- 	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
+#ifndef VIETNAM_EXHIBITION_MODE
+	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
+#else
+	uMsgOffset += (32 * nItemCount);
+#endif
 
 	//20240429 GBM end
  
@@ -17653,9 +17687,9 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 #ifndef ENGLISH_MODE
 				GF_AddLog(L"GT1APPENDIX.ROM 파일을 여는 데에 실패했습니다.");
 #else
-				GF_AddLog(L"Failed to open GT1APPENDIX.ROM file.");
+				GF_AddLog(L"Failed to open the GT1APPENDIX.ROM file.");
 #endif
-				Log::Trace("Failed to open GT1APPENDIX.ROM file.");
+				Log::Trace("Failed to open the GT1APPENDIX.ROM file.");
 				return 0;
 			}
 

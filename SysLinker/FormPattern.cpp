@@ -413,7 +413,7 @@ void CFormPattern::OnInitialUpdate()
 	m_ctrlRelayList.InsertColumn(4, L"EQUIPMENT NO.", LVCFMT_LEFT, 50);
 	m_ctrlRelayList.InsertColumn(5, L"OUTPUT DESCRIPTION", LVCFMT_LEFT, 80);
 	m_ctrlRelayList.InsertColumn(6, L"LOCATION", LVCFMT_LEFT, 150);
-	m_ctrlRelayList.InsertColumn(7, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRelayList.InsertColumn(7, L"OUTPUT CATEGORY", LVCFMT_LEFT, 80);
 	m_ctrlRelayList.InsertColumn(8, L"AUTO/MANUAL", LVCFMT_LEFT, 80);
 #endif
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);

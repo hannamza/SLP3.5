@@ -138,7 +138,7 @@ void CFormPSwitch::OnInitialUpdate()
 	m_ctrlRightBottomRelayList.InsertColumn(5, L"OUTPUT DESCRIPTION", LVCFMT_LEFT, 80);
 	m_ctrlRightBottomRelayList.InsertColumn(6, L"LOCATION", LVCFMT_LEFT, 150);
 	m_ctrlRightBottomRelayList.InsertColumn(7, L"INTERLOCK TYPE", LVCFMT_LEFT, 80);
-	m_ctrlRightBottomRelayList.InsertColumn(8, L"OUTPUT TYPE", LVCFMT_LEFT, 80);
+	m_ctrlRightBottomRelayList.InsertColumn(8, L"OUTPUT CATEGORY", LVCFMT_LEFT, 80);
 #endif
 
 // 	m_ctrlRightBottomRelayList.InsertColumn(0, L"감지기/중계기", LVCFMT_LEFT, 150);

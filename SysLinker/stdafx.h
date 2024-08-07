@@ -55,6 +55,8 @@ using namespace Gdiplus;
 #include <vector>
 #include <map>
 
+//#define VIETNAM_EXHIBITION_MODE
+
 //20240129 GBM start - 추가 기능 헤더
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>

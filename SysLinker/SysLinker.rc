@@ -3123,7 +3123,7 @@ END
 STRINGTABLE
 BEGIN
     ID_SORT_EQUIP_EN        "Sort by equipment name\nSort devices by equipment name."
-    ID_SORT_CUSTOM_EN       "Sort by user settings\nSort devices according to user settings."
+    ID_SORT_CUSTOM_EN       "Sort by user settings\nSort devices by user settings."
     ID_DKPANE_PATTERN_EN    "PATTERN VIEW"
     ID_DKPANE_EMERGENCY_EN  "PUBLIC ADDRESS VIEW"
     ID_DKPANE_PUMP_EN       "PUMP VIEW"
@@ -4030,7 +4030,7 @@ BEGIN
     LTEXT           "",IDC_ST_MESSAGE,7,20,544,8
 END
 
-IDD_FORMEDITLOGIC3_EN DIALOGEX 0, 0, 552, 322
+IDD_FORMEDITLOGIC3_EN DIALOGEX 0, 0, 567, 322
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 9, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
@@ -4048,36 +4048,36 @@ BEGIN
     EDITTEXT        IDC_ED_PLUSNFLOOR,83,101,40,14,ES_AUTOHSCROLL
     CONTROL         "PUBLIC ADDRESS OUTPUT",IDC_CHK_EMERGENCY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,116,101,10
     CONTROL         "Basement floor logic (output all basement floors for fire)",IDC_CHK_UNDERFLOOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,146,46,193,10
-    GROUPBOX        "",IDC_STATIC,142,52,396,101
-    CONTROL         "Distinguish basement by building: when enabled, this option displays only the basement floors of buildings on fire",IDC_CHK_UNDERFLOOR_CLASS_DONG,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,69,376,10
-    CONTROL         "Distinguish basement by building type: this option displays only the basement floors of building types on fire",IDC_CHK_UNDERFLOOR_CLASS_BTYPE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,83,365,10
-    CONTROL         "Distinguish line: when enabled, this option displays only the lines on fire",IDC_CHK_UNDERFLOOR_CLASS_STAIR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,97,259,10
-    CONTROL         "Display All Basement Floors for Fire on 1st Basement Floor",IDC_CHK_UNDERFLOOR_FIRST_FLOOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,116,202,10
-    CONTROL         "Display Ground Floor for Fire on 1st Basement Floor",IDC_CHK_UNDERFLOOR_B1F,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,128,225,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,162,46,193,10
+    GROUPBOX        "",IDC_STATIC,158,52,396,101
+    CONTROL         "Distinguish basement by building: when enabled, this option outputs only the basement floors of buildings on fire",IDC_CHK_UNDERFLOOR_CLASS_DONG,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,69,376,10
+    CONTROL         "Distinguish basement by building type: this option outputs only the basement floors of building types on fire",IDC_CHK_UNDERFLOOR_CLASS_BTYPE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,83,365,10
+    CONTROL         "Distinguish line: when enabled, this option outputs only the lines on fire",IDC_CHK_UNDERFLOOR_CLASS_STAIR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,97,259,10
+    CONTROL         "Output All Basement Floors for Fire on 1st Basement Floor",IDC_CHK_UNDERFLOOR_FIRST_FLOOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,116,202,10
+    CONTROL         "Output Ground Floor for Fire on 1st Basement Floor",IDC_CHK_UNDERFLOOR_B1F,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,128,225,10
     PUSHBUTTON      "ADD",IDC_BTN_ADD,8,158,36,14
     PUSHBUTTON      "SAVE",IDC_BTN_SAVE,45,158,36,14
     PUSHBUTTON      "DELETE",IDC_BTN_DEL,83,158,36,14
-    PUSHBUTTON      "IMPORT AUTO LOGIC",IDC_BTN_LOGIC_IMPORT,163,158,79,14
-    PUSHBUTTON      "EXPORT AUTO LOGIC",IDC_BTN_LOGIC_EXPORT,244,158,73,14
-    CONTROL         "",IDC_LOGIC_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,174,538,141
-    GROUPBOX        "SET OUTPUT DESTINATION",IDC_STATIC,7,38,538,118
+    PUSHBUTTON      "IMPORT AUTO LOGIC",IDC_BTN_LOGIC_IMPORT,203,158,79,14
+    PUSHBUTTON      "EXPORT AUTO LOGIC",IDC_BTN_LOGIC_EXPORT,284,158,73,14
+    CONTROL         "",IDC_LOGIC_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,174,553,141
+    GROUPBOX        "SET OUTPUT DESTINATION",IDC_STATIC,7,38,553,118
     LTEXT           "INPUT\nTYPE",IDC_STATIC,10,17,27,16
     LTEXT           "OUTPUT\nTYPE",IDC_STATIC,209,16,29,16
     LTEXT           "EQUIPMENT\nNAME",IDC_STATIC,101,16,43,15
     LTEXT           "OUTPUT\nDESCRIPTION",IDC_STATIC,306,16,46,16
     LTEXT           "CONTROL UP TO\n+ N FLOOR(S)",IDC_STATIC,17,99,61,17
-    GROUPBOX        "SET DESTINATION",IDC_STATIC,7,7,538,29
-    GROUPBOX        "MATCHING LOCATION CONDITION",IDC_STATIC,16,65,123,35
-    GROUPBOX        "Location (input and output locations are the same)",IDC_STATIC,147,58,383,56
+    GROUPBOX        "SET DESTINATION",IDC_STATIC,7,7,553,29
+    GROUPBOX        "MATCHING I/O LOCATION CONDITION",IDC_STATIC,16,65,137,35
+    GROUPBOX        "Location (input and output locations are the same)",IDC_STATIC,163,58,383,56
     CONTROL         "Include Basement Parking Lot",IDC_CHK_UNDER_PARKING,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,151,140,107,10
-    LTEXT           "(Apply logic in case of fire on the basement floor or parking lot)",IDC_STATIC,261,141,208,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,140,107,10
+    LTEXT           "(Apply logic in case of fire on the basement floor or parking lot)",IDC_STATIC,277,141,208,8
 END
 
 IDD_FORMEMERGENCY_EN DIALOGEX 0, 0, 289, 196
@@ -4659,7 +4659,7 @@ BEGIN
     IDD_FORMEDITLOGIC3_EN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 545
+        RIGHTMARGIN, 560
         TOPMARGIN, 7
         BOTTOMMARGIN, 315
     END

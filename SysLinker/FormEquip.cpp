@@ -242,18 +242,6 @@ void CFormEquip::OnBnClickedBtnAdd()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
-// #ifndef _DEBUG
-// 	int nType = ET_NONE;
-// 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-// 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
-// 	{
-// 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
-// 		return;
-// 	}
-// #endif
-	//20240408 GBM end
-
 	AddInit();
 }
 
@@ -261,18 +249,6 @@ void CFormEquip::OnBnClickedBtnAdd()
 void CFormEquip::OnBnClickedBtnSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
-// #ifndef _DEBUG
-// 	int nType = ET_NONE;
-// 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-// 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
-// 	{
-// 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
-// 		return;
-// 	}
-// #endif
-	//20240408 GBM end
 
 	//20240527 GBM start - 스레드로 전환
 #if 1
@@ -329,18 +305,6 @@ void CFormEquip::OnBnClickedBtnSave()
 void CFormEquip::OnBnClickedBtnDel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	//20240408 GBM start - 입력타입/설비이름/출력타입/출력내용일 경우 진행되지 않도록 함
-// #ifndef _DEBUG
-// 	int nType = ET_NONE;
-// 	nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-// 	if ((nType >= ET_INPUTTYPE) && (nType <= ET_OUTCONTENTS))
-// 	{
-// 		AfxMessageBox(_T("[입력타입/설비이름/출력타입/출력내용]은\n중계기 일람표 (WEB)에서 편집을 진행해 주세요."));
-// 		return;
-// 	}
-// #endif
-	//20240408 GBM end
 
 	if (m_pCurrentData == nullptr)
 	{
@@ -548,11 +512,11 @@ int CFormEquip::DisplayEquip(HTREEITEM hItem)
 
 int CFormEquip::DataDelete()
 {
-	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록함
-// 	int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-// 	int nID = m_nNum;
-// 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
-// 		return 0;
+	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록함 -> 다시 활성화
+	int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+	int nID = m_nNum;
+	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
+		return 0;
 	//20240422 GBM end
 
 	YAdoDatabase * pDB = m_pRefFasSysData->GetPrjDB();
@@ -676,9 +640,9 @@ int CFormEquip::DataAdd()
 		return 0;
 	nType = (int)m_cmbType.GetItemData(nSel);
 
-	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함
-// 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
-// 		return 0;
+	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함 -> 다시 활성화
+	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
+		return 0;
 	//20240422 GBM end
 	
 	strSql.Format(L"INSERT TB_EQUIP_MST(EQ_ID,EQ_TYPE , EQ_NAME ,EQ_DESC,EQ_SYMBOL,ADD_USER) "
@@ -823,11 +787,11 @@ int CFormEquip::DataSave()
 	{
 		if (m_bAdd)
 		{
-			//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함
-// 			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-// 			int nID = m_nNum;
-// 			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
-// 				return 0;
+			//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함 -> 다시 활성화
+			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+			int nID = m_nNum;
+			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
+				return 0;
 			//20240422 GBM end
 
 #ifndef ENGLISH_MODE

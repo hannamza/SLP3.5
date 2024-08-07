@@ -362,7 +362,7 @@ void CFormLoadRelayTable::OnBnClickedBtnPreview()
 #ifndef ENGLISH_MODE
 	CString strMsg = _T("변경 항목 미리보기를 진행하는 중입니다. 잠시 기다려 주세요.");
 #else
-	CString strMsg = _T("Previewing changes is in progress. Wait for a moment.");
+	CString strMsg = _T("Previewing the changes. Please wait a moment.");
 #endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
@@ -509,7 +509,7 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 #ifndef ENGLISH_MODE
 	CString strMsg = _T("변경 사항을 적용 중입니다. 잠시 기다려 주세요.");
 #else
-	CString strMsg = _T("Changes are being applied. Wait for a moment.");
+	CString strMsg = _T("Applying the changes. Please wait a moment.");
 #endif
 	CProgressBarDlg dlg(strMsg);
 	m_pProgressBarDlg = &dlg;
