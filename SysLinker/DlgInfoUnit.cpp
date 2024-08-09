@@ -190,7 +190,7 @@ void CDlgInfoUnit::PrjDataInit(int nInitType)
 	if (m_pRefFasSysData == nullptr)
 		return;
 	m_cmbType.ResetContent();
-	int i = 1, nIdx = 0;
+	int i = 0, nIdx = 0;
 	for (; i < UNIT_TYPE_COUNT; i++)
 	{
 		m_cmbType.InsertString(nIdx, g_szUnitTypeString[i]);
@@ -214,7 +214,7 @@ BOOL CDlgInfoUnit::GetChangeData()
 	CDataSystem * pSys;
 	CDataFacp* pFacp;
 	CDataUnit * pUnit;
-	int nWholeID = 0, nSel, nType = UNIT_TYPE_DLD;
+	int nWholeID = 0, nSel, nType = UNIT_TYPE_NONE;
 	nSel = m_cmbFacp.GetCurSel();
 	if (nSel < 0)
 		return FALSE;

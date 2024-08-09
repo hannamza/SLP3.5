@@ -916,7 +916,7 @@ BOOL CDlgViewRelay::SetDeviceAddressInfo(CDataDevice * pDev)
 	CDataUnit * pUnit;
 	CDataChannel * pChn;
 	CDataDevice * pTemp;
-	int nWholeID = 0, nSel, nType = UNIT_TYPE_DLD;
+	int nWholeID = 0, nSel, nType = UNIT_TYPE_NONE;
 	CRelayTableData * pTable;
 	pTable = theApp.m_pFasSysData;
 

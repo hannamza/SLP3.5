@@ -308,32 +308,24 @@ enum {
 // 수신기 타입
 enum 
 {
-	FACP_TYPE_NONE = 0 ,
-	FACP_TYPE_X2 = 1,
-	FACP_TYPE_F3 = 2,
-	FACP_TYPE_U4 = 3,
-	FACP_TYPE_F4 = 4,
+	FACP_TYPE_NONE,
+	FACP_TYPE_F3,
+	FACP_TYPE_GT1,
 	FACP_TYPE_COUNT,
 };
 
 #ifndef ENGLISH_MODE
 static TCHAR * g_szFacpTypeString[] = {
 	_T("설정안됨"),
-	_T("X2"),
 	_T("F3"),
-	_T("U4"),
-	_T("F4"),
-	_T("Reserve"),
+	_T("GT1"),
 	NULL
 };
 #else
 static TCHAR * g_szFacpTypeString[] = {
 	_T("NOT SET"),
-	_T("X2"),
 	_T("F3"),
-	_T("U4"),
-	_T("F4"),
-	_T("Reserve"),
+	_T("GT1"),
 	NULL
 };
 #endif
@@ -402,23 +394,41 @@ static TCHAR * g_szPatternTypeString[] = {
 enum 
 {
 	UNIT_TYPE_NONE = 0,
-	UNIT_TYPE_DLD = 1 ,
-	UINT_TYPE_PUMP=2,
+	UNIT_TYPE_P_TYPE_FACP = 1 ,
+	UNIT_TYPE_F3_RELAY_PANEL=2,
+	UNIT_TYPE_GT1_RELAY_PANEL,
+	UNIT_TYPE_F3_OPTICAL_SENSOR_RELAY_PANEL,
+	UNIT_TYPE_GT1_OPTICAL_SENSOR_RELAY_PANEL,
+	UNIT_TYPE_REDBOX,
+	UNIT_TYPE_ESCAPE_LADDER_MODULE,
+	UNIT_TYPE_NMS,
 	UNIT_TYPE_COUNT,
 };
 
 #ifndef ENGLISH_MODE
 static TCHAR * g_szUnitTypeString[] = {
 	_T("설정안됨"),
-	_T("DLD"),
-	_T("PUMP"),
+	_T("P형 수신기"),
+	_T("F3 중계반"),
+	_T("GT1 중계반"),
+	_T("F3 광센서 중계반"),
+	_T("GT1 광센서 중계반"),
+	_T("RedboX"),
+	_T("피난사다리모듈"),
+	_T("NMS"),
 	NULL
 };
 #else
 static TCHAR * g_szUnitTypeString[] = {
 	_T("NOT SET"),
-	_T("DLD"),
-	_T("PUMP"),
+	_T("P-TYPE FACP"),
+	_T("F3 RELAY PANEL"),
+	_T("GT1 RELAY PANEL"),
+	_T("F3 OPTICAL SENSOR RELAY PANEL"),
+	_T("GT1 OPTICAL SENSOR RELAY PANEL"),
+	_T("RedboX"),
+	_T("ESCAPE LADDER MODULE"),
+	_T("NMS"),
 	NULL
 };
 #endif

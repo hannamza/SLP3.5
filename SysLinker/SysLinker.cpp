@@ -3343,6 +3343,8 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 	if(m_pFasSysData->InsertPrjBaseData() <= 0)
 		return 0;
 
+	//20240808 GBM start - 테이블 생성하지 않고 기존 TB_FACP, TB_UNIT을 활용
+#if 0
 	//20240222 GBM start - 중계기 일람표 파싱이 끝나고 기존 DB가 준비된 시점에 GT1 추가 테이블에 Data Insert
 	CNewDBManager::Instance()->SetDBAccessor(m_pFasSysData->m_pDB);
 	//GT1 추가 입력 타입은 gfs_base에 미리 넣어 프로젝트 DB를 복사하면 적용하고 GT1 추가 테이블은 중계기 일람표 상에서 GT1 추가 정보가 존재할 때만 GT1 추가 테이블을 생성
@@ -3506,6 +3508,9 @@ int CSysLinkerApp::CreateProjectDatabase(BOOL bReverse)
 
 	}
 	//20240222 GBM end
+
+#endif
+	//20240808 GBM end
 
 	return 1;
 }

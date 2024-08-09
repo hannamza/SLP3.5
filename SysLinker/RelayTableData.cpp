@@ -830,6 +830,10 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	CNewExcelManager::Instance()->bExistUT = FALSE;
 	//20240308 GBM end
 
+	//수신기/유닛 타입 적용 전 초기화
+	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
+	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
+
 	nCnt = m_strFileNameList.GetCount();
 	pos = m_strFileNameList.GetHeadPosition();
 	//SendProgressStep(pPrgTagetWnd, PROG_RESULT_STEP, nCnt, 0, 0, 0);
@@ -947,30 +951,6 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 	x = 1;
 	y = 4;
 
-	// 수신기 입력
-	nFNum = CvtPathNameToFacpNum(strPath);
-	strKey = GF_GetSysDataKey(SE_FACP , nFNum);
-#define _TIMECHECK_
-#define _TEST_REM_ 1
-#ifdef _TIMECHECK_
-	DWORD dwStart,dwTemp,dwUnit,dwEnd;
-	dwStart = GetTickCount();
-#endif
-// 	pFacp = new CDataFacp;
-// 	pFacp->SetFacpNum(nFNum);
-// 	nFid = nFNum + 1;
-// 	pFacp->SetFacpID(nFid);
-// 	str.Format(L"FACP %02d", nFNum);
-// 	pFacp->SetFacpName(str);
-// 	pData = new CDataSystem(strKey  , SE_FACP , (LPVOID)pFacp);
-
-	nFid = nFNum + 1;
-	pData = AddSystemFacpDataByNum(nFNum , nFid, -1 , str);
-	if (pData != nullptr && pData->GetSysData() != nullptr)
-		pFacp = (CDataFacp *)pData->GetSysData();
-	// Num To ID 변경을 위해
-	m_MapFacpNum[nFNum] = pFacp;
-
 	try
 	{
 		// 유닛 입력
@@ -1070,11 +1050,74 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 #endif
 		//20240730 GBM end
 
+		//20240808 GBM start - 수신기 / 유닛 타입을 가장 먼저 읽어옴
+		if (!bEIInit)
+		{
+			for (int nSheet = 0; nSheet < nSheetCnt; nSheet++)
+			{
+				if (xls.SetWorkSheetChange(nSheet + 1) == FALSE)
+					continue;
+				strSheetName = xls.GetSheetName(nSheet + 1);
+
+				//20240312 GBM start - 수신기 Type, Unit Type 파싱 -> 20240801 GBM - 프로그램팀이 정의한 수신기 / 유닛 타입 파싱으로 변경
+#if 1
+				if (strSheetName.CompareNoCase(EXCEL_SHEET_NEW_FACP_UNIT_TYPE) == 0)
+				{
+					if ((CNewExcelManager::Instance()->bExistFT == FALSE) && (CNewExcelManager::Instance()->bExistUT == FALSE))
+					{
+						CNewExcelManager::Instance()->bExistFT = TRUE;
+						CNewExcelManager::Instance()->bExistUT = TRUE;
+						BOOL bRet = FALSE;
+						bRet = CNewExcelManager::Instance()->ParsingNewFacpUintType(&xls);
+						if (!bRet)
+						{
+							Log::Trace("New FACP / Unit Type Info Excel Parsing Failed!");
+						}
+					}
+					continue;
+				}
+#else
+				if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
+				{
+					if (CNewExcelManager::Instance()->bExistFT == FALSE)
+					{
+						CNewExcelManager::Instance()->bExistFT = TRUE;
+						BOOL bRet = FALSE;
+						bRet = CNewExcelManager::Instance()->ParsingFacpType(&xls);
+						if (!bRet)
+						{
+							Log::Trace("FACP Type Info Excel Parsing Failed!");
+						}
+					}
+					continue;
+				}
+
+				if (strSheetName.CompareNoCase(EXCEL_SHEET_UNIT_TYPE) == 0)
+				{
+					if (CNewExcelManager::Instance()->bExistUT == FALSE)
+					{
+						CNewExcelManager::Instance()->bExistUT = TRUE;
+						BOOL bRet = FALSE;
+						bRet = CNewExcelManager::Instance()->ParsingUnitType(&xls);
+						if (!bRet)
+						{
+							Log::Trace("Unit Type Info Excel Parsing Failed!");
+						}
+					}
+					continue;
+				}
+#endif
+				//20240312 GBM end
+			}
+		}
+		//20240808 GBM end
+
 		//설비 정의 초기화는 한번만 되어야 하는데 중계기 일람표가 여러 개일 경우, 
 		//첫번째 중계기 일람표에 설비 정의 Sheet가 있으면 이를 적용하고 설비 정의에 없는 회로가 들어오면 정의를 추가 (GT1 설비 정의 -> 기존 F3 설비 정의의 순서)
 		//첫번째 중계기 일람표에 설비 정의 Sheet가 없으면 기존 설비 정의를 적용 후 설비 정의에 없는 회로가 들어오면 정의를 추가 (기존 F3 설비 -> GT1 설비 정의의 순서)
 		//무조건 GT1 설비를 적용하려면 ProcessDeviceTable 처리 전에 모든 중계기 일람표 파일을 열어서 그 중 설비 정의 Sheet 정보를 얻어온 후 ProcessDeviceTable를 처리해야 하는데
 		//그렇게 하면 중계기 일람표를 두번씩 Open해야 해서 처리 시간이 두배로 걸리므로 일단은 이렇게 처리
+		//20240809 기준 WEB과 설비 정의 연계를 하지 않기로 했으므로 여러 중계기 일람표가 있어도 아래처럼 최초 한번만 설비 정의를 적용하면 문제없음
 		if (!m_bIsComparedData && !bEIInit)
 		{
 			if (theApp.m_spInputEquipManager)
@@ -1101,6 +1144,41 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 			);
 		}
 		//20240408 GBM end
+
+		//20240808 GBM start - 수신기 정보 입력을 중계기 일람표 내용 적용을 위해 아래로 이동
+		// 수신기 입력
+		nFNum = CvtPathNameToFacpNum(strPath);
+		strKey = GF_GetSysDataKey(SE_FACP, nFNum);
+#define _TIMECHECK_
+#define _TEST_REM_ 1
+#ifdef _TIMECHECK_
+		DWORD dwStart, dwTemp, dwUnit, dwEnd;
+		dwStart = GetTickCount();
+#endif
+		// 	pFacp = new CDataFacp;
+		// 	pFacp->SetFacpNum(nFNum);
+		// 	nFid = nFNum + 1;
+		// 	pFacp->SetFacpID(nFid);
+		// 	str.Format(L"FACP %02d", nFNum);
+		// 	pFacp->SetFacpName(str);
+		// 	pData = new CDataSystem(strKey  , SE_FACP , (LPVOID)pFacp);
+
+		nFid = nFNum + 1;
+
+		//수신기 타입을 기존 -1넣는 것을 중계기 일람표에서 읽어온 값으로 넣음
+#if 1
+		int nFacpType = CNewInfo::Instance()->m_gi.facpType[nFNum];
+		pData = AddSystemFacpDataByNum(nFNum, nFid, nFacpType, str);
+#else
+		pData = AddSystemFacpDataByNum(nFNum, nFid, -1, str);
+#endif
+		//20240808 GBM end
+
+		if (pData != nullptr && pData->GetSysData() != nullptr)
+			pFacp = (CDataFacp *)pData->GetSysData();
+		// Num To ID 변경을 위해
+		m_MapFacpNum[nFNum] = pFacp;
+		//20240808 GBM end
 
 		nDetailAll = nSheetCnt * 4;
 		// [KHS 2020-9-28 08:28:54] 
@@ -1148,56 +1226,6 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				continue;
 			}
 
-			//20240312 GBM start - 수신기 Type, Unit Type 파싱 -> 20240801 GBM - 프로그램팀이 정의한 수신기 / 유닛 타입 파싱으로 변경
-#if 1
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_NEW_FACP_UNIT_TYPE) == 0)
-			{
-				if ((CNewExcelManager::Instance()->bExistFT == FALSE) && (CNewExcelManager::Instance()->bExistUT == FALSE))
-				{
-					CNewExcelManager::Instance()->bExistFT = TRUE;
-					CNewExcelManager::Instance()->bExistUT = TRUE;
-					BOOL bRet = FALSE;
-					bRet = CNewExcelManager::Instance()->ParsingNewFacpUintType(&xls);
-					if (!bRet)
-					{
-						Log::Trace("New FACP / Unit Type Info Excel Parsing Failed!");
-					}
-				}
-				continue;
-			}
-#else
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_FACP_TYPE) == 0)
-			{
-				if (CNewExcelManager::Instance()->bExistFT == FALSE)
-				{
-					CNewExcelManager::Instance()->bExistFT = TRUE;
-					BOOL bRet = FALSE;
-					bRet = CNewExcelManager::Instance()->ParsingFacpType(&xls);
-					if (!bRet)
-					{
-						Log::Trace("FACP Type Info Excel Parsing Failed!");
-					}
-				}
-				continue;
-			}
-
-			if (strSheetName.CompareNoCase(EXCEL_SHEET_UNIT_TYPE) == 0)
-			{
-				if (CNewExcelManager::Instance()->bExistUT == FALSE)
-				{
-					CNewExcelManager::Instance()->bExistUT = TRUE;
-					BOOL bRet = FALSE;
-					bRet = CNewExcelManager::Instance()->ParsingUnitType(&xls);
-					if (!bRet)
-					{
-						Log::Trace("Unit Type Info Excel Parsing Failed!");
-					}
-				}
-				continue;
-			}
-#endif
-			//20240312 GBM end
-
 			str = strSheetName;
 			strUp1 = str;
 			strUp1.MakeUpper();
@@ -1205,12 +1233,12 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 			nTemp = strUp1.Find(strUp2);
 			if (nTemp < 0)
 				continue;
-#ifdef _DEBUG
+//#ifdef _DEBUG	//만약 기존 unit_type sheet가 있으면 걸러냄
 			int nTemp2 = 0;
 			nTemp2 = str.Find(_T("unit_type"));
 			if (nTemp2 != -1)
 				continue;
-#endif
+//#endif
 			str.Delete(nTemp, 4);
 			str.Replace(L"Unit" , L"");
 			nUNum = _wtoi(str);
@@ -1220,7 +1248,14 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 			pData = m_MapSystemData[strKey];
 			if (pData == nullptr)
 			{
+				//20240808 GBM start - 유닛 타입을 기존 -1넣는 것을 중계기 일람표에서 읽어온 값으로 넣음
+#if 1
+				int nUnitType = CNewInfo::Instance()->m_gi.unitType[nFNum][nUNum];
+				pData = AddSystemUnitDataByNum(nFNum, nUNum, -1, nUnitType);
+#else
 				pData = AddSystemUnitDataByNum(nFNum, nUNum);
+#endif
+				//20240808 GBM end
 			}
 
 			if (pData)
@@ -1863,8 +1898,9 @@ CDataSystem * CRelayTableData::AddSystemUnitDataByNum(int nFacpNum, int nUnitNum
 	if (strUnitName == L"")
 		strUnitName.Format(L"Unit_%02d%02d", nFacpNum, nUnitNum);
 	if (nUnitType < 0)
-		nUnitType = UNIT_TYPE_DLD;
+		nUnitType = UNIT_TYPE_NONE;
 	pUnit->SetUnitData(nFID, nFacpNum, nUnitNum, nUnitID, strUnitName,nUnitType);
+
 	m_MapSystemData[strKey] = pData;
 	pData->SetDataType(SE_UNIT);
 	pData->SetSysData((LPVOID)pUnit);
@@ -1901,7 +1937,7 @@ CDataSystem * CRelayTableData::AddSystemUnitDataByID(int nFacpID, int nUnitNum, 
 	if (strUnitName == L"")
 		strUnitName.Format(L"Unit_%02d%02d", nFNum, nUnitNum);
 	if (nUnitType < 0)
-		nUnitType = UNIT_TYPE_DLD;
+		nUnitType = UNIT_TYPE_NONE;
 	pUnit->SetUnitData(nFacpID, nFNum, nUnitNum, nUnitID, strUnitName, nUnitType);
 	m_MapSystemData[strKey] = pData;
 	pData->SetDataType(SE_UNIT);
@@ -11662,6 +11698,9 @@ int CRelayTableData::LoadProjectDatabase()
 		cvt.ChangeDatabase(m_pDB);
 	}
 
+	//20240808 GBM start - 기존 TB_FACP, TB_UNIT 테이블로 수신기/유닛 타입 정보를 얻고 새 테이블 만들지 않도록 함
+#if 0
+
 	//20240305 GBM start - 전체 테이블 로드가 모드 성공한 이후 시점에 GT1 추가 기능 테이블 정보를 로드
 	BOOL bRet = TRUE;
 	CNewDBManager::Instance()->SetDBAccessor(m_pDB);
@@ -11711,6 +11750,9 @@ int CRelayTableData::LoadProjectDatabase()
 		}
 	}
 	//20240305 GBM end
+
+#endif
+	//20240808 GBM end
 
 	return 1;
 }
@@ -20181,4 +20223,52 @@ int CRelayTableData::Check_UnusedOutputCount()
 int CRelayTableData::Check_InputWithNoOutput()
 {
 	return 1;
+}
+
+void CRelayTableData::GetFacpAndUnitType()
+{
+	CMapSystemData::iterator it;
+	CDataSystem * pData;
+	CDataDevice * pDev;
+	CDataFacp * pFacp;
+	CDataUnit * pUnit;
+	int nType;
+	LPVOID pTemp;
+	int nFacp = 0;
+	int nUnit = 0;
+	int nFacpType = 0;
+	int nUnitType = 0;
+	for (it = m_MapSystemData.begin(); it != m_MapSystemData.end(); it++)
+	{
+		pData = it->second;
+		if (pData == nullptr)
+			continue;
+		nType = pData->GetDataType();
+
+		if ((nType <= SE_FACP) && (nType >= SE_UNIT))
+			continue;
+
+		pTemp = pData->GetSysData();
+		if (pTemp == nullptr)
+			continue;
+
+		switch (nType)
+		{
+		case SE_FACP:
+			pFacp = (CDataFacp *)pTemp;
+			nFacp = pFacp->GetFacpNum();
+			nFacpType = pFacp->GetFacpType();
+			CNewInfo::Instance()->m_gi.facpType[nFacp] = nFacpType;
+			break;
+		case SE_UNIT:
+			pUnit = (CDataUnit *)pTemp;
+			nFacp = pUnit->GetFacpNum();
+			nUnit = pUnit->GetUnitNum();
+			nUnitType = pUnit->GetUnitType();
+			CNewInfo::Instance()->m_gi.unitType[nFacp][nUnit] = nUnitType;
+			break;
+		default:
+			break;
+		}
+	}
 }

@@ -578,25 +578,30 @@ BOOL GF_FindFile(CString strPath , CString strFile)
 
 BYTE GF_FacpType(CString strFType)
 {
-	if (strFType.CompareNoCase(_T("X2")) == 0)
-		return FACP_TYPE_X2;
-	else if (strFType.CompareNoCase(_T("F3")) == 0)
-		return FACP_TYPE_F3;
-	else if (strFType.CompareNoCase(_T("U4")) == 0)
-		return FACP_TYPE_U4;
-	else if (strFType.CompareNoCase(_T("F4")) == 0)
-		return FACP_TYPE_F4;
+	for (int i = FACP_TYPE_NONE; i < FACP_TYPE_COUNT; i++)
+	{
+		CString strFacpType = _T("");
+		strFacpType.Format(_T("%s"), g_szFacpTypeString[i]);
+
+		if (strFType.CompareNoCase(strFacpType) == 0)
+			return i;
+	}
 
 	return FACP_TYPE_NONE;
 }
 
 BYTE GF_UnitType(CString strUType)
 {
-	if (strUType.CompareNoCase(_T("DLD")) == 0)
-		return UNIT_TYPE_DLD;
-	else if (strUType.CompareNoCase(_T("PUMP")) == 0)
-		return UINT_TYPE_PUMP;
-	return UNIT_TYPE_DLD;
+	for (int i = UNIT_TYPE_NONE; i < UNIT_TYPE_COUNT; i++)
+	{
+		CString strUnitType = _T("");
+		strUnitType.Format(_T("%s"), g_szUnitTypeString[i]);
+
+		if (strUnitType.CompareNoCase(strUType) == 0)
+			return i;
+	}
+
+	return UNIT_TYPE_P_TYPE_FACP;
 }
 
 int GF_Unicode2ASCII(WCHAR *uni, char *ascii, int nBuffSize)

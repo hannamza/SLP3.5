@@ -60,11 +60,8 @@ int CPropSheetNewProject::ProcessDeviceTable()
 	}
 	else
 	{
-		//뒤로 갔다가 다시 앞으로 올 경우 메모리 해제
 		m_pFasSysData->m_strFileNameList.RemoveAll();
 		m_pFasSysData->RemoveAllData();
-		memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
-		memset(&CNewInfo::Instance()->m_gi, NULL, sizeof(GT1APPENDIX_INFO));
 	}
 #else
 	if (m_pFasSysData == nullptr)
@@ -73,6 +70,12 @@ int CPropSheetNewProject::ProcessDeviceTable()
 	}
 #endif
 	//20240527 GBM end
+
+	//20240808 GBM start - 뒤로 갔다가 다시 앞으로 올 경우 메모리 해제
+	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
+	memset(&CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
+	memset(&CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
+	//20240808 GBM end
 
 	int nCnt, i; 
 	CString str;

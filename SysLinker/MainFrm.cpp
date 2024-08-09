@@ -1078,6 +1078,12 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
+	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴
+	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
+	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
+	m_pRefFasSysData->GetFacpAndUnitType();
+	//20240808 GBM end
+
 	//20240618 GBM start - GT1 프로젝트가 아닌 경우 관리자 모드 여부를 묻지 않음
 	BOOL bGT1TypeExist = FALSE;
 	for (int i = 0; i < MAX_FACP_COUNT; i++)

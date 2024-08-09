@@ -79,7 +79,7 @@ void CDlgInfoFacp::PrjDataInit(int nInitType)
 {
 	CDlgInfoBasePage::PrjDataInit(nInitType);
 	m_cmbType.ResetContent();
-	int i = 1, nIdx = 0;
+	int i = 0, nIdx = 0;
 	for (; i < FACP_TYPE_COUNT; i++)
 	{
 		m_cmbType.InsertString(nIdx, g_szFacpTypeString[i]);
@@ -135,7 +135,7 @@ void CDlgInfoFacp::DisplayItem(ST_TREEITEM *pData, ST_TREEITEM * pNewData)
 	pFacp = (CDataFacp *)pSys->GetSysData();
 
 	m_strName = pFacp->GetFacpName();
-	m_nNum = pFacp->GetFacpNum();
+	m_nNum = pFacp->GetFacpNum();	
 	SetTypeCombo(pFacp->GetFacpType());
 	UpdateData(FALSE);
 

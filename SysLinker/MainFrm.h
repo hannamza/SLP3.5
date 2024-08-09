@@ -149,7 +149,6 @@ public:
 
 	afx_msg void OnSimpleErrorCheck();
 	afx_msg void OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI);
-
 };
 
 

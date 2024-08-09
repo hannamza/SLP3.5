@@ -966,7 +966,7 @@ BOOL CDlgChildEditRelay::SetDeviceAddressInfo(CDataDevice * pDev)
 	CDataUnit * pUnit;
 	CDataChannel * pChn;
 	CDataDevice * pTemp; 
-	int nWholeID = 0, nSel, nType = UNIT_TYPE_DLD;
+	int nWholeID = 0, nSel, nType = UNIT_TYPE_NONE;
 	nSel = m_cmbFacp.GetCurSel();
 	if (nSel < 0)
 		return FALSE;

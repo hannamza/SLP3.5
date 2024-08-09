@@ -34,6 +34,7 @@ void CDataFacp::SetFacpData(short sFacpNum, short sFacpID, byte btFacpType, CStr
 		m_btFacpType = FACP_TYPE_NONE;
 	else
 		m_btFacpType = btFacpType;
+
 	m_sFacpNum = sFacpNum;
 }
 // CDataFacp ¸â¹ö ÇÔ¼ö

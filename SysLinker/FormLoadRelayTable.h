@@ -145,6 +145,7 @@ public:
 	void SetButtonState();
 	CProgressBarDlg* m_pProgressBarDlg;
 	HANDLE m_hThreadHandle;
+	int UpdateNewFacpAndUnitType(YAdoDatabase * pDb);
 	//20240408 GBM end
 
 protected:

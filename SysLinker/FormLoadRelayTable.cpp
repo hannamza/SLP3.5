@@ -715,6 +715,9 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 				AfxMessageBox(L"Failed to update the project using the new module table.");
 #endif
 				Log::Trace("Applying the new module file failed!");
+
+				me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+				SetEvent(me->m_hThreadHandle);
 			}
 #else
 			nRet = me->ApplyDiffDataProc();
@@ -1033,6 +1036,9 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	// GT1추가 테이블의 경우는 변경된 중계기 일람표가 GT1 추가 정보가 있는 경우에만 생성, 당연히 해당 Sheet 중 하나가 있으면 다 있겠지만 혹시 완벽하지 않으면 DB에 넣지 않도록 함
 	// 20240731 GBM - 설비 정의 / 프로젝트 테이블 제외
 	BOOL bRet = FALSE;
+
+	//20240808 GBM start - 수신기 / 유닛 타입 테이블 따로 생성하지 않음
+#if 0
 	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT;
 	if (bRet)
 	{
@@ -1078,6 +1084,8 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		}
 
 	}
+#endif
+	//20240808 GBM end
 
 	//설비 정의 Sheet 존재 여부와는 상관없이 최신 정의 적용
 	bRet = CNewDBManager::Instance()->InsertDataIntoEquipmentInfoTable();
@@ -1325,6 +1333,21 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	}
 	pDB->CommitTransaction();
 
+	//20240808 GBM start - 중계기 일람표 갱신 시 변경된 것 / 추가된 것 / 삭제된 것 기준으로 적용이 되는데 
+	//수신기 타입 / 유닛 타입 정보는 회로 정보 (map) 안에 변수로 되어 있어 이를 따로 하나하나 비교하기 어려움
+	//따라서 중계기 일람표 갱신을 적용하는 상태라면 새 중계기 일람표 로드 시 
+	//CNewInfo::instance()->m_gi.facpType, CNewInfo::instance()->m_gi.unitType에 
+	//최신 수신기 타입 / 유닛 타입이 적용되어 있기 때문에 이 정보를 기준으로
+	//TB_FACP, TB_UNIT에 정보를 넣게 함
+	//사용자는 이미 적용하는 걸 선택했으므로 프로그램은 종료될 예정으로 
+	//CNewInfo::instance()->m_gi에 데이터가 기존이 아닌 최신 데이터가 반영되는 것은 상관없음
+	//-> ROM 파일 변환 시에는 회로 정보 (map)을 순회하면서 CNewInfo::instance()->m_gi에 값을 업데이트
+	if (!UpdateNewFacpAndUnitType(pDB))
+	{
+		AfxMessageBox(_T("수신기/유닛 타입 DB 업데이트를 실패했습니다."));
+		return 0;
+	}
+	//20240808 GBM end
 
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_FINISH, 0, 0);
 #ifndef ENGLISH_MODE
@@ -4942,4 +4965,108 @@ void CFormLoadRelayTable::SetButtonState()
 		pBtnApply->EnableWindow(FALSE);
 		pBtnStop->EnableWindow(FALSE);
 	}
+}
+
+int CFormLoadRelayTable::UpdateNewFacpAndUnitType(YAdoDatabase * pDb)
+{
+	int nFacp = 0;
+	int nFacpID = 0;
+	int nFacpType = 0;
+	int nUnit = 0;
+	int nUnitID = 0;
+	int nUnitType = 0;
+
+	CString strFacpName;
+	CString strUnitName;
+	CString strQuery;
+	CString strMsg;
+
+	//수신기 타입
+	for (int i = 0; i < MAX_FACP_COUNT; i++)
+	{
+		nFacpType = CNewInfo::Instance()->m_gi.facpType[i];
+		if (nFacpType != FACP_TYPE_NONE)
+		{
+			nFacp = i;
+			strQuery.Format(_T("SELECT * FROM TB_FACP WHERE FACP_NUM=%d"), nFacp);
+
+			if (!pDb->OpenQuery(strQuery))
+			{
+				Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
+				return 0;
+			}
+
+			int nRecordCount = -1;
+			nRecordCount = pDb->GetRecordCount();
+			if (nRecordCount > 0)
+			{
+				strQuery.Format(_T("UPDATE TB_FACP SET FACP_TYPE=%d WHERE FACP_NUM=%d"), nFacpType, nFacp);
+			}
+			else
+			{
+				nFacpID = nFacp + 1;
+				strFacpName.Format(_T("FACP_%02d"), nFacp);
+				strQuery.Format(_T("INSERT INTO TB_FACP (NET_ID, FACP_ID, FACP_NAME, FACP_TYPE, FACP_NUM, FACP_DESC, ADD_USER) VALUES (1, %d, '%s', %d, %d,'','ADMIN')")
+					, nFacpID, strFacpName, nFacpType, nFacp);
+			}
+
+			if (pDb->ExecuteSql(strQuery))
+			{
+				strMsg.Format(_T("TB_FACP INSERT / UPDATE QUERY(FACP No. = %d FACP TYPE = %d) Succeeded!"), nFacp, nFacpType);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+			}
+			else
+			{
+				strMsg.Format(_T("TB_FACP INSERT / UPDATE QUERY(FACP No. = %d FACP TYPE = %d) Failed!"), nFacp, nFacpType);
+				Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+				return 0;
+			}
+
+		}
+
+		for (int j = 0; j < MAX_UNIT_COUNT; j++)
+		{
+			nUnitType = CNewInfo::Instance()->m_gi.unitType[i][j];
+			if (nUnitType != UNIT_TYPE_NONE)
+			{
+				nUnit = j;
+				nFacpID = i + 1;
+				strQuery.Format(_T("SELECT * FROM TB_UNIT WHERE FACP_ID=%d AND UNIT_NUM=%d"), nFacpID, nUnit);
+
+				if (!pDb->OpenQuery(strQuery))
+				{
+					Log::Trace("[%s] query failed!", CCommonFunc::WCharToChar(strQuery.GetBuffer(0)));
+					return 0;
+				}
+
+				int nRecordCount = -1;
+				nRecordCount = pDb->GetRecordCount();
+				if (nRecordCount > 0)
+				{
+					strQuery.Format(_T("UPDATE TB_UNIT SET UNIT_TYPE=%d WHERE UNIT_NUM=%d"), nUnitType, nUnit);
+				}
+				else
+				{
+					nUnitID = nUnit + 1;
+					strUnitName.Format(_T("Unit_%04d"), nUnit);
+					strQuery.Format(_T("INSERT INTO TB_UNIT (NET_ID, FACP_ID, UNIT_ID, UNIT_TYPE, UNIT_NUM, UNIT_NAME, UNIT_DESC, ADD_USER) VALUES (1, %d, %d, %d, %d, '%s', '', 'ADMIN')")
+						,nFacpID, nUnitID, nUnitType, nUnit, strUnitName);
+				}
+
+				if (pDb->ExecuteSql(strQuery))
+				{
+					strMsg.Format(_T("TB_UNIT INSERT / UPDATE QUERY(UNIT No. = %d UNIT TYPE = %d) Succeeded!"), nUnit, nUnitType);
+					Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+				}
+				else
+				{
+					strMsg.Format(_T("TB_UNIT INSERT / UPDATE QUERY(UNIT No. = %d UNIT TYPE = %d) Failed!"), nUnit, nUnitType);
+					Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+					return 0;
+				}
+			}
+		}
+	}
+
+	return 1;
 }
