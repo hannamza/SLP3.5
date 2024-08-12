@@ -178,6 +178,12 @@ BOOL CNewExcelManager::ParsingEquipmentInfo(CExcelWrapper* xls)
 		strcpy_s(CNewInfo::Instance()->m_ei.outputType[nNumber], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
 		strTemp = xls->GetItemText(i, EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_OUTPUT_CIRCUIT);
 		strcpy_s(CNewInfo::Instance()->m_ei.outputCircuit[nNumber], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PUMP_EQUIPMENT);
+		strcpy_s(CNewInfo::Instance()->m_ei.pumpEquipment[nNumber], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PS_EQUIPMENT);
+		strcpy_s(CNewInfo::Instance()->m_ei.psEquipment[nNumber], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
+		strTemp = xls->GetItemText(i, EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PUMP_MODULE);
+		strcpy_s(CNewInfo::Instance()->m_ei.pumpModule[nNumber], CCommonFunc::WCharToChar(strTemp.GetBuffer(0)));
 	}
 
 	return TRUE;

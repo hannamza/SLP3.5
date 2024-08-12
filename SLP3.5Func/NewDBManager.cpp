@@ -137,7 +137,7 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 
 BOOL CNewDBManager::InsertDataIntoEquipmentInfoTable()
 {	
-	for (int i = EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_INPUT_TYPE; i <= EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_OUTPUT_CIRCUIT; i++)
+	for (int i = EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_INPUT_TYPE; i <= EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PUMP_MODULE; i++)
 	{
 		int nType = i - EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_NUMBER;
 
@@ -168,6 +168,21 @@ BOOL CNewDBManager::InsertDataIntoEquipmentInfoTable()
 			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_OUTPUT_CIRCUIT:
 			{
 				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.outputCircuit[j]));
+				break;
+			}
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PUMP_EQUIPMENT:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.pumpEquipment[j]));
+				break;
+			}
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PS_EQUIPMENT:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.psEquipment[j]));
+				break;
+			}
+			case EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_PUMP_MODULE:
+			{
+				strTemp.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_ei.pumpModule[j]));
 				break;
 			}
 			default:
@@ -215,8 +230,10 @@ BOOL CNewDBManager::InsertDataIntoEquipmentInfoTable()
 
 BOOL CNewDBManager::DeleteEquipmentCircuitInfoFromEquipmentInfoTable()
 {
-	//입력타입, 설비명, 출력타입, 출력내용만 중계기 일람표에서 작성되므로 이 내용만 지움
-	CString strQuery = _T("DELETE TB_EQUIP_MST WHERE EQ_TYPE >= 1 AND EQ_TYPE <= 4");
+	//입력타입, 설비명, 출력타입, 출력내용만 중계기 일람표에서 작성되므로 이 내용만 지움 -> 펌프설비, 압력스위치설비, 펌프모듈을 포함한 모든 설비 정의 삭제
+	//CString strQuery = _T("DELETE TB_EQUIP_MST WHERE EQ_TYPE >= 1 AND EQ_TYPE <= 4");
+	CString strQuery = _T("DELETE TB_EQUIP_MST");
+
 	m_pDB->BeginTransaction();
 	if (m_pDB->ExecuteSql(strQuery))
 	{
