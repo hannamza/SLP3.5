@@ -36,6 +36,7 @@ public:
 	CString m_strSiteName;
 	CString m_strSiteManager;
 	CString m_strSitePhone;
+	COleDateTime m_currentTime;
 	CRelayTableData		*		m_pRefFasSysData; /// 중계기 일람표의 모든데이터
 
 	virtual BOOL OnSetActive();
@@ -44,4 +45,5 @@ public:
 	//afx_msg void OnEnChangeEdDatabase();
 	void SetFasSysData(CRelayTableData * pData) { m_pRefFasSysData = pData; }
 	virtual LRESULT OnWizardNext();
+	virtual BOOL OnInitDialog();
 };

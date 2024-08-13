@@ -20,7 +20,7 @@ CPropPageProjectInfo::CPropPageProjectInfo()
 	, m_strDBName(_T(""))
 	, m_strMaker(_T(""))
 	, m_strPrjPath(_T(""))
-	, m_strPrjVersion(_T(""))
+	, m_strPrjVersion(_T("1.0"))
 	, m_strSiteName(_T(""))
 	, m_strSiteManager(_T(""))
 	, m_strSitePhone(_T(""))
@@ -36,7 +36,7 @@ CPropPageProjectInfo::CPropPageProjectInfo()
 	, m_strDBName(_T(""))
 	, m_strMaker(_T(""))
 	, m_strPrjPath(_T(""))
-	, m_strPrjVersion(_T(""))
+	, m_strPrjVersion(_T("1.0"))
 	, m_strSiteName(_T(""))
 	, m_strSiteManager(_T(""))
 	, m_strSitePhone(_T(""))
@@ -305,7 +305,7 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 	}
 
 	
-	m_pRefFasSysData->SetProjectInfo(m_strPrjName, m_strSiteName, COleDateTime::GetCurrentTime()
+	m_pRefFasSysData->SetProjectInfo(m_strPrjName, m_strSiteName, m_currentTime
 		, m_strMaker, m_strSitePhone, m_strDBName);
 
 	//20240730 GBM start - 별도의 DB가 아닌 프로젝트 정보 파일로 프로젝트 정보를 넣음
@@ -317,4 +317,26 @@ LRESULT CPropPageProjectInfo::OnWizardNext()
 	//20240730 GBM end
 
 	return CPropertyPage::OnWizardNext();
+}
+
+
+BOOL CPropPageProjectInfo::OnInitDialog()
+{
+	CPropertyPage::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+
+	CEdit* pEditCreateDate = (CEdit*)GetDlgItem(IDC_ED_CREATEDATE);
+	pEditCreateDate->SetReadOnly();
+
+	CEdit* pEditVersion = (CEdit*)GetDlgItem(IDC_ED_PRJ_VERSION);
+	pEditVersion->SetReadOnly();
+
+	m_currentTime = COleDateTime::GetCurrentTime();
+	m_strCreateDate = m_currentTime.Format(L"%Y-%m-%d %H:%M:%S");
+
+	UpdateData(FALSE);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
