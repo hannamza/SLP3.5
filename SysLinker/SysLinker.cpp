@@ -1741,19 +1741,21 @@ void CSysLinkerApp::OnHomeProjectNew()
 	m_pFasSysData->SetProjectOpened(TRUE);
 
 	CString strName;
+	CString strVersion;
+	strVersion.Format(_T("(ver%d.%d)"), m_pFasSysData->GetPrjMajorNum(), m_pFasSysData->GetPrjMinorNum());
 #ifndef ENGLISH_MODE
-	strName.Format(L"프로젝트명 - %s", m_pFasSysData->GetPrjName());
+	strName.Format(L"프로젝트명 - %s %s", m_pFasSysData->GetPrjName(), strVersion);
 #else
-	strName.Format(L"Project Name - %s", m_pFasSysData->GetPrjName());
+	strName.Format(L"Project Name - %s %s", m_pFasSysData->GetPrjName(), strVersion);
 #endif
 	AfxGetMainWnd()->SetWindowTextW(strName);
 
 #ifndef ENGLISH_MODE
-	GF_AddLog(L"[%s] 프로젝트를 생성했습니다.", m_pFasSysData->GetPrjName());
+	GF_AddLog(L"[%s %s] 프로젝트를 생성했습니다.", m_pFasSysData->GetPrjName(), strVersion);
 #else
-	GF_AddLog(L"You have created the project [%s].", m_pFasSysData->GetPrjName());
+	GF_AddLog(L"You have created the project [%s].", m_pFasSysData->GetPrjName(), strVersion);
 #endif
-	Log::Trace("[%s] Project Created!", CCommonFunc::WCharToChar(m_pFasSysData->GetPrjName().GetBuffer(0)));
+	Log::Trace("[%s %s] Project Created!", CCommonFunc::WCharToChar(m_pFasSysData->GetPrjName().GetBuffer(0)));
 
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_NEW, 0);
 
@@ -1927,10 +1929,13 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		pMakLinkView->SetRelayTableData(m_pFasSysData);
 
 	PostMessageAllView(UDBC_ALLDATA_INIT, FORM_PRJ_OPEN, 0);
+
+	CString strProject;
+	strProject.Format(_T("%s (ver%s)"), dlg.GetOpenProjectName(), strVersion);
 #ifndef ENGLISH_MODE
-	GF_AddLog(L"[%s] 프로젝트를 여는데 성공 했습니다.", dlg.GetOpenProjectName());
+	GF_AddLog(L"[%s] 프로젝트를 여는데 성공 했습니다.", strProject);
 #else
-	GF_AddLog(L"Successfully opened the project [%s].", dlg.GetOpenProjectName());
+	GF_AddLog(L"Successfully opened the project [%s].", strProject);
 #endif
 	Log::Trace("[%s] Project Opened!", CCommonFunc::WCharToChar(dlg.GetOpenProjectName().GetBuffer(0)));
 	dwEnd = GetTickCount();
@@ -1943,9 +1948,9 @@ void CSysLinkerApp::OnHomeProjectOpen()
 #endif
 	CString strName;
 #ifndef ENGLISH_MODE
-	strName.Format(L"프로젝트명 - %s", m_pFasSysData->GetPrjName());
+	strName.Format(L"프로젝트명 - %s", strProject);
 #else
-	strName.Format(L"Project Name - %s", m_pFasSysData->GetPrjName());
+	strName.Format(L"Project Name - %s", strProject);
 #endif
 	AfxGetMainWnd()->SetWindowTextW(strName);
 
@@ -2061,12 +2066,23 @@ void CSysLinkerApp::OnHomeProjectSave()
 	//////////////////////////////////////////////////////////////////////////
 	// 4. 
 	m_pFasSysData->SetChangeFlag(FALSE);
+
+	CString strVersion;
+	strVersion.Format(_T("%s (ver%d.%d)"), m_pFasSysData->GetPrjName(), m_pFasSysData->GetPrjMajorNum(), m_pFasSysData->GetPrjMinorNum());
 #ifndef ENGLISH_MODE
-	GF_AddLog(L"프로젝트를 저장하는데 성공했습니다.");
+	GF_AddLog(L"[%s] 프로젝트를 저장하는데 성공했습니다.", strVersion);
 #else
-	GF_AddLog(L"Successfully saved the project.");
+	GF_AddLog(L"Successfully saved the project [%s].", strVersion);
 #endif
 	//AfxMessageBox(L"프로젝트를 저장하는데 성공했습니다");
+
+	CString strName;
+#ifndef ENGLISH_MODE
+	strName.Format(L"프로젝트명 - %s", strVersion);
+#else
+	strName.Format(L"Project Name - %s", strVersion);
+#endif
+	AfxGetMainWnd()->SetWindowTextW(strName);
 
 }
 
