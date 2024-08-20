@@ -1,5 +1,7 @@
 #pragma once
 
+//20240820 GBM - git test
+
 // 중계기 일람표 업데이트 플래그 - 편집에 따라 GT1 추가 정보 / 설비 정의 / 비상방송 / 패턴 (중계기 일람표 상, 수동 패턴 제외)를 갱신시키는 기능 Enable / disable
 //#define MODULE_TABLE_UPDATE_MODE
 
