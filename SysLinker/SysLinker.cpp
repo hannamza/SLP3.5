@@ -250,7 +250,11 @@ public:
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
 ,m_strVersion(_T(""))
 {
+#ifndef SLP4_MODE
 	m_strVersion = GFSP_PRODUCT_UPDATE_DATE;
+#else
+	m_strVersion.Format(_T("SLP4 Program Version : [%s]"), CCommonFunc::GetProgramVersion());
+#endif
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
