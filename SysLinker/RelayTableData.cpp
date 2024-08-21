@@ -17117,11 +17117,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	/************************************************************************/
 
 	int nItemCount = 0;
-#ifndef VIETNAM_EXHIBITION_MODE
 	nItemCount = MAX_EQUIP_INFO_ITEM_COUNT;
-#else
-	nItemCount = 17;
-#endif
 
  	spRefManager = m_spRefInputEquipManager;
  	if(spRefManager == nullptr)
@@ -17153,21 +17149,13 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 			break;
  	}
 
-#ifndef VIETNAM_EXHIBITION_MODE
  	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
-#else
-	uMsgOffset += (32 * nItemCount);
-#endif
  
  	/************************************************************************/
  	/* 출력타입 - 연동정지 0~ 99 : 100개 글자수 32                                                             */
  	/************************************************************************/
 
-#ifndef VIETNAM_EXHIBITION_MODE
 	nItemCount = MAX_EQUIP_INFO_ITEM_COUNT;
-#else
-	nItemCount = 57;
-#endif
 
  	spRefManager = m_spRefOutputEquipManager;
  	if(spRefManager == nullptr)
@@ -17200,11 +17188,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 		if (nItem == nItemCount)
 			break;
  	}
-#ifndef VIETNAM_EXHIBITION_MODE
+
 	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
-#else
-	uMsgOffset += (32 * nItemCount);
-#endif
 
 	//20240429 GBM end
  

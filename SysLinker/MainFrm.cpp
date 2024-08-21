@@ -243,10 +243,18 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// 창 제목 표시줄에서 문서 이름 및 응용 프로그램 이름의 순서를 전환합니다.
 	// 문서 이름이 축소판 그림과 함께 표시되므로 작업 표시줄의 기능성이 개선됩니다.
 	ModifyStyle(0, FWS_PREFIXTITLE);
-#ifndef ENGLISH_MODE
-	GF_AddLog(L"SLP3 프로그램이 정상 기동됐습니다.");
+
+	CString strProgram;
+#ifndef SLP4_MODE
+	strProgram = _T("SLP3");
 #else
-	GF_AddLog(L"The SLP3 program has been started successfully.");
+	strProgram = _T("SLP4");
+#endif
+
+#ifndef ENGLISH_MODE
+	GF_AddLog(L"%s 프로그램이 정상 기동됐습니다.", strProgram);
+#else
+	GF_AddLog(L"The %s program has been started successfully.", strProgram);
 #endif
 }
 
