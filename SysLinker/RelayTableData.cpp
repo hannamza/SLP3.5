@@ -1050,7 +1050,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 #endif
 		//20240730 GBM end
 
-		//20240808 GBM start - 수신기 / 유닛 타입을 가장 먼저 읽어옴
+		//20240816 GBM start - 수신기 / 유닛 타입을 가장 먼저 읽어옴
 		if (!bEIInit)
 		{
 			for (int nSheet = 0; nSheet < nSheetCnt; nSheet++)
@@ -1110,7 +1110,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				//20240312 GBM end
 			}
 		}
-		//20240808 GBM end
+		//20240816 GBM end
 
 		//설비 정의 초기화는 한번만 되어야 하는데 중계기 일람표가 여러 개일 경우, 
 		//첫번째 중계기 일람표에 설비 정의 Sheet가 있으면 이를 적용하고 설비 정의에 없는 회로가 들어오면 정의를 추가 (GT1 설비 정의 -> 기존 F3 설비 정의의 순서)
@@ -1145,7 +1145,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		}
 		//20240408 GBM end
 
-		//20240808 GBM start - 수신기 정보 입력을 중계기 일람표 내용 적용을 위해 아래로 이동
+		//20240816 GBM start - 수신기 정보 입력을 중계기 일람표 내용 적용을 위해 아래로 이동
 		// 수신기 입력
 		nFNum = CvtPathNameToFacpNum(strPath);
 		strKey = GF_GetSysDataKey(SE_FACP, nFNum);
@@ -1172,13 +1172,12 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 #else
 		pData = AddSystemFacpDataByNum(nFNum, nFid, -1, str);
 #endif
-		//20240808 GBM end
 
 		if (pData != nullptr && pData->GetSysData() != nullptr)
 			pFacp = (CDataFacp *)pData->GetSysData();
 		// Num To ID 변경을 위해
 		m_MapFacpNum[nFNum] = pFacp;
-		//20240808 GBM end
+		//20240816 GBM end
 
 		nDetailAll = nSheetCnt * 4;
 		// [KHS 2020-9-28 08:28:54] 

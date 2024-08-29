@@ -584,7 +584,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>../../Run\$(Platform)\$(Configuration)\SLP4$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>../../lib/$(Platform)\$(Configuration)/</AdditionalLibraryDirectories>
-      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <ProgramDatabaseFile>$(OutDir)\SLP4.pdb</ProgramDatabaseFile>
       <ManifestFile>$(IntDir)$(TargetName)$(TargetExt).intermediate.manifest</ManifestFile>
     </Link>
@@ -882,6 +882,7 @@
       <OutputFile>../../Run\$(Platform)\$(Configuration)\SLP4.exe</OutputFile>
       <AdditionalLibraryDirectories>../../lib/$(Platform)\$(Configuration)/</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(OutDir)SLP4.pdb</ProgramDatabaseFile>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>

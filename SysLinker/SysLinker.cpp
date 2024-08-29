@@ -90,7 +90,7 @@ UINT ThreadCloseProject(LPVOID pParam)
 
 UINT ThreadGetDefaultEquipmentDefinition(LPVOID pParam)
 {
-	//20240516 GBM start - 기본 DB가 프로젝트 생성 시 설비 정의가 중계기 일람표 상 설비 정의로 overwrite되므로 기본 설비 정의 엑셀 파일을 두어서 새 프로젝트 생성 시마다 초기화
+	//20240822 GBM start - 기본 DB가 프로젝트 생성 시 설비 정의가 중계기 일람표 상 설비 정의로 overwrite 되므로 기본 설비 정의 엑셀 파일을 두어서 새 프로젝트 생성 시마다 초기화
 	theApp.m_bThreadSucceeded = TRUE;
 	CString strEquipmentDefinitionFile = _T("");
 	CString strFolder = _T("");
@@ -138,7 +138,7 @@ UINT ThreadGetDefaultEquipmentDefinition(LPVOID pParam)
 	
 	theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
 	SetEvent(theApp.m_hThreadHandle);
-	//20240516 GBM end
+	//20240822 GBM end
 
 	return 0;
 }
@@ -433,7 +433,13 @@ BOOL CSysLinkerApp::InitInstance()
 	// 해당 설정이 저장된 레지스트리 키를 변경하십시오.
 	// TODO: 이 문자열을 회사 또는 조직의 이름과 같은
 	// 적절한 내용으로 수정해야 합니다.
+
+#ifndef SLP4_MODE
 	SetRegistryKey(_T("GFS\\FICON3\\SLP3"));
+#else
+	SetRegistryKey(_T("GFS\\FICON3\\SLP4"));
+#endif
+
 	LoadStdProfileSettings(4);  // MRU를 포함하여 표준 INI 파일 옵션을 로드합니다.
 
 	SetSystemPath();

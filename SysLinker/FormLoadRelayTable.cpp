@@ -1334,7 +1334,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	}
 	pDB->CommitTransaction();
 
-	//20240808 GBM start - 중계기 일람표 갱신 시 변경된 것 / 추가된 것 / 삭제된 것 기준으로 적용이 되는데 
+	//20240822 GBM start - 중계기 일람표 갱신 시 변경된 것 / 추가된 것 / 삭제된 것 기준으로 적용이 되는데 
 	//수신기 타입 / 유닛 타입 정보는 회로 정보 (map) 안에 변수로 되어 있어 이를 따로 하나하나 비교하기 어려움
 	//따라서 중계기 일람표 갱신을 적용하는 상태라면 새 중계기 일람표 로드 시 
 	//CNewInfo::instance()->m_gi.facpType, CNewInfo::instance()->m_gi.unitType에 
@@ -1348,7 +1348,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		AfxMessageBox(_T("수신기/유닛 타입 DB 업데이트를 실패했습니다."));
 		return 0;
 	}
-	//20240808 GBM end
+	//20240822 GBM end
 
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_FINISH, 0, 0);
 #ifndef ENGLISH_MODE

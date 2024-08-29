@@ -111,9 +111,27 @@ DWORD CFormAutoMake::Thread_MakeProc(LPVOID lpData)
 
 	try
 	{
+#ifdef SLP4_MODE
+		SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
+#endif
+
+		//20240822 GBM start - 시간 측정
+		LARGE_INTEGER startTime, endTime;
+		QueryPerformanceCounter(&startTime);
+
 		//nRet = me->GenerateAutoLinkData();
 		nRet = me->GenerateAutoLinkData2();
 		//nRet = me->GenerateAutoLinkData3();
+
+		QueryPerformanceCounter(&endTime);
+		float duringTime;
+		duringTime = CCommonFunc::GetPreciseDeltaTime(startTime, endTime);
+		Log::Trace("연동데이터 자동 생성에 걸린 시간 : %f", duringTime);
+		//20240822 GBM end
+
+#ifdef SLP4_MODE
+		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
+#endif
 	}
 	catch (...)
 	{
@@ -142,9 +160,27 @@ DWORD CFormAutoMake::Thread_SaveProc(LPVOID lpData)
 
 	try
 	{
+#ifdef SLP4_MODE
+		SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
+#endif
+
+		//20240822 GBM start - 시간 측정
+		LARGE_INTEGER startTime, endTime;
+		QueryPerformanceCounter(&startTime);
+
 		//nRet = me->GenerateAutoLinkData();
 		nRet = me->ProcessSaveAutoLink();
 		//nRet = me->GenerateAutoLinkData3();
+
+		QueryPerformanceCounter(&endTime);
+		float duringTime;
+		duringTime = CCommonFunc::GetPreciseDeltaTime(startTime, endTime);
+		Log::Trace("자동 생성된 연동데이터 적용에 걸린 시간 : %f", duringTime);
+		//20240822 GBM end
+
+#ifdef SLP4_MODE
+		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
+#endif
 	}
 	catch(...)
 	{
