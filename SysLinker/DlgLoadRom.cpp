@@ -45,7 +45,7 @@ CDlgLoadRom::CDlgLoadRom(CWnd* pParent /*=NULL*/)
 
 CDlgLoadRom::~CDlgLoadRom()
 {
-	//20240619 GBM start - 메모리 누수 수정
+	//20240913 GBM start - 메모리 누수 수정
 	POSITION pos;
 	pos = m_ptrList.GetHeadPosition();
 
@@ -60,7 +60,7 @@ CDlgLoadRom::~CDlgLoadRom()
 			pSR = nullptr;
 		}
 	}
-	//20240619 GBM end
+	//20240913 GBM end
 }
 
 void CDlgLoadRom::DoDataExchange(CDataExchange* pDX)

@@ -888,13 +888,13 @@ int CSysLinkerApp::DocumentTemplateInit()
 
 	AddDocTemplate(m_pTempleUnit);
 
-	//20240318 GBM start - 메모리 누수 오류 수정 : 누락 코드 반영
+	//20240909 GBM start - 메모리 누수 오류 수정 : 누락 코드 반영
 	AddDocTemplate(m_pTempleRelayEdit);
 	AddDocTemplate(m_pTempleAutoMake);
 	AddDocTemplate(m_pTempleLogicEdit);
 	AddDocTemplate(m_pTempleLoadRealy);
 	AddDocTemplate(m_pTempleErrorCheck);
-	//20240318 GBM end
+	//20240909 GBM end
 
 	return 0;
 }

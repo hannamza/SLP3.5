@@ -811,7 +811,7 @@ void CDlgErrorCheck::RemoveAllError()
 	while(!m_ptrErrorList.IsEmpty())
 	{
 		pData = (ST_ERRCHECK *)m_ptrErrorList.RemoveHead();
-		if(pData == nullptr)	//20240320 GBM - 메모리 누수 발생 수정 ( != -> == )
+		if(pData == nullptr)	//20240912 GBM - 메모리 누수 발생 수정 ( != -> == )
 			continue; 
 		delete pData;
 		pData = nullptr;

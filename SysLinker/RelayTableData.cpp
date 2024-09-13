@@ -15724,10 +15724,17 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		//기존에는 ROM파일 생성 시 증가시켰지만 현재는 프로젝트 저장 시 증가시키므로 주석 처리
 		//CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum++;		//위에서는 루프 중이어서 바로 값을 증가시키지 않고 여기서 연동데이터 번호를 증가시켜 ROM으로 저장한 후 여기를 지나 중계기 일람표 갱신 시에는 현재 증가된 번호를 적용하도록 함
 
+		int nSize = -1;
 		int nModuleTableVerNum = -1;
 		int nLinkedDataVerNum = -1;
 		bool bAuthorized = false;
+		CString strProjectName = _T("");
+		char cProjectName[PROJCET_NAME_LENGTH];
+		memset(cProjectName, NULL, PROJCET_NAME_LENGTH);
 		CString strAuthorized = _T("");
+
+		strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));		
+		nSize = GF_Unicode2ASCII(strProjectName.GetBuffer(), cProjectName, PROJCET_NAME_LENGTH);
 
 		nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
 		nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
@@ -15750,7 +15757,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			return 0;
 		}
 
-		fGT1Appendix.Write(&CNewInfo::Instance()->m_gi, sizeof(GT1APPENDIX_INFO));
+		fGT1Appendix.Write(cProjectName, PROJCET_NAME_LENGTH);
+		fGT1Appendix.Write(&CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum, sizeof(GT1APPENDIX_INFO) - PROJCET_NAME_LENGTH);
 		fGT1Appendix.Close();
 		//20240329 GBM end
 	}
