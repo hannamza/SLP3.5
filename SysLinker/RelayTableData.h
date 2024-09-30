@@ -53,7 +53,7 @@ public:
 	SIMPLE_FUNC_IMPL(BOOL, ProjectChanged, m_bChangeFlag);
 	SIMPLE_FUNC_IMPL(int, LastRelayIndex, m_nLastRelayIndex);
 
-	SIMPLE_FUNC_IMPL(BOOL, IsComparedData, m_bIsComparedData);	//20240326 GBM - 메모리 누수 오류 수정
+	SIMPLE_FUNC_IMPL(BOOL, IsComparedData, m_bIsComparedData);	//20240924 GBM - 메모리 누수 오류 수정
 	SIMPLE_FUNC_IMPL(BOOL, NewEquipmentTypeAdded, m_bNewEquipmentTypeAdded);
 
 	CStringList* GetRelayTableList() { return &m_strFileNameList; }
@@ -125,7 +125,7 @@ public:
 	BOOL		m_bChangeFlag;//< 프로젝트 변경 Flag
 	BOOL		m_bOpened; //< Project Opened 
 
-	BOOL	m_bIsComparedData;	//20240326 GBM - 메모리 누수 오류 수정, 비교 데이터 여부 Flag
+	BOOL	m_bIsComparedData;	//20240924 GBM - 메모리 누수 오류 수정, 비교 데이터 여부 Flag
 	BOOL	m_bNewEquipmentTypeAdded;	//20240422 GBM - 설비 정의가 추가되었을 때만 중계기 일람표 저장하기 위한 flag
 
 protected:

@@ -452,7 +452,7 @@ BEGIN
     POPUP "PTNLinkPopup"
     BEGIN
         MENUITEM "패턴 삭제",                       ID_PTNLK_MENU_DELPTN
-        MENUITEM "패턴 보기 전환",                    ID_PTNVIEW_
+        MENUITEM "패턴 보기 전환",                    ID_PTNLK_MENU_VIEWPTN
     END
 END
 

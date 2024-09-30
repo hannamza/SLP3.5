@@ -54,13 +54,13 @@ void CImgViewCtrl::SetImageFile(LPCTSTR stSourceName)
 		m_pImage = NULL;
 	}
 
-	//20240325 GBM start - 메모리 누수 오류 수정
+	//20240920 GBM start - 메모리 누수 오류 수정
 	if (m_pDimensionID)
 	{
 		delete[] m_pDimensionID;
 		m_pDimensionID = NULL;
 	}
-	//20240325 GBM end
+	//20240920 GBM end
 
 	m_stFullName = stSourceName;
 

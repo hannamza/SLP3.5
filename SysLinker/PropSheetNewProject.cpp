@@ -52,7 +52,7 @@ int CPropSheetNewProject::ProcessDeviceTable()
 {
 	//AfxMessageBox(L"ReadDeviceTable");
 
-	//20240527 GBM start - 메모리 누수 수정
+	//20240919 GBM start - 메모리 누수 수정
 #if 1
 	if (m_pFasSysData == nullptr)
 	{
@@ -69,7 +69,7 @@ int CPropSheetNewProject::ProcessDeviceTable()
 		m_pFasSysData = new CRelayTableData;
 	}
 #endif
-	//20240527 GBM end
+	//20240919 GBM end
 
 	//20240808 GBM start - 뒤로 갔다가 다시 앞으로 올 경우 메모리 해제
 	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));

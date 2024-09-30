@@ -303,7 +303,7 @@ void CFormPump::OnSize(UINT nType, int cx, int cy)
 
 void CFormPump::RemoveAllData()
 {
-	//20240321 GBM start - 메모리 누수 오류 수정
+	//20240927 GBM start - 메모리 누수 오류 수정
 	if (m_pDlgLeftTopTreePane != nullptr)
 	{	
 		delete m_pDlgLeftTopTreePane;
@@ -328,7 +328,7 @@ void CFormPump::RemoveAllData()
 // 		delete m_pCurrentData;
 // 		m_pCurrentData = nullptr;
 // 	}
-	//20240321 GBM end
+	//20240927 GBM end
 }
 // 
 // 

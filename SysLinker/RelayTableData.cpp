@@ -798,7 +798,7 @@ CRelayTableData::CRelayTableData()
 	m_nLastRelayIndex = 0;
 	m_nAllocRelayIndexType = 0;
 
-	m_bIsComparedData = FALSE;	//20240326 GBM - 메모리 누수 오류 수정
+	m_bIsComparedData = FALSE;	//20240924 GBM - 메모리 누수 오류 수정
 	m_bNewEquipmentTypeAdded = FALSE;
 }
 
@@ -1750,7 +1750,7 @@ CDataSystem * CRelayTableData::AddSystemDeviceDataByNum(
 	if (pOutputLoc == nullptr)
 		pOutputLoc = pInputLoc;
 
-	//20240620 GBM start - 메모리 누수 오류 수정
+	//20240924 GBM start - 메모리 누수 오류 수정
 #if 1
 	pDevice = (CDataDevice*)pData->GetSysData();
 	if (pDevice == nullptr)
@@ -1760,7 +1760,7 @@ CDataSystem * CRelayTableData::AddSystemDeviceDataByNum(
 #else
 	pDevice = new CDataDevice;
 #endif
-	//20240620 GBM end
+	//20240924 GBM end
 
 	pDevice->SetDeviceData(nFid, nUid, nCid, nRid
 		, strKey
@@ -1967,7 +1967,7 @@ CDataSystem * CRelayTableData::AddSystemChannelDataByNum(int nFacpNum, int nUnit
 	if (nUID < 0)
 		return nullptr;
 
-	//20240620 GBM start - 메모리 누수 오류 수정
+	//20240924 GBM start - 메모리 누수 오류 수정
 #if 1
 	strKey = GF_GetSysDataKey(SE_CHANNEL, nFacpNum, nUnitNum, nChnNum);
 	pData = m_MapSystemData[strKey];
@@ -1989,7 +1989,7 @@ CDataSystem * CRelayTableData::AddSystemChannelDataByNum(int nFacpNum, int nUnit
 		pData = new CDataSystem;
 	}
 #endif
-	//20240620 GBM end
+	//20240924 GBM end
 
 	pData->SetDataType(SE_CHANNEL);
 	pData->SetSysData((LPVOID)pChn);
@@ -13593,7 +13593,7 @@ int CRelayTableData::ReduceDatabase()
 
 int CRelayTableData::RemoveAllData()
 {
-	//20240326 GBM start - 메모리 누수 오류 수정 : 비교 데이터가 아닐 때 DB 관련 메모리 해제
+	//20240924 GBM start - 메모리 누수 오류 수정 : 비교 데이터가 아닐 때 DB 관련 메모리 해제
 	if (!m_bIsComparedData)
 	{
 		if (m_pDB != nullptr)
@@ -13607,7 +13607,7 @@ int CRelayTableData::RemoveAllData()
 			m_pDB = nullptr;
 		}
 	}
-	//20240326 GBM end
+	//20240924 GBM end
 
 	RemoveAutoLogic();
 	RemoveLocation();
@@ -17827,11 +17827,11 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 		nCnt++;
 	}
 
-	//20240619 GBM start - 메모리 누수 오류 수정
+	//20240924 GBM start - 메모리 누수 오류 수정
 	delete[] pMain;
 	delete[] pLcd;
 	delete[] pEmer;
-	//20240619 GBM end
+	//20240924 GBM end
 
 	return 0;
 }

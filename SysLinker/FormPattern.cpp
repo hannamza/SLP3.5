@@ -803,7 +803,7 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 			break;;
 		}
 		pPtn->DeleteItemPtr(plnk);
-		delete plnk;	//20240604 GBM - 메모리 누수 수정
+		delete plnk;	//20240925 GBM - 메모리 누수 수정
 		m_ctrlRelayList.DeleteItem(vtSel[i]);
 	}
 	
@@ -931,7 +931,7 @@ void CFormPattern::OnBnClickedBtnRelayDel()
 			break;;
 		}
 		pPtn->DeleteItemPtr(plnk);
-		delete plnk;	//20240604 GBM - 메모리 누수 수정
+		delete plnk;	//20240925 GBM - 메모리 누수 수정
 		m_ctrlRelayList.DeleteItem(vtSel[i]);
 	}
 	pDB->CommitTransaction();
@@ -2286,7 +2286,7 @@ void CFormPattern::OnBnClickedRdTableMake()
 	m_nManualMakeStatus = 0;
 }
 
-//20240319 GBM start - 패턴 편집 창 메모리 누수 오류 처리
+//20240925 GBM start - 패턴 편집 창 메모리 누수 오류 처리
 void CFormPattern::OnDestroy()
 {
 	CFormView::OnDestroy();
@@ -2294,4 +2294,4 @@ void CFormPattern::OnDestroy()
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	RemoveAllTreeData();
 }
-//20240319 GBM end
+//20240925 GBM end

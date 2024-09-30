@@ -1926,7 +1926,7 @@ CRelayTableData *  CFormLoadRelayTable::LoadNewRelayTable()
 
 	CRelayTableData * pOldTable;
 	m_pNewRelayTable = new CRelayTableData;
-	m_pNewRelayTable->SetIsComparedData(TRUE);		//20240326 GBM - 메모리 누수 오류 수정
+	m_pNewRelayTable->SetIsComparedData(TRUE);		//20240924 GBM - 메모리 누수 오류 수정
 	pOldTable = theApp.GetRelayTableData();
 	if (pOldTable == nullptr)
 		return nullptr;
@@ -2682,7 +2682,7 @@ void CFormLoadRelayTable::RemoveAllData()
 		pLink = nullptr;
 	}
 
-	//20240319 GBM start - 메모리 누수 오류 수정
+	//20240924 GBM start - 메모리 누수 오류 수정
 	CTempPtn* pPtn;
 	while (!m_ptrTempNewPatternData.IsEmpty())
 	{
@@ -2698,7 +2698,7 @@ void CFormLoadRelayTable::RemoveAllData()
 		delete m_pNewRelayTable;
 		m_pNewRelayTable = nullptr;
 	}
-	//20240319 GBM end
+	//20240924 GBM end
 }
 
 
