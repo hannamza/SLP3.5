@@ -1038,7 +1038,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	// 20240731 GBM - 설비 정의 / 프로젝트 테이블 제외
 	BOOL bRet = FALSE;
 
-	//20240808 GBM start - 수신기 / 유닛 타입 테이블 따로 생성하지 않음
+	//20240808 GBM start - 수신기 / 유닛 타입 테이블 따로 생성하지 않음 (기존 수신기 / 유닛 타입 기능 보완 및 기존 수신기 / 유닛 테이블을 활용하기로 함)
 #if 0
 	bRet = CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT;
 	if (bRet)

@@ -564,7 +564,7 @@ int CFormEquip::DataDelete()
 	if (hItem)
 		m_ctrlTree.DeleteItem(hItem);
 
-	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
+	//20240411 GBM start - Web과 연계하지 않기로 함에 따라 중계기 일람표 자동 편집 기능 Disable
 #ifdef MODULE_TABLE_UPDATE_MODE
 	if (pEq->GetEquipType() >= ET_INPUTTYPE && pEq->GetEquipType() <= ET_OUTCONTENTS)
 	{
@@ -682,7 +682,7 @@ int CFormEquip::DataAdd()
 	m_ctrlTree.SelectItem(htemp);
 	m_bAdd = TRUE;
 
-	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
+	//20240411 GBM start - Web과 연계하지 않기로 함에 따라 중계기 일람표 자동 편집 기능 Disable
 #ifdef MODULE_TABLE_UPDATE_MODE
 	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
 	{
@@ -858,7 +858,7 @@ int CFormEquip::DataSave()
 	m_pCurrentData->SetFileName(m_strSymbol);
 	m_ctrlTree.SetItemText(hItem, m_pCurrentData->GetEquipName());
 
-	//20240411 GBM start - 편집을 막았지만 추후 출력타입에 의한 연동정지키 편집 기능 요청이 있을 수 있으므로 일단 작업해 놓음 -> 조건에 따라 편집 가능
+	//20240411 GBM start - Web과 연계하지 않기로 함에 따라 중계기 일람표 자동 편집 기능 Disable
 #ifdef MODULE_TABLE_UPDATE_MODE
 	if (nType >= ET_INPUTTYPE && nType <= ET_OUTCONTENTS)
 	{

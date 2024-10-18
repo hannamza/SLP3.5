@@ -3607,7 +3607,11 @@ int CSysLinkerApp::SaveProjectInfoFile(CString strCurrentPrjRootFolder)
 	file.WriteString(m_pFasSysData->GetDBUser() + L"\n");
 	file.WriteString(m_pFasSysData->GetDBPwd() + L"\n");
 	file.WriteString(m_pFasSysData->GetPrjCreateDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");
-// 	file.WriteString(m_pFasSysData->GetPrjModifyDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");	//20240731 GBM - 프로젝트 수정 시간 적용 (주석 해제)
+
+	//20240731 GBM - 프로젝트 수정 시간 적용 (주석 해제) 
+	//-> 다시 주석처리 : 기존 SLP3 프로젝트와의 호환성을 위해 수정 시간 사용하지 않음, 
+	//
+// 	file.WriteString(m_pFasSysData->GetPrjModifyDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");	
 // 	file.WriteString(m_pFasSysData->GetPrjModifier() + L"\n");
 	file.Close();
 

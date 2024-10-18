@@ -1,7 +1,5 @@
 #pragma once
 
-//20240821 GBM - git test
-
 // 중계기 일람표 업데이트 플래그 - 편집에 따라 GT1 추가 정보 / 설비 정의 / 비상방송 / 패턴 (중계기 일람표 상, 수동 패턴 제외)를 갱신시키는 기능 Enable / disable
 //#define MODULE_TABLE_UPDATE_MODE
 
@@ -24,7 +22,7 @@
 //#define MAX_PROJECT_ACCOUNT_PASSWORD_LENGTH	20
 
 // 프로젝트 이름 길이
-#define PROJCET_NAME_LENGTH	100
+#define PROJECT_NAME_LENGTH	100
 
 // LCD 회로명 최대 문자 길이 - F3
 #define MAX_LCD_TEXT_LENGTH_F3 40
@@ -501,7 +499,7 @@ static const TCHAR* g_lpszEquipmentOutputType[] = {
 // 추후에 중계기 일람표 상의 프로젝트명과 SLP3의 프로젝트명을 일치시키는 방향으로 진행해야 함
 typedef struct 
 {
-	char projectName[PROJCET_NAME_LENGTH];
+	char projectName[PROJECT_NAME_LENGTH];
 	unsigned char moduleTableVerNum;
 	unsigned char linkedDataVerNum;
 	bool authorized;

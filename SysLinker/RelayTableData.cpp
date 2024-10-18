@@ -859,12 +859,14 @@ int CRelayTableData::ProcessDeviceTableList(CWnd *pPrgTagetWnd/* = NULL*/)
 	}
 	//20240408 GBM end
 
-	//20240604 GBM start - GT1 수신기가 아닐 경우 설비 정의 Sheet가 존재해도 플래그가 True가 안될 경우가 있어 다른 Sheet의 존재 여부로 판단
-// 	if (CNewExcelManager::Instance()->bExistEI == FALSE)
-// 	{
-// 		if (CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT)
-// 			CNewExcelManager::Instance()->bExistEI = TRUE;
-// 	}
+	//20240604 GBM start - GT1 수신기가 아닐 경우 설비 정의 Sheet가 존재해도 플래그가 True가 안될 경우가 있어 다른 Sheet의 존재 여부로 판단 -> WEB과 설비 정의 연계를 하지 않음에 따라 주석처리
+#if 0
+	if (CNewExcelManager::Instance()->bExistEI == FALSE)
+	{
+		if (CNewExcelManager::Instance()->bExistPI && CNewExcelManager::Instance()->bExistFT && CNewExcelManager::Instance()->bExistUT)
+			CNewExcelManager::Instance()->bExistEI = TRUE;
+	}
+#endif
 	//20240604 GBM end
 
 	m_nLastRelayIndex = nRelayIdx;
@@ -977,7 +979,7 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 
 		nSheetCnt = xls.GetSheetCount();
 
-		//20240730 GBM start - 설비 정의 연계를 하지 않도록 했으므로 주석처리
+		//20240730 GBM start - Web과 설비 정의 연계를 하지 않도록 했으므로 주석처리
 #if 0
 		//20240408 GBM start - 중계기 일람표를 열면 가장 먼저 설비 정의를 찾아서 먼저 파싱 후 기본 DB에 넣은 후 메모리 적용을 먼저한 후에 아래에서 설비 정의에 따른 회로 정보 처리가 이루어지도록 함
 		//첫번째 수신기가 GT1이면 중계기 일람표 상의 설비 정의를 먼저 적용하고 이후 수신기가 F3 수신기라면 새 설비 정의를 추가하는 과정에서 F3 설비 정의를 추가하도록 하고,
@@ -15288,8 +15290,12 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 				nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
 				nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
 				bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
+
+				// 인증 ROM : A, 비인증 ROM : X 
 				if (bAuthorized)
 					strAuthorized = _T("A");
+				else
+					strAuthorized = _T("X");
 
 				strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 				strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
@@ -15615,8 +15621,12 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
 			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
 			bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
+
+			// 인증 ROM : A, 비인증 ROM : X 
 			if (bAuthorized)
 				strAuthorized = _T("A");
+			else
+				strAuthorized = _T("X");
 
 			strMain.Format(L"%sMAIN%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
 			strLcd.Format(L"%sLCD%02d_v%02d-%02d%s.ROM", strPath, nLastFacp, nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
@@ -15729,18 +15739,26 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		int nLinkedDataVerNum = -1;
 		bool bAuthorized = false;
 		CString strProjectName = _T("");
-		char cProjectName[PROJCET_NAME_LENGTH];
-		memset(cProjectName, NULL, PROJCET_NAME_LENGTH);
+		char cProjectName[PROJECT_NAME_LENGTH];
+		memset((void*)cProjectName, 0, PROJECT_NAME_LENGTH);
 		CString strAuthorized = _T("");
 
-		strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));		
-		nSize = GF_Unicode2ASCII(strProjectName.GetBuffer(), cProjectName, PROJCET_NAME_LENGTH);
+		strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));	
+		//nSize = strlen(CNewInfo::Instance()->m_gi.projectInfo.projectName);
+		nSize = GF_Unicode2ASCII(strProjectName.GetBuffer(), cProjectName, PROJECT_NAME_LENGTH);
+		//strProjectName.ReleaseBuffer();
+		//strncpy_s(cProjectName, CNewInfo::Instance()->m_gi.projectInfo.projectName, nSize);
+		memset((void*)(cProjectName + nSize), 0, PROJECT_NAME_LENGTH - nSize);
 
 		nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
 		nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
 		bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
+
+		// 인증 ROM : A, 비인증 ROM : X 
 		if (bAuthorized)
 			strAuthorized = _T("A");
+		else
+			strAuthorized = _T("X");
 
 		CFile fGT1Appendix;
 		CString strFilePath;
@@ -15757,9 +15775,10 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			return 0;
 		}
 
-		fGT1Appendix.Write(cProjectName, PROJCET_NAME_LENGTH);
-		fGT1Appendix.Write(&CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum, sizeof(GT1APPENDIX_INFO) - PROJCET_NAME_LENGTH);
+		fGT1Appendix.Write(cProjectName, PROJECT_NAME_LENGTH);
+		fGT1Appendix.Write(&CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum, sizeof(GT1APPENDIX_INFO) - PROJECT_NAME_LENGTH);
 		fGT1Appendix.Close();
+
 		//20240329 GBM end
 	}
 
@@ -15779,6 +15798,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 #ifndef ENGLISH_MODE
 	strEqLine = L"#ID,TYPE,이름,설명,SYMBOL\n";
 #else
+
 	strEqLine = L"#ID,TYPE,NAME,DESCRIPTION,SYMBOL\n";
 #endif
 	nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
@@ -16695,10 +16715,12 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	memset(szStrBuff, 0, 256);
 	nSize = GF_Unicode2ASCII(strName.GetBuffer(), szStrBuff, 256);
 	strName.ReleaseBuffer();
-	nSize += 1;
+
+	//nSize += 1;	//20241016 GBM GT1 타입일 경우 문자열 뒷부분에 0으로 채워 넣도록 하기 위해 수신기 타입 판단 다음으로 하기 위해 아래로 이동
+
 	//sizeof(szStrBuff);
 
-	//20240424 GBM start - 수신기 종류에 따라 문자열 제한 개수 분기 처리
+	//20240424 GBM start - 수신기 종류에 따라 문자열 제한 개수 분기 처리 + 20241016 GBM start - GT1 타입일 경우 문자열 뒷부분에 0으로 채워 넣도록 함
 #if 1
 	int nFacpType = -1;
 	int nMaxSize;
@@ -16713,12 +16735,15 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	{
 		nMaxSize = MAX_LCD_TEXT_LENGTH_GT1;
 		strFacpType = _T("GT1");
+		memset(szStrBuff + nSize, 0, 256 - nSize);
 	}
 	else
 	{
 		nMaxSize = MAX_LCD_TEXT_LENGTH_F3;
 		strFacpType = _T("F3");
 	}
+
+	nSize += 1;	//20241016 GBM GT1 타입일 경우 문자열 뒷부분에 0으로 채워 넣도록 하기 위해 수신기 타입 판단 다음으로 하기 위해 위로부터 이동
 
 	if (nSize > nMaxSize)
 	{
@@ -17116,6 +17141,13 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	int nCopyPos=0,nTemp=0; 
  	char szStrBuff[256] = { 0 };
  	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
+
+	//20241016 GBM start - GT1 ROM 생성 시 문자열 입력 후 32버퍼 나머지 부분을 0으로 채움 그러나 F3의 경우는 기존처럼 채우지 않아서 기존 ROM과 Hexa 값 비교시 불일치하지 않도록 함
+	// 수신기 타입 얻음
+	BOOL bGT1Type = FALSE;
+	if (CNewInfo::Instance()->m_gi.facpType[nFNum] == GT1)
+		bGT1Type = TRUE;
+	//20241016 GBM end
  
 	//20240429 GBM start - 설비 정의(입력타입, 출력타입) 개수 증설 (17 -> 100)
 
@@ -17148,6 +17180,12 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			nSize = 32;
  			szStrBuff[31] = 0;
  		}
+
+		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
+		if(bGT1Type)
+			memset(szStrBuff + nSize, 0, 256 - nSize);
+		//20241016 GBM end
+
  		nCopyPos = pEquip->GetEquipID() * 32;
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos ,szStrBuff,32);
  		strName.ReleaseBuffer();
@@ -17188,6 +17226,12 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			nSize = 32;
  			szStrBuff[31] = 0;
  		}
+
+		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
+		if(bGT1Type)
+			memset(szStrBuff + nSize, 0, 256 - nSize);
+		//20241016 GBM end
+
  		nCopyPos = pEquip->GetEquipID() * 32;
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
  		strName.ReleaseBuffer();
@@ -17226,7 +17270,12 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			nSize = 32;
  			szStrBuff[31] = 0;
  		}
-		
+
+		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
+		if(bGT1Type)
+			memset(szStrBuff + nSize, 0, 256 - nSize);
+		//20241016 GBM end
+
 		nTemp = pPmp->GetPumpID() - 1; 
 		if(nTemp < 0)
 			continue; 
@@ -17261,6 +17310,12 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			nSize = 32;
  			szStrBuff[31] = 0;
  		}
+
+		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
+		if(bGT1Type)
+			memset(szStrBuff + nSize, 0, 256 - nSize);
+		//20241016 GBM end
+
  		nCopyPos = pEquip->GetEquipID() * 32;
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
  		strName.ReleaseBuffer();
@@ -17290,6 +17345,12 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			nSize = 32;
  			szStrBuff[31] = 0;
  		}
+
+		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
+		if(bGT1Type)
+			memset(szStrBuff + nSize, 0, 256 - nSize);
+		//20241016 GBM end
+
  		nCopyPos = pEquip->GetEquipID() * 32;
  		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
  	}
@@ -17739,6 +17800,10 @@ int CRelayTableData::CreateFromRom(CString strRomPath, CPtrList *pPtrRomList, BO
 			if (CNewInfo::Instance()->m_gi.projectInfo.authorized)
 			{
 				strAuthorized = _T("A");
+			}
+			else
+			{
+				strAuthorized = _T("X");
 			}
 
 			break;

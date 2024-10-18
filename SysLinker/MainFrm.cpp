@@ -1334,9 +1334,9 @@ int CMainFrame::CreateFacpLink()
 		}
 		//20240305 GBM end
 
-#else	//중계기 일람표를 갱신하지 않더라도(MODULE_TABLE_UPDATE_MODE undefined) 프로젝트 정보 DB는 반드시 갱신해야 함
+#else	//중계기 일람표를 갱신하지 않더라도(MODULE_TABLE_UPDATE_MODE undefined) 프로젝트 정보 DB는 반드시 갱신해야 함 -> 아래 주석 참조
 
-		//20240730 GBM start - 프로젝트 DB 대신 기존의 프로젝트 파일의 버전 정보를 사용 아래 주석처리
+		//20240730 GBM start - 프로젝트 DB 대신 기존의 프로젝트 파일의 버전 정보를 사용하기로 하므로써 아래 주석처리
 		//20240305 GBM start - 연동데이터 생성이 성공한 시점에 프로젝트 번호 업데이트 및 중계기 일람표 적용
 		//수신기 타입 정보에서 GT1 타입이 하나도 없으면 아래 행정을 하지 않음 (F3만 있으면 의미가 없기 때문)
 // 		BOOL bGT1TypeExist = FALSE;

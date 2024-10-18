@@ -558,7 +558,7 @@ int CFormEmergency::DataDelete()
 	}
 	spManager->RemoveEmergency(pData->GetEmID());
 
-	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
+	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용 -> WEB과 연계하지 않기로 함에 따라 Disable
 #ifdef MODULE_TABLE_UPDATE_MODE
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
@@ -789,7 +789,7 @@ int CFormEmergency::DataAdd()
 	m_ctrlList.SetFocus();
 	//AfxMessageBox(L"비상방송 정보를 추가하는데 성공 했습니다.");
 
-	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용
+	//20240507 GBM start - 비상방송 편집 중계기 일람표 적용 -> WEB과 연계하지 않기로 함에 따라 Disable
 #ifdef MODULE_TABLE_UPDATE_MODE
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
@@ -960,7 +960,7 @@ int CFormEmergency::DataSave()
 	m_ctrlList.SetItemText(nIdx, 2, pData->GetEmAddr());
 	m_ctrlList.SetItemData(nIdx, (DWORD_PTR)pData);
 
-	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용
+	//20240502 GBM start - 비상방송 편집 중계기 일람표 적용 -> WEB과 연계하지 않기로 함에 따라 Disable
 #ifdef MODULE_TABLE_UPDATE_MODE
 	int nNum = pData->GetEmID();
 	CString strRemarks = pData->GetEmName();
