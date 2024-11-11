@@ -92,20 +92,22 @@ enum {
 // GT1 추가 입력 타입 
 namespace NEW_EQUIPMENT_INPUT_TYPE {
 	enum {
-		AN정온교차A = 16,
-		AN정온교차B,
-		AN광전교차A,
-		AN광전교차B,
-		발신기화재,
+		AN열식교차A = 16,
+		AN열식교차B,
+		AN연식교차A,
+		AN연식교차B,
+		사용안함_20,
 		광센서감지기,
-		CCTV
+		CCTV,
+		NMS
 	};
 }
 
 // GT1 추가 입력 설비명
 namespace NEW_EQUIPMENT_INPUT_NAME {
 	enum {
-		CCTV = 52
+		CCTV = 52,
+		NMS = 53
 	};
 }
 
@@ -121,19 +123,19 @@ namespace EQUIPMENT_DEFINITION {
 		화재용접점,
 		열식아나로그,
 		연식아나로그,
-		열식주소형,
-		연식주소형,
+		주소형,
+		발신기화재,
 		감시비지속,
 		감시지속,
 		일반확인,
 		전원확인,
 		가스누출,
-		사용안함,	// 기존 : 펌프입력
+		사용안함_15,	// 기존 : 펌프입력
 		AN열식교차A,
 		AN열식교차B,
 		AN연식교차A,
 		AN연식교차B,
-		발신기화재,
+		사용안함_20,
 		광센서감지기,
 		CCTV,
 		NMS
@@ -340,35 +342,36 @@ enum {
 }NEW_TABLES;
 
 // GT1 추가 입력 타입 문자열 
-static const TCHAR* g_lpszNewEquipmentInputType[] = {
-	_T(""),					// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
-	_T(""),					// 1
-	_T(""),					// 2
-	_T(""),					// 3
-	_T(""),					// 4
-	_T(""),					// 5
-	_T(""),					// 6
-	_T(""),					// 7
-	_T(""),					// 8	
-	_T(""),					// 9
-	_T(""),					// 10
-	_T(""),					// 11
-	_T(""),					// 12
-	_T(""),					// 13
-	_T(""),					// 14
-	_T(""),					// 15
-	_T("AN열식교차A"),		// 16	
-	_T("AN열식교차B"),		// 17	
-	_T("AN연식교차A"),		// 18
-	_T("AN연식교차B"),		// 19
-	_T("발신기화재"),		// 20
-	_T("광센서감지기"),		// 21
-	_T("CCTV"),				// 22				
+static const TCHAR* g_lpszEquipmentInputType[] = {
+	_T(""),						// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
+	_T("자탐감지기"),			// 1
+	_T("A교차감지기"),			// 2
+	_T("B교차감지기"),			// 3
+	_T("일반감지기"),			// 4
+	_T("화재용접점"),			// 5
+	_T("열식아나로그"),			// 6
+	_T("연식아나로그"),			// 7
+	_T("주소형"),				// 8	
+	_T("발신기화재"),			// 9
+	_T("감시비지속"),			// 10
+	_T("감시지속"),				// 11
+	_T("일반확인"),				// 12
+	_T("전원확인"),				// 13
+	_T("가스누출"),				// 14
+	_T("사용안함"),				// 15
+	_T("AN열식교차A"),			// 16	
+	_T("AN열식교차B"),			// 17	
+	_T("AN연식교차A"),			// 18
+	_T("AN연식교차B"),			// 19
+	_T("사용안함"),				// 20
+	_T("광센서감지기"),			// 21
+	_T("CCTV"),					// 22	
+	_T("NMS"),					// 23
 	NULL
 };
 
-// GT1 추가 입력 설비명 문자열
-static const TCHAR* g_lpszNewEquipmentInputName[] = {
+// GT1 추가 입력 설비명 문자열 -> 20241111 GBM - 기존 SLP3 DB에 새 SLP4 DB가 적용될 경우 사용되는 부분으로 SLP4는 GT1 전용으로 사용되며, 최초 기본 설비(equipment.xlsx)를 읽어오므로 사용되지 않지만 일단 삭제하지 않고 남겨둠
+static const TCHAR* g_lpszEquipmentInputName[] = {
 	_T(""),					// 0 없음, 설비명번호는 1베이스, 문자열은 0베이스	
 	_T(""),					// 1
 	_T(""),					// 2
@@ -422,6 +425,7 @@ static const TCHAR* g_lpszNewEquipmentInputName[] = {
 	_T(""),					// 50
 	_T(""),					// 51
 	_T("CCTV"),				// 52
+	_T("NMS"),				// 53
 	NULL
 };
 
@@ -432,32 +436,6 @@ static const TCHAR* g_lpszNewTable[] = {
 	_T("TB_PROJECT_INFO")
 };
 
-// 설비 정의 : 입력 타입 문자열
-static const TCHAR* g_lpszEquipmentInputType[] = {
-	_T(""),
-	_T("자탐감지기"),
-	_T("A교차감지기"),
-	_T("B교차감지기"),
-	_T("일반감지기"),
-	_T("화재용접점"),
-	_T("열식아나로그"),
-	_T("연식아나로그"),
-	_T("열식주소형"),
-	_T("연식주소형"),
-	_T("감시비지속"),
-	_T("감시지속"),
-	_T("일반확인"),
-	_T("전원확인"),
-	_T("가스누출"),
-	_T("사용안함"),		// 기존 : 펌프입력
-	_T("AN열식교차A"),
-	_T("AN열식교차B"),
-	_T("AN연식교차A"),
-	_T("AN연식교차B"),
-	_T("발신기화재"),
-	_T("광센서감지기"),
-	_T("CCTV")
-};
 
 // 설비 정의 : 출력 타입 문자열
 static const TCHAR* g_lpszEquipmentOutputType[] = {

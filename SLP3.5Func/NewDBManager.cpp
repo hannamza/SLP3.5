@@ -22,10 +22,10 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 	if (m_pDB == nullptr)
 		return FALSE;
 
-	for (int i = NEW_EQUIPMENT_INPUT_TYPE::AN정온교차A; i <= NEW_EQUIPMENT_INPUT_TYPE::CCTV; i++)
+	for (int i = NEW_EQUIPMENT_INPUT_TYPE::AN열식교차A; i <= NEW_EQUIPMENT_INPUT_TYPE::CCTV; i++)
 	{
 		CString strEquip = _T("");
-		strEquip.Format(_T("%s"), g_lpszNewEquipmentInputType[i]);
+		strEquip.Format(_T("%s"), g_lpszEquipmentInputType[i]);
 
 		CString strQuery = _T("");
 		strQuery.Format(_T("SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=1 AND EQ_ID=%d"), i);
@@ -75,7 +75,7 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 	for (int j = NEW_EQUIPMENT_INPUT_NAME::CCTV; j <= NEW_EQUIPMENT_INPUT_NAME::CCTV; j++)
 	{
 		CString strName = _T("");
-		strName.Format(_T("%s"), g_lpszNewEquipmentInputName[j]);
+		strName.Format(_T("%s"), g_lpszEquipmentInputName[j]);
 
 		CString strQuery = _T("");
 		strQuery.Format(_T("SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=2 AND EQ_NAME=\'%s\' AND EQ_DESC=\'%s\'"), strName, strName);
@@ -131,6 +131,8 @@ BOOL CNewDBManager::CheckAndInsertEquipmentNewInputType()
 			return FALSE;
 		}
 	}
+
+	//20241111 GBM - 여기에는 NMS 부분이 들어가야 하지만, 해당 매서드 자체가 현재 호출되지 않으므로 구현하지 않음
 
 	return TRUE;
 }

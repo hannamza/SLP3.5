@@ -973,7 +973,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 	}
 
 	//20240408 GBM start - 새 중계기 일람표의 설비 정보를 저장, 중계기 일람표 상에 설비 정의가 있으면 DB에 넣으면 되고 없으면 기존에는 설비 정의 DB 저장 기능이 없으므로 넣으면 됨
-	//펌프설비, 압력스위치설비, 펌프모듈은 중계기 일람표와는 상관없이 기본 DB에 고정으로 들어가는 값으로 원래부터 편집이 불가능하므로 여기서는 별도의 처리가 필요없음
+	//펌프설비, 압력스위치설비, 펌프모듈은 중계기 일람표와는 상관없이 기본 DB에 고정으로 들어가는 값이므로 여기서는 별도의 처리가 필요없음
 	POSITION pos;
 	std::shared_ptr <CManagerEquip> spManager;
 	CDataEquip * pEq;
