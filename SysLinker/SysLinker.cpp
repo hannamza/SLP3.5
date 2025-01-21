@@ -253,7 +253,7 @@ CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
 #ifndef SLP4_MODE
 	m_strVersion = GFSP_PRODUCT_UPDATE_DATE;
 #else
-	m_strVersion.Format(_T("SLP4 Program Version : [%s]"), CCommonFunc::GetProgramVersion());
+	m_strVersion.Format(_T("SLP4 Program Version Number : [%g]\nLast Build Time : [%s]"), SLP4_VERSION_NUMBER, CCommonFunc::GetProgramVersion());
 #endif
 }
 

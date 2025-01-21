@@ -248,7 +248,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #ifndef SLP4_MODE
 	strProgram = _T("SLP3");
 #else
-	strProgram = _T("SLP4");
+	strProgram.Format(_T("SLP4(ver%g)"), SLP4_VERSION_NUMBER);
 #endif
 
 #ifndef ENGLISH_MODE

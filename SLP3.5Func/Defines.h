@@ -1,5 +1,8 @@
 #pragma once
 
+// 프로그램 버전 번호, 배포 전 반드시 수정할 것
+#define SLP4_VERSION_NUMBER		1.1
+
 // 중계기 일람표 업데이트 플래그 - 편집에 따라 GT1 추가 정보 / 설비 정의 / 비상방송 / 패턴 (중계기 일람표 상, 수동 패턴 제외)를 갱신시키는 기능 Enable / disable
 //#define MODULE_TABLE_UPDATE_MODE
 

@@ -545,8 +545,8 @@ CAPTION "SysLinker 정보"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
-    LTEXT           "SLP3, 버전 1.12 (2023.04.28) Test",IDC_ST_VERSION,42,14,170,8,SS_NOPREFIX
-    LTEXT           "Copyright 2021. (주) GFS. all rights reserved.",IDC_STATIC,42,26,182,8
+    LTEXT           "SLP3, 버전 1.12 (2023.04.28) Test",IDC_ST_VERSION,42,14,170,19,SS_NOPREFIX
+    LTEXT           "Copyright 2021. (주) GFS. all rights reserved.",IDC_STATIC,42,35,182,8
     DEFPUSHBUTTON   "확인",IDOK,174,42,50,14,WS_GROUP
 END
 
