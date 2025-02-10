@@ -299,7 +299,7 @@ public:
 		,int& nFId, int& nUId, int& nCId
 		, int nFnum, int nUnum, int nCnum
 	);
-	int InsertLocationData(YAdoDatabase * pDb, CRelayTableData * pNewTable);
+	int InsertLocationData(YAdoDatabase * pDb, CRelayTableData * pNewTable, CRelayTableData* pOldTable);
 	int ChangePatternDB(YAdoDatabase * pDb, CRelayTableData * pNewTable
 		, CPtrList * pPatternList , CString strCurrentUser);
 

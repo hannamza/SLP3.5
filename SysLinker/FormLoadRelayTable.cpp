@@ -1307,7 +1307,7 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 		m_pNewRelayTable->SendProgStep(this, PROG_RESULT_ERROR, 0, 0);
 		return 0;
 	}
-	nRet = InsertLocationData(pDB, m_pNewRelayTable); // 일반 중에 수동 입력 부분
+	nRet = InsertLocationData(pDB, m_pNewRelayTable, pOldTable); // 일반 중에 수동 입력 부분
 	if (nRet <= 0)
 	{
 		USERLOG(L"DB 오류(InsertLocationData) : %s",pDB->GetLastErrorString());
@@ -4526,10 +4526,10 @@ int CFormLoadRelayTable::UpdateOldTable()
 }
 
 
-int CFormLoadRelayTable::InsertLocationData(YAdoDatabase * pDB, CRelayTableData * pNewTable)
+int CFormLoadRelayTable::InsertLocationData(YAdoDatabase * pDB, CRelayTableData * pNewTable, CRelayTableData* pOldTable)
 {
 	CString strSql= L"",strtemp = L"";
-	int nCnt = 0; 
+	int nCnt = 0, nOldFlNum;
 
 	strSql = L"DELETE FROM TB_LOC_BUILDING ";
 	pDB->ExecuteSql(strSql);
@@ -4546,7 +4546,7 @@ int CFormLoadRelayTable::InsertLocationData(YAdoDatabase * pDB, CRelayTableData 
 	CDataLocBuild * pBuild;
 	CDataLocBType * pBType;
 	CDataLocStair * pStair;
-	CDataLocFloor * pFloor;
+	CDataLocFloor * pFloor, *pOldFl = nullptr;
 	CMapLocBType::iterator bit;
 	CMapLocStair::iterator sit;
 	CMapLocFloor::iterator fit;
@@ -4554,8 +4554,10 @@ int CFormLoadRelayTable::InsertLocationData(YAdoDatabase * pDB, CRelayTableData 
 	POSITION pos;
 	CPtrList * pList;
 	std::shared_ptr<CManagerLocation> spManager = nullptr;
+	std::shared_ptr<CManagerLocation> spOldMng = nullptr;
 	CDataLocBase * pLoc = nullptr;
 	spManager = pNewTable->GetLocationManager();
+	spOldMng = pOldTable->GetLocationManager();
 
 	pList = spManager->GetBuildList();
 	pos = pList->GetHeadPosition();
@@ -4639,10 +4641,16 @@ int CFormLoadRelayTable::InsertLocationData(YAdoDatabase * pDB, CRelayTableData 
 					if(pData == nullptr)
 						continue;
 
+					pOldFl = (CDataLocFloor *)spOldMng->GetLocation(LT_FLOOR, pData->GetBuildName(), pData->GetBTypeName(), pData->GetStairName(), pData->GetFloorName());
+					if (pOldFl == nullptr)
+						nOldFlNum = pData->GetFloorNumber();
+					else
+						nOldFlNum = pOldFl->GetFloorNumber();
+
 					strtemp.Format(L"INSERT INTO TB_LOC_FLOOR(NET_ID, BD_ID,BTYPE_ID,STAIR_ID,FL_ID,FL_NAME,FL_NUM,FL_MIDDLE,ADD_USER) "
 						L" VALUES(1, %d,%d,%d,%d,'%s',%d,%d,'ADMIN') ;\n"
 						,pData->GetBuildID(),pData->GetBTypeID(),pData->GetStairID()
-						,pData->GetFloorID(),pData->GetFloorName(),pData->GetFloorNumber(),pData->GetMiddleFloor()
+						,pData->GetFloorID(),pData->GetFloorName(),nOldFlNum,pData->GetMiddleFloor()
 					);
 					strSql += strtemp;
 					nCnt ++;
