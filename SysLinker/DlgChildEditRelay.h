@@ -51,7 +51,7 @@ public:
 #ifndef ENGLISH_MODE
 	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_RELAY, pParent); }
 #else
-	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_RELAY, pParent); }
+	virtual BOOL CreateDlg(CWnd * pParent) { return Create(IDD_DLG_CHILD_EDIT_RELAY_EN, pParent); }
 #endif
 	virtual void DisplayItem(ST_TREEITEM * pData, ST_TREEITEM * pNewData);
 	virtual BOOL GetChangeData();
