@@ -955,6 +955,29 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
+			else if (nID >= MAX_ROM_INPUT_TYPE_COUNT)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("입력 타입 ID는 %d보다 작아야 합니다. [입력 타입 ID : %d]"), MAX_ROM_INPUT_TYPE_COUNT, nID);
+#else
+				strMsg.Format(_T("Input type ID must be less than %d.[Input Type ID : %d]."), MAX_ROM_INPUT_TYPE_COUNT, nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		else if (nEquimentType == ET_EQNAME)
+		{
+			if (nID >= MAX_EQUIP_INFO_ITEM_COUNT)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("설비명 ID는 %d보다 작아야 합니다. [설비명 ID : %d]"), MAX_EQUIP_INFO_ITEM_COUNT, nID);
+#else
+				strMsg.Format(_T("Equipment name ID must be less than %d.[Equipment Name ID : %d]."), MAX_EQUIP_INFO_ITEM_COUNT, nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
 		}
 		else if (nEquimentType == ET_OUTPUTTYPE)
 		{
@@ -968,10 +991,60 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
+			else if (nID >= MAX_ROM_OUTPUT_TYPE_COUNT)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("출력 타입 ID는 %d보다 작아야 합니다. [출력 타입 ID : %d]"), MAX_ROM_OUTPUT_TYPE_COUNT, nID);
+#else
+				strMsg.Format(_T("Output type ID must be less than %d.[Output Type ID : %d]."), MAX_ROM_OUTPUT_TYPE_COUNT, nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		else if (nEquimentType == ET_OUTCONTENTS)
+		{
+			if (nID >= MAX_EQUIP_INFO_ITEM_COUNT)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("출력 내용 ID는 %d보다 작아야 합니다. [출력 내용 ID : %d]"), MAX_EQUIP_INFO_ITEM_COUNT, nID);
+#else
+				strMsg.Format(_T("Output Content ID must be less than %d.[Output Content ID : %d]."), MAX_EQUIP_INFO_ITEM_COUNT, nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		else if (nEquimentType == ET_PUMPTYPE)
+		{
+			if (nID >= MAX_ROM_PUMP_EQUIP_COUNT)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("펌프 설비는 ID는 %d보다 작아야 합니다. [펌프 설비 ID : %d]"), MAX_ROM_PUMP_EQUIP_COUNT, nID);
+#else
+				strMsg.Format(_T("Pump Equipment ID must be less than %d.[Pump Equipment ID : %d]."), MAX_ROM_PUMP_EQUIP_COUNT, nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		else if (nEquimentType == ET_PSTYPE)
+		{
+			if (nID >= MAX_ROM_PS_COUNT)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("압력스위치는 ID는 %d보다 작아야 합니다. [압력스위치 ID : %d]"), MAX_ROM_PS_COUNT, nID);
+#else
+				strMsg.Format(_T("Pressure Switch ID must be less than %d.[Pressure Switch ID : %d]."), MAX_ROM_PS_COUNT, nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
 		}
 	}
 	else if (nEditType == EQUIPMENT_TYPE_MODIFY)
 	{
+		// 개발 최초에 해당 내용이 고정이라고 했으나 실제 현장 작업 시 현장 요구에 따라 편집은 가능하도록 함
 // 		if (nEquimentType == ET_INPUTTYPE)
 // 		{
 // 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)

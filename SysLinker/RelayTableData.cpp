@@ -17149,25 +17149,25 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 		bGT1Type = TRUE;
 	//20241016 GBM end
  
-	//20240429 GBM start - 설비 정의(입력타입, 출력타입) 개수 증설 (17 -> 100)
+	//20240429 GBM start - 설비 정의(입력타입, 출력타입) 개수 증설 (17 -> 100) : 정확히는 99개임, 1번부터 시작하므로 0번에 해당하는 부분은 항상 비어있음
 
  	/************************************************************************/
  	/* 입력타입    0~ 99 : 100개 글자수 32                                                          */
  	/************************************************************************/
 
 	int nItemCount = 0;
-	nItemCount = MAX_EQUIP_INFO_ITEM_COUNT;
+	nItemCount = MAX_ROM_INPUT_TYPE_COUNT;			// 20250515 GBM - 설비 정의(입력타입, 출력타입) 개수를 200개로 증설했지만 ROM에서는 이전처럼 100개까지만 처리 
+
+	int nID = 0;
 
  	spRefManager = m_spRefInputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
  	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
- 
-	int nItem = 0;
+
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
-		nItem++;
  		pEquip = spRefManager->GetNext(pos);
  		if(pEquip == nullptr)
  			continue;
@@ -17186,32 +17186,32 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 			memset(szStrBuff + nSize, 0, 256 - nSize);
 		//20241016 GBM end
 
- 		nCopyPos = pEquip->GetEquipID() * 32;
- 		memcpy(pMsgBuff + uMsgOffset + nCopyPos ,szStrBuff,32);
+		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
+		nID = pEquip->GetEquipID();
+		if (nID < nItemCount)
+		{
+			nCopyPos = nID * 32;
+			memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
+		}
  		strName.ReleaseBuffer();
-
-		if (nItem == nItemCount)
-			break;
  	}
 
- 	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
+ 	uMsgOffset += (32 * nItemCount);		// 20250515 GBM - 설비 정의(입력타입, 출력타입) 개수를 200개로 증설했지만 ROM에서는 이전처럼 100개까지만 처리 
  
  	/************************************************************************/
  	/* 출력타입 - 연동정지 0~ 99 : 100개 글자수 32                                                             */
  	/************************************************************************/
 
-	nItemCount = MAX_EQUIP_INFO_ITEM_COUNT;
+	nItemCount = MAX_ROM_OUTPUT_TYPE_COUNT;			// 20250515 GBM - 설비 정의(입력타입, 출력타입) 개수를 200개로 증설했지만 ROM에서는 이전처럼 100개까지만 처리 ;
 
  	spRefManager = m_spRefOutputEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
  
-	nItem = 0;
  	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
-		nItem++;
  		pEquip = spRefManager->GetNext(pos);
  		if(pEquip == nullptr)
  			continue;
@@ -17232,22 +17232,26 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 			memset(szStrBuff + nSize, 0, 256 - nSize);
 		//20241016 GBM end
 
- 		nCopyPos = pEquip->GetEquipID() * 32;
- 		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
- 		strName.ReleaseBuffer();
-
-		if (nItem == nItemCount)
-			break;
+		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
+		nID = pEquip->GetEquipID();
+		if (nID < nItemCount)
+		{
+			nCopyPos = nID * 32;
+			memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
+		}
+		strName.ReleaseBuffer();
  	}
 
-	uMsgOffset += (32 * MAX_EQUIP_INFO_ITEM_COUNT);
+	uMsgOffset += (32 * nItemCount);		// 20250515 GBM - 설비 정의(입력타입, 출력타입) 개수를 200개로 증설했지만 ROM에서는 이전처럼 100개까지만 처리 
 
 	//20240429 GBM end
  
 	// 펌프 (최대 128개)
+	nItemCount = MAX_ROM_PUMP_COUNT;
  	if(m_spPump == nullptr)
  		return 0;
- 	memset(pMsgBuff + uMsgOffset,0,(32 * 128));
+
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
  	pos = m_spPump->GetHeadPosition();
  	while(pos)
  	{
@@ -17280,20 +17284,28 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 		if(nTemp < 0)
 			continue; 
 
- 		nCopyPos = nTemp * 32;
- 		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
- 		strName.ReleaseBuffer();
+		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
+		nID = nTemp + 1;	// 펌프는 0번 위치부터 1번 펌프를 씀
+		if (nID <= nItemCount)
+		{
+			nCopyPos = nTemp * 32;
+			memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
+		}
+		strName.ReleaseBuffer();
  	}
- 	uMsgOffset += (32 * 128);
+ 	uMsgOffset += (32 * nItemCount);
  
  
  	/************************************************************************/
  	/* 압력 스위치 모듈                                                         */
  	/************************************************************************/
+
+	nItemCount = MAX_ROM_PS_COUNT;
  	spRefManager = m_spRefPSEquipManager;
  	if(spRefManager == nullptr)
  		return 0;
- 	memset(pMsgBuff + uMsgOffset,0,(32 * 17));
+
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
@@ -17316,19 +17328,28 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 			memset(szStrBuff + nSize, 0, 256 - nSize);
 		//20241016 GBM end
 
- 		nCopyPos = pEquip->GetEquipID() * 32;
- 		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
- 		strName.ReleaseBuffer();
+		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
+		nID = pEquip->GetEquipID();
+		if (nID < nItemCount)
+		{
+			nCopyPos = nID * 32;
+			memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
+		}
+		strName.ReleaseBuffer();
  	}
- 	uMsgOffset += (32 * 17);
+ 	uMsgOffset += (32 * nItemCount);
  
  	/************************************************************************/
- 	/* 펌프 종류                                                             */
+ 	/* 펌프 종류                                                            */
+	/* 프로그램 내에서의 이름은 [펌프 설비]                                 */
  	/************************************************************************/
  	spRefManager = m_spRefPumpEquipManager;
+	nItemCount = MAX_ROM_PUMP_EQUIP_COUNT;
+
  	if(spRefManager == nullptr)
  		return 0;
- 	memset(pMsgBuff + uMsgOffset,0,(32 * 17));
+
+ 	memset(pMsgBuff + uMsgOffset,0,(32 * nItemCount));
  	pos = spRefManager->GetHeadPosition();
  	while(pos)
  	{
@@ -17351,10 +17372,17 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 			memset(szStrBuff + nSize, 0, 256 - nSize);
 		//20241016 GBM end
 
- 		nCopyPos = pEquip->GetEquipID() * 32;
- 		memcpy(pMsgBuff + uMsgOffset + nCopyPos,szStrBuff,32);
+		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
+		nID = pEquip->GetEquipID();
+		if (nID < nItemCount)
+		{
+			nCopyPos = nID * 32;
+			memcpy(pMsgBuff + uMsgOffset + nCopyPos, szStrBuff, 32);
+		}
+		strName.ReleaseBuffer();
+
  	}
- 	uMsgOffset += (32 * 17);
+ 	uMsgOffset += (32 * nItemCount);
 
  	return uMsgOffset;
  }

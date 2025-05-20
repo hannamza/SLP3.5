@@ -167,6 +167,8 @@ BOOL CNewExcelManager::ParsingEquipmentInfo(CExcelWrapper* xls)
 	for (int i = EXCEL_ENUM_EQUIPMENT_INFO::ROW_LIST_START; i < MAX_EQUIP_INFO_ITEM_COUNT + EXCEL_ENUM_EQUIPMENT_INFO::ROW_LIST_START; i++)
 	{
 		strTemp = xls->GetItemText(i, EXCEL_ENUM_EQUIPMENT_INFO::COLUMN_NUMBER);
+		if (strTemp.IsEmpty())
+			break;						// 20250519 GBM - 기존처럼 100개까지는 엑셀파일에서 읽고 100번 이후에는 번호가 없기 때문에 200개까지 루프 돌지 않고 종료
 		nNumber = _wtoi(strTemp);
 		ASSERT(nNumber > 0);
 		nNumber -= 1;	//번호는 1베이스, 인덱스는 0베이스
@@ -269,7 +271,8 @@ BOOL CNewExcelManager::UpdateProjectInfo(CString strWin32AppProjectName)
 			//모든 Sheet를 검색했는데 project Sheet를 못찾았다면 프로젝트 버전 번호 갱신 실패
 			if (j == nSheetCount - 1)
 			{
-				CString strLog = _T("Failed to update the project number in file [%s] because it failed to find the [%s] sheet.", strModuleTableFile, EXCEL_SHEET_PROJECT_INFO);
+				CString strLog = _T("");
+				strLog.Format(_T("Failed to update the project number in file [%s] because it failed to find the [%s] sheet."), strModuleTableFile, EXCEL_SHEET_PROJECT_INFO);
 				Log::Trace("%s", CCommonFunc::WCharToChar(strLog.GetBuffer(0)));
 			}
 		}

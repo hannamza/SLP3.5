@@ -1,7 +1,7 @@
 #pragma once
 
 // 프로그램 버전 번호, 배포 전 반드시 수정할 것
-#define SLP4_VERSION_NUMBER		1.1
+#define SLP4_VERSION_NUMBER		1.2
 
 // 중계기 일람표 업데이트 플래그 - 편집에 따라 GT1 추가 정보 / 설비 정의 / 비상방송 / 패턴 (중계기 일람표 상, 수동 패턴 제외)를 갱신시키는 기능 Enable / disable
 //#define MODULE_TABLE_UPDATE_MODE
@@ -36,8 +36,23 @@
 // 설비 정의 문자 길이
 #define MAX_EQUIP_INFO_TEXT_LENGTH	50
 
-// 설비 정의 최대 개수
-#define MAX_EQUIP_INFO_ITEM_COUNT	100
+// 설비 정의 최대 개수 -> 기존에 설비 정의 최대 개수를 사용했으나 철산 같은 대형 현장에 설비명 개수 추가가 필요하다는 요청으로 기존 100개에서 200개로 정의 (2025.05.13.), 설비명, 출력내용은 이 정의를 사용
+#define MAX_EQUIP_INFO_ITEM_COUNT	200
+
+// 설비 정의 최대 개수는 200개지만 ROM 파일에서는 입력타입을 최대 100개만 하기로 했으므로 정의를 추가
+#define MAX_ROM_INPUT_TYPE_COUNT	100
+
+// 설비 정의 최대 개수는 200개지만 ROM 파일에서는 출력타입을 최대 100개만 하기로 했으므로 정의를 추가
+#define MAX_ROM_OUTPUT_TYPE_COUNT	100
+
+// ROM 파일에서는 펌프설비를 최대 128개만 적용하므로 정의를 추가 (설비 정의 최대 개수와는 관련 없음, 왜냐하면 기존부터 128개의 버퍼를 그대로 ROM에 쓰기 때문)
+#define MAX_ROM_PUMP_COUNT	128
+
+// 설비 정의 최대 개수는 200개지만 ROM 파일에서는 압력스위치를 17개만 사용하므로 정의를 추가
+#define MAX_ROM_PS_COUNT	17
+
+// 설비 정의 최대 개수는 200개지만 ROM 파일에서는 펌프 종류를 17개만 사용하므로 정의를 추가
+#define MAX_ROM_PUMP_EQUIP_COUNT	17
 
 // 프로젝트 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_PROJECT_INFO	_T("project")
