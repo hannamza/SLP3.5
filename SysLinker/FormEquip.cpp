@@ -515,8 +515,14 @@ int CFormEquip::DataDelete()
 	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록함 -> 다시 활성화
 	int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
 	int nID = m_nNum;
+
+	//20250612 GBM start - SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
+#ifdef SLP4_MODE
 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
 		return 0;
+#endif
+	//20250612 GBM end
+
 	//20240422 GBM end
 
 	YAdoDatabase * pDB = m_pRefFasSysData->GetPrjDB();
@@ -641,8 +647,14 @@ int CFormEquip::DataAdd()
 	nType = (int)m_cmbType.GetItemData(nSel);
 
 	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함 -> 다시 활성화
+
+	//20250612 GBM start - SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
+#ifdef SLP4_MODE
 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
 		return 0;
+#endif
+	//20250612 GBM end
+
 	//20240422 GBM end
 	
 	strSql.Format(L"INSERT TB_EQUIP_MST(EQ_ID,EQ_TYPE , EQ_NAME ,EQ_DESC,EQ_SYMBOL,ADD_USER) "
@@ -785,14 +797,30 @@ int CFormEquip::DataSave()
 	}
 	else
 	{
+		//20250612 GBM start - 새로 추가 설비 여부와는 상관없이 설비 정의 타입과 ID를 가져와서 유효성 검사
+
+		//SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
+#ifdef SLP4_MODE
+		if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
+			return 0;
+#endif
+
+		//20250612 GBM end
+
 		if (m_bAdd)
 		{
-			//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함 -> 다시 활성화
-			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
-			int nID = m_nNum;
-			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
-				return 0;
-			//20240422 GBM end
+// 			//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함 -> 다시 활성화
+// 			int nType = m_cmbType.GetCurSel() + 1;	// Enum index == Combo box index + 1 
+// 			int nID = m_nNum;
+// 
+// 			//20250612 GBM start - SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
+// #ifdef SLP4_MODE
+// 			if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
+// 				return 0;
+// #endif
+// 			//20250612 GBM end
+// 
+// 			//20240422 GBM end
 
 #ifndef ENGLISH_MODE
 			if (AfxMessageBox(L"이미 데이터가 있습니다. 기존데이터를 수정하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
@@ -945,6 +973,17 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 	{
 		if (nEquimentType == ET_INPUTTYPE)
 		{
+			//20250612 GBM start - 프로그램팀 요청으로 입력타입은 새로 추가 불가
+#if 1
+
+#ifndef ENGLISH_MODE
+			strMsg.Format(_T("[입력 타입]은 추가할 수 없습니다."), nID);
+#else
+			strMsg.Format(_T("[Input type] cannot be added."), nID);
+#endif
+			AfxMessageBox(strMsg);
+			return FALSE;
+#else
 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::NMS)
 			{
 #ifndef ENGLISH_MODE
@@ -960,11 +999,13 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 #ifndef ENGLISH_MODE
 				strMsg.Format(_T("입력 타입 ID는 %d보다 작아야 합니다. [입력 타입 ID : %d]"), MAX_ROM_INPUT_TYPE_COUNT, nID);
 #else
-				strMsg.Format(_T("Input type ID must be less than %d.[Input Type ID : %d]."), MAX_ROM_INPUT_TYPE_COUNT, nID);
+				strMsg.Format(_T("Input type ID must be less than %d. [Input Type ID : %d]"), MAX_ROM_INPUT_TYPE_COUNT, nID);
 #endif
 				AfxMessageBox(strMsg);
 				return FALSE;
 			}
+#endif
+			//20250612 GBM end
 		}
 		else if (nEquimentType == ET_EQNAME)
 		{
@@ -996,7 +1037,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 #ifndef ENGLISH_MODE
 				strMsg.Format(_T("출력 타입 ID는 %d보다 작아야 합니다. [출력 타입 ID : %d]"), MAX_ROM_OUTPUT_TYPE_COUNT, nID);
 #else
-				strMsg.Format(_T("Output type ID must be less than %d.[Output Type ID : %d]."), MAX_ROM_OUTPUT_TYPE_COUNT, nID);
+				strMsg.Format(_T("Output type ID must be less than %d. [Output Type ID : %d]"), MAX_ROM_OUTPUT_TYPE_COUNT, nID);
 #endif
 				AfxMessageBox(strMsg);
 				return FALSE;
@@ -1009,7 +1050,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 #ifndef ENGLISH_MODE
 				strMsg.Format(_T("출력 내용 ID는 %d보다 작아야 합니다. [출력 내용 ID : %d]"), MAX_EQUIP_INFO_ITEM_COUNT, nID);
 #else
-				strMsg.Format(_T("Output Content ID must be less than %d.[Output Content ID : %d]."), MAX_EQUIP_INFO_ITEM_COUNT, nID);
+				strMsg.Format(_T("Output Content ID must be less than %d. [Output Content ID : %d]"), MAX_EQUIP_INFO_ITEM_COUNT, nID);
 #endif
 				AfxMessageBox(strMsg);
 				return FALSE;
@@ -1022,7 +1063,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 #ifndef ENGLISH_MODE
 				strMsg.Format(_T("펌프 설비는 ID는 %d보다 작아야 합니다. [펌프 설비 ID : %d]"), MAX_ROM_PUMP_EQUIP_COUNT, nID);
 #else
-				strMsg.Format(_T("Pump Equipment ID must be less than %d.[Pump Equipment ID : %d]."), MAX_ROM_PUMP_EQUIP_COUNT, nID);
+				strMsg.Format(_T("Pump Equipment ID must be less than %d. [Pump Equipment ID : %d]"), MAX_ROM_PUMP_EQUIP_COUNT, nID);
 #endif
 				AfxMessageBox(strMsg);
 				return FALSE;
@@ -1035,7 +1076,7 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 #ifndef ENGLISH_MODE
 				strMsg.Format(_T("압력스위치는 ID는 %d보다 작아야 합니다. [압력스위치 ID : %d]"), MAX_ROM_PS_COUNT, nID);
 #else
-				strMsg.Format(_T("Pressure Switch ID must be less than %d.[Pressure Switch ID : %d]."), MAX_ROM_PS_COUNT, nID);
+				strMsg.Format(_T("Pressure Switch ID must be less than %d. [Pressure Switch ID : %d]"), MAX_ROM_PS_COUNT, nID);
 #endif
 				AfxMessageBox(strMsg);
 				return FALSE;
@@ -1044,40 +1085,45 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 	}
 	else if (nEditType == EQUIPMENT_TYPE_MODIFY)
 	{
-		// 개발 최초에 해당 내용이 고정이라고 했으나 실제 현장 작업 시 현장 요구에 따라 편집은 가능하도록 함
-// 		if (nEquimentType == ET_INPUTTYPE)
-// 		{
-// 			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::CCTV)
-// 			{
-// 				strMsg.Format(_T("[입력 타입 ID : %d]는/은 변경할 수 없습니다."), nID);
-// 				AfxMessageBox(strMsg);
-// 				return FALSE;
-// 			}
-// 		}
-// 		else if (nEquimentType == ET_OUTPUTTYPE)
-// 		{
-// 			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
-// 			{
-// 				strMsg.Format(_T("[출력 타입 ID : %d]는/은 변경할 수 없습니다."), nID);
-// 				AfxMessageBox(strMsg);
-// 				return FALSE;
-// 			}
-// 		}
+		//20250612 GBM start - 프로그램팀 요청으로 입력타입은 모두 수정 불가, 출력타입은 유도등정지까지 수정 불가
+		if (nEquimentType == ET_INPUTTYPE)
+		{
+#ifndef ENGLISH_MODE
+			strMsg.Format(_T("[입력 타입]은 변경할 수 없습니다."), nID);
+#else
+			strMsg.Format(_T("[Input Type] cannot be changed."), nID);
+#endif
+			AfxMessageBox(strMsg);
+			return FALSE;
+		}
+		else if (nEquimentType == ET_OUTPUTTYPE)
+		{
+			if (nID > EQUIPMENT_DEFINITION::알수없는출력타입 && nID <= EQUIPMENT_DEFINITION::유도등정지)
+			{
+#ifndef ENGLISH_MODE
+				strMsg.Format(_T("[출력 타입 ID : %d]는/은 변경할 수 없습니다."), nID);
+#else
+				strMsg.Format(_T("You cannot change [Output Type ID: %d]."), nID);
+#endif
+				AfxMessageBox(strMsg);
+				return FALSE;
+			}
+		}
+		//20250612 GBM end
 	}
 	else if (nEditType == EQUIPMENT_TYPE_DELETE)
 	{
 		if (nEquimentType == ET_INPUTTYPE)
 		{
-			if (nID > EQUIPMENT_DEFINITION::알수없는입력타입 && nID <= EQUIPMENT_DEFINITION::NMS)
-			{
+			//20250612 GBM start - 프로그램팀 요청으로 입력타입은 모두 삭제 불가
 #ifndef ENGLISH_MODE
-				strMsg.Format(_T("[입력 타입 ID : %d]는 삭제할 수 없습니다."), nID);
+			strMsg.Format(_T("[입력 타입]은 삭제할 수 없습니다."), nID);
 #else
-				strMsg.Format(_T("You cannot delete [Input Type ID: %d]."), nID);
+			strMsg.Format(_T("You cannot delete [Input Type]."), nID);
 #endif
-				AfxMessageBox(strMsg);
-				return FALSE;
-			}
+			AfxMessageBox(strMsg);
+			return FALSE;
+			//20250612 GBM end
 		}
 		else if (nEquimentType == ET_OUTPUTTYPE)
 		{
