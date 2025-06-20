@@ -72,15 +72,9 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-#ifndef SLP4_MODE
 IDR_MAINFRAME           ICON                    "res\\SysLinker.ico"
 
 IDR_MAINFRAME_EN        ICON                    "res\\SysLinker.ico"
-#else
-IDR_MAINFRAME           ICON                    "res\\SysLinker_SLP4.ico"
-
-IDR_MAINFRAME_EN        ICON                    "res\\SysLinker_SLP4.ico"
-#endif
 
 IDR_SysLinkerTYPE       ICON                    "res\\SysLinkerDoc.ico"
 
@@ -124,11 +118,7 @@ IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 
 IDR_MAINFRAME_256       BITMAP                  "res\\Toolbar256.bmp"
 
-#ifndef SLP4_MODE
 IDB_MAIN                BITMAP                  "res\\main.bmp"
-#else
-IDB_MAIN                BITMAP                  "res\\main_SLP4.bmp"
-#endif
 
 IDB_WRITESMALL          BITMAP                  "res\\writesmall.bmp"
 
@@ -560,6 +550,8 @@ BEGIN
     PUSHBUTTON      "추가   ▼",IDC_BTN_ADD,6,82,43,13
     PUSHBUTTON      "저장",IDC_BTN_SAVE2,49,82,43,13
     PUSHBUTTON      "삭제",IDC_BTN_DEL,92,82,43,13
+    PUSHBUTTON      "수동 복사",IDC_BUTTON_COPY,142,82,50,13
+    PUSHBUTTON      "수동 붙여넣기",IDC_BUTTON_PASTE,192,82,50,13
 END
 
 IDD_DLG_NEW_PROJECT DIALOGEX 0, 0, 465, 257
@@ -1865,6 +1857,19 @@ BEGIN
     PUSHBUTTON      "취소",IDCANCEL,263,179,50,14
 END
 
+IDD_DIALOG_MANUAL_COPY DIALOGEX 0, 0, 752, 360
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "복사된 수동 연동데이터"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "닫기",IDOK,328,339,98,14
+    CONTROL         "",IDC_LIST_PATTERN,"SysListView32",LVS_LIST | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,24,93,702,109
+    EDITTEXT        IDC_EDIT_INPUT,24,42,702,14,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "",IDC_LIST_RELAY,"SysListView32",LVS_LIST | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,24,213,702,109
+    GROUPBOX        "입력 회로",IDC_STATIC,14,26,720,46
+    GROUPBOX        "연동 출력 (수동)",IDC_STATIC,14,76,721,259
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2521,6 +2526,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 193
     END
+
+    IDD_DIALOG_MANUAL_COPY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 745
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 353
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2909,6 +2922,11 @@ BEGIN
 END
 
 IDD_DLG_PROGRESS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG_MANUAL_COPY AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -4385,6 +4403,19 @@ BEGIN
     PUSHBUTTON      "DELETE",IDC_BTN_DEL,92,82,43,13
 END
 
+IDD_DIALOG_MANUAL_COPY_EN DIALOGEX 0, 0, 752, 360
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "COPIED MANUAL LINKED DATA"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "CLOSE",IDOK,328,339,97,14
+    CONTROL         "",IDC_LIST_PATTERN,"SysListView32",LVS_LIST | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,24,93,702,109
+    EDITTEXT        IDC_EDIT_INPUT,24,42,702,14,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "",IDC_LIST_RELAY,"SysListView32",LVS_LIST | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,24,213,702,109
+    GROUPBOX        "INPUT CIRCUIT",IDC_STATIC,14,26,720,46
+    GROUPBOX        "LINKED OUTPUT (MANUAL)",IDC_STATIC,14,76,721,259
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4800,6 +4831,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 186
     END
+
+    IDD_DIALOG_MANUAL_COPY_EN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 745
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 353
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -5068,6 +5107,11 @@ BEGIN
 END
 
 IDD_SYSLINKER_FORM_EN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG_MANUAL_COPY_EN AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

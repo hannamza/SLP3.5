@@ -180,6 +180,8 @@ BEGIN_MESSAGE_MAP(CSysLinkerView, CFormView)
 	//ON_BN_CLICKED(IDC_BTN_SAVE, &CSysLinkerView::OnBnClickedBtnSave)
 	ON_BN_CLICKED(IDC_BTN_DEL, &CSysLinkerView::OnBnClickedBtnDel)
 	ON_BN_CLICKED(IDC_BTN_SAVE2, &CSysLinkerView::OnBnClickedBtnSave2)
+	ON_BN_CLICKED(IDC_BUTTON_COPY, &CSysLinkerView::OnBnClickedButtonCopy)
+	ON_BN_CLICKED(IDC_BUTTON_PASTE, &CSysLinkerView::OnBnClickedButtonPaste)
 END_MESSAGE_MAP()
 
 // CSysLinkerView 생성/소멸
@@ -202,6 +204,8 @@ CSysLinkerView::CSysLinkerView()
 
 	m_nAddType = -1;
 	m_pRefPtrSelectedItems = nullptr;
+
+	m_pDlgManualCopy = nullptr;			//20250617 GBM - 수동 연동데이터 일괄 편집 기능
 }
 #else
 CSysLinkerView::CSysLinkerView()
@@ -640,11 +644,7 @@ void CSysLinkerView::OnTvnOutputDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		m_ctrlRelayList.SetItemText(nIdx, 5, pDev->GetEqAddIndex(),crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 6, pDev->GetOutContentsName(),crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 7, pDev->GetOutputLocationName(),crText,crBk);
-#ifndef ENGLISH_MODE
-		m_ctrlRelayList.SetItemText(nIdx, 8, L"수동",crText,crBk);
-#else
-		m_ctrlRelayList.SetItemText(nIdx, 8, L"MANUAL", crText, crBk);
-#endif
+		m_ctrlRelayList.SetItemText(nIdx, 8, g_szLogicTypeString[LOGIC_MANUAL],crText,crBk);
 		m_ctrlRelayList.SetItemText(nIdx, 9, L"",crText,crBk);
 
 		if (bMulti)
@@ -1018,6 +1018,15 @@ void CSysLinkerView::OnTvnContactDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CSysLinkerView::OnTvnPSwitchDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 {
+	//20250618 GBM start - PS는 출력으로 잡지 않음
+#ifndef ENGLISH_MODE
+	AfxMessageBox(_T("압력 스위치는 추가할 수 없습니다."));
+#else
+	AfxMessageBox(_T("A pressure switch cannot be added."));
+#endif
+	return;
+	//20250618 GBM end
+
 	*pResult = 0;
 #if _USE_PSWITCH_
 	LPNMTVNDROPITEMS ptc = reinterpret_cast<LPNMTVNDROPITEMS>(pNMHDR);
@@ -3755,4 +3764,214 @@ int CSysLinkerView::ChangeMultiInputIndivisualLinkOrder(CDataDevice* pDev)
 // 
 
 	return 0;
+}
+
+
+void CSysLinkerView::OnBnClickedButtonCopy()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	// 현재 선택된 입력 회로가 있는지 여부
+	CDataDevice* pDataDevice = nullptr;
+	pDataDevice = CManualLinkManager::Instance()->GetCurrentInputCircuit();
+	if (pDataDevice == nullptr)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("선택된 입력 회로가 없습니다."));
+#else
+		AfxMessageBox(_T("There is no input circuit selected."));
+#endif
+		return;
+	}
+
+	//
+	CManualLinkManager::Instance()->SetRelayTableData(m_pRefFasSysData);
+
+	// 현재까지 진행된 연동데이터 중 수동 연동데이터의 리스트를 얻음
+	CManualLinkManager::Instance()->SetManualLinkListOnly();
+
+	// 리스트에 표시할 정보와 수동 붙여쓰기 할 때에 수동 연동을 넣을 정보를 이 시점에 가공해야 한다. CManualLinkManager에서 해야 할 듯
+	CManualLinkManager::Instance()->MakeCopyData();
+
+	// 현재 복사된 목록 다이이얼로그 띄움
+	if (m_pDlgManualCopy == nullptr)
+	{
+		CDlgManualCopy* pDlg = new CDlgManualCopy;
+		m_pDlgManualCopy = pDlg;
+#ifndef ENGLISH_MODE
+		pDlg->Create(IDD_DIALOG_MANUAL_COPY);
+#else
+		pDlg->Create(IDD_DIALOG_MANUAL_COPY_EN);
+#endif
+		pDlg->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		CDlgManualCopy* pDlg = m_pDlgManualCopy;
+		pDlg->ShowWindow(SW_SHOW);
+		pDlg->SetNewInfo();
+	}
+}
+
+
+void CSysLinkerView::OnBnClickedButtonPaste()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	// 현재 선택된 입력 회로가 있는지 여부
+	CPtrList* pList = nullptr;
+	pList = CManualLinkManager::Instance()->GetManualLinkListOnly();
+	if (pList->GetCount() == 0)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("수동 출력이 없습니다."));
+#else
+		AfxMessageBox(_T("There is no manual output."));
+#endif
+		return;
+	}
+
+	m_ctrlRelayList.SetRedraw(FALSE);
+	m_ctrlPatternList.SetRedraw(FALSE);
+
+	BOOL bCrossCondition = FALSE;
+
+	// 현재 입력 회로 정보를 얻어옴
+	CDataDevice* pCurrentInputCircuit = nullptr;
+	pCurrentInputCircuit = CManualLinkManager::Instance()->GetCurrentInputCircuit();
+	
+	// 수동 출력 리스트 가져옴
+	std::vector<MANUAL_COPY_INFO> mci;
+	std::vector<MANUAL_COPY_INFO>::iterator iter;
+
+	mci = CManualLinkManager::Instance()->GetManualLinkVector();
+	iter = mci.begin();
+	for (; iter != mci.end(); iter++)
+	{
+		// 리스트에 이미 있다면 추가하지 않음
+		int nAlreadyExists = -1;
+		nAlreadyExists = FindItemLink(iter->nLinkType, iter->nTgtFacp, iter->nTgtUnit, iter->nTgtChn, iter->nTgtCircuit);
+		if(nAlreadyExists >= 0)
+			continue;
+
+		// 크로스 조건 만족 여부
+		bCrossCondition = CheckCrossCondition(pCurrentInputCircuit, iter);
+
+		// UI및 메모리에 적용
+		InsertManualOutputToList(bCrossCondition, pCurrentInputCircuit, iter);
+	}
+
+	// 리스트 화면 갱신 -> 참조한 소스에 있어서 추가했으나 동작하지 않는 것으로 보임
+	m_ctrlRelayList.SetRedraw();
+	m_ctrlPatternList.SetRedraw();
+}
+
+BOOL CSysLinkerView::CheckCrossCondition(CDataDevice* pDataDevice, std::vector<MANUAL_COPY_INFO>::iterator& iter)
+{
+	POSITION pos;
+	CDataEquip* pEq;
+	CString strEqName;
+
+	// 크로스 입력 타입 여부 판단
+	BOOL bCrossInputType = FALSE;
+	CDataEquip* pInputEq = nullptr;
+	pInputEq = pDataDevice->GetEqInput();
+	int nInputType = pInputEq->GetEquipID();
+
+	if (nInputType == INTYPE_CROSSA || nInputType == INTYPE_CROSSB
+		|| nInputType == INTYPE_CROSS16_A || nInputType == INTYPE_CROSS17_B
+		|| nInputType == INTYPE_CROSS18_A || nInputType == INTYPE_CROSS19_B
+		)
+	{
+		// 입력 회로가 Cross 조건 대상이면 출력에 대한 조건도 검사
+		std::shared_ptr<CManagerEquip> pRefOutputEquipManager;
+		pRefOutputEquipManager = m_pRefFasSysData->m_spRefOutputEquipManager;
+
+		// 프리액션 여부
+		int nOutputType = -1;
+		pos = pRefOutputEquipManager->GetHeadPosition();
+		while (pos)
+		{
+			pEq = pRefOutputEquipManager->GetNext(pos);
+			strEqName = pEq->GetEquipName();
+
+			if (iter->strOutputType.Compare(strEqName) == 0)
+			{
+				nOutputType = pEq->GetEquipID();
+				break;
+			}
+		}
+
+		if (nOutputType == OUTTYPE_PREACTION)
+		{
+			// 밸브 여부
+			std::shared_ptr<CManagerEquip> pRefContentsEquipManager;
+			pRefContentsEquipManager = m_pRefFasSysData->m_spRefContentsEquipManager;
+
+			int nOutputContent = -1;
+			pos = pRefContentsEquipManager->GetHeadPosition();
+			while (pos)
+			{
+				pEq = pRefContentsEquipManager->GetNext(pos);
+				strEqName = pEq->GetEquipName();
+
+				if (iter->strOutputDecription.Compare(strEqName) == 0)
+				{
+					nOutputContent = pEq->GetEquipID();
+					break;
+				}
+			}
+
+			if (nOutputContent == OUTCONT_VALVE)
+			{
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+void CSysLinkerView::InsertManualOutputToList(BOOL bCrossCondition, CDataDevice* pDataDevice, std::vector<MANUAL_COPY_INFO>::iterator& iter)
+{
+	int nListCount = -1;
+	CString strIndex = _T("");
+	COLORREF crText = RGB(255, 255, 255), crBk = RGB(255, 0, 0);
+
+	// 메모리 및 DB에 적용
+	CDataLinked* pDataLinked;
+	pDataLinked = new CDataLinked;
+	pDataLinked->SetLinkData(iter->nTgtFacp, iter->nTgtUnit, iter->nTgtChn, iter->nTgtCircuit, iter->nLinkType, iter->nLogicType, 0, pDataDevice->GetFacpID(), pDataDevice->GetUnitID(), pDataDevice->GetChnID(), pDataDevice->GetDeviceID());
+	m_pRefFasSysData->InsertLinkedTable(pDataDevice, pDataLinked);
+	pDataDevice->AddLink(bCrossCondition, pDataLinked);
+
+	// 타입에 따른 분기
+	if (iter->nLinkType == LK_TYPE_RELEAY)
+	{
+		nListCount = m_ctrlRelayList.GetItemCount();
+
+		m_ctrlRelayList.InsertItem(nListCount, L"", crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 1, iter->strFullName, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 2, iter->strInputType, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 3, iter->strOutputType, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 4, iter->strEquipmentName, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 5, iter->strEquipmentNumber, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 6, iter->strOutputDecription, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 7, iter->strPosition, crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 8, g_szLogicTypeString[LOGIC_MANUAL], crText, crBk);
+		m_ctrlRelayList.SetItemText(nListCount, 9, L"", crText, crBk);
+
+		m_ctrlRelayList.SetItemData(nListCount, (DWORD_PTR)pDataLinked);
+
+		// Cross 조건에 의해 연동된 출력이 맨 앞에 있을 경우 이를 보정해서 순번 숫자를 매기고 현재는 맨 아래있지만 다시 그려질 때는 순서대로 표시가 됨
+		ChangeRelayEditNumber();	
+	}
+	else
+	{
+		//m_ctrlPatternList에서는 추가되면 가장 윗 칸에 추가됨
+		m_ctrlPatternList.InsertItem(0, iter->strFullName, crText, crBk);
+		m_ctrlPatternList.SetItemText(0, 1, iter->strContactType, crText, crBk);
+
+		m_ctrlPatternList.SetItemData(0, (DWORD_PTR)pDataLinked);
+	}
 }

@@ -221,6 +221,10 @@ void CDlgInfoRelay::DisplayItem(ST_TREEITEM *pData, ST_TREEITEM * pNewData)
 	}
 
 	UpdateData(FALSE);
+
+	//20250617 GBM start - 수동 연동데이터 일괄 편집 기능
+	CManualLinkManager::Instance()->SetCurrentInputCircuit(pDev);
+	//20250617 GBM end
 }
 
 

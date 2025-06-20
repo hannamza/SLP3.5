@@ -521,4 +521,30 @@ typedef struct
 	char pumpModule[MAX_EQUIP_INFO_ITEM_COUNT][MAX_EQUIP_INFO_TEXT_LENGTH];
 }EQUIPMENT_INFO;
 
+// 수동 복사 구조체
+typedef struct 
+{
+	int nSrcFacp;
+	int nSrcUnit;
+	int nSrcChn;
+	int nSrcCircuit;
+	int nTgtFacp;
+	int nTgtUnit;
+	int nTgtChn;
+	int nTgtCircuit;
+	int nLogicID;
+	byte nLogicType;
+	byte nLinkType;
+	CString strFullName;
+	CString strInputType;
+	CString strOutputType;
+	CString strEquipmentName;
+	CString strEquipmentNumber;
+	CString strOutputDecription;
+	CString strPosition;
+	CString strLinkType;
+	CString strOutputKind;
+	CString strContactType;	// [접점 종류] 표시를 위한 변수
+}MANUAL_COPY_INFO;
+
 #pragma pack(pop)

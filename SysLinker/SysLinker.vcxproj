@@ -1087,6 +1087,7 @@
     <ClInclude Include="DlgMakeAutoAllInput.h" />
     <ClInclude Include="DlgMakeAutoOnInput.h" />
     <ClInclude Include="DlgMakePwd.h" />
+    <ClInclude Include="DlgManualCopy.h" />
     <ClInclude Include="DlgNewProjectWizard.h" />
     <ClInclude Include="DlgOutputChange.h" />
     <ClInclude Include="DlgPatternChange.h" />
@@ -1129,6 +1130,7 @@
     <ClInclude Include="ManagerLocation.h" />
     <ClInclude Include="ManagerPS.h" />
     <ClInclude Include="ManagerPump.h" />
+    <ClInclude Include="ManualLinkManager.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="ProgressBarDlg.h" />
     <ClInclude Include="RelayTableData.h" />
@@ -1376,6 +1378,7 @@
     <ClCompile Include="DlgMakeAutoAllInput.cpp" />
     <ClCompile Include="DlgMakeAutoOnInput.cpp" />
     <ClCompile Include="DlgMakePwd.cpp" />
+    <ClCompile Include="DlgManualCopy.cpp" />
     <ClCompile Include="DlgNewProjectWizard.cpp" />
     <ClCompile Include="DlgOutputChange.cpp" />
     <ClCompile Include="DlgPatternChange.cpp" />
@@ -1418,6 +1421,7 @@
     <ClCompile Include="ManagerLocation.cpp" />
     <ClCompile Include="ManagerPS.cpp" />
     <ClCompile Include="ManagerPump.cpp" />
+    <ClCompile Include="ManualLinkManager.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="ProgressBarDlg.cpp" />
     <ClCompile Include="RelayTableData.cpp" />

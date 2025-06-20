@@ -514,6 +514,8 @@ BOOL CSysLinkerApp::InitInstance()
 	CNewExcelManager::New();
 	//20240202 GBM end
 
+	CManualLinkManager::New();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
+
 	OnHomeLogin();
 	return TRUE;
 }
@@ -546,6 +548,8 @@ int CSysLinkerApp::ExitInstance()
 
 	//_CrtDumpMemoryLeaks();
 	//20240202 GBM end
+
+	CManualLinkManager::Delete();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
 
 	return CWinAppEx::ExitInstance();
 }
@@ -4123,6 +4127,11 @@ int CSysLinkerApp::CloseProject()
 	memset(&CNewInfo::Instance()->m_gi, NULL, sizeof(GT1APPENDIX_INFO));
 	memset(&CNewInfo::Instance()->m_ei, NULL, sizeof(EQUIPMENT_INFO));
 	//20240307 GBM end
+
+	//20250617 GBM start - 수동 연동데이터 일괄 편집 기능
+	//수동복사 입력회로 및 연동데이터 정보 초기화
+	CManualLinkManager::Instance()->InitManualCopyData();
+	//20250617 GBM end
 
 	return 1;
 }

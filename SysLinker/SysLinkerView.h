@@ -19,6 +19,8 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 
+#include "DlgManualCopy.h"	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
+
 #define D_MAX_DATA_PAGE		5
 
 class CRelayTableData;
@@ -132,6 +134,8 @@ public:
 	vector<int>				m_vtDeleteRelationFacp;
 	CPtrList			*	m_pRefPtrSelectedItems;
 
+	CDlgManualCopy*			m_pDlgManualCopy;
+
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	int InitSplitter();
 	int SetSplitterPos();
@@ -209,6 +213,13 @@ public:
 		, byte btLinkType, byte btLogicType, int nLogicID
 	);
 	int ChangeMultiInputIndivisualLinkOrder(CDataDevice* pDev);
+
+	//20250617 GBM start - 수동 연동데이터 일괄 편집 기능
+	afx_msg void OnBnClickedButtonCopy();
+	afx_msg void OnBnClickedButtonPaste();
+	BOOL CheckCrossCondition(CDataDevice* pDataDevice, std::vector<MANUAL_COPY_INFO>::iterator& iter);
+	void InsertManualOutputToList(BOOL bCrossCondition, CDataDevice* pDataDevice, std::vector<MANUAL_COPY_INFO>::iterator& iter);
+	//20250617 GBM end
 };
 
 #ifndef _DEBUG  // SysLinkerView.cpp의 디버그 버전

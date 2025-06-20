@@ -75,6 +75,10 @@ using namespace Gdiplus;
 #include "../include/Common_def.h"
 #include "../Common/Utils/clasimpl.h"
 
+//20250617 GBM start - 수동 연동데이터 일괄 편집 기능
+#include "ManualLinkManager.h"
+//20250617 GBM end
+
 #define MAX_QUERY_STRING_SIZE	5000		
 
 // [KHS 2020-1-16 17:28:02] 
