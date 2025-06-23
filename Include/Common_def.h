@@ -371,6 +371,7 @@ static TCHAR * g_szPatternTypeString[] = {
 	_T("출력내용"),
 	_T("설비이름"),
 	_T("기타패턴"),
+	_T("검색결과"),
 	NULL
 };
 #else

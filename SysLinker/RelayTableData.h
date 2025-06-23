@@ -369,6 +369,7 @@ public:
 	int InsertPrjBasePSDB();
 
 	int FillPatternTree(CTreeCtrl * pCtrl , CPtrList * pItemList);
+	int FillSearchResultPattern(CTreeCtrl * pCtrl, HTREEITEM hResultRoot, CPtrList * pItemList, CString strText);
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	// Converter Function

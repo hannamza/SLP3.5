@@ -615,6 +615,9 @@
 #define IDC_BUTTON_COPY                 1173
 #define IDC_BUTTON_PASTE                1174
 #define IDC_EDIT_INPUT                  1176
+#define IDC_ED_SEARCH                   1177
+#define IDC_BUTTON1                     1178
+#define IDC_BTN_SEARCH                  1178
 #define ID_WRITE_PASTEASHYPERLINK       32770
 #define ID_HOME_PROJECT_NEW             32772
 #define ID_HOME_PROJECT_OPEN            32773
@@ -699,7 +702,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        527
 #define _APS_NEXT_COMMAND_VALUE         32855
-#define _APS_NEXT_CONTROL_VALUE         1177
+#define _APS_NEXT_CONTROL_VALUE         1179
 #define _APS_NEXT_SYMED_VALUE           371
 #endif
 #endif

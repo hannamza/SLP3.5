@@ -2311,7 +2311,10 @@ void CSysLinkerApp::OnFacpLocation()
 void CSysLinkerApp::OnFacpPattern()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
-	OpenFormView(FV_MAKEPATTERN);
+	CFormPattern * pPtnView = (CFormPattern*)OpenFormView(FV_MAKEPATTERN);
+	CSysLinkerView * pView = (CSysLinkerView*)GetSysLinkerView(m_pTempleMakeLink);
+	if (pView != nullptr && pPtnView != nullptr)
+		pPtnView->RegisterPatternDropWnd(&pView->m_ctrlPatternList);
 }
 
 

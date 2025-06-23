@@ -8677,8 +8677,113 @@ int CRelayTableData::FillPatternTree(CTreeCtrl * pCtrl, CPtrList * pItemList)
 	return 1;
 }
 
+int CRelayTableData::FillSearchResultPattern(CTreeCtrl * pCtrl, HTREEITEM hResultRoot, CPtrList * pItemList, CString strText)
+{
+	int nCnt = 0;
+	POSITION pPos;
+	POSITION iPos;
+	CPtrList * pList;
+	BOOL bFind = FALSE;
+	CDataLinked * plnk;
+	CDataEmBc * pEm;
+	CDataPump * pPm;
+	CDataDevice * pDev;
+	CDataPattern *pPtn, *pTemp;
+	CString strName, strUpSearch, strUpName;
 
+	ST_TREEITEM * pItem;
+	HTREEITEM hPtn[PTN_COUNT] = { nullptr };
+	HTREEITEM hItem;
 
+	if (m_spUserAddPattern == nullptr)
+		return 0;
+	if (hResultRoot == nullptr)
+		return 0;
+
+	pPos = m_spUserAddPattern->GetHeadPosition();
+	while (pPos)
+	{
+		pPtn = m_spUserAddPattern->GetNext(pPos);
+		if (pPtn == nullptr)
+			continue;
+
+		pList = pPtn->GetPtnItemList();
+		if (pList == nullptr || pList->GetCount() <= 0)
+			continue;
+
+		bFind = FALSE;
+		iPos = pList->GetHeadPosition();
+		while (iPos)
+		{
+			plnk = (CDataLinked *)pList->GetNext(iPos);
+			if (plnk == nullptr)
+				continue;
+			switch (plnk->GetLinkType())
+			{
+			case LK_TYPE_PATTERN:
+				pTemp = GetPattern(plnk->GetTgtFacp());
+				if (pTemp == nullptr)
+					continue;
+				strName = pTemp->GetPatternName();
+				bFind = TRUE;
+				break;
+			case LK_TYPE_EMERGENCY:
+				pEm = GetEmergency(plnk->GetTgtFacp());
+				if (pEm == nullptr)
+					continue;
+				strName = pEm->GetEmName();
+				bFind = TRUE;
+				break;
+			case LK_TYPE_PUMP:
+				pPm = GetPump(plnk->GetTgtFacp(), plnk->GetTgtUnit());
+				if (pPm == nullptr)
+					continue;
+				strName = pPm->GetPumpName();
+				bFind = TRUE;
+				break;
+			case LK_TYPE_RELEAY:
+				pDev = GetDeviceByID(plnk->GetTgtFacp(), plnk->GetTgtUnit(), plnk->GetTgtChn(), plnk->GetTgtDev());
+				if (pDev == nullptr)
+					continue;
+				strName = pDev->GetOutContentsFullName();
+				bFind = TRUE;
+				break;
+			default:
+				continue;
+			}
+
+			if (bFind == FALSE)
+				continue;
+
+			strUpSearch = strText;
+			strUpName = strName;
+			strUpName.MakeUpper();
+			strUpSearch.MakeUpper();
+
+			if (strUpName.Find(strUpSearch) >= 0)
+			{
+				break;
+			}
+			else
+				bFind = FALSE;
+		}
+
+		if (bFind == FALSE)
+			continue;
+
+		pItem = new ST_TREEITEM;
+		hItem = pCtrl->InsertItem(pPtn->GetPatternName(), PTN_DEVICE, PTN_DEVICE, hResultRoot);
+		pItem->hItem = hItem;
+		pItem->hParent = hResultRoot;
+		pItem->nDataType = TIMG_DEV_PATTERN;
+		pItem->pData = pPtn;
+		pCtrl->SetItemData(hItem, (DWORD_PTR)pItem);
+		if (pItemList)
+			pItemList->AddTail(pItem);
+		nCnt++;
+	}
+	return nCnt;
+}
 
 int CRelayTableData::CvtFacpNumToID(short nNum)
 {

@@ -278,6 +278,8 @@ CFormPattern::CFormPattern()
 	m_pRefFasSysData = nullptr;
 	m_bAdd = FALSE;
 	m_nManualMakeStatus = -1;
+
+	m_hResultRoot = nullptr;
 }
 #else
 CFormPattern::CFormPattern()
@@ -297,6 +299,7 @@ CFormPattern::CFormPattern()
 
 CFormPattern::~CFormPattern()
 {
+//	RemoveSearchResult();	
 }
 
 void CFormPattern::DoDataExchange(CDataExchange* pDX)
@@ -334,6 +337,7 @@ BEGIN_MESSAGE_MAP(CFormPattern, CFormView)
 	ON_BN_CLICKED(IDC_RD_MANAUL_MAKE,&CFormPattern::OnBnClickedRdManaulMake)
 	ON_BN_CLICKED(IDC_RD_TABLE_MAKE,&CFormPattern::OnBnClickedRdTableMake)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BTN_SEARCH, &CFormPattern::OnBnClickedBtnSearch)
 END_MESSAGE_MAP()
 
 
@@ -425,6 +429,11 @@ void CFormPattern::OnInitialUpdate()
 		m_cmbPtnType.SetItemData(i ,i );
 	}
 	theApp.SetFormViewInitComplete(FV_MAKEPATTERN);
+	m_ctrlPtnTree.SetCursorResourceID(IDC_DROPADD_CURSOR);
+	m_ctrlPtnTree.SetSendEventContainer(TRUE);
+	m_ctrlPtnTree.SetAllowDragFlag(TRUE);
+
+	m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_CUSTOM], FALSE);
 }
 
 
@@ -443,6 +452,7 @@ void CFormPattern::OnSize(UINT nType, int cx, int cy)
 	rcList = rc;
 	rcList.top = 142;
 	rcList.left = rcTree.right + 5;
+	rcTree.top = 142; //-->추가부분
 	if (m_ctrlPtnTree.GetSafeHwnd())
 		m_ctrlPtnTree.MoveWindow(&rcTree);
 	
@@ -528,6 +538,8 @@ void CFormPattern::OnBnClickedBtnDel()
 	if (AfxMessageBox(L"Do you want to delete the selected pattern?", MB_YESNO) == IDNO)
 		return;
 #endif
+
+	RemoveSearchResult();
 
 	UpdateData();
 
@@ -1029,7 +1041,7 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 	m_pCurItem = pItem;
 
 	int nType , nIdx = 0 ;
-	CString str;
+	CString str, strSearch, strUpSearch, strUpName;
 	COLORREF crBk,crText;
 	CDataEmBc * pEm;
 	CDataPump * pPm;
@@ -1047,6 +1059,10 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 		m_ctrlRelayList.SetRedraw();
 		return 0;
 	}
+
+	GetDlgItem(IDC_ED_SEARCH)->GetWindowTextW(strSearch);
+	if (strSearch.GetLength() < LEN_MAX_SEARCH)
+		strSearch = L"";
 	m_nPtnCount = pList->GetCount();
 	POSITION pos;
 	pos = pList->GetHeadPosition();
@@ -1062,7 +1078,21 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			pTemp = m_pRefFasSysData->GetPattern(plnk->GetTgtFacp());
 			if (pTemp == nullptr)
 				continue;
-			m_ctrlRelayList.InsertItem(nIdx, pTemp->GetPatternName());
+			strUpSearch = strSearch;
+			strUpName = pTemp->GetPatternName();
+			strUpName.MakeUpper();
+			strUpSearch.MakeUpper();
+			if (strUpSearch.GetLength() > 0 && strUpName.Find(strUpSearch) >= 0)
+			{
+				crText = RGB(0, 0, 0);
+				crBk = RGB(0, 0, 255);
+			}
+			else
+			{
+				crText = RGB(0, 0, 0);
+				crBk = RGB(255, 255, 255);
+			}
+			m_ctrlRelayList.InsertItem(nIdx, pTemp->GetPatternName(), crText, crBk);
 			m_ctrlRelayList.SetItemText(nIdx, 1, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 2, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 3, L"");
@@ -1082,6 +1112,20 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			pEm = m_pRefFasSysData->GetEmergency(plnk->GetTgtFacp());
 			if (pEm == nullptr)
 				continue;
+			strUpSearch = strSearch;
+			strUpName = pEm->GetEmName();
+			strUpName.MakeUpper();
+			strUpSearch.MakeUpper();
+			if (strUpSearch.GetLength() > 0 && strUpName.Find(strUpSearch) >= 0)
+			{
+				crText = RGB(0, 0, 0);
+				crBk = RGB(0, 0, 255);
+			}
+			else
+			{
+				crText = RGB(0, 0, 0);
+				crBk = RGB(255, 255, 255);
+			}
 			m_ctrlRelayList.InsertItem(nIdx, pEm->GetEmName());
 			m_ctrlRelayList.SetItemText(nIdx, 1, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 2, L"");
@@ -1101,6 +1145,20 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 			pPm = m_pRefFasSysData->GetPump(plnk->GetTgtFacp(), plnk->GetTgtUnit());
 			if (pPm == nullptr)
 				continue;
+			strUpSearch = strSearch;
+			strUpName = pPm->GetPumpName();
+			strUpName.MakeUpper();
+			strUpSearch.MakeUpper();
+			if (strUpSearch.GetLength() > 0 && strUpName.Find(strUpSearch) >= 0)
+			{
+				crText = RGB(0, 0, 0);
+				crBk = RGB(0, 0, 255);
+			}
+			else
+			{
+				crText = RGB(0, 0, 0);
+				crBk = RGB(255, 255, 255);
+			}
 			m_ctrlRelayList.InsertItem(nIdx, pPm->GetPumpName());
 			m_ctrlRelayList.SetItemText(nIdx, 1, L"");
 			m_ctrlRelayList.SetItemText(nIdx, 2, L"");
@@ -1141,7 +1199,20 @@ int CFormPattern::DisplayPattern(HTREEITEM hItem)
 				crBk = RGB(255,255,255);
 				crText = RGB(0,0,0);
 			}
-			m_ctrlRelayList.InsertItem(nIdx, pDev->GetOutContentsFullName(),crText,crBk);
+			strUpSearch = strSearch;
+			strUpName = pDev->GetOutContentsFullName();
+			strUpName.MakeUpper();
+			strUpSearch.MakeUpper();
+			if (strUpSearch.GetLength() > 0 && strUpName.Find(strUpSearch) >= 0)
+			{
+				m_ctrlRelayList.InsertItem(nIdx, pDev->GetOutContentsFullName(), RGB(255, 255, 255), RGB(0, 0, 255));
+			}
+			else
+			{
+				// 				crText = RGB(0,0,0);
+				// 				crBk = RGB(255,255,255);
+				m_ctrlRelayList.InsertItem(nIdx, pDev->GetOutContentsFullName(), crText, crBk);
+			}
 			m_ctrlRelayList.SetItemText(nIdx, 1, pDev->GetInputTypeName(),crText,crBk);
 			m_ctrlRelayList.SetItemText(nIdx, 2, pDev->GetOutputTypeName(),crText,crBk);
 			m_ctrlRelayList.SetItemText(nIdx, 3, pDev->GetEquipName(),crText,crBk);
@@ -1245,6 +1316,8 @@ int CFormPattern::RemoveAllTreeData()
 		delete pItem;
 		pItem = nullptr;
 	}
+
+	RemoveSearchResult();
 	return 1;
 }
 
@@ -2295,3 +2368,86 @@ void CFormPattern::OnDestroy()
 	RemoveAllTreeData();
 }
 //20240925 GBM end
+
+
+void CFormPattern::OnBnClickedBtnSearch()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString strText, strResult;
+	int nInsertCnt;
+	GetDlgItem(IDC_ED_SEARCH)->GetWindowTextW(strText);
+	if (strText.GetLength() <= 0)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"검색어를 입력하십시오.");
+#else
+		AfxMessageBox(L"Please enter your search term.");
+#endif
+		return;
+	}
+
+	if (strText.GetLength() < LEN_MAX_SEARCH)
+	{
+		CString strError;
+#ifndef ENGLISH_MODE
+		strError.Format(L"검색어를 %d글자 이상 입력하십시오.", LEN_MAX_SEARCH);
+#else
+		strError.Format(L"Please enter a search term of at least %d characters.", LEN_MAX_SEARCH);
+#endif
+		AfxMessageBox(strError);
+		return;
+	}
+
+	if (m_hResultRoot == nullptr)
+		m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_CUSTOM], FALSE);
+	RemoveSearchResult();
+	nInsertCnt = m_pRefFasSysData->FillSearchResultPattern(&m_ctrlPtnTree, m_hResultRoot, &m_ptrResultList, strText);
+#ifndef ENGLISH_MODE
+	strResult.Format(L"검색이 완료되었습니다.\n%d개의 검색 결과가 있습니다.", nInsertCnt);
+#else
+	if(nInsertCnt > 1)
+		strResult.Format(L"Your search is complete.\nThere are %d search results.", nInsertCnt);
+	else if(nInsertCnt == 1)
+		strResult.Format(L"Your search is complete.\nThere is %d search result.", nInsertCnt);
+	else
+		strResult.Format(L"Your search is complete.\nThere is no search results.", nInsertCnt);
+#endif
+	AfxMessageBox(strResult);
+}
+
+void CFormPattern::RegisterPatternDropWnd(CListCtrl * pPtnList)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_ctrlPtnTree.AddDropWnd(pPtnList);
+	//m_ctrlPtnTree.AddDropWnd(pRlyList);
+}
+
+void CFormPattern::RemoveSearchResult()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	// 	if(m_hResultRoot == nullptr)
+	// 		m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree,m_ctrlPtnTree.GetRootItem(),g_szPatternTypeString[PTN_CUSTOM],FALSE);
+
+	if (m_hResultRoot == nullptr)
+		return;
+
+	ST_TREEITEM * pItem;
+	HTREEITEM hNext;
+	HTREEITEM hChild = m_ctrlPtnTree.GetChildItem(m_hResultRoot);
+	while (hChild != nullptr)
+	{
+		hNext = m_ctrlPtnTree.GetNextItem(hChild, TVGN_NEXT);
+		m_ctrlPtnTree.DeleteItem(hChild);
+		hChild = hNext;
+	}
+
+	while (!m_ptrResultList.IsEmpty())
+	{
+		pItem = (ST_TREEITEM *)m_ptrResultList.RemoveHead();
+		if (pItem != nullptr)
+		{
+			delete pItem;
+			pItem = nullptr;
+		}
+	}
+}

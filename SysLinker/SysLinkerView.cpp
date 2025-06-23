@@ -151,6 +151,7 @@ BEGIN_MESSAGE_MAP(CSysLinkerView, CFormView)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_TVN_DROPED_ITEM(IDC_PATTERNVIEW_TREE, OnTvnPatternDropedItem)
+	ON_TVN_DROPED_ITEM(IDC_PATTERN_TREE, OnTvnFormPatternDropedItem)
 	ON_TVN_DROPED_ITEM(IDC_EMERGENCYVIEW_TREE, OnTvnEmergencyDropedItem)
 	ON_TVN_DROPED_ITEM(IDC_PUMPVIEW_TREE, OnTvnPumpDropedItem)
 	ON_TVN_DROPED_ITEM(IDC_CONTACTFACP_TREE, OnTvnContactDropedItem)
@@ -3712,6 +3713,97 @@ CDataLinked * CSysLinkerView::InsertMultiInputLink(BOOL bFirst
 		}
 	}
 	return pLink;
+}
+
+void CSysLinkerView::OnTvnFormPatternDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	*pResult = 0;
+	LPNMTVNDROPITEMS ptc = reinterpret_cast<LPNMTVNDROPITEMS>(pNMHDR);
+	if (ptc == nullptr)
+		return;
+
+	if (m_pRefFasSysData == nullptr)
+		return;
+
+	BOOL bMulti = FALSE;
+	if (m_pRefPtrSelectedItems == nullptr)
+	{
+		if (m_pDevice == nullptr)
+			return;
+		bMulti = FALSE;
+	}
+	else
+	{
+		//////////////////////////////////////////////////////////////////////////
+		// 다중 선택
+		bMulti = TRUE;
+	}
+
+	m_ctrlPatternList.SetRedraw(FALSE);
+	COLORREF crText = RGB(255, 255, 255), crBk = RGB(255, 0, 0);
+	VT_HITEM vtItem;
+	ST_TREEITEM *pData;
+	CDataPattern * pPtn;
+	CDataLinked	* pLink;
+	CString str;
+	vtItem = ptc->vtDropItems;
+	int i = 0, nIdx = 0, nFind = -1;
+	for (; i < vtItem.size(); i++)
+	{
+		if (vtItem[i] == nullptr)
+			continue;
+		if (vtItem[i]->dwItemData == 0)
+			continue;
+		pData = (ST_TREEITEM*)vtItem[i]->dwItemData;
+		if (pData->pData == nullptr)
+			continue;
+
+		if (pData->nDataType != TTYPE_DEV_PATTERN)
+			continue;
+
+		pPtn = (CDataPattern *)pData->pData;
+		if (pPtn == nullptr)
+			continue;
+
+		nFind = FindItemLink(LK_TYPE_PATTERN, (int)pPtn->GetPatternID());
+
+		if (nFind >= 0)
+		{
+			// Yellow
+			// 			m_ctrlPatternList.InsertItem(0,pPtn->GetPatternName(),crText,crBk);
+			// 			m_ctrlPatternList.SetItemText(0,1,g_szPatternTypeString[pPtn->GetPatternType()],crText,crBk);
+			// 			m_ctrlPatternList.SetItemData(0,(DWORD_PTR)0);
+			//  
+			continue;
+		}
+
+		m_ctrlPatternList.InsertItem(0, pPtn->GetPatternName(), crText, crBk);
+		m_ctrlPatternList.SetItemText(0, 1, g_szPatternTypeString[pPtn->GetPatternType()], crText, crBk);
+
+
+		if (bMulti)
+		{
+			pLink = InsertMultiInputLink(FALSE
+				, (int)pPtn->GetPatternID(), 0, 0, 0
+				, LK_TYPE_PATTERN, LOGIC_MANUAL, 0
+			);
+		}
+		else
+		{
+			pLink = new CDataLinked;
+			pLink->SetLinkData((int)pPtn->GetPatternID(), 0, 0, 0
+				, LK_TYPE_PATTERN, LOGIC_MANUAL, 0
+				, m_pDevice->GetFacpID(), m_pDevice->GetUnitID(), m_pDevice->GetChnID(), m_pDevice->GetDeviceID()
+			);
+			m_pRefFasSysData->InsertLinkedTable(m_pDevice, pLink);
+			m_pDevice->AddLink(FALSE, pLink);
+		}
+		m_ctrlPatternList.SetItemData(0, (DWORD_PTR)pLink);
+
+		//m_ctrlPatternList.SetItemData(0, (DWORD_PTR)pLink);
+	}
+	m_ctrlPatternList.SetRedraw();
+
 }
 
 int CSysLinkerView::ChangeMultiInputIndivisualLinkOrder(CDataDevice* pDev)

@@ -4,6 +4,7 @@
 #include "../Common/XList/XListCtrl.h"
 
 #include "afxwin.h"
+#include "ViewTree.h"
 
 #include "ProgressBarDlg.h"
 
@@ -13,6 +14,7 @@ class CDataDevice;
 class CDataLinked;
 // CFormPattern 폼 뷰입니다.
 
+#define LEN_MAX_SEARCH	2
 class CFormPattern : public CFormView
 {
 	DECLARE_DYNCREATE(CFormPattern)
@@ -27,6 +29,7 @@ public:
 	ST_TREEITEM		*		m_pCurItem; //< 현재 트리에 선택된 아이템
 	ST_TREEITEM		*		m_pEditItem; //< 삭제나 편집중인 아이템
 	CPtrList				m_ptrItemList;
+	CPtrList				m_ptrResultList;
 	BOOL					m_bAdd;
 
 	int						m_nManualMakeStatus;
@@ -52,7 +55,8 @@ protected:
 public:
 	virtual void OnInitialUpdate();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	CTreeCtrl m_ctrlPtnTree;
+	//CTreeCtrl m_ctrlPtnTree;
+	CViewTree m_ctrlPtnTree;
 	CXListCtrl m_ctrlRelayList;
 	CString m_strPatternName;
 	CString m_strPatternCode;
@@ -108,6 +112,16 @@ public:
 	afx_msg void OnBnClickedRdManaulMake();
 	afx_msg void OnBnClickedRdTableMake();
 	afx_msg void OnDestroy();
+	afx_msg void OnBnClickedBtnSearch();
+
+	// [2025/6/17 9:48:02 KHS] 
+	// Drop 창 등록 --> SysLinkerView(연동데이터생성)
+	void RegisterPatternDropWnd(CListCtrl * pPtnList);
+
+	// [2025/6/17 12:57:15 KHS] 
+	// Search Result List
+	HTREEITEM m_hResultRoot;
+	void RemoveSearchResult();
 };
 
 

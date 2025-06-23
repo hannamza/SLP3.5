@@ -756,22 +756,39 @@ CImageList* CDTreeCtrl::CreateDragImageEx(HTREEITEM hCurrent)
 	RemoveCheckList(&m_vtDragCheckItem);
 	//	MakeCheckedItems(TVI_ROOT, &m_vtDragCheckItem, 0);
 
-	if (FindCheckItem(TVI_ROOT, hCurrent) == FALSE)
+	DWORD dwStyle = GetStyle();
+	if (dwStyle & TVS_CHECKBOXES)
 	{
-		// Check된 아이템을 Drag하는것이 아니면 Drag Item을 모두 삭제한다.
+		if (FindCheckItem(TVI_ROOT, hCurrent) == FALSE)
+		{
+			// Check된 아이템을 Drag하는것이 아니면 Drag Item을 모두 삭제한다.
+			pItem = new ST_HITEM;
+			memset(pItem, 0, sizeof(ST_HITEM));
+			pItem->nTreeLevel = 1;
+			pItem->hItem = hCurrent;
+			pItem->tsCheck = GetCheck(hCurrent);
+			pItem->dwItemData = GetItemData(hCurrent);
+			wcscpy_s(pItem->szCaption, sizeof(pItem->szCaption) / sizeof(TCHAR), GetItemText(hCurrent));
+			m_vtDragCheckItem.push_back(pItem);
+		}
+		else
+		{
+			MakeCheckedItems(TVI_ROOT, &m_vtDragCheckItem, 0);
+		}
+	}
+	else
+	{
 		pItem = new ST_HITEM;
 		memset(pItem, 0, sizeof(ST_HITEM));
 		pItem->nTreeLevel = 1;
 		pItem->hItem = hCurrent;
-		pItem->tsCheck = GetCheck(hCurrent);
+		pItem->tsCheck = TVCS_NONE;
 		pItem->dwItemData = GetItemData(hCurrent);
 		wcscpy_s(pItem->szCaption, sizeof(pItem->szCaption) / sizeof(TCHAR), GetItemText(hCurrent));
 		m_vtDragCheckItem.push_back(pItem);
 	}
-	else
-	{
-		MakeCheckedItems(TVI_ROOT, &m_vtDragCheckItem, 0);
-	}
+
+	
 	nSelected = m_vtDragCheckItem.size();
 	if (nSelected <= 0)
 	{

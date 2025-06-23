@@ -149,6 +149,10 @@ public:
 	afx_msg void OnTvnPSwitchDropedItem(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnOutputDropedItem(NMHDR *pNMHDR, LRESULT *pResult);
 
+	// [2025/6/17 10:15:33 KHS] 
+	// Pattern Form¿¡¼­ DropµÈ
+	afx_msg void OnTvnFormPatternDropedItem(NMHDR *pNMHDR, LRESULT *pResult);
+
 	int DisplayLinkData(CDataDevice* pDev);
 	void SetSelectTreeItem(CPtrList * pPtrSelectItems, ST_TREEITEM* pItem);
 	afx_msg void OnPtnlkMenuDelptn();
