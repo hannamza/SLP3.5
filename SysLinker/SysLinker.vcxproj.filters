@@ -525,11 +525,11 @@
     <ClInclude Include="ProgressBarDlg.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ManualLinkManager.h">
-      <Filter>SLP3.5Func</Filter>
-    </ClInclude>
     <ClInclude Include="DlgManualCopy.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\ManualLinkManager.h">
+      <Filter>SLP3.5Func</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -998,11 +998,11 @@
     <ClCompile Include="ProgressBarDlg.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ManualLinkManager.cpp">
-      <Filter>SLP3.5Func</Filter>
-    </ClCompile>
     <ClCompile Include="DlgManualCopy.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\ManualLinkManager.cpp">
+      <Filter>SLP3.5Func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1019,6 +1019,7 @@
     <ClInclude Include="..\SLP3.5Func\CommonFunc.h" />
     <ClInclude Include="..\SLP3.5Func\Defines.h" />
     <ClInclude Include="..\SLP3.5Func\Log.h" />
+    <ClInclude Include="..\SLP3.5Func\ManualLinkManager.h" />
     <ClInclude Include="..\SLP3.5Func\NewDBManager.h" />
     <ClInclude Include="..\SLP3.5Func\NewExcelManager.h" />
     <ClInclude Include="..\SLP3.5Func\NewInfo.h" />
@@ -1130,7 +1131,6 @@
     <ClInclude Include="ManagerLocation.h" />
     <ClInclude Include="ManagerPS.h" />
     <ClInclude Include="ManagerPump.h" />
-    <ClInclude Include="ManualLinkManager.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="ProgressBarDlg.h" />
     <ClInclude Include="RelayTableData.h" />
@@ -1312,6 +1312,7 @@
     </ClCompile>
     <ClCompile Include="..\SLP3.5Func\CommonFunc.cpp" />
     <ClCompile Include="..\SLP3.5Func\Log.cpp" />
+    <ClCompile Include="..\SLP3.5Func\ManualLinkManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewDBManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewExcelManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewInfo.cpp" />
@@ -1421,7 +1422,6 @@
     <ClCompile Include="ManagerLocation.cpp" />
     <ClCompile Include="ManagerPS.cpp" />
     <ClCompile Include="ManagerPump.cpp" />
-    <ClCompile Include="ManualLinkManager.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="ProgressBarDlg.cpp" />
     <ClCompile Include="RelayTableData.cpp" />
