@@ -364,8 +364,8 @@ MANUAL_COPY_INFO CManualLinkManager::GetPumpInfo(CDataLinked* pDataLinked)
 		if (pDataPump == nullptr)
 			continue;
 
-		// 펌프 ID가 매칭되면 펌프 이름을 얻는다.
-		if (pDataLinked->GetTgtUnit() == pDataPump->GetPumpID())
+		// 수신기 ID와 펌프 ID가 매칭되면 펌프 이름을 얻는다.
+		if ((pDataLinked->GetTgtFacp() == pDataPump->GetFacpID()) && (pDataLinked->GetTgtUnit() == pDataPump->GetPumpID()))
 		{
 			mci.strFullName = pDataPump->GetPumpName();
 			mci.strContactType = g_szLinkTypeString[LK_TYPE_PUMP];
@@ -416,8 +416,8 @@ MANUAL_COPY_INFO CManualLinkManager::GetFacpContactInfo(CDataLinked* pDataLinked
 		if(pDataFacpRelay == nullptr)
 			continue;
 
-		// 수신기 접점 ID가 매칭되면 수신기 접점 이름을 얻는다.
-		if (pDataLinked->GetTgtUnit() == pDataFacpRelay->GetRelayID())
+		// 수신기 ID와 접점 ID가 매칭되면 수신기 접점 이름을 얻는다.
+		if ((pDataLinked->GetTgtFacp() == pDataFacpRelay->GetFacpID()) && (pDataLinked->GetTgtUnit() == pDataFacpRelay->GetRelayID()))
 		{
 			mci.strFullName = pDataFacpRelay->GetFRelayName();
 			mci.strContactType = g_szLinkTypeString[LK_TYPE_FACP_RELAY];
