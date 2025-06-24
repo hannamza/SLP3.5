@@ -387,7 +387,7 @@ MANUAL_COPY_INFO CManualLinkManager::GetFacpContactInfo(CDataLinked* pDataLinked
 	mci.nSrcChn = pDataLinked->m_nSrcChn;
 	mci.nSrcCircuit = pDataLinked->m_nSrcDev;
 	mci.nTgtFacp = pDataLinked->m_nTgtFacp;
-	mci.nTgtUnit = pDataLinked->m_nTgtUnit;		// 압력스위치 ID
+	mci.nTgtUnit = pDataLinked->m_nTgtUnit;		// 수신기 접점 ID
 	mci.nTgtChn = 0;
 	mci.nTgtCircuit = 0;
 	mci.nLogicID = 0;
