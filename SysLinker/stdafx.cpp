@@ -921,6 +921,11 @@ CString GF_GetSafeArrayValue(COleSafeArray * pSa,int nRow,int nCol)
 		strRet = COleCurrency(val).Format();
 		break;
 	}
+
+	// 공란이 1개 이상 들어갔거나 문자열 중간의 공란은 제외하고 양 옆에 공란이 있을 경우 제거
+	strRet.TrimLeft();
+	strRet.TrimRight();
+
 	return strRet;
 
 }

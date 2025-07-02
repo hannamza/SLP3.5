@@ -1333,7 +1333,6 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 					pEqInput = FindEquipData(strInput, ET_INPUTTYPE);
 					if (strInput != L"")
 					{
-						strInput.Remove(' ');
 						if (pEqInput == nullptr)
 							pEqInput = AddNewEquip(strInput, ET_INPUTTYPE);
 						if(pEqInput != nullptr)
@@ -2295,6 +2294,11 @@ int CRelayTableData::FindEquipID(CString strEqName, int nType)
 	CDataEquip * pEquip;
 	POSITION pos;
 	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
+
+	//공란일 경우 리턴
+	if (strEqName.GetLength() == 0)
+		return -1;
+
 	switch (nType)
 	{
 	case ET_INPUTTYPE:
@@ -2342,9 +2346,15 @@ CDataEquip * CRelayTableData::FindEquipData(CString strEqName, int nType)
 	CDataEquip * pEquip;
 	CString str1, str2;
 	POSITION pos;
+
 	str1 = strEqName;
 	str1.Remove(' ');
 	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
+
+	//공란일 경우 리턴
+	if (strEqName.GetLength() == 0)
+		return nullptr;
+
 	switch (nType)
 	{
 	case ET_INPUTTYPE:
@@ -2393,6 +2403,11 @@ CDataPattern * CRelayTableData::FindPatternData(CString strPattern)
 {
 	CDataPattern * pPtn;
 	POSITION pos;
+
+	//공란일 경우 리턴
+	if (strPattern.GetLength() == 0)
+		return nullptr;
+
 	if (m_spUserAddPattern)
 		return nullptr;
 	pos = m_spUserAddPattern->GetHeadPosition();
