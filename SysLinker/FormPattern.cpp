@@ -423,7 +423,9 @@ void CFormPattern::OnInitialUpdate()
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	int i = 0; 
-	for (i = 0; i < PTN_COUNT; i++)
+	// [2025/7/9 16:39:28 KHS] 
+	//  PTN_SEARCH Á¦¿Ü
+	for (i = 0; i < PTN_COUNT - 1; i++)
 	{
 		m_cmbPtnType.InsertString(i,g_szPatternTypeString[i]);
 		m_cmbPtnType.SetItemData(i ,i );
@@ -433,7 +435,7 @@ void CFormPattern::OnInitialUpdate()
 	m_ctrlPtnTree.SetSendEventContainer(TRUE);
 	m_ctrlPtnTree.SetAllowDragFlag(TRUE);
 
-	m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_CUSTOM], FALSE);
+	m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_SEARCH], FALSE);
 }
 
 

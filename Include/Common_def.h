@@ -342,8 +342,9 @@ enum
 	PTN_EQUIP_OUT = 7,
 	PTN_CONTENTS = 8,
 	PTN_EQUIPNAME = 9,
-	PTN_DEVICE=10,
-	PTN_CUSTOM = 11,
+	PTN_DEVICE=10,		// 기타 패턴
+	PTN_CUSTOM = 11,	// 사용자 패턴
+	PTN_SEARCH = 12,	// 검색결과
 	PTN_COUNT,
 };
 
@@ -371,6 +372,7 @@ static TCHAR * g_szPatternTypeString[] = {
 	_T("출력내용"),
 	_T("설비이름"),
 	_T("기타패턴"),
+	_T("사용자패턴"),
 	_T("검색결과"),
 	NULL
 };
