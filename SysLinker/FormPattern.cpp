@@ -2414,6 +2414,11 @@ void CFormPattern::OnBnClickedBtnSearch()
 	else
 		strResult.Format(L"Your search is complete.\nThere is no search results.", nInsertCnt);
 #endif
+	if (nInsertCnt > 0)
+	{
+		m_ctrlPtnTree.Expand(m_hResultRoot, TVE_EXPAND);
+	}
+
 	AfxMessageBox(strResult);
 }
 
