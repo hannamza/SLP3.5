@@ -14810,7 +14810,9 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			nUNum = pDev->GetUnitNum();
 			nLastUNum = nUNum;
 			xls.AddWorkSheet(str);
-			xls.OpenData((256 * 4) * 2  + 1 + 1, D_MAX_LINKITEM_COUNT + 5 + 1 + 1);;
+			//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
+			xls.OpenData((256 * 4) * 2  + 1 + 1, D_MAX_LINKITEM_COUNT + 5 + 1 + 1 + 2);
+			//20250723 GBM end
 			//xls.SetSheetName(nSheetIdx, str);
 			nUpCol = nDownCol = 6;
 			nRow = 1;
@@ -14823,7 +14825,10 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			nSheetIdx++;
 			xls.CloseData(1,1);
 			xls.AddWorkSheet(str);
-			xls.OpenData((256 * 4) * 2 + 1 + 1, D_MAX_LINKITEM_COUNT + 5 + 1 + 1);
+			//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
+			xls.OpenData((256 * 4) * 2 + 1 + 1, D_MAX_LINKITEM_COUNT + 5 + 1 + 1 + 2);
+			//20250723 GBM end
+
 			//xls.SetSheetName(nSheetIdx, str);
 
 			// Unit Header 생성
@@ -14846,6 +14851,19 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 				str.Format(L"%d",nn + 1);
 				xls.SetData(1, 6 + nn, str);
 			}
+
+			//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
+#ifndef ENGLISH_MODE
+			xls.SetData(1, 26, L"LCD 표시 이름");	// 기존 누락 내용
+			xls.SetData(1, 27, L"설비명");
+			xls.SetData(1, 28, L"출력내용");
+#else
+			xls.SetData(1, 26, L"LCD DISPLAY NAME");
+			xls.SetData(1, 27, L"EQUIPMENT NAME");
+			xls.SetData(1, 28, L"OUTPUT CONTENT");
+#endif
+			//20250723 GBM end
+
 			nUpCol = nDownCol = 6;
 			nRow = 1;
 		}
@@ -14874,6 +14892,19 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 #endif
 
 		xls.SetData(nRow * 2, 26, pDev->GetInputFullName());
+
+		//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
+		CDataEquip* pEquipmentName = nullptr;
+		CDataEquip* pOutputContent = nullptr;
+
+		pEquipmentName = pDev->GetEqName();
+		if (pEquipmentName)
+			xls.SetData(nRow * 2, 27, pEquipmentName->GetEquipName());
+
+		pOutputContent = pDev->GetEqOutput();
+		if (pOutputContent)
+			xls.SetData(nRow * 2, 28, pOutputContent->GetEquipName());
+		//20250723 GBM end
 
 		nUpCol = nDownCol = 6;
 		pLinkList = pDev->GetLinkedList();
