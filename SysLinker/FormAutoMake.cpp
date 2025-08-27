@@ -111,10 +111,6 @@ DWORD CFormAutoMake::Thread_MakeProc(LPVOID lpData)
 
 	try
 	{
-#ifdef SLP4_MODE
-		SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
-#endif
-
 		//20240822 GBM start - 시간 측정
 		LARGE_INTEGER startTime, endTime;
 		QueryPerformanceCounter(&startTime);
@@ -128,10 +124,6 @@ DWORD CFormAutoMake::Thread_MakeProc(LPVOID lpData)
 		duringTime = CCommonFunc::GetPreciseDeltaTime(startTime, endTime);
 		Log::Trace("연동데이터 자동 생성에 걸린 시간 : %f", duringTime);
 		//20240822 GBM end
-
-#ifdef SLP4_MODE
-		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
-#endif
 	}
 	catch (...)
 	{
@@ -160,10 +152,6 @@ DWORD CFormAutoMake::Thread_SaveProc(LPVOID lpData)
 
 	try
 	{
-#ifdef SLP4_MODE
-		SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
-#endif
-
 		//20240822 GBM start - 시간 측정
 		LARGE_INTEGER startTime, endTime;
 		QueryPerformanceCounter(&startTime);
@@ -177,10 +165,6 @@ DWORD CFormAutoMake::Thread_SaveProc(LPVOID lpData)
 		duringTime = CCommonFunc::GetPreciseDeltaTime(startTime, endTime);
 		Log::Trace("자동 생성된 연동데이터 적용에 걸린 시간 : %f", duringTime);
 		//20240822 GBM end
-
-#ifdef SLP4_MODE
-		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);		//20240821 GBM - 프로세스 우선순위 변경
-#endif
 	}
 	catch(...)
 	{
@@ -348,9 +332,18 @@ int CFormAutoMake::AutoMakeStart()
 		return 0;
 	}
 
+	//20250827 GBM start - 기존에 프로세스 우선순위를 높이던 방식에서 스레드 우선순위를 높이는 방식으로 변경
+#ifdef SLP4_MODE
+	// Thread Start
+	m_pMakeThread = AfxBeginThread((AFX_THREADPROC)Thread_MakeProc,
+		(LPVOID)this, THREAD_PRIORITY_HIGHEST);							
+#else
 	// Thread Start
 	m_pMakeThread = AfxBeginThread((AFX_THREADPROC)Thread_MakeProc,
 		(LPVOID)this);
+#endif
+	//20250827 GBM end
+
 	return 1; 
 }
 
@@ -2844,8 +2837,16 @@ void CFormAutoMake::OnBnClickedBtnSave()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 // 	if (SaveAutoLink() > 0)
 // 		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다." , MB_OK|MB_ICONINFORMATION);
+
+	//20250827 GBM start - 기존에 프로세스 우선순위를 높이던 방식에서 스레드 우선순위를 높이는 방식으로 변경
+#ifdef SLP4_MODE
+	m_pMakeThread = AfxBeginThread((AFX_THREADPROC)Thread_SaveProc,
+		(LPVOID)this, THREAD_PRIORITY_HIGHEST);
+#else
 	m_pMakeThread = AfxBeginThread((AFX_THREADPROC)Thread_SaveProc,
 		(LPVOID)this);
+#endif
+	//20250827 GBM end
 }
 
 

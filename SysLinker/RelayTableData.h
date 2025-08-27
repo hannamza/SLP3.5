@@ -639,6 +639,13 @@ public:
 
 	int MakeConstructorTable(CString strPath);
 
+	//20250822 GBM start - 위에 MakeConstructorTable에서 만들어지는 유닛, 패턴 정보 이외의 정보 추가 (비상방송, 펌프, 압력스위치, 수신기접점)
+	void MakeEBSheet(CExcelWrapper* xls);
+	void MakePumpSheet(CExcelWrapper* xls);
+	void MakePSSheet(CExcelWrapper* xls);
+	void MakeFacpContactSheet(CExcelWrapper* xls);
+	//20250822 GBM end
+
 	/*!
 	 * @fn         MakeLinkData
 	 * @version    1.0

@@ -54,6 +54,9 @@
 // 설비 정의 최대 개수는 200개지만 ROM 파일에서는 펌프 종류를 17개만 사용하므로 정의를 추가
 #define MAX_ROM_PUMP_EQUIP_COUNT	17
 
+// 로직 편집 완료 메세지 정의 : 현재 WM_USER + 12000 ~ 대략 WM_USER + 12100, WM_USER + 21000 프로그램에서 사용 중
+#define LOGIC_EDIT_COMPLETE_MESSAGE	WM_USER + 30000
+
 // 프로젝트 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_PROJECT_INFO	_T("project")
 
@@ -72,6 +75,9 @@
 // 설비 회로 정의 (입력타입, 설비명, 출력타입, 출력회로) 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_EQUIPMENT_INFO	_T("equipment")
 
+// 도움말 리스트 파일 엑셀 시트 이름
+#define EXCEL_SHEET_HELP_MESSAGE		_T("MSG")
+
 // 관리자 모드 (ROM 인증 모드) Password
 #define ADMIN_MODE_PASSWORD	_T("gfsadmin1234!")
 
@@ -80,6 +86,16 @@
 #define EQUIPMENT_INFO_EXCEL_FILE_NAME	_T("equipment.xlsx")
 #else
 #define EQUIPMENT_INFO_EXCEL_FILE_NAME	_T("equipment_en.xlsx")
+#endif
+
+// 도움말 리스트 파일 폴더
+#define HELP_MESSAGE_FOLDER		_T("MSG")
+
+// 도움말 리스트 파일 이름
+#ifndef ENGLISH_MODE			
+#define HELP_MESSAGE_EXCEL_FILE_NAME	_T("HelpMessageList.xlsx")
+#else
+#define HELP_MESSAGE_EXCEL_FILE_NAME	_T("HelpMessageList_en.xlsx")
 #endif
 
 // 수신기 타입
@@ -179,7 +195,17 @@ namespace EQUIPMENT_DEFINITION {
 	}OUTPUT_TYPES;
 }
 
-
+// 도움말 기능 동작설비 종류
+enum 
+{
+	ALERT_TYPE,
+	DAMPER_TYPE,
+	DOOR_TYPE,
+	WINDOW_TYPE,
+	FAN_TYPE,
+	ETC,
+	EXCLUSIVE
+}HELP_MESSAGE_OUTPUT_CONTENT_TYPE;
 
 // 엑셀 ROW, Column Define
 
@@ -349,6 +375,37 @@ namespace EXCEL_ENUM_NEW_FACP_UNIT_TYPE {
 		COLUMN_FACP_TYPE,
 		COLUMN_UNIT_NUMBER,
 		COLUMN_UNIT_TYPE
+	}COLUMNS;
+}
+
+// 도움말 리스트 Excel Cell 위치 정의
+namespace EXCEL_ENUM_HELP_MESSAGE {
+	//Row : 설비명 별 동작설비 종류가 정해진 Row 개수로 이어지므로 여기서는 동작설비 종류를 Row로 정의
+	enum {
+		ROW_HEADER = 1,
+		ROW_LIST_START
+	}ROWS;
+
+	enum {
+		ROW_ALERT_TYPE,
+		ROW_DAMPER_TYPE,
+		ROW_DOOR_TYPE,
+		ROW_WINDOW_TYPE,
+		ROW_FAN_TYPE,
+		ROW_ETC,
+		ROW_EXCLUSIVE,
+		ROW_TYPE_TOTAL_COUNT
+	}ROW_TYPES;
+
+	//Column
+	enum 
+	{
+		COLUMN_NUMBER = 1,
+		COLUMN_EQUIPMENT_NAME,
+		COLUMN_TYPE,
+		COLUMN_ITEM1,
+		COLUMN_ITEM20 = 23,
+		COLUMN_TOTAL_COUNT
 	}COLUMNS;
 }
 
@@ -546,5 +603,17 @@ typedef struct
 	CString strOutputKind;
 	CString strContactType;	// [접점 종류] 표시를 위한 변수
 }MANUAL_COPY_INFO;
+
+// 도움말 설비별 출력 내용 구조체
+typedef struct 
+{
+	std::vector<CString> alertTypeVec;
+	std::vector<CString> damperTypeVec;
+	std::vector<CString> doorTypeVec;
+	std::vector<CString> windowTypeVec;
+	std::vector<CString> fanTypeVec;
+	std::vector<CString> etcVec;
+	std::vector<CString> exclusiveVec;
+}HELP_MESSAGE_OUTPUT_CONTENT_INFO;
 
 #pragma pack(pop)

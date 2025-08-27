@@ -12,6 +12,7 @@
 #define ON_TVN_CHECK_PROC_BEGIN(nID,memberFxn) ON_NOTIFY(TVN_CHECK_PROC_BEGIN,(nID),(memberFxn))
 #define ON_TVN_CHECK_PROC_END(nID,memberFxn) ON_NOTIFY(TVN_CHECK_PROC_END,(nID),(memberFxn))
 
+class CDataSystem;
 
 enum
 {
@@ -101,7 +102,10 @@ public:
 	CDTreeCtrl();
 	virtual ~CDTreeCtrl();
 
+	void SetEnableToolTip(BOOL bEnable);	//20250825 GBM - ÅøÆÁ ±â´É
+
 protected:
+	BOOL m_bTooltipEnabled;					//20250825 GBM - ÅøÆÁ ±â´É
 
 	//////////////////////////////////////////////////////////////////////////
 	/// Drag & Drop
@@ -123,6 +127,11 @@ private:
 	CBitmap    m_bmCheck;
 	CImageList m_CheckImageList;
 	HTREEITEM  m_hTriggerItem;
+
+	//20250825 GBM start - ÅøÆÁ ±â´É
+	CToolTipCtrl m_ToolTip;
+	CString m_LastTipText;
+	//20250825 GBM end
 
 	// [KHS 2020-9-3 10:11:29] 
 	// Event Send 
@@ -168,6 +177,8 @@ public:
 	void SetRootDrag(BOOL bDrag) { m_bAllowRootDrag = bDrag; }
 	int RemoveCheckList(VT_HITEM * pCheckList);
 	BOOL FindCheckItem(HTREEITEM hItem, HTREEITEM hCurrent);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
 

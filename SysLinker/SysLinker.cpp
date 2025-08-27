@@ -219,6 +219,7 @@ UINT ThreadOpenProjectDatabase(LPVOID pParam)
 
 	theApp.m_pProgressBarDlg->PostMessage(WM_CLOSE);
 	SetEvent(theApp.m_hThreadHandle);
+
 	return 0;
 }
 
@@ -512,6 +513,7 @@ BOOL CSysLinkerApp::InitInstance()
 	Log::Setup(strProgramName.Left(nProgramNameLen - 4));
 	CNewDBManager::New();
 	CNewExcelManager::New();
+	CHelpMsgManager::New();
 	//20240202 GBM end
 
 	CManualLinkManager::New();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
@@ -544,6 +546,7 @@ int CSysLinkerApp::ExitInstance()
 	CNewInfo::Delete();
 	CNewDBManager::Delete();
 	CNewExcelManager::Delete();
+	CHelpMsgManager::Delete();
 	Log::Cleanup();
 
 	//_CrtDumpMemoryLeaks();
@@ -1822,6 +1825,11 @@ void CSysLinkerApp::OnHomeProjectNew()
 
 #endif
 	//20240523 GBM end
+
+	//20250804 GBM start - 도움말 파일 로드 : 프로그램 실행 시 최초 한번 실행
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	pFrame->GetHelpMessage();
+	//20250804 GBM end
 }
 
 void CSysLinkerApp::OnHomeProjectOpen()
@@ -1979,6 +1987,11 @@ void CSysLinkerApp::OnHomeProjectOpen()
 		dlg.m_pRefFasSysData = m_pFasSysData;
 		dlg.DoModal();
 	}
+
+	//20250804 GBM start - 도움말 파일 로드 : 프로그램 실행 시 최초 한번 실행
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	pFrame->GetHelpMessage();
+	//20250804 GBM end
 }
 
 void CSysLinkerApp::OnHomeProjectSave()
@@ -2194,6 +2207,37 @@ void CSysLinkerApp::OnBasicSetUsergroup()
 void CSysLinkerApp::OnBasicSetLogicEdit()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+
+	//20250805 GBM start - test
+#if 0
+	CString strPath = CCommonFunc::GetCurrentPath();
+	//CString strExe = _T("LinkedDataView.exe");
+	CString strExe = _T("CommandLineTest.exe");
+	strPath += _T("\\") + strExe;
+	HANDLE hHandle = nullptr;
+	BOOL bFind = FALSE;
+	//bFind = CCommonFunc::FindProcess(strExe, hHandle);	// FindWindow보다 확실한 방법이지만 실행 중인 전체 프로세스 스냅샷을 찍다보니 시간이 걸림
+	HWND hwnd = FindWindow(NULL, L"통신 테스트");		//캡션명으로 해야 할 듯
+	if (hwnd != nullptr)
+		bFind = TRUE;
+	if (!bFind)
+	{
+		// 실행 중이 아니라면 실행
+		//ShellExecuteW(NULL, L"open", strPath, NULL, NULL, SW_SHOWNORMAL);
+		CString strProjectName;
+		strProjectName = m_pFasSysData->GetPrjName();
+		CString strCaption;
+		m_pMainWnd->GetWindowTextW(strCaption);
+		strCaption = _T("\"") + strCaption + _T("\"");
+		ShellExecuteW(NULL, L"open", strPath, strCaption, NULL, SW_SHOWNORMAL);
+	}
+	else
+	{
+		AfxMessageBox(L"프로그램이 이미 실행 중입니다.");
+	}
+#endif
+	//20250805 GBM end
+
 	OpenFormView(FV_LOGICEDIT);
 
 }

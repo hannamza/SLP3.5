@@ -14660,7 +14660,11 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			if (nLastFacp >= 0)
 			{
 				xls.CloseData(1,1);
-				strFile.Format(L"%s\\%s_%02d.xlsx", strPath, m_strPrjName, nLastFacp);
+#ifndef ENGLISH_MODE
+				strFile.Format(L"%s\\(연동표)%s_%02d.xlsx", strPath, m_strPrjName, nLastFacp);
+#else
+				strFile.Format(L"%s\\(Linked Data)%s_%02d.xlsx", strPath, m_strPrjName, nLastFacp);
+#endif
 				xls.SaveCopyAs(strFile);
 				xls.Close();
 			}
@@ -14725,7 +14729,11 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 					if(nDownCol > D_MAX_PTNITEM_COUNT + 4)
 					{
 						xls.CloseData(1,1);
-						strFile.Format(L"%s\\%s_%02d.xlsx",strPath,m_strPrjName,nLastFacp);
+#ifndef ENGLISH_MODE
+						strFile.Format(L"%s\\(연동표)%s_%02d.xlsx",strPath,m_strPrjName,nLastFacp);
+#else
+						strFile.Format(L"%s\\(Linked Data)%s_%02d.xlsx", strPath, m_strPrjName, nLastFacp);
+#endif
 						xls.SaveCopyAs(strFile);
 						xls.Close();
 #ifndef ENGLISH_MODE
@@ -14805,6 +14813,14 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			}
 			xls.CloseData(1,1);
 			nSheetIdx = 1;
+
+			//20250821 GBM start - 비상방송 / 펌프 / 압력스위치 / 접점 데이터 추가
+			MakeEBSheet(&xls);
+			MakePumpSheet(&xls);
+			MakePSSheet(&xls);
+			MakeFacpContactSheet(&xls);
+			//20250821 GBM end
+
 			// 유닛 Sheet 설정
 			str.Format(L"%d", pDev->GetUnitNum());
 			nUNum = pDev->GetUnitNum();
@@ -14901,7 +14917,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 		if (pEquipmentName)
 			xls.SetData(nRow * 2, 27, pEquipmentName->GetEquipName());
 
-		pOutputContent = pDev->GetEqOutput();
+		pOutputContent = pDev->GetEqOutContents();
 		if (pOutputContent)
 			xls.SetData(nRow * 2, 28, pOutputContent->GetEquipName());
 		//20250723 GBM end
@@ -14981,7 +14997,11 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 		nRow++;
 	}
 	xls.CloseData(1,1);
-	strFile.Format(L"%s\\%s_%02d.xlsx", strPath, m_strPrjName, nFacp);
+#ifndef ENGLISH_MODE
+	strFile.Format(L"%s\\(연동표)%s_%02d.xlsx", strPath, m_strPrjName, nFacp);
+#else
+	strFile.Format(L"%s\\(Linked Data)%s_%02d.xlsx", strPath, m_strPrjName, nFacp);
+#endif
 	xls.SaveCopyAs(strFile);
 	xls.Close();
 	return 1;
@@ -20507,4 +20527,427 @@ void CRelayTableData::GetFacpAndUnitType()
 			break;
 		}
 	}
+}
+
+void CRelayTableData::MakeEBSheet(CExcelWrapper* xls)
+{
+	CString str;
+
+	// 비상방송
+	str.Format(L"EB");
+	xls->AddWorkSheet(str);
+	xls->OpenData(D_MAX_EMERGENCY_COUNT + 3, 3);
+
+	// 헤더
+#ifndef ENGLISH_MODE
+	xls->SetData(0, 0, L"비상방송 통신데이터");
+	xls->SetData(1, 0, L"번호");
+	xls->SetData(1, 1, L"비고");
+	xls->SetData(1, 2, L"통신내용");
+#else
+	xls->SetData(0, 0, L"Emergency broadcast communication data");
+	xls->SetData(1, 0, L"Number");
+	xls->SetData(1, 1, L"Remarks");
+	xls->SetData(1, 2, L"Communication content");
+#endif
+
+	int nEbRow = 2;
+	CDataEmBc* pDeb;
+	POSITION pos;
+	pos = m_spEmergencyManager->GetHeadPosition();
+	while (pos)
+	{
+		pDeb = (CDataEmBc*)m_spEmergencyManager->GetNext(pos);
+		CString strTemp;
+
+		// 번호
+		strTemp.Format(_T("%d"), pDeb->GetEmID());
+		xls->SetData(nEbRow, 0, strTemp);
+
+		// 이름 (비고)
+		strTemp = pDeb->GetEmName();
+		xls->SetData(nEbRow, 1, strTemp);
+
+		// 주소 (통신내용)
+		strTemp = pDeb->GetEmAddr();
+		strTemp.Replace(_T("-"), _T("_"));		// 엑셀에서 날짜로 인식하는 오류때문에 여기서 언더바로 대체하고 연동데이터 VIEW 프로그램에서 다시 대쉬로 대체할 예정
+		xls->SetData(nEbRow, 2, strTemp);
+
+		nEbRow++;
+	}
+	xls->CloseData(1, 1);
+}
+
+void CRelayTableData::MakePumpSheet(CExcelWrapper* xls)
+{
+	CString str;
+	POSITION pos;
+	POSITION posItem;
+	CPtrList* pLinkList;
+	CDataLinked* pLnk;
+	CDataDevice* pItem;
+	CDataPattern* pTempPtn;
+	CDataEmBc* pTempEm;
+	CDataPump* pTempPump;
+	CDataFacpRelay* pTempContact;
+
+	// 펌프
+	str.Format(L"Pump");
+	xls->AddWorkSheet(str);
+	xls->OpenData(D_MAX_PUMP_COUNT * 2 + 1, 6 + 20);	// Row : 80 (최대 펌프 개수) * 2 (접점 제어 / 중계기 제어) + 1 (헤더), Column : 6 (수신기 번호 ~ 제어) + 20 (출력 최대 개수)
+
+	// 헤더
+#ifndef ENGLISH_MODE
+	xls->SetData(0, 0, L"수신기 번호");
+	xls->SetData(0, 1, L"펌프 번호");
+	xls->SetData(0, 2, L"펌프 타입");
+	xls->SetData(0, 3, L"펌프 이름");
+	xls->SetData(0, 4, L"LCD 이름");
+	xls->SetData(0, 5, L"제어");
+#else
+	xls->SetData(0, 0, L"FACP number");
+	xls->SetData(0, 1, L"Pump number");
+	xls->SetData(0, 2, L"Pump type");
+	xls->SetData(0, 3, L"Pump name");
+	xls->SetData(0, 4, L"LCD name");
+	xls->SetData(0, 5, L"Control");
+#endif
+	for (int nOutputNum = 1; nOutputNum <= D_MAX_LINKITEM_COUNT; nOutputNum++)
+	{
+		CString strNumber = _T("");
+		strNumber.Format(_T("%d"), nOutputNum);
+		xls->SetData(0, nOutputNum + 5, strNumber);
+	}
+
+	int nPumpRow = 1;
+	CDataPump* pDp;
+	pos = m_spPump->GetHeadPosition();
+	while (pos)
+	{
+		pDp = (CDataPump*)m_spPump->GetNext(pos);
+		CString strTemp;
+
+		// 수신기 번호
+		strTemp.Format(_T("%d"), pDp->GetFacpID() - 1);		// 수신기 ID는 1베이스, 수신기 번호는 0베이스
+		xls->SetData(nPumpRow, 0, strTemp);
+
+		// 펌프 번호
+		strTemp.Format(_T("%d"), pDp->GetPumpID());
+		xls->SetData(nPumpRow, 1, strTemp);
+
+		// 펌프 타입
+		CDataEquip* pDe = m_spRefPumpEquipManager->GetEquip(pDp->GetPumpType());
+		strTemp = pDe->GetEquipName();
+		xls->SetData(nPumpRow, 2, strTemp);
+
+		// 펌프 이름
+		strTemp = pDp->GetPumpName();
+		xls->SetData(nPumpRow, 3, strTemp);
+
+		// LCD 이름
+		strTemp = pDp->GetPumpLcd();
+		xls->SetData(nPumpRow, 4, strTemp);
+
+		// 제어
+#ifndef ENGLISH_MODE
+		strTemp = _T("접점 제어");
+		xls->SetData(nPumpRow, 5, strTemp);
+		strTemp = _T("중계기 제어");
+		xls->SetData(nPumpRow + 1, 5, strTemp);
+#else
+		strTemp = _T("Contact control");
+		xls->SetData(nPumpRow, 5, strTemp);
+		strTemp = _T("Repeater control");
+		xls->SetData(nPumpRow + 1, 5, strTemp);
+#endif
+
+		// 출력
+		int nContCtrlCol = 6;
+		int nRepeaterCtrlCol = 6;
+		pLinkList = pDp->GetLinkList();
+		posItem = pLinkList->GetHeadPosition();
+		while (posItem)
+		{
+			pLnk = (CDataLinked*)pLinkList->GetNext(posItem);
+			if (pLnk == nullptr)
+				continue;
+
+			switch (pLnk->GetLinkType())
+			{
+			case LK_TYPE_RELEAY:
+				pItem = GetDeviceByID(pLnk->GetTgtFacp(), pLnk->GetTgtUnit(), pLnk->GetTgtChn(), pLnk->GetTgtDev());
+				if (pItem == nullptr)
+					continue;
+				str.Format(L"'%s", pItem->GetDevAddress());
+				xls->SetData(nPumpRow + 1, nRepeaterCtrlCol, str);
+				nRepeaterCtrlCol++;
+				break;
+			case LK_TYPE_PATTERN:
+				pTempPtn = GetPattern(pLnk->GetTgtFacp());
+				if (pTempPtn == nullptr)
+					continue;
+				str.Format(L"'P%d", pTempPtn->GetPatternID());
+				xls->SetData(nPumpRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			case LK_TYPE_EMERGENCY:
+				pTempEm = GetEmergency(pLnk->GetTgtFacp());
+				if (pTempEm == nullptr)
+					continue;
+				str.Format(L"'A%d", pTempEm->GetEmID());
+				xls->SetData(nPumpRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			case LK_TYPE_PUMP:
+				pTempPump = GetPump(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
+				if (pTempPump == nullptr)
+					continue;
+				str.Format(L"'M%d", pTempPump->GetPumpID());
+				xls->SetData(nPumpRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			case LK_TYPE_G_FLAG:
+				// 						pTempPtn = GetPump(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_BELL:
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_XA_FLAG:
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_XB_FLAG:
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_FACP_RELAY:
+				pTempContact = GetContactFacp(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
+				if (pTempContact == nullptr)
+					continue;
+				str.Format(L"'R%d", pTempContact->GetRelayNum());
+				xls->SetData(nPumpRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			default:
+				continue;
+			}
+
+		}
+
+		nPumpRow += 2;
+	}
+	xls->CloseData(1, 1);
+}
+
+void CRelayTableData::MakePSSheet(CExcelWrapper* xls)
+{
+	CString str;
+	POSITION pos;
+	POSITION posItem;
+	CPtrList* pLinkList;
+	CDataLinked* pLnk;
+	CDataDevice* pItem;
+	CDataPattern* pTempPtn;
+	CDataEmBc* pTempEm;
+	CDataPump* pTempPump;
+	CDataFacpRelay* pTempContact;
+
+	// 압력스위치
+	str.Format(L"PS");
+	xls->AddWorkSheet(str);
+	xls->OpenData(D_MAX_PUMP_COUNT * 2 + 1, 6 + 20);	// Row : 80 (최대 압력스위치 개수) * 2 (접점 제어 / 중계기 제어) + 1 (헤더), Column : 6 (수신기 번호 ~ 제어) + 20 (출력 최대 개수)
+
+	// 헤더
+#ifndef ENGLISH_MODE
+	xls->SetData(0, 0, L"수신기 번호");
+	xls->SetData(0, 1, L"압력스위치 번호");
+	xls->SetData(0, 2, L"압력스위치 타입");
+	xls->SetData(0, 3, L"압력스위치 이름");
+	xls->SetData(0, 4, L"LCD 이름");
+	xls->SetData(0, 5, L"제어");
+#else
+	xls->SetData(0, 0, L"FACP number");
+	xls->SetData(0, 1, L"PS number");
+	xls->SetData(0, 2, L"PS type");
+	xls->SetData(0, 3, L"PS name");
+	xls->SetData(0, 4, L"LCD name");
+	xls->SetData(0, 5, L"Control");
+#endif
+	for (int nOutputNum = 1; nOutputNum <= D_MAX_LINKITEM_COUNT; nOutputNum++)
+	{
+		CString strNumber = _T("");
+		strNumber.Format(_T("%d"), nOutputNum);
+		xls->SetData(0, nOutputNum + 5, strNumber);
+	}
+
+	int nPSRow = 1;
+	CDataPS* pDps;
+	pos = m_spPresureSwitch->GetHeadPosition();
+	while (pos)
+	{
+		pDps = (CDataPS*)m_spPresureSwitch->GetNext(pos);
+		CString strTemp;
+
+		// 수신기 번호
+		strTemp.Format(_T("%d"), pDps->GetFacpID() - 1);		// 수신기 ID는 1베이스, 수신기 번호는 0베이스
+		xls->SetData(nPSRow, 0, strTemp);
+
+		// 압력스위치 번호
+		strTemp.Format(_T("%d"), pDps->GetPSwitchID());
+		xls->SetData(nPSRow, 1, strTemp);
+
+		// 압력스위치 타입
+		CDataEquip* pDe = m_spRefPSEquipManager->GetEquip(pDps->GetPSwitchType());
+		strTemp = pDe->GetEquipName();
+		xls->SetData(nPSRow, 2, strTemp);
+
+		// 압력스위치 이름
+		strTemp = pDps->GetPSwitchName();
+		xls->SetData(nPSRow, 3, strTemp);
+
+		// LCD 이름
+		strTemp = pDps->GetPSwitchLcd();
+		xls->SetData(nPSRow, 4, strTemp);
+
+		// 제어
+#ifndef ENGLISH_MODE
+		strTemp = _T("접점 제어");
+		xls->SetData(nPSRow, 5, strTemp);
+		strTemp = _T("중계기 제어");
+		xls->SetData(nPSRow + 1, 5, strTemp);
+#else
+		strTemp = _T("Contact control");
+		xls->SetData(nPSRow, 5, strTemp);
+		strTemp = _T("Repeater control");
+		xls->SetData(nPSRow + 1, 5, strTemp);
+#endif
+
+		// 출력
+		int nContCtrlCol = 6;
+		int nRepeaterCtrlCol = 6;
+		pLinkList = pDps->GetLinkList();
+		posItem = pLinkList->GetHeadPosition();
+		while (posItem)
+		{
+			pLnk = (CDataLinked*)pLinkList->GetNext(posItem);
+			if (pLnk == nullptr)
+				continue;
+
+			switch (pLnk->GetLinkType())
+			{
+			case LK_TYPE_RELEAY:
+				pItem = GetDeviceByID(pLnk->GetTgtFacp(), pLnk->GetTgtUnit(), pLnk->GetTgtChn(), pLnk->GetTgtDev());
+				if (pItem == nullptr)
+					continue;
+				str.Format(L"'%s", pItem->GetDevAddress());
+				xls->SetData(nPSRow + 1, nRepeaterCtrlCol, str);
+				nRepeaterCtrlCol++;
+				break;
+			case LK_TYPE_PATTERN:
+				pTempPtn = GetPattern(pLnk->GetTgtFacp());
+				if (pTempPtn == nullptr)
+					continue;
+				str.Format(L"'P%d", pTempPtn->GetPatternID());
+				xls->SetData(nPSRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			case LK_TYPE_EMERGENCY:
+				pTempEm = GetEmergency(pLnk->GetTgtFacp());
+				if (pTempEm == nullptr)
+					continue;
+				str.Format(L"'A%d", pTempEm->GetEmID());
+				xls->SetData(nPSRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			case LK_TYPE_PUMP:
+				pTempPump = GetPump(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
+				if (pTempPump == nullptr)
+					continue;
+				str.Format(L"'M%d", pTempPump->GetPumpID());
+				xls->SetData(nPSRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			case LK_TYPE_G_FLAG:
+				// 						pTempPtn = GetPump(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_BELL:
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_XA_FLAG:
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_XB_FLAG:
+				// 						xls.SetData(nRow * 2, nDownCol, pPtn->GetPatternName());
+				// 						nUpCol++;
+				break;
+			case LK_TYPE_FACP_RELAY:
+				pTempContact = GetContactFacp(pLnk->GetTgtFacp(), pLnk->GetTgtUnit());
+				if (pTempContact == nullptr)
+					continue;
+				str.Format(L"'R%d", pTempContact->GetRelayNum());
+				xls->SetData(nPSRow, nContCtrlCol, str);
+				nContCtrlCol++;
+				break;
+			default:
+				continue;
+			}
+
+		}
+
+		nPSRow += 2;
+	}
+	xls->CloseData(1, 1);
+}
+
+void CRelayTableData::MakeFacpContactSheet(CExcelWrapper* xls)
+{
+	CString str;
+	POSITION pos;
+
+	//수신기 접점
+	str.Format(L"Contact");
+	xls->AddWorkSheet(str);
+	xls->OpenData(D_MAX_FACPCONTACT_COUNT + 1, 3);
+
+	// 헤더
+#ifndef ENGLISH_MODE
+	xls->SetData(0, 0, L"수신기 번호");
+	xls->SetData(0, 1, L"접점 번호");
+	xls->SetData(0, 2, L"접점 이름");
+#else
+	xls->SetData(0, 0, L"FACP number");
+	xls->SetData(0, 1, L"Contact number");
+	xls->SetData(0, 2, L"Contact name");
+#endif
+
+	int nContRow = 1;
+	CDataFacpRelay* pDfr;
+	pos = m_spContactFacp->GetHeadPosition();
+	while (pos)
+	{
+		pDfr = (CDataFacpRelay*)m_spContactFacp->GetNext(pos);
+		CString strTemp;
+
+		// 수신기 번호
+		strTemp.Format(_T("%d"), pDfr->GetFacpID() - 1);	// ID는 1베이스
+		xls->SetData(nContRow, 0, strTemp);
+
+		// 접점 번호
+		strTemp.Format(_T("%d"), pDfr->GetRelayNum());
+		xls->SetData(nContRow, 1, strTemp);
+
+		// 접점 이름
+		strTemp = pDfr->GetFRelayName();
+		xls->SetData(nContRow, 2, strTemp);
+
+		nContRow++;
+	}
+	xls->CloseData(1, 1);
 }

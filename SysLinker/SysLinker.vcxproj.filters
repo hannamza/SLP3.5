@@ -531,6 +531,12 @@
     <ClInclude Include="..\SLP3.5Func\ManualLinkManager.h">
       <Filter>SLP3.5Func</Filter>
     </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\HelpMsgManager.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\HelpMsgManagerWrapper.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -1002,6 +1008,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\SLP3.5Func\ManualLinkManager.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\HelpMsgManager.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\HelpMsgManagerWrapper.cpp">
       <Filter>SLP3.5Func</Filter>
     </ClCompile>
   </ItemGroup>

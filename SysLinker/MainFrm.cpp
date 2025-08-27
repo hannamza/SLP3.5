@@ -29,6 +29,63 @@
 #define new DEBUG_NEW
 #endif
 
+UINT ThreadGetHelpMessageList(LPVOID pParam)
+{
+	CMainFrame* pMain = (CMainFrame*)pParam;
+	pMain->m_bThreadSucceeded = TRUE;
+	CString strHelpMessageFilePath = _T("");
+	CString strFolder = _T("");
+	CString strFile = _T("");
+	std::vector<CString> fileVec;
+	BOOL bRet = FALSE;
+
+	strFolder.Format(_T("C:\\Ficon3\\%s"), HELP_MESSAGE_FOLDER);
+	strFile.Format(_T("%s"), HELP_MESSAGE_EXCEL_FILE_NAME);
+	fileVec = CCommonFunc::GetFullPathFileListIntheFolder(strFolder, strFile);	// 경로를 얻는 매서드를 파일이 존재하는 지 여부로 활용
+	strHelpMessageFilePath.Format(_T("%s\\%s"), strFolder, strFile);
+	if (fileVec.size() > 0)
+	{
+		CExcelWrapper xls;
+		if (!xls.Open(strHelpMessageFilePath))
+		{
+			pMain->m_bThreadSucceeded = FALSE;
+
+			CString strMsg = _T("");
+#ifndef ENGLISH_MODE
+			strMsg.Format(_T("도움말 메시지 리스트 [%s] 파일을 열다가 오류가 발생했습니다."), strFile);
+#else
+			strMsg.Format(_T("Help Message List An error occurred while opening file [%s]."), strFile);
+#endif
+			GF_AddLog(strMsg);
+			strMsg.Format(_T("Help Message List An error occurred while opening file [%s]."), strFile);
+			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		}
+
+		CHelpMsgManager::Instance()->ParsingHelpMessage(&xls);
+		CHelpMsgManager::Instance()->SetMessageInfoLoaded(TRUE);
+		xls.Close();
+	}
+	else
+	{
+		pMain->m_bThreadSucceeded = FALSE;
+
+		CString strMsg = _T("");
+#ifndef ENGLISH_MODE
+		strMsg.Format(_T("도움말 메세지 리스트 [%s]가 없어서 적용하지 않습니다."), strFile);
+#else
+		strMsg.Format(_T("Not applied because the help message list [%s] doesn't exist."), strFile);
+#endif
+		GF_AddLog(strMsg);
+		strMsg.Format(_T("The help message list [%s] does not exist and will not be applied."), strFile);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+	}
+
+	pMain->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pMain->m_hThreadHandle);
+
+	return 0;
+}
+
 // CMainFrame
 
 IMPLEMENT_DYNAMIC(CMainFrame, CMDIFrameWndEx)
@@ -91,6 +148,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_COMMAND(ID_CHK_VIEWDKLOG, &CMainFrame::OnChkViewdkLog)
 	ON_UPDATE_COMMAND_UI(ID_CHK_VIEWDKLOG, &CMainFrame::OnUpdateChkViewdkLog)
 #endif
+
+	ON_MESSAGE(LOGIC_EDIT_COMPLETE_MESSAGE, &CMainFrame::OnLogicEditCompleteMessage)
+	ON_COMMAND(ID_CHK_SHOWHELPMSG, &CMainFrame::OnChkShowhelpmsg)
+	ON_UPDATE_COMMAND_UI(ID_CHK_SHOWHELPMSG, &CMainFrame::OnUpdateChkShowhelpmsg)
 END_MESSAGE_MAP()
 
 // CMainFrame 생성/소멸
@@ -101,6 +162,8 @@ CMainFrame::CMainFrame()
 	theApp.m_nAppLook = theApp.GetInt(_T("ApplicationLook"), ID_VIEW_APPLOOK_OFF_2007_BLUE);
 	m_pRefFasSysData = nullptr;
 	m_pDlgErrorCheck = nullptr;
+	m_pProgressBarDlg = nullptr;
+	m_bShowHelpMsg = TRUE;
 }
 
 CMainFrame::~CMainFrame()
@@ -109,6 +172,12 @@ CMainFrame::~CMainFrame()
 	{
 		delete m_pDlgErrorCheck;
 		m_pDlgErrorCheck = nullptr;
+	}
+
+	if (m_pProgressBarDlg)
+	{
+		delete m_pProgressBarDlg;
+		m_pProgressBarDlg = nullptr;
 	}
 }
 
@@ -175,41 +244,41 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockPane(&m_wndDkInputRelay);
 	CDockablePane* pTabbedBar = NULL;
 
-//	m_wndDkInputRelay.AttachToTabWnd(&m_wndFileView, DM_SHOW, TRUE, &pTabbedBar);
+	//	m_wndDkInputRelay.AttachToTabWnd(&m_wndFileView, DM_SHOW, TRUE, &pTabbedBar);
 #if _USE_OUTPUTWND_
 	m_wndOutput.EnableDocking(CBRS_ALIGN_ANY);
 	DockPane(&m_wndOutput);
 	g_pLogWnd = &m_wndOutput;
 	CString strCat, strName;
 	BOOL bFind = FALSE;
-//	DockPane(&m_wndOutput);
+	//	DockPane(&m_wndOutput);
 
-	// 	CMFCRibbonButton* pBtn = NULL;
-	// 	pBtn = DYNAMIC_DOWNCAST(CMFCRibbonButton, m_wndRibbonBar.FindByID(ID_SECURITY));
+		// 	CMFCRibbonButton* pBtn = NULL;
+		// 	pBtn = DYNAMIC_DOWNCAST(CMFCRibbonButton, m_wndRibbonBar.FindByID(ID_SECURITY));
 
-// 	int nCategoryCount = m_wndRibbonBar.GetCategoryCount();
-// 	for (i = 0; i < nCategoryCount; i++)
-// 	{
-// 		prc = m_wndRibbonBar.GetCategory(i);
-// 		if (prc == nullptr)
-// 			continue;
-// 		strCat = prc->GetName();
-// 		if (strCat != L"홈")
-// 			continue;
-// 		nPCnt = prc->GetPanelCount();
-// 		for (x = 0; x < nPCnt; x++)
-// 		{
-// 			pPnl = prc->GetPanel(x);
-// 			if (pPnl == nullptr)
-// 				continue;
-// 			strName = pPnl->GetName();
-// 			if (strName != L"창")
-// 				continue;
-// 			pBtn = new CMFCRibbonCheckBox(ID_CHK_VIEWDKLOG, L"로그 뷰 보기");
-// 			pPnl->Add(pBtn);
-// 
-// 		}
-// 	}
+	// 	int nCategoryCount = m_wndRibbonBar.GetCategoryCount();
+	// 	for (i = 0; i < nCategoryCount; i++)
+	// 	{
+	// 		prc = m_wndRibbonBar.GetCategory(i);
+	// 		if (prc == nullptr)
+	// 			continue;
+	// 		strCat = prc->GetName();
+	// 		if (strCat != L"홈")
+	// 			continue;
+	// 		nPCnt = prc->GetPanelCount();
+	// 		for (x = 0; x < nPCnt; x++)
+	// 		{
+	// 			pPnl = prc->GetPanel(x);
+	// 			if (pPnl == nullptr)
+	// 				continue;
+	// 			strName = pPnl->GetName();
+	// 			if (strName != L"창")
+	// 				continue;
+	// 			pBtn = new CMFCRibbonCheckBox(ID_CHK_VIEWDKLOG, L"로그 뷰 보기");
+	// 			pPnl->Add(pBtn);
+	// 
+	// 		}
+	// 	}
 	m_wndOutput.DockToWindow(&m_wndDkInputRelay, CBRS_BOTTOM);
 #endif
 
@@ -243,6 +312,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// 창 제목 표시줄에서 문서 이름 및 응용 프로그램 이름의 순서를 전환합니다.
 	// 문서 이름이 축소판 그림과 함께 표시되므로 작업 표시줄의 기능성이 개선됩니다.
 	ModifyStyle(0, FWS_PREFIXTITLE);
+	
+	SetHelpMsgFunc(TRUE);	//20250825 GBM - 최초 실행 시 도움말 기능 활성화
 
 	CString strProgram;
 #ifndef SLP4_MODE
@@ -1512,4 +1583,79 @@ void CMainFrame::OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI)
 		else
 			pCmdUI->Enable(FALSE);
 	}
+}
+
+void CMainFrame::GetHelpMessage()
+{
+	// 이미 메세지 파일이 로드되어 있으면 진행하지 않음
+	if (CHelpMsgManager::Instance()->GetMessageInfoLoaded())
+		return;
+
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+
+#ifndef ENGLISH_MODE
+	CString strMsg = _T("도움말 메세지 리스트를 로드 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Loading help message list. Wait for a moment.");
+#endif
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
+
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadGetHelpMessageList, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw : %d", dw);
+	}
+
+	if (m_bThreadSucceeded)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"도움말 메세지 리스트 로드에 성공했습니다.");
+#else
+		GF_AddLog(L"Successfully loaded the default equipment definition.");
+#endif
+		Log::Trace("Loading of the help message list was successful.");
+	}
+
+	m_pProgressBarDlg = nullptr;
+}
+
+LRESULT CMainFrame::OnLogicEditCompleteMessage(WPARAM wParam, LPARAM lParam)
+{
+	AfxMessageBox(L"C#으로부터 메세지를 받았다!");
+
+	//새 로직 편집기에서 DB에 로직을 저장 완료한 상태이므로 여기서 다시 로직 DB를 읽어옴
+	m_pRefFasSysData->LoadAutMakeLogic();
+
+	//로직 자동 생성 화면으로 넘기려면 theApp로 접근해서 실행
+	theApp.OpenFormView(FV_AUTOMAKE);
+
+	return 0;
+}
+
+void CMainFrame::SetHelpMsgFunc(BOOL bEnable)
+{
+	m_wndDkInputRelay.m_ctrlRelayTree.SetEnableToolTip(bEnable);
+}
+
+void CMainFrame::OnChkShowhelpmsg()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+
+	// toggle
+	m_bShowHelpMsg = !m_bShowHelpMsg;
+
+	// 툴팁 기능 사용 여부 적용
+	SetHelpMsgFunc(m_bShowHelpMsg);
+}
+
+
+void CMainFrame::OnUpdateChkShowhelpmsg(CCmdUI *pCmdUI)
+{
+	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
+	pCmdUI->SetCheck(m_bShowHelpMsg);
 }

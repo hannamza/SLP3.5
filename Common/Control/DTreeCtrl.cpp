@@ -8,11 +8,11 @@
 #include <afxcmn.h>             // Windows 공용 컨트롤에 대한 MFC 지원입니다.
 #include "DTreeCtrl.h"
 
-
 IMPLEMENT_DYNAMIC(CDTreeCtrl, CTreeCtrl)
 
 CDTreeCtrl::CDTreeCtrl()
 {
+	m_bTooltipEnabled = FALSE;
 	m_hTriggerItem = nullptr;
 	m_bAllowRootDrag = FALSE;
 	m_pDragImage = nullptr;
@@ -42,8 +42,17 @@ BEGIN_MESSAGE_MAP(CDTreeCtrl, CTreeCtrl)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
+#pragma once
+#include "../../SLP3.5Func/CommonFunc.h"
+#include "../../SLP3.5Func/HelpMsgManagerWrapper.h"
+
+void CDTreeCtrl::SetEnableToolTip(BOOL bEnable)
+{
+	m_bTooltipEnabled = bEnable;
+}
 
 TVCS_CHECKSTATE CDTreeCtrl::GetCheck(HTREEITEM hTreeItem) const
 {
@@ -597,6 +606,7 @@ void CDTreeCtrl::PreSubclassWindow()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 
 	CTreeCtrl::PreSubclassWindow();
+
 	SetImageList(&m_CheckImageList, TVSIL_STATE);
 }
 
@@ -719,6 +729,50 @@ void CDTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	}
 	else
 	{
+		//20250825 GBM start - 툴팁 기능
+		if (m_bTooltipEnabled)
+		{
+			CPoint ptTree = point;
+
+			UINT uFlags = 0;
+			HTREEITEM hItem = HitTest(ptTree, &uFlags);
+			if (hItem && (uFlags & TVHT_ONITEMLABEL))
+			{
+				// 마지막 노드만 대상
+				if (!ItemHasChildren(hItem))
+				{
+					CString strEquipmentName = _T("");
+					CString tooltipText  = _T("");
+					//CString nodeText = GetItemText(hItem);
+					//strEquipmentName = CHelpMsgManagerWrapper::GetEquipmentName(nodeText);
+					strEquipmentName = CHelpMsgManagerWrapper::GetEquipmentName(this, hItem);
+					if (!strEquipmentName.IsEmpty())
+					{
+						// 툴팁 메세지 얻기
+						tooltipText = CHelpMsgManagerWrapper::GetGuideMessage(strEquipmentName);
+					}
+
+					// 중복 방지
+					if (tooltipText != m_LastTipText)
+					{
+						m_LastTipText = tooltipText;
+						m_ToolTip.UpdateTipText(tooltipText, this);
+					}
+				}
+				else
+				{
+					m_ToolTip.UpdateTipText(_T(""), this);
+					m_LastTipText.Empty();
+				}
+			}
+			else
+			{
+				m_ToolTip.UpdateTipText(_T(""), this);
+				m_LastTipText.Empty();
+			}
+		}
+		//20250825 GBM end
+
 		SelectDropTarget(nullptr);
 	}
 
@@ -1133,4 +1187,43 @@ BOOL CDTreeCtrl::FindCheckItem(HTREEITEM hItem, HTREEITEM hCurrent)
 		hChild = GetNextSiblingItem(hChild);
 	}
 	return bIncludeCheckItem;
+}
+
+
+BOOL CDTreeCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	//20250825 GBM start - 툴팁 기능
+	if (m_bTooltipEnabled)
+	{
+		if (m_ToolTip.m_hWnd)
+			m_ToolTip.RelayEvent(pMsg);
+	}
+	//20250825 GBM end
+
+	return CTreeCtrl::PreTranslateMessage(pMsg);
+}
+
+
+int CDTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CTreeCtrl::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  여기에 특수화된 작성 코드를 추가합니다.
+	//20250825 GBM start - 툴팁 기능
+	// 툴팁 생성 및 등록
+	if (!m_ToolTip.Create(this, TTS_ALWAYSTIP))
+	{
+		return -1;
+	}
+	
+	m_ToolTip.SetMaxTipWidth(400);
+
+	m_ToolTip.AddTool(this, _T(""));
+	m_ToolTip.Activate(TRUE);
+	//20250825 GBM end
+
+	return 0;
 }

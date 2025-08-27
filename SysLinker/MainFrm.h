@@ -22,6 +22,9 @@
 #include "DkPanePSwitch.h"
 #include "OutputWnd.h"
 #include "DkContactFacp.h"
+
+#include "ProgressBarDlg.h"
+
 class CManagerEquip;
 class CRelayTableData;
 class YAdoDatabase;
@@ -73,6 +76,15 @@ protected:  // 컨트롤 모음이 포함된 멤버입니다.
 
 
 	CDlgErrorCheck		*		m_pDlgErrorCheck;
+
+	//20250825 GBM start - 도움말 기능
+public:
+	CProgressBarDlg*		m_pProgressBarDlg;
+	HANDLE					m_hThreadHandle;
+	BOOL					m_bThreadSucceeded;
+	BOOL					m_bShowHelpMsg;
+	void SetHelpMsgFunc(BOOL bEnable);
+	//20250825 GBM end
 
 // 생성된 메시지 맵 함수
 protected:
@@ -149,6 +161,12 @@ public:
 
 	afx_msg void OnSimpleErrorCheck();
 	afx_msg void OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI);
+
+	void GetHelpMessage();
+
+	afx_msg LRESULT OnLogicEditCompleteMessage(WPARAM wParam, LPARAM lParam);	// 로직 편집이 끝났다는 메세지를 받음
+	afx_msg void OnChkShowhelpmsg();
+	afx_msg void OnUpdateChkShowhelpmsg(CCmdUI *pCmdUI);
 };
 
 

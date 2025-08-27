@@ -1018,6 +1018,8 @@
     <ClInclude Include="..\Include\Common_def.h" />
     <ClInclude Include="..\SLP3.5Func\CommonFunc.h" />
     <ClInclude Include="..\SLP3.5Func\Defines.h" />
+    <ClInclude Include="..\SLP3.5Func\HelpMsgManager.h" />
+    <ClInclude Include="..\SLP3.5Func\HelpMsgManagerWrapper.h" />
     <ClInclude Include="..\SLP3.5Func\Log.h" />
     <ClInclude Include="..\SLP3.5Func\ManualLinkManager.h" />
     <ClInclude Include="..\SLP3.5Func\NewDBManager.h" />
@@ -1311,6 +1313,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='UniCode_Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\SLP3.5Func\CommonFunc.cpp" />
+    <ClCompile Include="..\SLP3.5Func\HelpMsgManager.cpp" />
+    <ClCompile Include="..\SLP3.5Func\HelpMsgManagerWrapper.cpp" />
     <ClCompile Include="..\SLP3.5Func\Log.cpp" />
     <ClCompile Include="..\SLP3.5Func\ManualLinkManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewDBManager.cpp" />
