@@ -17,6 +17,8 @@ CDataPS::CDataPS()
 	m_nPcb = -1;
 	m_strName = L"";
 	m_strLcd = L"";
+	m_strPrefix = L"";
+	m_strTypeName = L"";
 }
 
 CDataPS::~CDataPS()
@@ -28,7 +30,9 @@ CDataPS::~CDataPS()
 // CDataPS ¸â¹ö ÇÔ¼ö
 
 
-int CDataPS::SetPSwitchData(int nFacpID, int nPSwitch, int nPType, CString strName, CString strLcd, int nPcb)
+int CDataPS::SetPSwitchData(int nFacpID, int nPSwitch, int nPType, CString strName, CString strLcd
+	,CString strPrefix,CString strTypeName
+	,int nPcb)
 {
 	if (nPcb < 0)
 		nPcb = nPSwitch / 4;
@@ -38,6 +42,8 @@ int CDataPS::SetPSwitchData(int nFacpID, int nPSwitch, int nPType, CString strNa
 	m_nPcb = nPcb;
 	m_strName = strName;
 	m_strLcd = strLcd;
+	m_strPrefix = strPrefix;
+	m_strTypeName = strTypeName;
 	return 0;
 }
 
@@ -166,7 +172,9 @@ void CDataPS::RemoveAllLink()
 
 void CDataPS::CopyData(CDataPS * pSrc)
 {
-	SetPSwitchData(pSrc->GetFacpID(), pSrc->GetPSwitchID(), pSrc->GetPSwitchType(), pSrc->GetPSwitchName(), pSrc->GetPSwitchLcd(), pSrc->GetPcb());
+	SetPSwitchData(pSrc->GetFacpID(), pSrc->GetPSwitchID(), pSrc->GetPSwitchType(), pSrc->GetPSwitchName(), pSrc->GetPSwitchLcd()
+		,pSrc->GetPrefix(),pSrc->GetTypeName()
+		,pSrc->GetPcb());
 	CPtrList * pList;
 	CDataLinked * pData , *pTarget;
 	POSITION pos;

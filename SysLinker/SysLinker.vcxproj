@@ -1004,6 +1004,10 @@
     <ClInclude Include="..\Common\Control\DTreeCtrl.h" />
     <ClInclude Include="..\Common\Control\SplitterCtrl.h" />
     <ClInclude Include="..\Common\Control\SSplitter.h" />
+    <ClInclude Include="..\Common\CustomList\CustomBaseItem.h" />
+    <ClInclude Include="..\Common\CustomList\CustomItemManager.h" />
+    <ClInclude Include="..\Common\CustomList\CustomListCtrl.h" />
+    <ClInclude Include="..\Common\CustomList\Def_CustomCtrl.h" />
     <ClInclude Include="..\Common\Utils\clasimpl.h" />
     <ClInclude Include="..\Common\Utils\Excel12.h" />
     <ClInclude Include="..\Common\Utils\ExcelWrapper.h" />
@@ -1028,6 +1032,8 @@
     <ClInclude Include="..\SLP3.5Func\TSingleton.h" />
     <ClInclude Include="..\Version\Version.h" />
     <ClInclude Include="AllocRelayIndex.h" />
+    <ClInclude Include="BtnFacp.h" />
+    <ClInclude Include="BtnST.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="CvtRelayIDConverter.h" />
     <ClInclude Include="DataAutoDevice.h" />
@@ -1097,12 +1103,14 @@
     <ClInclude Include="DlgPatternProperty.h" />
     <ClInclude Include="DlgProgramLogin.h" />
     <ClInclude Include="DlgProgress.h" />
+    <ClInclude Include="DlgPumpEditPane.h" />
     <ClInclude Include="DlgRETabPattern.h" />
     <ClInclude Include="DlgRETabRelay.h" />
     <ClInclude Include="DlgSetUserTreeView.h" />
     <ClInclude Include="DlgTreePane.h" />
     <ClInclude Include="DlgVersion.h" />
     <ClInclude Include="DlgViewRelay.h" />
+    <ClInclude Include="EditSpecial.h" />
     <ClInclude Include="FormAccess.h" />
     <ClInclude Include="FormAutoMake.h" />
     <ClInclude Include="FormContactFacp.h" />
@@ -1135,6 +1143,8 @@
     <ClInclude Include="ManagerPump.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="ProgressBarDlg.h" />
+    <ClInclude Include="PumpItem.h" />
+    <ClInclude Include="PumpTypeList.h" />
     <ClInclude Include="RelayTableData.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="ManagerEquip.h" />
@@ -1237,6 +1247,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_ENG|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='UniCode_Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Common\CustomList\CustomBaseItem.cpp" />
+    <ClCompile Include="..\Common\CustomList\CustomItemManager.cpp" />
+    <ClCompile Include="..\Common\CustomList\CustomListCtrl.cpp" />
     <ClCompile Include="..\Common\Utils\EventQueue.cpp" />
     <ClCompile Include="..\Common\Utils\ExcelWrapper.cpp" />
     <ClCompile Include="..\Common\Utils\ggets.cpp">
@@ -1321,6 +1334,8 @@
     <ClCompile Include="..\SLP3.5Func\NewExcelManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewInfo.cpp" />
     <ClCompile Include="AllocRelayIndex.cpp" />
+    <ClCompile Include="BtnFacp.cpp" />
+    <ClCompile Include="BtnST.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="CvtRelayIDConverter.cpp" />
     <ClCompile Include="DataAutoDevice.cpp" />
@@ -1390,12 +1405,14 @@
     <ClCompile Include="DlgPatternProperty.cpp" />
     <ClCompile Include="DlgProgramLogin.cpp" />
     <ClCompile Include="DlgProgress.cpp" />
+    <ClCompile Include="DlgPumpEditPane.cpp" />
     <ClCompile Include="DlgRETabPattern.cpp" />
     <ClCompile Include="DlgRETabRelay.cpp" />
     <ClCompile Include="DlgSetUserTreeView.cpp" />
     <ClCompile Include="DlgTreePane.cpp" />
     <ClCompile Include="DlgVersion.cpp" />
     <ClCompile Include="DlgViewRelay.cpp" />
+    <ClCompile Include="EditSpecial.cpp" />
     <ClCompile Include="FormAccess.cpp" />
     <ClCompile Include="FormAutoMake.cpp" />
     <ClCompile Include="FormContactFacp.cpp" />
@@ -1428,6 +1445,8 @@
     <ClCompile Include="ManagerPump.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="ProgressBarDlg.cpp" />
+    <ClCompile Include="PumpItem.cpp" />
+    <ClCompile Include="PumpTypeList.cpp" />
     <ClCompile Include="RelayTableData.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="ManagerEquip.cpp" />
@@ -1484,6 +1503,7 @@
     <Image Include="res\bitmap2.bmp" />
     <Image Include="res\bmp00001.bmp" />
     <Image Include="res\bmp00002.bmp" />
+    <Image Include="res\BTN_DELETE_HOT.ico" />
     <Image Include="res\buttons.bmp" />
     <Image Include="res\Cancel1_32x32x16.ico" />
     <Image Include="res\Checkboxs.bmp" />
@@ -1491,6 +1511,8 @@
     <Image Include="res\classview_hc.bmp" />
     <Image Include="res\class_view.ico" />
     <Image Include="res\class_view_hc.ico" />
+    <Image Include="res\CLOSE_ASSIGN.bmp" />
+    <Image Include="res\CLOSE_UNASSIGN.bmp" />
     <Image Include="res\contactf.bmp" />
     <Image Include="res\cont_fac.bmp" />
     <Image Include="res\DeviceIcon.bmp" />
@@ -1522,7 +1544,10 @@
     <Image Include="res\properties_wnd.ico" />
     <Image Include="res\properties_wnd_hc.ico" />
     <Image Include="res\PSWITCHTREEICON.bmp" />
+    <Image Include="res\PumpSymbol.bmp" />
     <Image Include="res\PUMPTREEICON.bmp" />
+    <Image Include="res\PUMP_ASSIGN.bmp" />
+    <Image Include="res\PUMP_UNASSIGN.bmp" />
     <Image Include="res\RB_LINKER_LARGE.bmp" />
     <Image Include="res\RB_LINKER_LARGE_EDIT.bmp" />
     <Image Include="res\RB_LINKER_SMALL.bmp" />

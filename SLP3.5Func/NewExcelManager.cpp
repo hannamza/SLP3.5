@@ -198,7 +198,7 @@ BOOL CNewExcelManager::UpdateProjectInfo(CString strWin32AppProjectName)
 	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
-	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+	strModuleTablePath.Format(_T("C:\\%s\\Project\\%s\\%s\\%s"), ROOT_FOLDER, strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
 	//중계기 일람표 리스트 얻음
 	std::vector<CString> strModuleTableFileList;
@@ -290,7 +290,7 @@ BOOL CNewExcelManager::UpdateEquipmentInfo(CString strWin32AppProjectName)
 	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
-	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+	strModuleTablePath.Format(_T("C:\\%s\\Project\\%s\\%s\\%s"), ROOT_FOLDER, strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
 	//중계기 일람표 리스트 얻음
 	std::vector<CString> strModuleTableFileList;
@@ -383,7 +383,7 @@ BOOL CNewExcelManager::UpdateOneEquipmentInfo(int nType, int nIndex, CString str
 	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
-	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+	strModuleTablePath.Format(_T("C:\\%s\\Project\\%s\\%s\\%s"), ROOT_FOLDER, strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
 	//중계기 일람표 리스트 얻음
 	std::vector<CString> strModuleTableFileList;
@@ -599,7 +599,7 @@ BOOL CNewExcelManager::UpdatePatternInfo(int nFacp, int nUnit, int nLoop, int nC
 	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
-	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+	strModuleTablePath.Format(_T("C:\\%s\\Project\\%s\\%s\\%s"), ROOT_FOLDER, strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
 	//중계기 일람표 리스트 얻음
 	std::vector<CString> strModuleTableFileList;
@@ -642,7 +642,7 @@ BOOL CNewExcelManager::CopyModuleTable(CStringList * pStrList, CString strWin32A
 	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
-	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+	strModuleTablePath.Format(_T("C:\\%s\\Project\\%s\\%s\\%s"), ROOT_FOLDER, strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
 	int nModuleTableCount = -1;
 	nModuleTableCount = pStrList->GetSize();
@@ -692,7 +692,7 @@ BOOL CNewExcelManager::UpdateOneEBInfo(int nNum, CString strRemarks, CString str
 	strProjectName.Format(_T("%s"), CCommonFunc::CharToWCHAR(CNewInfo::Instance()->m_gi.projectInfo.projectName));
 
 	CString strModuleTablePath;
-	strModuleTablePath.Format(_T("C:\\Ficon3\\Project\\%s\\%s\\%s"), strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
+	strModuleTablePath.Format(_T("C:\\%s\\Project\\%s\\%s\\%s"), ROOT_FOLDER, strWin32AppProjectName, F3_VERSIONTEMPFOLDER_NAME, F3_PRJ_DIR_RELAYTABLE);
 
 	//중계기 일람표 리스트 얻음
 	std::vector<CString> strModuleTableFileList;

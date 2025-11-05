@@ -185,6 +185,18 @@ public:
 	CUIntArray		m_arrSortType;
 	CUIntArray		m_arrDirection;
 	BOOL			m_bSorting;
+
+	// [2025/11/4 8:55:51 KHS] 
+	// Focus를 잃어도 선택된 항목의 색상을 표시
+	// LVS_SHOWSELALWAYS가  선택되어 있어야 한다.
+	BOOL			m_bAlwaysVisibleSelWhenLostFocus;
+
+	// [2025/9/11 13:15:37 KHS] 
+	// Drag & Drop
+	BOOL			m_bEnableDrag;
+	int				m_nDragIndex;
+	BOOL			m_bDragging;
+	CImageList	*	m_pDragImage;
 // Operations
 public:
 	virtual void Sort(int nSubItem, BOOL bAsc); // bAsc = TRUE:내림차순, FALSE:오름차순
@@ -197,6 +209,7 @@ public:
 	void	SetDefaultFont(CString strFont, int nFontSize) {
 		m_strWindowFont = strFont; m_nWindowFontSize = nFontSize;
 	}
+	void	SetAlwaysVisibleSelection(BOOL bShow) { m_bAlwaysVisibleSelWhenLostFocus = bShow; }
 	void	SetHighLightColor(COLORREF crHighLight) { m_crHighLight = crHighLight; }
 	void	SetHighLightTextColor(COLORREF crHighLightTxt) { m_crHighLightText = crHighLightTxt; }
 	void	SetDefaultTextColor(COLORREF crText) { m_crWindowText = crText; }
@@ -437,8 +450,15 @@ public:
 	afx_msg void OnHdnItemclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnBegindrag(NMHDR *pNMHDR,LRESULT *pResult);
+	afx_msg BOOL OnLvnBegindrag(NMHDR *pNMHDR,LRESULT *pResult);
 	afx_msg void OnMouseMove(UINT nFlags,CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags,CPoint point);
+public:
+	void SetEnableDrag(BOOL bEnable) { m_bEnableDrag = bEnable; }
+	int HitTestEx(CPoint point);
+	void MoveItem(int nFrom,int nTo);
+	CImageList * CreateDragImageWithText(int nItem);
+	CImageList * CreateDragImageEx(LPPOINT  lpPoint);
 };
 
 /////////////////////////////////////////////////////////////////////////////

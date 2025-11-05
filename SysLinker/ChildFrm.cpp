@@ -86,6 +86,6 @@ void CChildFrame::CloseEnable(bool bEnable)
 
 LRESULT CChildFrame::OnFrameCloseEnable(WPARAM wp, LPARAM lp)
 {
-	CloseEnable(lp);
+	CloseEnable((lp == 0? 0:1));
 	return 0;
 }

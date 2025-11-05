@@ -308,6 +308,10 @@ CString CHelpMsgManager::GetEquipmentName(CDTreeCtrl* pCtrl, HTREEITEM hItem)
 		CDataSystem* pData = (CDataSystem*)st->pData;
 		if (pData != nullptr)
 		{
+			// 회로가 아니면 그냥 리턴
+			if (pData->GetDataType() != SE_RELAY)
+				return result;
+			
 			CDataDevice* pDevice = (CDataDevice*)pData->GetSysData();
 			if (pDevice != nullptr)
 			{

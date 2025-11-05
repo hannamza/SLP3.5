@@ -34,6 +34,9 @@
     <Filter Include="SLP3.5Func">
       <UniqueIdentifier>{1b854517-b5d0-46d5-9820-da111b263bca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\CustomList">
+      <UniqueIdentifier>{e81c95b7-69ea-4a21-9c86-3f34bce73a59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -537,6 +540,36 @@
     <ClInclude Include="..\SLP3.5Func\HelpMsgManagerWrapper.h">
       <Filter>SLP3.5Func</Filter>
     </ClInclude>
+    <ClInclude Include="BtnFacp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BtnST.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PumpItem.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PumpTypeList.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EditSpecial.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CustomList\CustomBaseItem.h">
+      <Filter>Common\CustomList</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CustomList\CustomItemManager.h">
+      <Filter>Common\CustomList</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CustomList\CustomListCtrl.h">
+      <Filter>Common\CustomList</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CustomList\Def_CustomCtrl.h">
+      <Filter>Common\CustomList</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgPumpEditPane.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -1016,6 +1049,33 @@
     <ClCompile Include="..\SLP3.5Func\HelpMsgManagerWrapper.cpp">
       <Filter>SLP3.5Func</Filter>
     </ClCompile>
+    <ClCompile Include="BtnFacp.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BtnST.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PumpItem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PumpTypeList.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EditSpecial.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CustomList\CustomBaseItem.cpp">
+      <Filter>Common\CustomList</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CustomList\CustomItemManager.cpp">
+      <Filter>Common\CustomList</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CustomList\CustomListCtrl.cpp">
+      <Filter>Common\CustomList</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgPumpEditPane.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SysLinker.rc">
@@ -1204,6 +1264,24 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="res\bmp00002.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\BTN_DELETE_HOT.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\PumpSymbol.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\PUMP_ASSIGN.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\PUMP_UNASSIGN.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\CLOSE_ASSIGN.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\CLOSE_UNASSIGN.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

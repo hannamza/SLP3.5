@@ -57,6 +57,8 @@ void CManagerPS::RemoveData(CDataPS* pData)
 // 	RemoveAt(pos);
 	CDataPS *pTemp;
 	POSITION pos, savePos;
+	if(pData == nullptr)
+		return;
 	pos = GetHeadPosition();
 	while (pos)
 	{

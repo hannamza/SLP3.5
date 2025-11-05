@@ -14,6 +14,9 @@
 #define F3_PRJ_DIR_ETC				_T("ETC")		//< 
 #define F3_PRJ_DIR_RELAYTABLE		_T("RELAYTABLE")//< 중계기 일람표
 #define F3_PRJ_DIR_RELEASE			_T("RELEASE")	//< 컴파일 된 ROM파일 저장 폴더
+//20251014 GBM start - 로직 편집 정보가 들어갈 폴더 정의
+#define F3_PRJ_DIR_LOGIC			_T("LOGIC")		// 로직 편집 정보를 저장할 폴더
+//20251014 GBM end
 
 
 // ROM FILE NAME
@@ -516,6 +519,13 @@ static TCHAR * g_szLogicTypeString[] = {
 	NULL
 };
 #endif
+
+enum 
+{
+	PUMP_PS_USE = 0,
+	PUMP_PS_NOTUSE = 1,
+	PUMP_PS_NOTAVAILABLE = 2,
+};
 
 #pragma pack(push,1)
 

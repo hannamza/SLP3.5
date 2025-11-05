@@ -306,10 +306,34 @@ std::wstring LoadUtf8FileToString(const std::wstring& filename)
 
 BOOL GF_IsExistFile(CString strFullPath)
 {
+	CString strFilePath = strFullPath;
+	CFileStatus status;
+
+	if(CFile::GetStatus(strFilePath,status))
+	{
+		// 파일이 존재합니다.
+		//AfxMessageBox(_T("파일이 존재합니다."));
+		return TRUE;
+	}
+	else
+	{
+		// 파일이 존재하지 않습니다.
+		//AfxMessageBox(_T("파일이 존재하지 않습니다."));
+		return FALSE;
+	}
+
 #ifdef _UNICODE 
-	return(_waccess_s(strFullPath, 0) != -1);
+	if(_waccess_s(strFullPath,0) == 0)
+		return TRUE;
+	else
+		return FALSE;
+	//return(_waccess_s(strFullPath, 0) != -1);
 #else 
-	return (_access_s(strFullPath, 0) != -1);
+	if(_access_s(strFullPath,0) == 0)
+		return TRUE;
+	else
+		return FALSE;
+	//return (_access_s(strFullPath, 0) != -1);
 #endif
 }
 

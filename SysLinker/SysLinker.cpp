@@ -43,6 +43,7 @@
 #include "FormPSwitchEdit.h"
 #include "FormErrorCheck.h"
 
+#include "FormPumpEdit.h"
 
 #include "PropSheetNewProject.h"
 #include "PropPageProjectInfo.h"
@@ -98,7 +99,7 @@ UINT ThreadGetDefaultEquipmentDefinition(LPVOID pParam)
 	std::vector<CString> fileVec;
 	BOOL bRet = FALSE;
 
-	strFolder.Format(_T("C:\\Ficon3\\%s"), F3_PRJ_DIR_DATABASE);
+	strFolder.Format(_T("C:\\%s\\%s"), ROOT_FOLDER, F3_PRJ_DIR_DATABASE);
 	strFile.Format(_T("%s"), EQUIPMENT_INFO_EXCEL_FILE_NAME);
 	fileVec = CCommonFunc::GetFullPathFileListIntheFolder(strFolder, strFile);	// 경로를 얻는 매서드를 파일이 존재하는 지 여부로 활용
 	strEquipmentDefinitionFile.Format(_T("%s\\%s"), strFolder, strFile);
@@ -438,7 +439,9 @@ BOOL CSysLinkerApp::InitInstance()
 #ifndef SLP4_MODE
 	SetRegistryKey(_T("GFS\\FICON3\\SLP3"));
 #else
-	SetRegistryKey(_T("GFS\\FICON3\\SLP4"));
+	CString key = _T("");
+	key.Format(_T("GFS\\%s\\SLP4"), ROOT_FOLDER);
+	SetRegistryKey(key);
 #endif
 
 	LoadStdProfileSettings(4);  // MRU를 포함하여 표준 INI 파일 옵션을 로드합니다.
@@ -703,18 +706,31 @@ int CSysLinkerApp::DocumentTemplateInit()
 	if (!m_pTempleLinkView)
 		return FALSE;
 	AddDocTemplate(m_pTempleLinkView);
+// 
+// #ifndef ENGLISH_MODE
+// 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE,
+// 		RUNTIME_CLASS(CFormDoc),
+// 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+// 		RUNTIME_CLASS(CFormPump));
+// #else
+// 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+// 		RUNTIME_CLASS(CFormDoc),
+// 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+// 		RUNTIME_CLASS(CFormPump));
+// #endif
 
 #ifndef ENGLISH_MODE
 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
-		RUNTIME_CLASS(CFormPump));
+		RUNTIME_CLASS(CFormPumpEdit));
 #else
 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
-		RUNTIME_CLASS(CFormPump));
+		RUNTIME_CLASS(CFormPumpEdit));
 #endif
+
 	if (!m_pTemplePump)
 		return FALSE;
 	AddDocTemplate(m_pTemplePump);
@@ -2012,6 +2028,15 @@ void CSysLinkerApp::OnHomeProjectSave()
 #endif
 		return;
 	}
+
+	// [2025/10/22 16:48:28 KHS] 
+	// Pump의 변경된 정보 저장 명령 전송
+	CView * pView = GetSysLinkerView(m_pTemplePump);
+	if(pView != nullptr)
+	{
+		pView->SendMessage(UWM_PROJECT_SAVE,0,0);
+	}
+
 	// Database 용량 줄이기
 	if (m_pFasSysData->ReduceDatabase() == 0)
 	{
@@ -2059,7 +2084,7 @@ void CSysLinkerApp::OnHomeProjectSave()
 		, F3_PRJ_DIR_DATABASE
 		, m_pFasSysData->GetDBName()
 	);
-	if (GF_IsExistFile(strDBPath) == FALSE)
+	if (GF_IsExistFile(strDBPath) == TRUE)
 	{
 		CString strError;
 #ifndef ENGLISH_MODE
@@ -2209,15 +2234,20 @@ void CSysLinkerApp::OnBasicSetLogicEdit()
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 
 	//20250805 GBM start - test
-#if 0
+#if true
 	CString strPath = CCommonFunc::GetCurrentPath();
-	//CString strExe = _T("LinkedDataView.exe");
-	CString strExe = _T("CommandLineTest.exe");
+	CString strExe = _T("LogicEditor.exe");
+	//CString strExe = _T("CommandLineTest.exe");
 	strPath += _T("\\") + strExe;
 	HANDLE hHandle = nullptr;
 	BOOL bFind = FALSE;
 	//bFind = CCommonFunc::FindProcess(strExe, hHandle);	// FindWindow보다 확실한 방법이지만 실행 중인 전체 프로세스 스냅샷을 찍다보니 시간이 걸림
-	HWND hwnd = FindWindow(NULL, L"통신 테스트");		//캡션명으로 해야 할 듯
+#ifndef ENGLISH_MODE
+	CString strLogicEditorCaption = L"로직 편집기";
+#else
+	CString strLogicEditorCaption = L"Logic Editor";
+#endif
+	HWND hwnd = FindWindow(NULL, strLogicEditorCaption);		//캡션명으로 해야 할 듯
 	if (hwnd != nullptr)
 		bFind = TRUE;
 	if (!bFind)
@@ -2233,13 +2263,17 @@ void CSysLinkerApp::OnBasicSetLogicEdit()
 	}
 	else
 	{
-		AfxMessageBox(L"프로그램이 이미 실행 중입니다.");
+#ifndef ENGLISH_MODE
+		CString strMsg = strLogicEditorCaption + "가 이미 실행 중입니다.";
+#else
+		CString strMsg = "The " + strLogicEditorCaption + "is already running.";
+#endif
+		AfxMessageBox(strMsg);
 	}
+#else
+	OpenFormView(FV_LOGICEDIT);
 #endif
 	//20250805 GBM end
-
-	OpenFormView(FV_LOGICEDIT);
-
 }
 // 
 // void CSysLinkerApp::OnFacpCreateLink()
@@ -2941,7 +2975,9 @@ int CSysLinkerApp::ConfigLoad()
 	vector<CString> vtView;
 	memset(&g_stConfig, 0, sizeof(ST_CONFIG));
 
-	nRet = ::GetPrivateProfileString(L"PROJECT", L"PATH", L"C:\\FICON3\\PROJECT\\", buff, _MAX_PATH, (LPCTSTR)strPath);
+	CString strDefaultPath = _T("");
+	strDefaultPath.Format(_T("C:\\%s\\PROJECT\\"), ROOT_FOLDER);
+	nRet = ::GetPrivateProfileString(L"PROJECT", L"PATH", strDefaultPath, buff, _MAX_PATH, (LPCTSTR)strPath);
 	if (nRet)
 	{
 		wcscpy_s(g_stConfig.szPrjPath, sizeof(g_stConfig.szPrjPath) / sizeof(TCHAR), buff);
@@ -3199,7 +3235,7 @@ int CSysLinkerApp::CreateProjectFolder()
 {
 	CString strPrjPath, strVersion, strLastPath;
 	CString strPrjNameFolder, strPrjVerFolder;
-	CString strPrjSymbolFolder, strPrjResFolder, strPrjDBFolder, strPrjRelayTableFolder, strPrjMapFolder, strPrjEtcFolder;
+	CString strPrjSymbolFolder, strPrjResFolder, strPrjDBFolder, strPrjRelayTableFolder, strPrjMapFolder, strPrjEtcFolder, strPrjLogicFolder, strPrjOupputContentImages;
 	strPrjPath = g_stConfig.szPrjPath;
 	if (strPrjPath.Right(1) != '\\')
 		strPrjPath += "\\";
@@ -3235,6 +3271,11 @@ int CSysLinkerApp::CreateProjectFolder()
 
 	strPrjEtcFolder.Format(L"%s\\%s", strPrjVerFolder, F3_PRJ_DIR_RELEASE);
 	CreateDirectory(strPrjEtcFolder, nullptr);
+
+	//20251014 GBM start - 로직 편집 정보가 들어갈 폴더 생성
+	strPrjLogicFolder.Format(L"%s\\%s", strPrjVerFolder, F3_PRJ_DIR_LOGIC);
+	CreateDirectory(strPrjLogicFolder, nullptr);
+	//20251014 GBM end
 
 	CopyBaseFile(m_pFasSysData->GetPrjName(),strPrjSymbolFolder, strPrjRelayTableFolder, strPrjDBFolder);
 	SaveProjectInfoFile(strPrjNameFolder);
@@ -4523,6 +4564,27 @@ int CSysLinkerApp::CopyVersionTempToVersion(CString strPrjName, CString strPrjFu
 			return 0;
 		}
 	}
+
+	//20251014 GBM start - 로직 편집 정보와 출력 내용 이미지들이 들어갈 폴더 추가
+	//////////////////////////////////////////////////////////////////////////
+	// 9. LOGIC
+	strTo.Format(L"%s%s\\%s"
+		, strPrjFullPath, GF_GetVersionFolderName(wMajor, wMinor)
+		, F3_PRJ_DIR_LOGIC
+	);
+	strFrom.Format(L"%s%s\\%s"
+		, strPrjFullPath, F3_VERSIONTEMPFOLDER_NAME
+		, F3_PRJ_DIR_LOGIC
+	);
+	strError = GF_CopyDir(strTo, strFrom);
+	if (strError != L"")
+	{
+		GF_AddLog(strError);
+		AfxMessageBox(strError);
+		return 0;
+	}
+	//20251014 GBM end
+
 	return 1;
 }
 

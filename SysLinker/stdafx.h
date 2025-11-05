@@ -107,7 +107,13 @@ using namespace Gdiplus;
 
 #define UWM_CHILDFRAME_CLOSEENABLE			UWM_BASE +31 //< Child Frame 닫기 기능 Enable/Disable
 #define UWM_CHILDPANE_TREESELCHANGE			UWM_BASE +32 //< PS,PUMP FORM에서 TREE CONTROL의 선택변경
-#define UWM_CHILDPANE_SELDATACHANGE			UWM_BASE +43 //< PS , PUMP 정보 창에서 데이터 수정이 발생
+#define UWM_CHILDPANE_SELDATACHANGE			UWM_BASE +33 //< PS , PUMP 정보 창에서 데이터 수정이 발생
+
+// [2025/9/30 13:18:36 KHS] 
+// 펌프 관련 Message 추가
+#define UWM_CHILDPANE_SELECTCHANGE			UWM_BASE +42 //< PS,PUMP FORM에서 TREE CONTROL의 선택변경
+#define UWM_CHILDPANE_CURDATACHANGE			UWM_BASE +43 //< PS , PUMP 정보 창에서 데이터 수정이 발생
+#define UWM_PROJECT_SAVE					UWM_BASE +44 //< 프로젝트 전체 저장 시 펌프 CHILDPANE 저장
 
 #define UWM_RELAYEDITFORM_TREESELCHANGE		UWM_BASE +51 //< RELAY EDIT FORM에서 TREE 선택 변경
 														//< WPARAM : 선택,CHECK 변경 여부 
@@ -170,6 +176,8 @@ enum
 	DATA_SAVE = 2,
 	DATA_DEL = 3,
 	DATA_ALL = 4,
+	DATA_MOVE = 5, // Pump Drag & Drop 때문에 추가
+	DATA_ALLDEL = 6,
 };
 
 enum FormViewStyle
@@ -427,6 +435,7 @@ WORD GF_CRC16(WORD wCrc, BYTE bData);
 
 BOOL GF_Text2Number(CString strNumber, int &nRet);
 
+
 #define _USE_UNICODE_REVS_INFO_ 0
 
 #if _USE_OUTPUTWND_
@@ -452,6 +461,45 @@ extern TVORDER g_tvOutput;
 
 extern BOOL g_bRequirePtnManualCheck;
 
+
+#pragma pack(push,1)
+#define D_MAX_TEMPLETE_ITEM_CNT 10
+struct ST_PUMPTYPE
+{
+	int		nPumpType;
+	int		nPsType;
+	CString strTypeName;
+	CString strLcdMsg;
+	int		nPsUse;
+	void SetPumpType(int _nPmpType,CString _strTypeName,CString _strLcdMsg,int _nPsType , int _nPsUse)
+	{
+		nPumpType = _nPmpType;
+		nPsType = _nPsType;
+		strTypeName = _strTypeName;
+		strLcdMsg = _strLcdMsg;
+		nPsUse = _nPsUse;
+	}
+	bool CompareTypeName(BOOL bAsc,const ST_PUMPTYPE * pData)
+	{
+		if(pData == nullptr)
+			return false;
+		if(bAsc)
+			return strTypeName.CompareNoCase(pData->strTypeName) > 0;
+		else
+			return strTypeName.CompareNoCase(pData->strTypeName) < 0;
+		return false;
+	}
+};
+
+struct ST_PUMPTEMPLETE
+{
+	int		nID;
+	CString strTempleteName;
+	ST_PUMPTYPE * pArrPumpType[D_MAX_TEMPLETE_ITEM_CNT];
+};
+
+
+#pragma pack(pop)
 #ifdef _UNICODE
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")

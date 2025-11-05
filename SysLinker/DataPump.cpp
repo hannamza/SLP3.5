@@ -17,6 +17,9 @@ CDataPump::CDataPump()
 	m_nPcb = -1;
 	m_strName = L"";
 	m_strLcd = L"";
+	m_strPrefix = L"";
+	m_strTypeName = L"";
+	m_nUsePS = PUMP_PS_NOTUSE;
 }
 
 CDataPump::~CDataPump()
@@ -28,7 +31,9 @@ CDataPump::~CDataPump()
 // CDataPump ¸â¹ö ÇÔ¼ö
 
 
-int CDataPump::SetPumpData(int nFacpID, int nPump, int nPType, CString strName, CString strLcd,int nPcb)
+int CDataPump::SetPumpData(int nFacpID, int nPump, int nPType, CString strName, CString strLcd
+	,CString strPrefix,CString strTypeName,int nPSUse
+	,int nPcb)
 {
 	if (nPcb < 0)
 		nPcb = nPump / 4; 
@@ -38,6 +43,9 @@ int CDataPump::SetPumpData(int nFacpID, int nPump, int nPType, CString strName, 
 	m_nPcb = nPcb;
 	m_strName = strName;
 	m_strLcd = strLcd;
+	m_strPrefix = strPrefix;
+	m_strTypeName = strTypeName;
+	m_nUsePS = nPSUse;
 	return 1;
 }
 
@@ -169,7 +177,9 @@ void CDataPump::RemoveAllLink()
 
 void CDataPump::CopyData(CDataPump * pSrc)
 {
-	SetPumpData(pSrc->GetFacpID(), pSrc->GetPumpID(), pSrc->GetPumpType(), pSrc->GetPumpName(), pSrc->GetPumpLcd(), pSrc->GetPcb());
+	SetPumpData(pSrc->GetFacpID(), pSrc->GetPumpID(), pSrc->GetPumpType(), pSrc->GetPumpName(), pSrc->GetPumpLcd()
+		,pSrc->GetPrefix() , pSrc->GetTypeName()
+		, pSrc->GetPcb());
 	CPtrList * pList;
 	CDataLinked * pData, *pTarget;
 	POSITION pos;

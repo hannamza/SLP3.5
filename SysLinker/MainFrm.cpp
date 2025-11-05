@@ -39,7 +39,7 @@ UINT ThreadGetHelpMessageList(LPVOID pParam)
 	std::vector<CString> fileVec;
 	BOOL bRet = FALSE;
 
-	strFolder.Format(_T("C:\\Ficon3\\%s"), HELP_MESSAGE_FOLDER);
+	strFolder.Format(_T("C:\\%s\\%s"), ROOT_FOLDER, HELP_MESSAGE_FOLDER);
 	strFile.Format(_T("%s"), HELP_MESSAGE_EXCEL_FILE_NAME);
 	fileVec = CCommonFunc::GetFullPathFileListIntheFolder(strFolder, strFile);	// 경로를 얻는 매서드를 파일이 존재하는 지 여부로 활용
 	strHelpMessageFilePath.Format(_T("%s\\%s"), strFolder, strFile);
@@ -1626,7 +1626,13 @@ void CMainFrame::GetHelpMessage()
 
 LRESULT CMainFrame::OnLogicEditCompleteMessage(WPARAM wParam, LPARAM lParam)
 {
-	AfxMessageBox(L"C#으로부터 메세지를 받았다!");
+#ifndef ENGLISH_MODE
+	//AfxMessageBox(L"Logic Editor로부터 로직 편집 완료 메세지가 도착했습니다.");
+	Log::Trace("Logic Editor로부터 로직 편집 완료 메세지가 도착했습니다.");
+#else
+	//AfxMessageBox(L"A logic editing completion message has arrived from the Logic Editor.");
+	Log::Trace("A logic editing completion message has arrived from the Logic Editor.");
+#endif
 
 	//새 로직 편집기에서 DB에 로직을 저장 완료한 상태이므로 여기서 다시 로직 DB를 읽어옴
 	m_pRefFasSysData->LoadAutMakeLogic();

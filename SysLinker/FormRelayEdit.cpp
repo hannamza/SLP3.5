@@ -276,7 +276,7 @@ LRESULT CFormRelayEdit::OnEditDlgPreview(WPARAM wp, LPARAM lp)
 	else if (lp == DATA_SAVE)
 		MakeChangeDeviceMap(m_pNewData, CHANGE_ACTION_UPDATE);
 	if (m_pDlgBottomChangePane)
-		m_pDlgBottomChangePane->EditDlgPreviewChange(wp,lp);
+		m_pDlgBottomChangePane->EditDlgPreviewChange(wp,(int)lp);
 	return 0;
 }
 

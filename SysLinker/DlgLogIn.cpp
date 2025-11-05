@@ -33,6 +33,10 @@ CDlgLogIn::CDlgLogIn(YAdoDatabase * pMainDB , CWnd* pParent /*=NULL*/)
 	m_wMajor = 1;
 	m_wMinor = 0;
 	m_bVersionTempSelected = FALSE;
+#ifdef _DEBUG
+	m_strUser = L"admin";
+	m_strPwd = L"admin";
+#endif
 }
 #else
 CDlgLogIn::CDlgLogIn(YAdoDatabase * pMainDB, CWnd* pParent /*=NULL*/)

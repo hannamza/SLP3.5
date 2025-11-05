@@ -232,7 +232,7 @@ void CDlgChildPSwitch::OnBnClickedBtnSave()
 		return;
 	}
 	nPcb = m_nNum / 4 + 1;
-	m_pRefChangeData->SetPSwitchData(nFacpID, m_nNum, nType, m_strName, m_strLcd, nPcb);
+	m_pRefChangeData->SetPSwitchData(nFacpID, m_nNum, nType, m_strName, m_strLcd,L"",L"",nPcb);
 	if (m_bAddStatus)
 	{
 // 		if (DataAdd(nFacpID , m_nNum , nType , m_strName, nPcb) <= 0)

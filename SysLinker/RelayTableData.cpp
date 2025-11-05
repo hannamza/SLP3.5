@@ -7662,6 +7662,28 @@ int CRelayTableData::InsertPrjBaseData()
 		return 0;
 	}
 
+	if(CheckAddColumn(L"TB_PSWITCH_MST",L"PS_PREFIX",TRUE,L"varchar(100)") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_PSWITCH_MST에 PS_PREFIX 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_PREFIX 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PS_PREFIX column to TB_PSWITCH_MST of the database.");
+#endif
+		return 0;
+	}
+
+	if(CheckAddColumn(L"TB_PSWITCH_MST",L"PS_TYPENAME",TRUE,L"varchar(100)") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_PSWITCH_MST에 PS_TYPENAME 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_TYPENAME 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PS_TYPENAME column to TB_PSWITCH_MST of the database.");
+#endif
+		return 0;
+	}
+
 	if (CheckAddColumn(L"TB_PUMP_MST", L"PMP_LCD", TRUE, L"varchar(100)") == 0)
 	{
 		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
@@ -7669,6 +7691,39 @@ int CRelayTableData::InsertPrjBaseData()
 		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_LCD 컬럼을 추가하는데 실패했습니다.");
 #else
 		GF_AddLog(L"Failed to add the PMP_LCD column to TB_PUMP_MST in the database.");
+#endif
+		return 0;
+	}
+
+	if(CheckAddColumn(L"TB_PUMP_MST",L"PMP_PREFIX",TRUE,L"varchar(100)") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_PREFIX 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_PREFIX 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_PREFIX column to TB_PUMP_MST in the database.");
+#endif
+		return 0;
+	}
+
+	if(CheckAddColumn(L"TB_PUMP_MST",L"PMP_TYPENAME",TRUE,L"varchar(100)") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_TYPENAME 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_TYPENAME 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_TYPENAME column to TB_PUMP_MST in the database.");
+#endif
+		return 0;
+	}
+
+	if(CheckAddColumn(L"TB_PUMP_MST",L"PMP_USEPS",TRUE,L"SMALLINT") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_PUMP_MST에 PMP_USEPS 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_USEPS 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_USEPS column to TB_PATTERN_MST of the database.");
 #endif
 		return 0;
 	}
@@ -11427,7 +11482,58 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 		return 0;
 	}
+//////////////////////////////////////////////////////////////////////////
+	// [2025/9/24 13:50:12 KHS] 
+	// Pump UI 개선 관련 DB Column 추가 - Pump , PS
+	if(CheckAddColumn(L"TB_PSWITCH_MST",L"PS_PREFIX",TRUE,L"varchar(100)") == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_PREFIX 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PS_PREFIX column to TB_PSWITCH_MST of the database.");
+#endif
+		return 0;
+	}
+	if(CheckAddColumn(L"TB_PSWITCH_MST",L"PS_TYPENAME",TRUE,L"varchar(100)") == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PSWITCH_MST에 PS_TYPENAME 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PS_TYPENAME column to TB_PSWITCH_MST of the database.");
+#endif
+		return 0;
+	}
 
+	if(CheckAddColumn(L"TB_PUMP_MST",L"PMP_PREFIX",TRUE,L"varchar(100)") == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_PREFIX 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_PREFIX column to TB_PUMP_MST of the database.");
+#endif
+		return 0;
+	}
+	if(CheckAddColumn(L"TB_PUMP_MST",L"PMP_TYPENAME",TRUE,L"varchar(100)") == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_TYPENAME 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_TYPENAME column to TB_PUMP_MST of the database.");
+#endif
+		return 0;
+	}
+
+	if(CheckAddColumn(L"TB_PUMP_MST",L"PMP_USEPS",TRUE,L"SMALLINT") == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_PUMP_MST에 PMP_USEPS 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the PMP_USEPS column to TB_PUMP_MST of the database.");
+#endif
+		return 0;
+	}
+
+//////////////////////////////////////////////////////////////////////////
 
 	if (CheckAddColumn(L"TB_RELAY_LIST", L"RIDX", TRUE, L"int") == 0)
 	{
@@ -13177,7 +13283,7 @@ int CRelayTableData::LoadLinkRelay()
 
 int CRelayTableData::LoadPump()
 {
-	CString strSql, strKey, strName , strLcd = L"";
+	CString strSql, strKey, strName , strLcd = L"",strPrefix,strTypeName;
 	CDataPump * pData;
 	int nCnt = 0, nValue = 0, i;
 	int nFID, nPType , nPcb;
@@ -13215,10 +13321,12 @@ int CRelayTableData::LoadPump()
 		m_pDB->GetFieldValue(L"PMP_NAME", strName);
 		m_pDB->GetFieldValue(L"PMP_LCD", strLcd);
 		m_pDB->GetFieldValue(L"PMP_PCB", nValue);
+		m_pDB->GetFieldValue(L"PMP_PREFIX",strPrefix);
+		m_pDB->GetFieldValue(L"PMP_TYPENAME",strTypeName);
 		nPcb = nValue;
 
 		pData = new CDataPump;
-		pData->SetPumpData(nFID, nPID, nPType, strName, strLcd, nPcb);
+		pData->SetPumpData(nFID, nPID, nPType, strName, strLcd,strPrefix,strTypeName, nPcb);
 		m_spPump->AddTail(pData);
 		m_pDB->MoveNext();
 	}
@@ -13275,7 +13383,7 @@ int CRelayTableData::LoadFacpContact()
 
 int CRelayTableData::LoadPresureSwitch()
 {
-	CString strSql, strKey, strName, strLcd = L"";
+	CString strSql, strKey, strName, strLcd = L"",strPrefix,strTypeName;
 	CDataPS * pData;
 	int nCnt = 0, nValue = 0, i;
 	int nFID, nPType, nPcb;
@@ -13312,10 +13420,12 @@ int CRelayTableData::LoadPresureSwitch()
 		m_pDB->GetFieldValue(L"PS_NAME", strName);
 		m_pDB->GetFieldValue(L"PS_LCD", strLcd);
 		m_pDB->GetFieldValue(L"PS_PCB", nValue);
+		m_pDB->GetFieldValue(L"PS_PREFIX",strPrefix);
+		m_pDB->GetFieldValue(L"PS_TYPENAME",strTypeName);
 		nPcb = nValue;
 
 		pData = new CDataPS;
-		pData->SetPSwitchData(nFID, nPID, nPType, strName, strLcd, nPcb);
+		pData->SetPSwitchData(nFID,nPID,nPType,strName,strLcd,strPrefix,strTypeName,nPcb);
 		m_spPresureSwitch->AddTail(pData);
 		m_pDB->MoveNext();
 	}
@@ -18802,7 +18912,7 @@ UINT CRelayTableData::LoadFromRv63Unit0ChnRom(int nFacpNum, BYTE *pMain, BYTE * 
 		}
 		nSize = GF_ASCII2Unicode(szBuff, wszMsg, 256);
 		strMsg = wszMsg;
-		pPs->SetPSwitchData(nFacpNum, x + 1, btInType, strMsg, strMsg, 0);
+		pPs->SetPSwitchData(nFacpNum, x + 1, btInType, strMsg, strMsg,L"",L"", 0);
 // 		pPs->SetPSwitchData(x + 1, x + 1
 // 			, CvtEquipRomIDToDatabeseID(ET_PSTYPE, ptrEqList, btInType)
 // 			, strMsg, strMsg, 0);
@@ -18888,7 +18998,8 @@ UINT CRelayTableData::LoadFromRv63Unit1ChnRom(int nFacpNum, BYTE *pMain, BYTE * 
 	CDataDevice		*	pDev = nullptr;
 	CDataLinked		*	pLinked = nullptr;
 	CDataPump		*	pPmp = nullptr;
-
+	CDataPS			*	pPs = nullptr;
+	int					nPsUse;
 	if (m_spPump == nullptr)
 	{
 		m_spPump = std::make_shared<CManagerPump>();
@@ -18930,9 +19041,15 @@ UINT CRelayTableData::LoadFromRv63Unit1ChnRom(int nFacpNum, BYTE *pMain, BYTE * 
 		}
 		nSize = GF_ASCII2Unicode(szBuff, wszMsg, 256);
 		strMsg = wszMsg;
+
+		pPs = m_spPresureSwitch->GetPSData(nFID,x);
+		if(pPs == nullptr)
+			nPsUse = PUMP_PS_NOTUSE;
+		else
+			nPsUse = PUMP_PS_USE;
 		pPmp->SetPumpData(nFID, x
 			, btInType
-			, strMsg, strMsg);
+			, strMsg, strMsg,L"",L"",nPsUse);
 		m_spPump->AddTail(pPmp);
 
 		for (i = 0; i < btPtnCnt; i++)
@@ -19379,7 +19496,7 @@ UINT CRelayTableData::Load63Unit0ChnFromRom(int nFacpNum, CPtrList * ptrEqList, 
 		strMsg = wszMsg;
 		pPs->SetPSwitchData(x + 1, x + 1
 			, CvtEquipRomIDToDatabeseID(ET_PSTYPE, ptrEqList, btInType)
-			,  strMsg,strMsg, 0);
+			,strMsg,strMsg,L"",L"",0);
 		m_spPresureSwitch->AddTail(pPs);
 
 		for (i = 0; i < btPtnCnt; i++)
@@ -19462,7 +19579,8 @@ UINT CRelayTableData::Load63Unit1ChnFromRom(int nFacpNum, CPtrList * ptrEqList, 
 	CDataDevice		*	pDev = nullptr;
 	CDataLinked		*	pLinked = nullptr;
 	CDataPump		*	pPmp = nullptr;
-
+	CDataPS			*	pPs = nullptr;
+	int					nPsUse;
 	if (m_spPump == nullptr)
 	{
 		m_spPump = std::make_shared<CManagerPump>();
@@ -19504,9 +19622,16 @@ UINT CRelayTableData::Load63Unit1ChnFromRom(int nFacpNum, CPtrList * ptrEqList, 
 		}
 		nSize = GF_ASCII2Unicode(szBuff, wszMsg, 256);
 		strMsg = wszMsg;
+
+		pPs = m_spPresureSwitch->GetPSData(nFID,x);
+		if(pPs == nullptr)
+			nPsUse = PUMP_PS_NOTUSE;
+		else
+			nPsUse = PUMP_PS_USE;
+
 		pPmp->SetPumpData(nFID, x
 			, CvtEquipRomIDToDatabeseID(ET_PUMPTYPE, ptrEqList, btInType)
-			, strMsg,strMsg);
+			, strMsg,strMsg,L"",L"",nPsUse);
 		m_spPump->AddTail(pPmp);
 
 		for (i = 0; i < btPtnCnt; i++)

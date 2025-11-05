@@ -53,6 +53,8 @@ void CManagerPump::RemoveData(CDataPump* pData)
 {
 	CDataPump *pTemp;
 	POSITION pos , savePos;
+	if(pData == nullptr)
+		return; 
 	pos = GetHeadPosition();
 	while (pos)
 	{

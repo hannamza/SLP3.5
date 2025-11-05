@@ -68,8 +68,9 @@ BEGIN_MESSAGE_MAP(CXListCtrl, CListCtrl)
 	ON_REGISTERED_MESSAGE(WM_XEDIT_VK_ESCAPE, OnXEditEscape)
 	ON_WM_LBUTTONDBLCLK()
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, &CXListCtrl::OnLvnGetdispinfo)
-	ON_NOTIFY_REFLECT(LVN_BEGINDRAG,&CXListCtrl::OnLvnBegindrag)
+	ON_NOTIFY_REFLECT_EX(LVN_BEGINDRAG,&CXListCtrl::OnLvnBegindrag)
 	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,6 +100,17 @@ CXListCtrl::CXListCtrl()
 	m_nWindowFontSize = -1;
 	m_strWindowFont = _T("");
 	m_bSorting = FALSE;
+
+	// [2025/11/4 8:57:38 KHS] 
+	// Focus를 읽어도 항상 선택 사항을 표시 - 
+	m_bAlwaysVisibleSelWhenLostFocus = FALSE;
+	// [2025/9/23 9:01:02 KHS] 
+	// Drag관련 추가
+	m_nDragIndex = -1;
+	m_bEnableDrag = FALSE;
+	m_bDragging = FALSE;
+	m_pDragImage = nullptr;
+
 	GetColors();
 }
 
@@ -112,6 +124,12 @@ CXListCtrl::~CXListCtrl()
 #endif
 	if (m_pEdit)
 		delete m_pEdit;
+
+	if(m_pDragImage)
+	{
+		delete m_pDragImage;
+		m_pDragImage = nullptr;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -202,7 +220,6 @@ void CXListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// This is the notification message for an item.  We'll request
 		// notifications before each subitem's prepaint stage.
-
 		*pResult = CDRF_NOTIFYSUBITEMDRAW;
 	}
 	else if (pLVCD->nmcd.dwDrawStage == (CDDS_ITEMPREPAINT | CDDS_SUBITEM))
@@ -469,8 +486,12 @@ void CXListCtrl::GetDrawColors(int nItem,
 			{
 				if (dwStyle & LVS_SHOWSELALWAYS)
 				{
-					crText  = m_crWindowText;
-					crBkgnd = m_crBtnFace;
+					// Focus를 잃어도 항상 표시
+					if(m_bAlwaysVisibleSelWhenLostFocus == FALSE)
+					{
+						crText = m_crWindowText;
+						crBkgnd = m_crBtnFace;
+					}
 				}
 				else
 				{
@@ -492,8 +513,11 @@ void CXListCtrl::GetDrawColors(int nItem,
 				{
 					if (dwStyle & LVS_SHOWSELALWAYS)
 					{
-						crText  = m_crWindowText;
-						crBkgnd = m_crBtnFace;
+						if(m_bAlwaysVisibleSelWhenLostFocus == FALSE)
+						{
+							crText = m_crWindowText;
+							crBkgnd = m_crBtnFace;
+						}
 					}
 					else
 					{
@@ -1352,7 +1376,11 @@ void CXListCtrl::OnDestroy()
 	}
 
 	m_bHeaderIsSubclassed = FALSE;
-
+	if(m_pDragImage)
+	{
+		delete m_pDragImage;
+		m_pDragImage = nullptr;
+	}
 	CListCtrl::OnDestroy();
 }
 
@@ -3156,17 +3184,308 @@ void CXListCtrl::OnLvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 
-void CXListCtrl::OnLvnBegindrag(NMHDR *pNMHDR,LRESULT *pResult)
+BOOL CXListCtrl::OnLvnBegindrag(NMHDR *pNMHDR,LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
+	if(!m_bEnableDrag) return FALSE;
+
+	CPoint pt;
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	m_nDragIndex = pNMListView->iItem;
+	GetOrigin(&pt);
+	//m_pDragImage = CreateDragImageEx(&pt);
+	m_pDragImage = CreateDragImageWithText(m_nDragIndex);
+	if(m_pDragImage)
+	{
+		CPoint pt(pNMListView->ptAction);
+		ClientToScreen(&pt);
+		m_pDragImage->BeginDrag(0,CPoint(0,0));
+		m_pDragImage->DragEnter(GetDesktopWindow(),pt);
+		SetCapture();
+		m_bDragging = TRUE;
+	}
+	return FALSE;
 }
 
 
 void CXListCtrl::OnMouseMove(UINT nFlags,CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
+	if(m_bDragging && m_pDragImage)
+	{
+		POINT pt = { point.x,point.y };
+		ClientToScreen(&pt);
+		m_pDragImage->DragMove(pt);
+		int nHit = HitTestEx(point);
+		if(nHit != -1 && nHit != m_nDragIndex)
+		{
+			SetItemState(nHit,LVIS_DROPHILITED,LVIS_DROPHILITED);
+		}
+	}
 	CListCtrl::OnMouseMove(nFlags,point);
+}
+
+
+void CXListCtrl::OnLButtonUp(UINT nFlags,CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if(m_bDragging)
+	{
+		if(m_pDragImage)
+		{
+			POINT pt = { point.x,point.y };
+			ClientToScreen(&pt);
+			m_pDragImage->DragLeave(GetDesktopWindow());
+			m_pDragImage->EndDrag();
+			delete m_pDragImage;
+			m_pDragImage = nullptr;
+		}
+
+
+		ReleaseCapture();
+		m_bDragging = FALSE;
+
+
+		int nTarget = HitTestEx(point);
+		if(nTarget == -1)
+			nTarget = GetItemCount() - 1;
+
+
+		if(nTarget != -1 && m_nDragIndex != -1 && nTarget != m_nDragIndex)
+		{
+			//MoveItem(m_nDragIndex,nTarget);
+		}
+
+
+		m_nDragIndex = -1;
+		for(int i = 0; i < GetItemCount(); ++i) SetItemState(i,0,LVIS_DROPHILITED);
+	}
+	CListCtrl::OnLButtonUp(nFlags,point);
+}
+
+
+int CXListCtrl::HitTestEx(CPoint point)
+{
+	LVHITTESTINFO info = { 0 };
+	info.pt = point;
+	return HitTest(&info);
+}
+
+void CXListCtrl::MoveItem(int nFrom,int nTo)
+{
+	if(nFrom == nTo) return;
+
+
+	LVITEM lvitem = { 0 };
+	TCHAR buf[1024];
+	lvitem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE;
+	lvitem.iItem = nFrom;
+	lvitem.pszText = buf;
+	lvitem.cchTextMax = _countof(buf);
+	lvitem.stateMask = 0xFFFF;
+
+
+	if(!GetItem(&lvitem)) return;
+
+
+	CStringArray subTexts;
+	int nCols = GetHeaderCtrl()->GetItemCount();
+	for(int c = 0; c < nCols; ++c)
+	{
+		TCHAR sub[1024] = { 0 };
+		GetItemText(nFrom,c,sub,_countof(sub));
+		subTexts.Add(sub);
+	}
+
+
+	DeleteItem(nFrom);
+
+
+	int nInsert = nTo;
+	if(nTo > nFrom) nInsert = nTo;
+	if(nInsert > GetItemCount()) nInsert = GetItemCount();
+
+
+	InsertItem(nInsert,subTexts.GetCount() ? subTexts[0] : _T(""));
+	for(int c = 0; c < nCols; ++c)
+		SetItemText(nInsert,c,subTexts[c]);
+
+
+	SetItemState(nInsert,LVIS_SELECTED,LVIS_SELECTED);
+}
+
+CImageList *CXListCtrl::CreateDragImageWithText(int nItem)
+{
+	if(nItem < 0) return nullptr;
+
+	// 아이템 텍스트
+	CString text = GetItemText(nItem,0);
+
+	// 아이템 아이콘
+	int nImage = -1;
+	LVITEM lvi = { 0 };
+	lvi.mask = LVIF_IMAGE;
+	lvi.iItem = nItem;
+	GetItem(&lvi);
+	nImage = lvi.iImage;
+
+	// 아이콘 이미지 가져오기
+	CImageList* pImgList = GetImageList(LVSIL_NORMAL);
+	CSize sizeIcon(32,32);
+	if(pImgList)
+	{
+		IMAGEINFO info;
+		pImgList->GetImageInfo(nImage,&info);
+		sizeIcon.cx = info.rcImage.right - info.rcImage.left;
+		sizeIcon.cy = info.rcImage.bottom - info.rcImage.top;
+	}
+
+	// 텍스트 폭 계산
+	CClientDC dc(this);
+	CFont* pOldFont = dc.SelectObject(GetFont());
+	CSize sizeText = dc.GetTextExtent(text);
+	dc.SelectObject(pOldFont);
+
+	// 전체 비트맵 크기 = 아이콘 + 여백 + 텍스트
+	//int nWidth = sizeIcon.cx + 4 + sizeText.cx;
+	//int nHeight = max(sizeIcon.cy,sizeText.cy);
+	CRect rcOne;
+	GetItemRect(nItem,rcOne,LVIR_BOUNDS);
+
+	int nWidth = rcOne.Width();
+	int nHeight = rcOne.Height();
+
+	// 드래그 이미지 생성
+	CImageList* pDragImage = new CImageList();
+	pDragImage->Create(nWidth,nHeight,ILC_COLOR32 | ILC_MASK,0,1);
+
+	// 비트맵 DC에 그리기
+	CBitmap bmp;
+	CDC memDC;
+	memDC.CreateCompatibleDC(&dc);
+	bmp.CreateCompatibleBitmap(&dc,nWidth,nHeight);
+	CBitmap* pOldBmp = memDC.SelectObject(&bmp);
+
+	memDC.FillSolidRect(0,0,nWidth,nHeight,RGB(255,255,255)); // 배경 흰색
+	memDC.SetBkMode(TRANSPARENT);
+
+	// 아이콘 그리기
+	if(pImgList && nImage >= 0)
+		pImgList->Draw(&memDC,nImage,CPoint(0,(nHeight - sizeIcon.cy) / 2),ILD_TRANSPARENT);
+
+	// 텍스트 그리기
+	memDC.TextOut(sizeIcon.cx + 4,(nHeight - sizeText.cy) / 2,text);
+
+	memDC.SelectObject(pOldBmp);
+
+	// 이미지리스트에 추가
+	pDragImage->Add(&bmp,RGB(255,255,255));
+
+	return pDragImage;
+}
+
+
+CImageList *CXListCtrl::CreateDragImageEx(LPPOINT lpPoint)
+{
+	CRect	cSingleRect;
+	CRect	cCompleteRect(0,0,0,0);
+	int	nIdx;
+	BOOL	bFirst = TRUE;
+
+	CFont* pOldFont = GetFont();
+	LOGFONT logFont;
+	pOldFont->GetLogFont(&logFont);
+	logFont.lfQuality = ANTIALIASED_QUALITY; // 또는 CLEARTYPE_QUALITY 등,ANTIALIASED_QUALITY
+	CFont newFont;
+	newFont.CreateFontIndirect(&logFont);
+	SetFont(&newFont);
+	//
+	// Determine the size of the drag image
+	//
+	POSITION pos = GetFirstSelectedItemPosition();
+	while(pos)
+	{
+		nIdx = GetNextSelectedItem(pos);
+		GetItemRect(nIdx,cSingleRect,LVIR_BOUNDS);
+		if(bFirst)
+		{
+			// Initialize the CompleteRect
+			GetItemRect(nIdx,cCompleteRect,LVIR_BOUNDS);
+			bFirst = FALSE;
+		}
+		cCompleteRect.UnionRect(cCompleteRect,cSingleRect);
+	}
+
+	//
+	// Create bitmap in memory DC
+	//
+	CClientDC	cDc(this);
+	CDC		cMemDC;
+	CBitmap   	cBitmap;
+
+	if(!cMemDC.CreateCompatibleDC(&cDc))
+		return NULL;
+
+	if(!cBitmap.CreateCompatibleBitmap(&cDc,cCompleteRect.Width(),cCompleteRect.Height()))
+		return NULL;
+
+	CBitmap* pOldMemDCBitmap = cMemDC.SelectObject(&cBitmap);
+	// Here green is used as mask color
+	cMemDC.FillSolidRect(0,0,cCompleteRect.Width(),cCompleteRect.Height(),RGB(0,255,0));
+
+	//
+	// Paint each DragImage in the DC
+	//
+	CImageList *pSingleImageList;
+	CPoint		cPt;
+
+	pos = GetFirstSelectedItemPosition();
+	while(pos)
+	{
+		nIdx = GetNextSelectedItem(pos);
+		GetItemRect(nIdx,cSingleRect,LVIR_BOUNDS);
+
+		pSingleImageList = CreateDragImage(nIdx,&cPt);
+		if(pSingleImageList)
+		{
+			pSingleImageList->DrawIndirect(&cMemDC,
+				0,
+				CPoint(cSingleRect.left - cCompleteRect.left,
+					cSingleRect.top - cCompleteRect.top),
+				cSingleRect.Size(),
+				CPoint(0,0));
+			delete pSingleImageList;
+		}
+	}
+
+	cMemDC.SelectObject(pOldMemDCBitmap);
+	//
+	// Create the imagelist	with the merged drag images
+	//
+	CImageList* pCompleteImageList = new CImageList;
+
+	pCompleteImageList->Create(cCompleteRect.Width(),
+		cCompleteRect.Height(),
+		ILC_COLOR | ILC_MASK,0,1);
+	// Here green is used as mask color
+	pCompleteImageList->Add(&cBitmap,RGB(0,255,0));
+
+	cBitmap.DeleteObject();
+	//
+	// as an optional service:
+	// Find the offset of the current mouse cursor to the imagelist
+	// this we can use in BeginDrag()
+	//
+	if(lpPoint)
+	{
+		CPoint cCursorPos;
+		GetCursorPos(&cCursorPos);
+		ScreenToClient(&cCursorPos);
+		lpPoint->x = cCursorPos.x - cCompleteRect.left;
+		lpPoint->y = cCursorPos.y - cCompleteRect.top;
+	}
+	SetFont(pOldFont);
+	return(pCompleteImageList);
 }
