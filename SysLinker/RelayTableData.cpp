@@ -7800,12 +7800,36 @@ int CRelayTableData::InsertPrjBaseEquipDB()
 	POSITION pos;
 	CString strSql;
 	int nCnt = 0; 
+
+	//20251124 GBM start - bak파일에 남아있는 설비정의로 인해 eqiupment.xlsx에서 적용 + 중계기 일람표에서 추가 사항이 올바르게 적용되지 않아서 아예 delete를 먼저 실행
+	strSql.Format(L"DELETE TB_EQUIP_MST");
+	if (m_pDB->ExecuteSql(strSql))
+	{
+		Log::Trace("[%s] Query Succeeded!", strSql);
+	}
+	else
+	{
+		Log::Trace("[%s] Query Failed!", strSql);
+		return 0;
+	}
+	//20251124 GBM end
+
 	pos = m_spRefInputEquipManager->GetHeadPosition();
 	while (pos)
 	{
 		pData = m_spRefInputEquipManager->GetNext(pos);
 		if (pData == nullptr)
 			continue;
+
+		//20251124 GBM start
+		if (pData->GetEquipName() == "자동폐쇄"
+			|| pData->GetEquipName() == "창문폐쇄"
+			|| pData->GetEquipName() == "부표시기"
+			|| pData->GetEquipName() == "시각경보")
+		{
+			int a = 0;
+		}
+		//20251124 GBM end
 
 		strSql.Format(L"SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=%d AND EQ_ID=%d"
 			, pData->GetEquipType(), pData->GetEquipID()
