@@ -488,6 +488,7 @@
 #define IDC_BTN_MAKE                    1029
 #define IDC_CMB_INTYPE                  1029
 #define IDC_BTN_SAVE2                   1029
+#define IDC_COMBO_PUMP_TYPE             1029
 #define IDC_CHKP_ROOM_STAIR             1030
 #define IDC_CMB_IN_TO_BUILD             1030
 #define IDC_CMB_CHN                     1030

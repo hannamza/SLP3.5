@@ -174,7 +174,7 @@ CString CPumpItem::MakeFullName(BOOL bPump,int nInType,CString strPrefix,CString
 void CPumpItem::OnBnClickedOk()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CCustomBaseItem::OnOK();
+	//CCustomBaseItem::OnOK();
 }
 
 

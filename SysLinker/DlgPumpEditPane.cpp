@@ -19,6 +19,7 @@
 #include "ManagerFacp.h"
 #include "RelayTableData.h"
 #include "PumpTypeList.h"
+#include "DataEquip.h"
 // CDlgPumpEditPane 대화 상자입니다.
 
 IMPLEMENT_DYNAMIC(CDlgPumpEditPane, CDialogEx)
@@ -160,23 +161,45 @@ BOOL CDlgPumpEditPane::OnInitDialog()
 	m_ctrlPumpTypeList.SetAlwaysVisibleSelection(TRUE);
 	m_ctrlPumpTypeList.ModifyStyle(0,LVS_SHOWSELALWAYS);
 
-#ifndef ENGLISH_MODE
-	m_cmbPsType.InsertString(0,L"지속");
-	m_cmbPsType.InsertString(1,L"비지속");
+	//펌프 / 압력스위치 타입을 설비 정의에서 가져와 처리
+	m_pRefFasSysData = theApp.GetRelayTableData();
 
-	m_cmbPumpType.InsertString(0,L"휀입력");
-	m_cmbPumpType.InsertString(1,L"펌프입력");
-	m_cmbPumpType.InsertString(2,L"한전전원");
-	m_cmbPumpType.InsertString(3,L"비상발전기");
-#else
-	m_cmbPsType.InsertString(0,L"Keep");
-	m_cmbPsType.InsertString(1,L"NoKeep");
+	POSITION pos;
+	CDataEquip* pDataEquip;
+	int nIndex = 0;
 
-	m_cmbPumpType.InsertString(0,L"FAN");
-	m_cmbPumpType.InsertString(1,L"PUMP");
-	m_cmbPumpType.InsertString(2,L"Alw.Pwr");
-	m_cmbPumpType.InsertString(3,L"Generator");
-#endif
+	// 압력스위치
+	std::shared_ptr<CManagerEquip> spPSManager = m_pRefFasSysData->GetEquipManager(ET_PSTYPE);
+	if (spPSManager == nullptr)
+		return 0;
+
+	pos = spPSManager->GetHeadPosition();
+	while (pos)
+	{
+		pDataEquip = spPSManager->GetNext(pos);
+		if(pDataEquip == nullptr)
+			continue;
+
+		m_cmbPsType.InsertString(nIndex, pDataEquip->GetEquipName());
+		nIndex++;
+	}
+
+	// 펌프
+	std::shared_ptr<CManagerEquip> spPumpManager = m_pRefFasSysData->GetEquipManager(ET_PUMPTYPE);
+	if (spPumpManager == nullptr)
+		return 0;
+
+	nIndex = 0;
+	pos = spPumpManager->GetHeadPosition();
+	while (pos)
+	{
+		pDataEquip = spPumpManager->GetNext(pos);
+		if (pDataEquip == nullptr)
+			continue;
+
+		m_cmbPumpType.InsertString(nIndex, pDataEquip->GetEquipName());
+		nIndex++;
+	}
 //	MakeFacpButton();
 	ResizeControl();
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -826,8 +849,8 @@ void CDlgPumpEditPane::SetPumpTemplete(CPtrList * pPtrTemplete)
 
 int CDlgPumpEditPane::InitDlg()
 {
-	if(AfxGetMainWnd())
-		m_pRefFasSysData = theApp.GetRelayTableData();
+// 	if(AfxGetMainWnd())
+// 		m_pRefFasSysData = theApp.GetRelayTableData();
 	MakeFacpButton();
 
 // 	if(m_nPaneType == 1)
