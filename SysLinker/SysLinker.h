@@ -163,7 +163,7 @@ public:
 	afx_msg void OnUpdateBasicSetUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateBasicSetUsergroup(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateBasicSetEditLogic(CCmdUI *pCmdUI);
-	//afx_msg void OnUpdateFacpCreateLink(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateFacpCreateLink(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFacpEditLink(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFacpEmmergency(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFacpLinkPs(CCmdUI *pCmdUI);
@@ -174,6 +174,7 @@ public:
 	afx_msg void OnUpdateFacpReverseLink(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFacpSetFacppwd(CCmdUI *pCmdUI);
 
+	afx_msg void OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI);
 
 	int SetSystemPath();
 	int DocumentTemplateInit();

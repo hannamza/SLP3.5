@@ -7821,16 +7821,6 @@ int CRelayTableData::InsertPrjBaseEquipDB()
 		if (pData == nullptr)
 			continue;
 
-		//20251124 GBM start
-		if (pData->GetEquipName() == "ÀÚµ¿Æó¼â"
-			|| pData->GetEquipName() == "Ã¢¹®Æó¼â"
-			|| pData->GetEquipName() == "ºÎÇ¥½Ã±â"
-			|| pData->GetEquipName() == "½Ã°¢°æº¸")
-		{
-			int a = 0;
-		}
-		//20251124 GBM end
-
 		strSql.Format(L"SELECT * FROM TB_EQUIP_MST WHERE EQ_TYPE=%d AND EQ_ID=%d"
 			, pData->GetEquipType(), pData->GetEquipID()
 		);

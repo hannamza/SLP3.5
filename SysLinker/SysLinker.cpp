@@ -323,7 +323,7 @@ BEGIN_MESSAGE_MAP(CSysLinkerApp, CWinAppEx)
 	ON_UPDATE_COMMAND_UI(ID_BASIC_SET_USER, &CSysLinkerApp::OnUpdateBasicSetUser)
 	ON_UPDATE_COMMAND_UI(ID_BASIC_SET_USERGROUP, &CSysLinkerApp::OnUpdateBasicSetUsergroup)
 	ON_UPDATE_COMMAND_UI(ID_BASIC_SET_LOGIC_EDIT, &CSysLinkerApp::OnUpdateBasicSetEditLogic)
-	//ON_UPDATE_COMMAND_UI(ID_FACP_CREATE_LINK, &CSysLinkerApp::OnUpdateFacpCreateLink)
+	ON_UPDATE_COMMAND_UI(ID_FACP_CREATE_LINK, &CSysLinkerApp::OnUpdateFacpCreateLink)
 	ON_UPDATE_COMMAND_UI(ID_FACP_EDIT_LINK, &CSysLinkerApp::OnUpdateFacpEditLink)
 	ON_UPDATE_COMMAND_UI(ID_FACP_EMMERGENCY, &CSysLinkerApp::OnUpdateFacpEmmergency)
 	ON_UPDATE_COMMAND_UI(ID_FACP_LINK_PS, &CSysLinkerApp::OnUpdateFacpLinkPs)
@@ -341,6 +341,7 @@ BEGIN_MESSAGE_MAP(CSysLinkerApp, CWinAppEx)
 	ON_UPDATE_COMMAND_UI(ID_HOME_PROJECT_TABLE, &CSysLinkerApp::OnUpdateHomeProjectTable)
 	ON_COMMAND(ID_ERROR_CHECK,&CSysLinkerApp::OnErrorCheck)
 	ON_UPDATE_COMMAND_UI(ID_ERROR_CHECK,&CSysLinkerApp::OnUpdateErrorCheck)
+	ON_UPDATE_COMMAND_UI(ID_HOME_ERROR_CHECK, &CSysLinkerApp::OnUpdateSimpleErrorCheck)
 END_MESSAGE_MAP()
 
 
@@ -1514,6 +1515,20 @@ void CSysLinkerApp::OnHomeProjectClose()
 		return;
 #endif
 
+	//20251125 GBM start - 만약 로직 편집기가 열려 있다면 죽임
+	CString strLogicEditor = _T("LogicEditor.exe");
+#ifndef ENGLISH_MODE
+	CString strLogicEditorCaption = L"로직 편집기";
+#else
+	CString strLogicEditorCaption = L"Logic Editor";
+#endif
+	HWND hwnd = FindWindow(NULL, strLogicEditorCaption);
+	if (hwnd != nullptr)
+	{
+		CCommonFunc::KillProcess(strLogicEditor);
+	}
+	//20251125 GBM end
+
 	//20240527 GBM start - 스레드로 전환
 #if 1
 	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -1567,6 +1582,7 @@ void CSysLinkerApp::OnHomeProjectClose()
 	GF_AddLog(L"프로젝트를 닫았습니다.");
 	Log::Trace("Project Closed!");
 #endif
+
 	//20240527 GBM end
 }
 
@@ -4208,6 +4224,7 @@ int CSysLinkerApp::CloseProject()
 	}
 
 	m_pMainDb->DetachMSDB(m_pFasSysData->GetDBName());
+
 	delete m_pFasSysData;
 	m_pFasSysData = nullptr;
 
@@ -4865,4 +4882,26 @@ BOOL CSysLinkerApp::InitEquipmentInfoTable(CString strEquipmentDefinitionFile)
 	xls.Close();
 	
 	return TRUE;
+}
+
+void CSysLinkerApp::OnUpdateFacpCreateLink(CCmdUI *pCmdUI)
+{
+	if (pCmdUI)
+	{
+		if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
+			pCmdUI->Enable(TRUE);
+		else
+			pCmdUI->Enable(FALSE);
+	}
+}
+
+void CSysLinkerApp::OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI)
+{
+	if (pCmdUI)
+	{
+		if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
+			pCmdUI->Enable(TRUE);
+		else
+			pCmdUI->Enable(FALSE);
+	}
 }
