@@ -1,7 +1,7 @@
 #pragma once
 
 // 프로그램 버전 번호, 배포 전 반드시 수정할 것
-#define SLP4_VERSION_NUMBER		1.6
+#define SLP4_VERSION_NUMBER		1.7
 
 // 프로젝트 루트 폴더
 #define ROOT_FOLDER		_T("SLP4")
@@ -419,6 +419,14 @@ enum {
 	TB_PROJECT_INFO
 }NEW_TABLES;
 
+// 2개 이상 연동데이터 걸러낼 문자열 위치
+enum {
+	GAS_A,
+	GAS_B,
+	VALVE,
+	RECHECK_OUTPUT_CONTENT_COUNT
+}RECHECK_OUTPUT_CONTENT;
+
 // GT1 추가 입력 타입 문자열 
 static const TCHAR* g_lpszEquipmentInputType[] = {
 	_T(""),						// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
@@ -548,6 +556,13 @@ static const TCHAR* g_lpszEquipmentOutputType[] = {
 // 	HIKVISION
 // }COMPANY_TYPE;
 
+// 가스, 밸브인 출력 설명이 2개 이상 중복으로 연동데이터 출력에 있으면 걸러내기 위한 기준 문자열
+static const TCHAR * g_szRecheckOutputContent[] = {
+	_T("가스A"),
+	_T("가스B"),
+	_T("밸브")
+};
+
 #pragma pack(push, 1)
 
 // 프로젝트 버전 정보 구조체 
@@ -618,5 +633,12 @@ typedef struct
 	std::vector<CString> etcVec;
 	std::vector<CString> exclusiveVec;
 }HELP_MESSAGE_OUTPUT_CONTENT_INFO;
+
+// 중요설비 재확인 기능을 위한 구조체
+typedef struct 
+{
+	std::vector<int> IDVec;
+	std::vector<CString> nameVec;
+}RECHECK_OUTPUT_CONTENT_INFO;
 
 #pragma pack(pop)

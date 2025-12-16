@@ -128,6 +128,10 @@ public:
 	BOOL	m_bIsComparedData;	//20240924 GBM - 메모리 누수 오류 수정, 비교 데이터 여부 Flag
 	BOOL	m_bNewEquipmentTypeAdded;	//20240422 GBM - 설비 정의가 추가되었을 때만 중계기 일람표 저장하기 위한 flag
 
+	//20251211 GBM start - 로직 재확인 대상 출력 내용의 index와 name
+	RECHECK_OUTPUT_CONTENT_INFO m_roci;
+	//20251211 GBM end
+
 protected:
 	//CMapLocation							m_MapLocation;
 	std::shared_ptr<CManagerLocation>	m_spLocation;
@@ -755,6 +759,8 @@ public:
 	//20240808 GBM start - 현재 수신기 / 유닛 타입 정보 얻음
 	void GetFacpAndUnitType();
 	//20240808 GBM end
+
+	void SetRecheckOutputContentInfo();
 };
 
 

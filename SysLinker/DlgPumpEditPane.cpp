@@ -1721,7 +1721,7 @@ void CDlgPumpEditPane::OnBnClickedBtnAddtemplete()
 #ifndef ENGLISH_MODE
 						strMsg.Format(L"대상이 되는 펌프 %s를 삭제하는데 실패 했습니다.",pItem->GetPumpFullName());
 #else
-						strMsg.Format(L"대상이 되는 펌프 %s를 삭제하는데 실패 했습니다.",pItem->GetPumpFullName());
+						strMsg.Format(L"Failed to delete target pump %s.",pItem->GetPumpFullName());
 #endif
 						AfxMessageBox(strMsg);
 						return;

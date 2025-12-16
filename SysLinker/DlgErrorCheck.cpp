@@ -129,6 +129,10 @@ void CDlgErrorCheck::StartErrorCheck(int nCheckType,CWnd * pTargetWnd)
 	m_ctrlReport.DeleteAllItems();
 	m_cmbType.SetCurSel(0);
 
+	//20251210 GBM start - 프로젝트를 닫았다가 다시 프로젝트 열고 오류 검사하면 죽는 오류 수정
+	m_pRefFasSysData = theApp.m_pFasSysData;
+	//20251210 GBM end
+
 	GetDlgItem(IDC_BTN_VIEW)->EnableWindow(FALSE);
 	AfxBeginThread((AFX_THREADPROC)Thread_CheckProc,(LPVOID)this);
 }
@@ -206,6 +210,11 @@ void CDlgErrorCheck::OnBnClickedBtnView()
 			strType = g_strErrChkText[pData->btType];
 			strDesc = pData->strDesc;
 			break;
+		case CHK_PATTERN_ITEM_CNT:
+			strErr = L"ERROR";
+			strType = g_strErrChkText[pData->btType];
+			strDesc = pData->strDesc;
+			break;
 		case CHK_TEXT_CNT:
 			strErr = L"WARNING";
 			strType = g_strErrChkText[pData->btType];
@@ -233,6 +242,11 @@ void CDlgErrorCheck::OnBnClickedBtnView()
 			break;
 		case CHK_INPUT_WITHOUT_OUTPUT:
 			strErr = L"WARNING";
+			strType = g_strErrChkText[pData->btType];
+			strDesc = pData->strDesc;
+			break;
+		case CHK_GAS_VALVE_REDUNDANCY:
+			strErr = L"ERROR";
 			strType = g_strErrChkText[pData->btType];
 			strDesc = pData->strDesc;
 			break;
@@ -378,6 +392,16 @@ int CDlgErrorCheck::ProcErrorCheck()
 	POSITION pos;
 	char szStrBuff[256] = { 0 };
 
+	//20251209 GBM start - 가스A, 가스B, 밸브 중복 체크를 위한 변수
+	CDataDevice* pTemp;
+	CRelayTableData* pRelayTableData = theApp.GetRelayTableData();
+	if (pRelayTableData == nullptr)
+		return 0;
+	pRelayTableData->SetRecheckOutputContentInfo();
+	int nListSize = pRelayTableData->m_roci.IDVec.size();
+	int* nCountList = new int[nListSize];
+	//20251209 GBM end
+
 
 	pDBUtil = new YAdoDatabase;
 	pDBUtil->MSSqlInitialize(g_stConfig.szDBPass,g_stConfig.szDBUser
@@ -397,7 +421,12 @@ int CDlgErrorCheck::ProcErrorCheck()
 	}
 	// 전체 개수 
 	// 1.패턴 개수
-	nCnt = spPmng->GetCount();
+
+	//20251210 GBM start - 패턴 자체 개수 검사 추가
+	int nPatternCount = spPmng->GetCount();
+	nCnt = nPatternCount + 1;	
+	//20251210 GBM end
+
 	nPtnCnt = nCnt;
 	nAllCnt += nCnt;
 
@@ -447,6 +476,27 @@ int CDlgErrorCheck::ProcErrorCheck()
 			pDBUtil = nullptr;
 			return 0; 
 		}
+
+		//20251210 GBM start - 패턴 자체 개수 추가	
+		if (nPatternCount >= D_MAX_PATTERN_COUNT)
+		{
+			// 사용자가 리스트에 아이템을 클릭하면 가장 빠른 번호의 패턴이 선택된 상태에서 트리가 펼쳐지도록 함
+			pos = spPmng->GetHeadPosition();
+			pPtn = spPmng->GetNext(pos);
+			if (pPtn != nullptr)
+			{
+#ifndef ENGLISH_MODE
+				strDesc.Format(L"패턴 개수 초과 - %d개", nPatternCount);
+#else
+				strDesc.Format(L"Number of patterns exceeded - %d", nPatternCount);
+#endif
+				InsertErrorList(CHK_PATTERN_CNT, nPatternCount, (LPVOID)pPtn, strDesc);
+			}
+		}
+		SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
+		nOffset++;
+		//20251210 GBM end
+
 		nItemCnt = 0;
 		pos = spPmng->GetHeadPosition();
 		while(pos)
@@ -469,7 +519,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 #else
 				strDesc.Format(L"Pattern : %s count limit exceeded - [%d] patterns", pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
 #endif
-				InsertErrorList(CHK_PATTERN_CNT,nItemCnt,pPtn,strDesc);
+				InsertErrorList(CHK_PATTERN_ITEM_CNT,nItemCnt,pPtn,strDesc);
 			}
 			nOffset ++;
 			SendMessage(CSWM_PROGRESS_STEP,nOffset,PROG_RESULT_STEP);
@@ -607,6 +657,78 @@ int CDlgErrorCheck::ProcErrorCheck()
 #endif
 			InsertErrorList(CHK_NOINPUT,0,pDev,strDesc);
 		}
+
+		// 20251209 GBM start - 아래에서 연동데이터 자동 생성 시 진행하지 않으므로 여기서 가스, 밸브 중복 여부를 판단해야 함
+		// 가스, 밸브 중복 여부 판단
+		CString strRecheckErr = _T("");
+		memset(nCountList, 0, sizeof(int) * nListSize);
+		CDataLinked* pDataLinked = nullptr;
+		int nType = -1;
+		CPtrList* pList = pDev->GetLinkedList();
+		pos = pList->GetHeadPosition();
+		while (pos)
+		{
+			pDataLinked = (CDataLinked*)pList->GetNext(pos);
+			if(pDataLinked == nullptr)
+				continue;
+
+			nType = pDataLinked->GetLinkType();
+			switch (nType)
+			{
+			case LK_TYPE_RELEAY:
+				pTemp = pRelayTableData->GetDeviceByID(pDataLinked->GetTgtFacp(), pDataLinked->GetTgtUnit(), pDataLinked->GetTgtChn(), pDataLinked->GetTgtDev());
+				if (pTemp == nullptr)
+					break;
+
+				for (int i = 0; i < nListSize; i++)
+				{
+					int nEquipID = pRelayTableData->m_roci.IDVec[i];
+					CDataEquip* pDataEquip = pTemp->GetEqOutContents();
+					if (pDataEquip != nullptr)
+					{
+						if (nEquipID == pDataEquip->GetEquipID())
+						{
+							nCountList[i]++;
+						}
+					}
+				}
+
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		BOOL bAlert = FALSE;
+		if (nListSize > 0)
+		{
+#ifndef ENGLISH_MODE
+			strRecheckErr.Format(_T("[%02d%02d-%d%03d] %s의 연동데이터에 문제가 있습니다. "), pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum(), pDev->GetEquipLocationName());
+#else
+			strRecheckErr.Format(_T("There is a problem with [%02d%02d-%d%03d] %s linked data. "), pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum(), pDev->GetEquipLocationName());
+#endif
+			for (int i = 0; i < nListSize; i++)
+			{
+				if (nCountList[i] > 1)
+				{
+					CString strTemp = _T("");
+#ifndef ENGLISH_MODE
+					strTemp.Format(_T("[%s]의 연동데이터 개수가 %d개 입니다. "), pRelayTableData->m_roci.nameVec[i], nCountList[i]);
+#else
+					strTemp.Format(_T("The number of linked data for [%s] is %d "), pRelayTableData->m_roci.nameVec[i], nCountList[i]);
+#endif
+					strRecheckErr += strTemp;
+					bAlert = TRUE;
+				}
+			}
+		}
+		
+		if (bAlert)
+		{
+			InsertErrorList(CHK_GAS_VALVE_REDUNDANCY, 0, pDev, strRecheckErr);
+		}
+		// 20251209 GBM end
 
 		if(m_nCheckType == 2) // 연동데이터 생성
 			continue; 
@@ -773,6 +895,9 @@ int CDlgErrorCheck::ProcErrorCheck()
 
 	if(m_pNotifyWnd && m_pNotifyWnd->GetSafeHwnd())
 		m_pNotifyWnd->SendMessage(UWM_ERRORCHECK_NOTIFY,(WPARAM)m_nCheckType,m_nErrorCnt);
+
+	delete[] nCountList;	//20251211 GBM - 동적할당 해제
+
 	return 1;
 }
 
@@ -842,7 +967,8 @@ void CDlgErrorCheck::OnNMDblclkListReport(NMHDR *pNMHDR,LRESULT *pResult)
 
 	switch(pData->btType)
 	{
-	case CHK_PATTERN_CNT:
+	case CHK_PATTERN_CNT:	// 패턴 자체 개수가 제한 개수보다 많을 때는 패턴 화면을 열어 패턴 중 가장 빠른 번호의 패턴을 가리키고 트리를 펼치도록 함
+	case CHK_PATTERN_ITEM_CNT:
 	{
 		CDataPattern * pPtn = (CDataPattern*)pData->lpData;
 		theApp.ViewFormSelectItem(FV_MAKEPATTERN,TTYPE_DEV_PATTERN,(DWORD_PTR)pPtn->GetPatternID());
@@ -876,6 +1002,11 @@ void CDlgErrorCheck::OnNMDblclkListReport(NMHDR *pNMHDR,LRESULT *pResult)
 		AfxGetMainWnd()->SendMessage(UWM_VIEWFORM_RELAY,SE_RELAY,(LPARAM)pData->lpData);
 	}
 		break;
+	case CHK_GAS_VALVE_REDUNDANCY:
+	{
+		AfxGetMainWnd()->SendMessage(UWM_VIEWFORM_RELAY, SE_RELAY, (LPARAM)pData->lpData);
+	}
+	break;
 	default:
 		return;
 	}
@@ -894,6 +1025,12 @@ void CDlgErrorCheck::InsertErrorList(BYTE btType,int nErrorCnt,LPVOID lpData,CSt
 	switch(btType)
 	{
 	case CHK_PATTERN_CNT:
+		strErr = L"ERROR";
+		strType = g_strErrChkText[btType];
+		pErr->btError = 1;
+		m_nErrorCnt++;
+		break;
+	case CHK_PATTERN_ITEM_CNT:
 		strErr = L"ERROR";
 		strType = g_strErrChkText[btType];
 		pErr->btError = 1;
@@ -938,6 +1075,12 @@ void CDlgErrorCheck::InsertErrorList(BYTE btType,int nErrorCnt,LPVOID lpData,CSt
 		strType = g_strErrChkText[btType];
 		pErr->btError = 0;
 		m_nWarningCnt ++;
+		break;
+	case CHK_GAS_VALVE_REDUNDANCY:
+		strErr = L"ERROR";
+		strType = g_strErrChkText[btType];
+		pErr->btError = 1;
+		m_nErrorCnt++;
 		break;
 	default:
 		strErr = L"Unknown";

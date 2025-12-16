@@ -2249,11 +2249,10 @@ void CSysLinkerApp::OnBasicSetLogicEdit()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 
-	//20250805 GBM start - test
-#if true
+	//20250805 GBM start - 별도의 로직 편집기 프로그램을 사용하는 방식으로 변경
+#ifdef SLP4_MODE
 	CString strPath = CCommonFunc::GetCurrentPath();
 	CString strExe = _T("LogicEditor.exe");
-	//CString strExe = _T("CommandLineTest.exe");
 	strPath += _T("\\") + strExe;
 	HANDLE hHandle = nullptr;
 	BOOL bFind = FALSE;
@@ -2269,7 +2268,6 @@ void CSysLinkerApp::OnBasicSetLogicEdit()
 	if (!bFind)
 	{
 		// 실행 중이 아니라면 실행
-		//ShellExecuteW(NULL, L"open", strPath, NULL, NULL, SW_SHOWNORMAL);
 		CString strProjectName;
 		strProjectName = m_pFasSysData->GetPrjName();
 		CString strCaption;

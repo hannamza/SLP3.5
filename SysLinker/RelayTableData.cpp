@@ -15468,6 +15468,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 	char szBuff[256] = { 0 };
 	int nPtnItemCount, nDldItemCnt;
 
+	SetRecheckOutputContentInfo();	//20251126 GBM - 롬파일 생성 전에 재확인 출력 기준 세팅
+
 	// [KHS 2020-12-9 14:29:10] 
 	// 역변환 시 ROM파일안에는 위치정보 , 출력설명 데이터가 없어서 역변환이 되지 않는문제가 발생한다.
 	// 아래변수들은 역변환을 위한 파일을 만들기 위한 변수
@@ -16893,6 +16895,14 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 // 	}
 
 	nSrcFacpID = CvtFacpNumToID(nFacpNum);
+
+	//20251126 GBM start - 출력 재확인 대상인지 체크
+	CString strRecheckErr = _T("");
+	int nListSize = m_roci.IDVec.size();
+	int* nCountList = new int[nListSize];
+	memset(nCountList, 0, sizeof(int) * nListSize);
+	//20251126 GBM end
+	
 	pos = pList->GetHeadPosition();
 	while (pos)
 	{
@@ -16911,6 +16921,22 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 			pTemp = GetDeviceByID(pdl->GetTgtFacp(), pdl->GetTgtUnit(), pdl->GetTgtChn(), pdl->GetTgtDev());
 			if (pTemp == nullptr)
 				continue; 
+
+			//20251209 GBM start - 출력 재확인 대상인지 체크
+			for (int i = 0; i < nListSize; i++)
+			{
+				int nEquipID = m_roci.IDVec[i];
+				CDataEquip* pDataEquip = pTemp->GetEqOutContents();
+				if (pDataEquip != nullptr)
+				{
+					if (nEquipID == pDataEquip->GetEquipID())
+					{
+						nCountList[i]++;
+					}
+				}
+			}
+			//20251209 GBM end
+
 			btCmd = pTemp->GetFacpNum();
 			btDiv = pTemp->GetUnitNum() * 4 + pTemp->GetChnNum();
 			btRest = pTemp->GetDeviceNum();
@@ -16976,6 +17002,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		default :
 			continue; 
 		}
+
 		strCode.Format(L"%s%d,",strPreFix , nPtID);
 		btDiv = nPtID / 256;
 		btRest = nPtID % 256;
@@ -16984,6 +17011,47 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 		btPtn[nPCnt * 3 + 2] = btRest;
 		nPCnt++;
 	}
+
+	//20251209 GBM start - 출력 재확인 대상인지 체크
+	BOOL bAlert = FALSE;
+	if (nListSize > 0)
+	{
+#ifndef ENGLISH_MODE
+		strRecheckErr.Format(_T("[%02d%02d-%d%03d] %s의 연동데이터에 문제가 있습니다.\r\n\r\n"), nFacpNum, nUnit, nChn, nRelay, strName);
+#else
+		strRecheckErr.Format(_T("There is a problem with [%02d%02d-%d%03d] %s linked data.\r\n\r\n"), nFacpNum, nUnit, nChn, nRelay, strName);
+#endif
+		for (int i = 0; i < nListSize; i++)
+		{
+			if (nCountList[i] > 1)
+			{
+				CString strTemp = _T("");
+#ifndef ENGLISH_MODE
+				strTemp.Format(_T("[%s]의 연동데이터 개수가 %d개 입니다.\r\n"), m_roci.nameVec[i], nCountList[i]);
+#else
+				strTemp.Format(_T("The number of linked data for [%s] is %d\r\n"), m_roci.nameVec[i], nCountList[i]);
+#endif
+				strRecheckErr += strTemp;
+
+				bAlert = TRUE;
+			}
+		}
+#ifndef ENGLISH_MODE
+		strRecheckErr += _T("\r\n해당 내역을 확인하시고 수정 후 다시 변환하시기 바랍니다.");
+#else
+		strRecheckErr += _T("\r\nPlease check the details, make corrections, and convert again.");
+#endif
+	}
+	if (bAlert)
+	{
+		delete[] nCountList;
+		AfxMessageBox(strRecheckErr, MB_OK | MB_ICONERROR);
+		strRecheckErr.Replace(_T("\r\n"), _T(" "));
+		Log::Trace("%s", CCommonFunc::WCharToChar(strRecheckErr.GetBuffer(0)));
+		return 0;
+	}
+	//20251209 GBM end
+
 	// ROM BUFFER : 1 Byte. 연동개수
 	pRomBuff[uRomOffset] = nDevCnt + nPCnt;
 	// ROM BUFFER : 1 Byte.감지기 입력 타입
@@ -17102,6 +17170,9 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	// MEMORY COPY : DEVICE DATA
 	memcpy(pRomBuff + uRomOffset, btDev, nDevCnt * 3);
 	uRomOffset += nDevCnt * 3;
+
+	delete[] nCountList;	//20251211 GBM - 동적할당 해제
+
 	return nRet;
 }
 
@@ -21089,4 +21160,37 @@ void CRelayTableData::MakeFacpContactSheet(CExcelWrapper* xls)
 		nContRow++;
 	}
 	xls->CloseData(1, 1);
+}
+
+void CRelayTableData::SetRecheckOutputContentInfo()
+{
+	m_roci.IDVec.clear();
+	m_roci.nameVec.clear();
+
+	CDataEquip* pDataEquip;
+	POSITION pos;
+	pos = m_spRefContentsEquipManager->GetHeadPosition();
+	while (pos)
+	{
+		pDataEquip = m_spRefContentsEquipManager->GetNext(pos);
+		if (pDataEquip == nullptr)
+			continue;
+
+		CString strName = pDataEquip->GetEquipName();
+		int nID = pDataEquip->GetEquipID();
+		CString strKey = CCommonFunc::RemoveSpaceAndSpecial(strName);
+
+		for (int i = 0; i < RECHECK_OUTPUT_CONTENT_COUNT; i++)
+		{
+			CString strRecheck = _T("");
+			strRecheck.Format(g_szRecheckOutputContent[i]);
+			if (strKey == strRecheck)
+			{
+				m_roci.IDVec.push_back(nID);
+				m_roci.nameVec.push_back(strName);
+
+				break;
+			}
+		}
+	}
 }

@@ -1675,3 +1675,56 @@ std::vector<CString> CCommonFunc::GetFullPathFileListIntheFolder(CString strPath
 
 	return strFileListMap;
 }
+
+bool CCommonFunc::IsAllowedKoreanAlphaNum(wchar_t ch)
+{
+	// 숫자
+	if (ch >= L'0' && ch <= L'9') return true;
+
+	// 영문
+	if (ch >= L'A' && ch <= L'Z') return true;
+	if (ch >= L'a' && ch <= L'z') return true;
+
+	// 한글 음절 (가 ~ 힣)
+	if (ch >= 0xAC00 && ch <= 0xD7A3) return true;
+
+	// (필요하면) 호환 자모 등 다른 범위도 추가 가능
+	// if (ch >= 0x3130 && ch <= 0x318F) return true;
+
+	return false;
+}
+
+CString CCommonFunc::RemoveSpaceAndSpecial(const CString& src)
+{
+	CString result;
+	result.Preallocate(src.GetLength());
+
+#ifdef _UNICODE
+	for (int i = 0; i < src.GetLength(); ++i)
+	{
+		wchar_t ch = src[i];
+
+		// 문자 또는 숫자인 경우만 남긴다 (한글도 포함됨),  MSVC + MFC 환경에서는 iswalnum도 한글을 포함해서 true를 리턴하지만 다른 환경에서는 보장할 수 없음
+		//if (iswalnum(ch))				
+		if (IsAllowedKoreanAlphaNum(ch))
+		{
+			result.AppendChar(ch);
+		}
+		// 공백, 특수문자 등은 전부 제거
+	}
+#else
+	for (int i = 0; i < src.GetLength(); ++i)
+	{
+		unsigned char ch = static_cast<unsigned char>(src[i]);
+
+		// 문자 또는 숫자인 경우만 남긴다
+		if (isalnum(ch))
+		{
+			result.AppendChar(ch);
+		}
+		// 공백, 특수문자 등은 전부 제거
+	}
+#endif
+
+	return result;
+}
