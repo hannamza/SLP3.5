@@ -186,8 +186,9 @@ int CCustomListCtrl::ReArrangeItem()
 	else
 		nOneLineCnt = rcWnd.Width() / nWidth;
 	
-	if(nOneLineCnt == 0)
-		return 0;
+	if(nOneLineCnt <= 0)
+		nOneLineCnt = 1;
+
 
 	nSize = (int)m_Manager.size();
 

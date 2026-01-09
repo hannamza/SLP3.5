@@ -1111,11 +1111,11 @@ int CCvtRelayIDConverter::ChangePumpDB(YAdoDatabase * pDB)
 		pPmp = (CDataPump *)pManager->GetNext(pos);
 		if (pPmp == nullptr)
 			continue;
-		strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER) "
-			L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s')"
+		strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER,PMP_USEPS) "
+			L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s',%d)"
 			, pPmp->GetFacpID(), pPmp->GetPumpID(), pPmp->GetPumpType()
 			, pPmp->GetPumpName(), pPmp->GetPumpLcd(), pPmp->GetPcb()
-			, m_pOldTable->GetCurrentUser()
+			, m_pOldTable->GetCurrentUser(),pPmp->GetUsePS()
 		);
 		if (pDB->ExecuteSql(strSql) == FALSE)
 			continue;

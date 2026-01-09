@@ -160,6 +160,9 @@ void CDlgOutputChange::DisplayCompareResult(
 #else
 	hRoot = m_ctrlOutTree.InsertItem(L"OUTPUT", 0, 0, TVI_ROOT);
 #endif
+	m_ctrlOutTree.SetRedraw(FALSE);
+	m_ctrlRelayList.SetRedraw(FALSE);
+	
 	pos = pPtrUSINGDupList->GetHeadPosition();
 	while (pos)
 	{
@@ -174,6 +177,9 @@ void CDlgOutputChange::DisplayCompareResult(
 		suL.stParam.wStep = nStep;
 		pMainWnd->PostMessageW(CSWM_PROGRESS_STEP, PROG_RESULT_STEP, suL.dwParam);
 	}
+
+	m_ctrlOutTree.SetRedraw(TRUE);
+	m_ctrlRelayList.SetRedraw(TRUE);
 }
 
 

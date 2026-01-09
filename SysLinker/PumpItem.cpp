@@ -181,7 +181,7 @@ void CPumpItem::OnBnClickedOk()
 void CPumpItem::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CCustomBaseItem::OnCancel();
+	//CCustomBaseItem::OnCancel();
 }
 
 BOOL CPumpItem::OnEraseBkgnd(CDC* pDC)
@@ -348,7 +348,7 @@ void CPumpItem::OnBnClickedRdNokeep()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	SetModifiedFlag(TRUE);
-	m_nInPs = IN_PS_KEEP;
+	m_nInPs = IN_PS_NOKEEP;
 	if(GetParent())
 		GetParent()->PostMessageW(CIM_ITEM_SELECTED,(WPARAM)this,0);
 }
@@ -591,7 +591,11 @@ int CPumpItem::SetUIInPumpType(int nInType)
 int CPumpItem::SetUIInPsType(int nInType)
 {
 	m_nInPs = nInType;
-	if(m_nInPs == 0)
+
+	if(nInType == 0)
+		m_nInPs = IN_PS_KEEP;
+
+	if(m_nInPs == IN_PS_KEEP)
 	{
 		((CButton*)GetDlgItem(IDC_RD_KEEP))->SetCheck(1);
 		((CButton*)GetDlgItem(IDC_RD_NOKEEP))->SetCheck(0);

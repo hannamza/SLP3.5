@@ -15,14 +15,14 @@ enum
 {
 	IN_PUMP_FAN = 1, // 휀
 	IN_PUMP_PUMP = 2, // 펌프
-	IN_PUMP_POWER = 3, // 한전전력
-	IN_PUMP_GENERATOR = 4, // 발전기
+	IN_PUMP_POWER = 3, // 한전전력 - Utility Power
+	IN_PUMP_GENERATOR = 4, // 발전기 - Generation
 };
 
 enum
 {
-	IN_PS_NOKEEP = 1, // 비지속
-	IN_PS_KEEP = 2,		// 지속
+	IN_PS_NOKEEP = 1, // 비지속 - non-latching
+	IN_PS_KEEP = 2,		// 지속 - latching
 };
 
 

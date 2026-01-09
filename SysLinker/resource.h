@@ -488,7 +488,6 @@
 #define IDC_BTN_MAKE                    1029
 #define IDC_CMB_INTYPE                  1029
 #define IDC_BTN_SAVE2                   1029
-#define IDC_COMBO_PUMP_TYPE             1029
 #define IDC_CHKP_ROOM_STAIR             1030
 #define IDC_CMB_IN_TO_BUILD             1030
 #define IDC_CMB_CHN                     1030
@@ -503,6 +502,7 @@
 #define IDC_CMB_IN_TO_FLOOR             1032
 #define IDC_CMB_STAIR                   1032
 #define IDC_CMB_OUTCONTENTS             1032
+#define IDC_CMB_PSUSE                   1032
 #define IDC_BTN_IN_SEARCH_ROOM          1033
 #define IDC_CMB_ROOM                    1033
 #define IDC_CHK_SAME_OUTPUT             1033
@@ -711,6 +711,7 @@
 #define IDC_ST_PSTYPE                   1246
 #define IDC_ST_PUMPTYPE                 1247
 #define IDC_ST_LCDMSG                   1248
+#define IDC_ST_USEPS                    1249
 #define IDC_BTN_MODIFY                  1250
 #define IDC_ST_PS_FULLNAME              1251
 #define IDC_BTN_INITFACP                1251

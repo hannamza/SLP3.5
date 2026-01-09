@@ -724,7 +724,11 @@ int CSysLinkerApp::DocumentTemplateInit()
 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE,
 		RUNTIME_CLASS(CFormDoc),
 		RUNTIME_CLASS(CChildFrame), // 사용자 지정 MDI 자식 프레임입니다.
+
+		//20251219 GBM start - 테스트를 위한 기존 펌프 화면 로드 -> 원복
 		RUNTIME_CLASS(CFormPumpEdit));
+		//RUNTIME_CLASS(CFormPump));
+		//20251219 GBM end
 #else
 	m_pTemplePump = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
 		RUNTIME_CLASS(CFormDoc),

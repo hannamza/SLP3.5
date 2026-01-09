@@ -71,7 +71,7 @@ CFormLoadRelayTable::CFormLoadRelayTable()
 	m_pDlgInput = nullptr;
 	m_pDlgOutput = nullptr;
 	m_pDlgPattern = nullptr;
-	m_nCompareType = CMP_NAME;
+	m_nCompareType = CMP_ADDR;		//20251218 GBM - 주소가 동일할 때를 기본 값으로 변경
 	m_pNewRelayTable = nullptr;
 	m_bStopFlag = FALSE;
 	m_pRelayThread = nullptr;
@@ -202,9 +202,12 @@ void CFormLoadRelayTable::OnInitialUpdate()
 	m_pDlgOutput->ShowWindow(SW_HIDE);
 	m_pDlgPattern->ShowWindow(SW_HIDE);
 
-	m_nCompareType = CMP_NAME;
-	((CButton*)GetDlgItem(IDC_RD_NAME))->SetCheck(1);
-	((CButton*)GetDlgItem(IDC_RD_ADDR))->SetCheck(0);
+	//20251218 GBM start - 주소가 동일할 때를 기본 값으로 변경
+	m_nCompareType = CMP_ADDR;			
+
+	((CButton*)GetDlgItem(IDC_RD_NAME))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_RD_ADDR))->SetCheck(1);
+	//20251217 GBM end
 
 	m_ctrlProgAll.SetPos(0);
 	m_ctrlProgDetail.SetPos(0);
@@ -1468,7 +1471,7 @@ int CFormLoadRelayTable::ChangePatternDB(YAdoDatabase * pDb, CRelayTableData * p
 				continue; 
 			strtemp.Format(L"DELETE FROM TB_PATTERN_ITEM "
 				L" WHERE PT_ID=%d ;\n"
-				,nID
+				, pUpdate->m_nOldPID
 			);
 			strSql += strtemp;
 			nUCnt ++;

@@ -128,6 +128,8 @@ void CDlgInputChange::DisplayCompareResult(
 )
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_ctrlInputList.SetRedraw(FALSE);
+
 	CRUpdateItem * pItem = nullptr;
 	CString strKey;
 	int nIdx = 0 , i , nCnt , nStep=0;
@@ -221,6 +223,8 @@ void CDlgInputChange::DisplayCompareResult(
 		suL.stParam.wStep = nStep;
 		pMainWnd->PostMessageW(CSWM_PROGRESS_STEP, PROG_RESULT_STEP, suL.dwParam);
 	}
+
+	m_ctrlInputList.SetRedraw(TRUE);
 }
 
 void CDlgInputChange::OnInputListCheck(NMHDR *pNMHDR, LRESULT *pResult)

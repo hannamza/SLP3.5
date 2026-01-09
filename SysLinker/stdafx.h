@@ -472,11 +472,11 @@ extern BOOL g_bRequirePtnManualCheck;
 #define D_MAX_TEMPLETE_ITEM_CNT 10
 struct ST_PUMPTYPE
 {
-	int		nPumpType;
-	int		nPsType;
+	int		nPumpType; // 휀입력,펌프입력,한전원,비상발전기
+	int		nPsType; // 지속,비지속
 	CString strTypeName;
 	CString strLcdMsg;
-	int		nPsUse;
+	int		nPsUse; // PS사용여부:사용,사용안함,사용할 수 없음
 	void SetPumpType(int _nPmpType,CString _strTypeName,CString _strLcdMsg,int _nPsType , int _nPsUse)
 	{
 		nPumpType = _nPmpType;

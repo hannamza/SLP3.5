@@ -470,6 +470,8 @@ void CDlgViewRelay::FillLocRoom(CString strBuild, CString strBtype
 		return;
 	pLoc = (CDataLocFloor*)spManager->GetLocation(LT_FLOOR,strBuild,strBtype,strStair,strFloor);
 
+	if(pLoc == nullptr)
+		return;
 	CMapLocRoom::iterator it;
 	for(it = pLoc->m_mapRoom.begin(); it != pLoc->m_mapRoom.end(); it++)
 	{

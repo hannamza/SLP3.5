@@ -151,6 +151,9 @@ void CDlgPatternChange::DisplayCompareResult(
 #else
 	hRoot = m_ctrlPatternTree.InsertItem(L"PATTERN", 0, 0, TVI_ROOT);
 #endif
+	m_ctrlPatternTree.SetRedraw(FALSE);
+	m_ctrlRelayList.SetRedraw(FALSE);
+
 	pos = pPatternList->GetHeadPosition();
 	while (pos)
 	{
@@ -180,6 +183,9 @@ void CDlgPatternChange::DisplayCompareResult(
 		pMainWnd->PostMessageW(CSWM_PROGRESS_STEP, PROG_RESULT_STEP, suL.dwParam);
 	}
 	m_ctrlPatternTree.Expand(m_ctrlPatternTree.GetRootItem() , TVE_EXPAND);
+
+	m_ctrlPatternTree.SetRedraw(TRUE);
+	m_ctrlRelayList.SetRedraw(TRUE);
 }
 
 

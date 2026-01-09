@@ -1081,11 +1081,11 @@ int CFormPump::DataAdd(CDataPump * pData)
 		return 0;
 
 	CString strSql;
-	strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER) "
-		L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s')"
+	strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER,PMP_USEPS) "
+		L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s',%d)"
 		, pData->GetFacpID(), pData->GetPumpID(), pData->GetPumpType()
 		, pData->GetPumpName(), pData->GetPumpLcd(), pData->GetPcb()
-		, m_pRefFasSysData->GetCurrentUser()
+		, m_pRefFasSysData->GetCurrentUser(),pData->GetUsePS()
 	);
 
 	YAdoDatabase * pDb = m_pRefFasSysData->GetPrjDB();
@@ -1159,19 +1159,19 @@ int CFormPump::DataSave(CDataPump * pData)
 	if (nCnt > 0)
 	{
 		bAdd = FALSE;
-		strSql.Format(L"UPDATE TB_PUMP_MST SET PMP_TYPE=%d,PMP_NAME='%s',PMP_LCD='%s',PMP_PCB=%d "
+		strSql.Format(L"UPDATE TB_PUMP_MST SET PMP_TYPE=%d,PMP_NAME='%s',PMP_LCD='%s',PMP_PCB=%d,PMP_USEPS=%d "
 			L" WHERE FACP_ID=%d AND PMP_ID=%d "
-			, pData->GetPumpType(), pData->GetPumpName(), pData->GetPumpLcd(), pData->GetPcb()
+			, pData->GetPumpType(), pData->GetPumpName(), pData->GetPumpLcd(), pData->GetPcb(),pData->GetUsePS()
 			, pData->GetFacpID(), pData->GetPumpID()
 		);
 	}
 	else
 	{
 		bAdd = TRUE;
-		strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER) "
-			L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s')"
+		strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER,PMP_USEPS) "
+			L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s',%d)"
 			, pData->GetFacpID(), pData->GetPumpID(), pData->GetPumpType()
-			, pData->GetPumpName(), pData->GetPumpLcd(), pData->GetPcb()
+			, pData->GetPumpName(), pData->GetPumpLcd(), pData->GetPcb(),pData->GetUsePS()
 			, m_pRefFasSysData->GetCurrentUser()
 		);
 	}

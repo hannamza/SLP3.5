@@ -211,7 +211,7 @@ int CDkPanePSwitch::InitTree()
 	{
 		pData = spManger->GetNext(pos);
 		if (pData == nullptr)
-			continue;
+			continue;		
 		if (hFacp[pData->GetFacpID()] == nullptr)
 		{
 			pFacp = m_pRefFasSysData->GetFacpByID(pData->GetFacpID());

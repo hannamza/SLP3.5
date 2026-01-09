@@ -8593,11 +8593,11 @@ int CRelayTableData::InsertPrjBasePumpDB()
 		pPmp = (CDataPump *)m_spPump->GetNext(pos);
 		if (pPmp == nullptr)
 			continue;
-		strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER) "
-			L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s')"
+		strSql.Format(L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER,PMP_USEPS) "
+			L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s',%d)"
 			, pPmp->GetFacpID(), pPmp->GetPumpID(), pPmp->GetPumpType()
 			, pPmp->GetPumpName(), pPmp->GetPumpLcd(), pPmp->GetPcb()
-			,GetCurrentUser()
+			,GetCurrentUser(),pPmp->GetUsePS()
 		);
 		if (m_pDB->ExecuteSql(strSql) == FALSE)
 		{
@@ -13300,7 +13300,7 @@ int CRelayTableData::LoadPump()
 	CString strSql, strKey, strName , strLcd = L"",strPrefix,strTypeName;
 	CDataPump * pData;
 	int nCnt = 0, nValue = 0, i;
-	int nFID, nPType , nPcb;
+	int nFID, nPType , nPcb,nUsePS;
 	int nPID;
 	if (m_pDB == nullptr || m_pDB->IsOpen() == FALSE)
 	{
@@ -13335,12 +13335,14 @@ int CRelayTableData::LoadPump()
 		m_pDB->GetFieldValue(L"PMP_NAME", strName);
 		m_pDB->GetFieldValue(L"PMP_LCD", strLcd);
 		m_pDB->GetFieldValue(L"PMP_PCB", nValue);
+		nPcb = nValue;
 		m_pDB->GetFieldValue(L"PMP_PREFIX",strPrefix);
 		m_pDB->GetFieldValue(L"PMP_TYPENAME",strTypeName);
-		nPcb = nValue;
+		m_pDB->GetFieldValue(L"PMP_USEPS",nValue);
+		nUsePS = nValue;
 
 		pData = new CDataPump;
-		pData->SetPumpData(nFID, nPID, nPType, strName, strLcd,strPrefix,strTypeName, nPcb);
+		pData->SetPumpData(nFID, nPID, nPType, strName, strLcd,strPrefix,strTypeName,nUsePS,nPcb);
 		m_spPump->AddTail(pData);
 		m_pDB->MoveNext();
 	}

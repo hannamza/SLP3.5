@@ -467,14 +467,17 @@ int CFormPumpEdit::SavePumpTypeList()
 
 	if(m_pRefFasSysData == nullptr)
 		return 0;
+
+	if(m_pPtrTypeList == nullptr || m_pPtrTypeList->GetCount() <= 0)
+		return 0; 
 	strEtcPath = m_pRefFasSysData->GetProjectVersionPath(TRUE) + F3_PRJ_DIR_ETC;
 	strPath.Format(_T("%s\\%s"),strEtcPath,FN_PUMPTYPE_LIST);
 
 	fRv.Open(strPath,CFile::modeCreate | CFile::modeReadWrite);
 #ifndef ENGLISH_MODE
-	strLine = L"#Pump Type,Type Name,Lcd Msg,Ps Type,PS사용여부(0:사용 1:사용안함 2:사용할수없음)\n";
+	strLine = L"#Pump Type(1:휀 2:펌프 3:한전 4:발전기),Type Name,Lcd Msg,Ps Type(1:비지속 2:지속),PS사용여부(0:사용 1:사용안함 2:사용할수없음)\n";
 #else
-	strLine = L"#Pump Type,Type Name,Lcd Msg,Ps Type,PS USe OR Not(0:Use 1:Not Use 2:Not Available)\n";
+	strLine = L"#Pump Type(1:FAN 2:Pump 3:Utility Power 4:Generator),Type Name,Lcd Msg,Ps Type(1:Non-latching 2:Latching),PS USe OR Not(0:Use 1:Not Use 2:Not Available)\n";
 #endif
 	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
 	fRv.Write(szBuff,nTempSize);
@@ -565,7 +568,7 @@ int CFormPumpEdit::InitForm()
 		AfxGetMainWnd()->SendMessage(UWM_REG_PTNVIEW_DROPWND,DROP_WND_ADD,(LPARAM)&m_ctrlPatternList);
 		AfxGetMainWnd()->SendMessage(UWM_REG_EMVIEW_DROPWND,DROP_WND_ADD,(LPARAM)&m_ctrlPatternList);
 		//AfxGetMainWnd()->SendMessage(UWM_REG_PUMPVIEW_DROPWND, DROP_WND_ADD, (LPARAM)&m_ctrlPatternList);
-		AfxGetMainWnd()->SendMessage(UWM_REG_PSWITCHVIEW_DROPWND,DROP_WND_ADD,(LPARAM)&m_ctrlPatternList);
+		//AfxGetMainWnd()->SendMessage(UWM_REG_PSWITCHVIEW_DROPWND,DROP_WND_ADD,(LPARAM)&m_ctrlPatternList);
 
 		AfxGetMainWnd()->SendMessage(UWM_REG_CONTACTVIEW_DROPWND,DROP_WND_ADD,(LPARAM)&m_ctrlPatternList);
 
@@ -1498,12 +1501,12 @@ int CFormPumpEdit::DataPumpAdd(CPumpItem * pItem ,YAdoDatabase * pDB)
 	if(pPmp == nullptr)
 		return 0; 
 	strSql.Format(
-		L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER,PMP_PREFIX,PMP_TYPENAME) "
-		L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s','%s','%s')"
+		L"INSERT INTO TB_PUMP_MST(NET_ID,FACP_ID,PMP_ID,PMP_TYPE,PMP_NAME,PMP_LCD,PMP_PCB,ADD_USER,PMP_PREFIX,PMP_TYPENAME,PMP_USEPS) "
+		L" VALUES(1,%d,%d,%d,'%s','%s',%d,'%s','%s','%s',%d)"
 		,pPmp->GetFacpID(),pItem->GetItemID(),pItem->GetInPump()
 		, pItem->GetPumpFullName() , pItem->GetPumpLcdMsg() , pPmp->GetPcb()
 		, m_pRefFasSysData->GetCurrentUser()
-		, pItem->GetPrefix() , pItem->GetTypeName()
+		, pItem->GetPrefix() , pItem->GetTypeName(),pPmp->GetUsePS()
 	);
 
 // 	strSql.Format(
@@ -1755,10 +1758,10 @@ int CFormPumpEdit::DataPumpSave(CPumpItem * pItem,YAdoDatabase * pDB)
 	{
 		//bAdd = FALSE;
 		strSql.Format(
-			L"UPDATE TB_PUMP_MST SET PMP_TYPE=%d,PMP_NAME='%s',PMP_LCD='%s',PMP_PCB=%d "
+			L"UPDATE TB_PUMP_MST SET PMP_TYPE=%d,PMP_NAME='%s',PMP_LCD='%s',PMP_PCB=%d,PMP_USEPS=%d "
 			L", PMP_PREFIX='%s' , PMP_TYPENAME='%s' " 
 			L" WHERE FACP_ID=%d AND PMP_ID=%d "
-			, pItem->GetInPump() , pItem->GetPumpFullName() , pItem->GetPumpLcdMsg() , pPmp->GetPcb()
+			, pItem->GetInPump() , pItem->GetPumpFullName() , pItem->GetPumpLcdMsg() , pPmp->GetPcb(),pPmp->GetUsePS()
 			, pItem->GetPrefix() , pItem->GetTypeName()
 			, pPmp->GetFacpID(), pItem->GetItemID()
 		);

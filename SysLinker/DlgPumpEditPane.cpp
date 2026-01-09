@@ -66,6 +66,7 @@ void CDlgPumpEditPane::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX,IDC_CMB_PUMPTEMPLETE,m_cmbPumpTemplete);
 	DDX_Control(pDX,IDC_ED_TYPENAME,m_edTypeName);
 	DDX_Control(pDX,IDC_ED_LCDMSG,m_edLcdMsg);
+	DDX_Control(pDX,IDC_CMB_PSUSE,m_cmbPSUseType);
 }
 
 
@@ -200,6 +201,20 @@ BOOL CDlgPumpEditPane::OnInitDialog()
 		m_cmbPumpType.InsertString(nIndex, pDataEquip->GetEquipName());
 		nIndex++;
 	}
+	
+#ifndef ENGLISH_MODE
+	m_cmbPSUseType.InsertString(0,L"사용");
+	m_cmbPSUseType.InsertString(1,L"사용안함");
+	m_cmbPSUseType.InsertString(2,L"사용할수없음");
+#else
+	m_cmbPSUseType.InsertString(0,L"Use");
+	m_cmbPSUseType.InsertString(1,L"Not Use");
+	m_cmbPSUseType.InsertString(2,L"Not Available");
+#endif
+
+	m_cmbPsType.SetCurSel(0);
+	m_cmbPumpType.SetCurSel(0);
+	m_cmbPSUseType.SetCurSel(0);
 //	MakeFacpButton();
 	ResizeControl();
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -697,59 +712,70 @@ int CDlgPumpEditPane::ResizeAddArea(int nCx , int nCy)
 	int nLeftPos,nTopPos,nStWidth,nItemWidth,nHeight;
 	nStWidth = 80;
 	nItemWidth = 200;
-	nHeight = 30;
+	nHeight = 25;
 	nLeftPos = nCx - (nStWidth + nItemWidth) - 20;
 
 	if(GetDlgItem(IDC_ST_TYPENAME)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 5;
+		nTopPos = nCy - 20 - nHeight * 6;
 		GetDlgItem(IDC_ST_TYPENAME)->MoveWindow(nLeftPos,nTopPos,nStWidth,nHeight);
 	}
 
 	if(GetDlgItem(IDC_ST_PSTYPE)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 4;
+		nTopPos = nCy - 20 - nHeight * 5;
 		GetDlgItem(IDC_ST_PSTYPE)->MoveWindow(nLeftPos,nTopPos,nStWidth,nHeight);
 	}
 
 	if(GetDlgItem(IDC_ST_PUMPTYPE)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 3 ;
+		nTopPos = nCy - 20 - nHeight * 4 ;
 		GetDlgItem(IDC_ST_PUMPTYPE)->MoveWindow(nLeftPos,nTopPos,nStWidth,nHeight);
 	}
 
 	if(GetDlgItem(IDC_ST_LCDMSG)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 2;
+		nTopPos = nCy - 20 - nHeight * 3;
 		GetDlgItem(IDC_ST_LCDMSG)->MoveWindow(nLeftPos,nTopPos,nStWidth,nHeight);
 	}
+ 
+ 	if(GetDlgItem(IDC_ST_USEPS)->GetSafeHwnd() != nullptr)
+ 	{
+ 		nTopPos = nCy - 20 - nHeight * 2;
+ 		GetDlgItem(IDC_ST_USEPS)->MoveWindow(nLeftPos,nTopPos,nStWidth,nHeight);
+ 	}
 
 	// Edit control
 	nLeftPos = nCx - (nItemWidth) - 4;
 	if(GetDlgItem(IDC_ED_TYPENAME)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 5;
+		nTopPos = nCy - 20 - nHeight * 6;
 		GetDlgItem(IDC_ED_TYPENAME)->MoveWindow(nLeftPos,nTopPos,nItemWidth,nHeight - 4);
 	}
 
 	if(GetDlgItem(IDC_CMB_PSTYPE)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 4 ;
+		nTopPos = nCy - 20 - nHeight * 5 ;
 		GetDlgItem(IDC_CMB_PSTYPE)->MoveWindow(nLeftPos,nTopPos,nItemWidth,nHeight);
 	}
 
 	if(GetDlgItem(IDC_CMB_PUMPTYPE)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 3 ;
+		nTopPos = nCy - 20 - nHeight * 4 ;
 		GetDlgItem(IDC_CMB_PUMPTYPE)->MoveWindow(nLeftPos,nTopPos,nItemWidth,nHeight);
 	}
 
 	if(GetDlgItem(IDC_ED_LCDMSG)->GetSafeHwnd() != nullptr)
 	{
-		nTopPos = nCy - 20 - nHeight * 2;
+		nTopPos = nCy - 20 - nHeight * 3;
 		GetDlgItem(IDC_ED_LCDMSG)->MoveWindow(nLeftPos,nTopPos,nItemWidth,nHeight - 4);
 	}
 
+	if(GetDlgItem(IDC_CMB_PSUSE)->GetSafeHwnd() != nullptr)
+	{
+		nTopPos = nCy - 20 - nHeight * 2;
+		GetDlgItem(IDC_CMB_PSUSE)->MoveWindow(nLeftPos,nTopPos,nItemWidth,nHeight - 4);
+	}
 
 	nTopPos = nCy - 20 - nHeight * 1;
 	if(GetDlgItem(IDC_BTN_ADD)->GetSafeHwnd() != nullptr)
@@ -1225,7 +1251,7 @@ void CDlgPumpEditPane::OnBnClickedBtnAdd()
 	UpdateData();
 
 	int nCnt; 
-	int nPsType,nPumpType,nTemp;
+	int nPsType,nPumpType,nTemp,nPSUse;
 	ST_PUMPTYPE * pData;
 	POSITION pos;
 	CString str1,str2,strError;
@@ -1278,6 +1304,18 @@ void CDlgPumpEditPane::OnBnClickedBtnAdd()
 		return;
 	}
 	nPumpType = nTemp + 1;
+
+	nTemp = m_cmbPSUseType.GetCurSel();
+	if(nTemp < 0)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"PS 사용 여부가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"PS Use Type not selected.");
+#endif
+		return;
+	}
+	nPSUse = nTemp;
 	pData = new ST_PUMPTYPE;
 	pData->strTypeName = str2;
 	str1 = m_strLcdMsg.TrimLeft();
@@ -1285,6 +1323,7 @@ void CDlgPumpEditPane::OnBnClickedBtnAdd()
 	pData->strLcdMsg = str1;
 	pData->nPsType = nPsType;
 	pData->nPumpType = nPumpType;
+	pData->nPsUse = nPSUse;
 	m_pPtrRefPumpTypeList->AddTail(pData);
 	nCnt = m_ctrlPumpTypeList.GetItemCount();
 	m_ctrlPumpTypeList.InsertItem(nCnt,pData->strTypeName);
@@ -1304,42 +1343,37 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 	UpdateData();
 
 	BOOL bFind = FALSE;
-	int nPsType,nPumpType,nTemp;
-	ST_PUMPTYPE * pData;
+	int nPsType,nPumpType,nTemp,nPSUse,nSel;
+	ST_PUMPTYPE * pData = nullptr;
 	POSITION pos;
 	CString str1,str2,strError;
+
+	nSel = m_ctrlPumpTypeList.GetNextItem(-1,LVNI_SELECTED);
+	if(nSel < 0)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"선택된 펌프 타입이 없습니다.");
+#else
+		AfxMessageBox(L"There is no selected Pump Type");
+#endif
+		return; 
+	}
+
+	pData = (ST_PUMPTYPE *)m_ctrlPumpTypeList.GetItemData(nSel);
+	if(pData == nullptr)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"Pump Type 정보가 없습니다.");
+#else
+		AfxMessageBox(L"There is no Pump type Information");
+#endif
+		return;
+	}
+
 	str2 = m_strTypeName;
 	str2.TrimLeft();
 	str2.TrimRight();
-	pos = m_pPtrRefPumpTypeList->GetHeadPosition();
-	while(pos)
-	{
-		pData = (ST_PUMPTYPE *)m_pPtrRefPumpTypeList->GetNext(pos);
-		if(pData == nullptr)
-			continue;
-		str1 = pData->strTypeName;
-		str1.TrimLeft();
-		str1.TrimRight();
 
-		if(str1.CompareNoCase(str2) == 0)
-		{
-// 			strError.Format(L"이미 '%s'(으)로 펌프 타입이 있습니다",m_strTypeName);
-// 			AfxMessageBox(strError);
-			bFind = TRUE;
-			break;
-		}
-	}
-
-	if(bFind == FALSE)
-	{
-#ifndef ENGLISH_MODE
-		strError.Format(L"'%s'의 펌프 타입이 없습니다",m_strTypeName);
-#else
-		strError.Format(L"Pump type '%s' does not exist",m_strTypeName);
-#endif
-		AfxMessageBox(strError);
-		return;
-	}
 	nTemp = m_cmbPsType.GetCurSel();
 	if(nTemp < 0)
 	{
@@ -1363,12 +1397,28 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 		return;
 	}
 	nPumpType = nTemp + 1;
+
+	nTemp = m_cmbPSUseType.GetCurSel();
+	if(nTemp < 0)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"PS 사용 여부가 선택되지 않았습니다.");
+#else
+		AfxMessageBox(L"PS Use Type not selected.");
+#endif
+		return;
+	}
+	nPSUse = nTemp;
+
 	pData->strTypeName = str2;
 	str1 = m_strLcdMsg.TrimLeft();
 	str1 = m_strLcdMsg.TrimRight();
 	pData->strLcdMsg = str1;
 	pData->nPsType = nPsType;
 	pData->nPumpType = nPumpType;
+	pData->nPsUse = nPSUse;
+
+	m_ctrlPumpTypeList.SetItemText(nSel,0,str2);
 #ifndef ENGLISH_MODE
 	AfxMessageBox(L"Pump Type을 수정하는데 성공했습니다");
 #else
@@ -1469,6 +1519,7 @@ int CDlgPumpEditPane::DisplayType(ST_PUMPTYPE* pType)
 	m_strLcdMsg = pType->strLcdMsg;
 	m_cmbPsType.SetCurSel(pType->nPsType - 1);
 	m_cmbPumpType.SetCurSel(pType->nPumpType - 1);
+	m_cmbPSUseType.SetCurSel(pType->nPsUse);
 	UpdateData(FALSE);
 	return 0;
 }
@@ -1641,6 +1692,7 @@ void CDlgPumpEditPane::OnBnClickedBtnAddtemplete()
 	ST_PUMPTEMPLETE * pTemp;
 	CPumpItem * pItem;
 	CDataPump * pPmp;
+	CDataPS * pPs;
 	BOOL bOverWrite = FALSE;
 	LRESULT lRet = 1;
 	CString strMsg;
@@ -1736,15 +1788,21 @@ void CDlgPumpEditPane::OnBnClickedBtnAddtemplete()
 
 		if(pItem == nullptr || x == D_MAX_PUMP_COUNT)
 			continue;
-
+		pPs = nullptr;
 		pPmp = new CDataPump;
 		pPmp->SetPumpData(
 			m_pCurFacpData->GetFacpID(),x + 1,pTemp->pArrPumpType[i]->nPumpType
 			,pTemp->pArrPumpType[i]->strTypeName,pTemp->pArrPumpType[i]->strLcdMsg
 			,L"",pTemp->pArrPumpType[i]->strTypeName,pTemp->pArrPumpType[i]->nPsUse
 		);
-		pItem->SetPumpItemData(pPmp,nullptr);
-
+		if(pTemp->pArrPumpType[i]->nPsUse == PUMP_PS_USE)
+		{
+			pPs = new CDataPS;
+			pPs->SetPSwitchData(m_pCurFacpData->GetFacpID(),i,pTemp->pArrPumpType[i]->nPsType
+				,pTemp->pArrPumpType[i]->strTypeName,pTemp->pArrPumpType[i]->strLcdMsg,L"",pTemp->pArrPumpType[i]->strTypeName,1
+			);
+		}
+		pItem->SetPumpItemData(pPmp,pPs);
 		lRet = m_pMainForm->SendMessage(UWM_CHILDPANE_CURDATACHANGE,MAKELPARAM(DATA_ADD,0),(DWORD_PTR)pItem);
 		if(lRet != 0)
 		{
