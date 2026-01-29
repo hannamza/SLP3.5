@@ -1030,6 +1030,8 @@
     <ClInclude Include="..\SLP3.5Func\NewExcelManager.h" />
     <ClInclude Include="..\SLP3.5Func\NewInfo.h" />
     <ClInclude Include="..\SLP3.5Func\TSingleton.h" />
+    <ClInclude Include="..\SLP3.5Func\WebConnManager.h" />
+    <ClInclude Include="..\SLP3.5Func\WinCredManager.h" />
     <ClInclude Include="..\Version\Version.h" />
     <ClInclude Include="AllocRelayIndex.h" />
     <ClInclude Include="BtnFacp.h" />
@@ -1106,10 +1108,12 @@
     <ClInclude Include="DlgPumpEditPane.h" />
     <ClInclude Include="DlgRETabPattern.h" />
     <ClInclude Include="DlgRETabRelay.h" />
+    <ClInclude Include="DlgRomCreateOption.h" />
     <ClInclude Include="DlgSetUserTreeView.h" />
     <ClInclude Include="DlgTreePane.h" />
     <ClInclude Include="DlgVersion.h" />
     <ClInclude Include="DlgViewRelay.h" />
+    <ClInclude Include="DlgWebLogin.h" />
     <ClInclude Include="EditSpecial.h" />
     <ClInclude Include="FormAccess.h" />
     <ClInclude Include="FormAutoMake.h" />
@@ -1333,6 +1337,8 @@
     <ClCompile Include="..\SLP3.5Func\NewDBManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewExcelManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\NewInfo.cpp" />
+    <ClCompile Include="..\SLP3.5Func\WebConnManager.cpp" />
+    <ClCompile Include="..\SLP3.5Func\WinCredManager.cpp" />
     <ClCompile Include="AllocRelayIndex.cpp" />
     <ClCompile Include="BtnFacp.cpp" />
     <ClCompile Include="BtnST.cpp" />
@@ -1408,10 +1414,12 @@
     <ClCompile Include="DlgPumpEditPane.cpp" />
     <ClCompile Include="DlgRETabPattern.cpp" />
     <ClCompile Include="DlgRETabRelay.cpp" />
+    <ClCompile Include="DlgRomCreateOption.cpp" />
     <ClCompile Include="DlgSetUserTreeView.cpp" />
     <ClCompile Include="DlgTreePane.cpp" />
     <ClCompile Include="DlgVersion.cpp" />
     <ClCompile Include="DlgViewRelay.cpp" />
+    <ClCompile Include="DlgWebLogin.cpp" />
     <ClCompile Include="EditSpecial.cpp" />
     <ClCompile Include="FormAccess.cpp" />
     <ClCompile Include="FormAutoMake.cpp" />

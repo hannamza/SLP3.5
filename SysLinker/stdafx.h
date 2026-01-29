@@ -68,6 +68,9 @@ using namespace Gdiplus;
 #include "NewDBManager.h"
 #include "NewExcelManager.h"
 #include "HelpMsgManager.h"
+#include "json.hpp"
+#include "WebConnManager.h"
+#include "WinCredManager.h"
 //20240129 GBM end
 
 // #ifdef _DEBUG
@@ -379,6 +382,9 @@ typedef struct
 	// TREE VIEW CUSTOM 보기
 	TCHAR	szInput[MAX_PATH + 1];
 	TCHAR	szOutput[MAX_PATH + 1];
+
+	//20260126 GBM start - 로그인창 설정 값 추가
+	int		nAccountSave;
 }ST_CONFIG;
 
 struct ST_REMOVE_LINKED

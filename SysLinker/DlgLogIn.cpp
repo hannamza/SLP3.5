@@ -145,6 +145,8 @@ void CDlgLogIn::OnBnClickedOk()
 		return;
 	}
 
+	//20260129 GBM start - 로그인 제거
+#if 0
 	if (m_strUser == L"")
 	{
 #ifndef ENGLISH_MODE
@@ -168,6 +170,8 @@ void CDlgLogIn::OnBnClickedOk()
 #endif
 		return;
 	}
+#endif
+	//20260129 GBM end
 
 	m_strOpenPrjName = pInfo->strName;
 	m_strOpenPrjPath = pInfo->strPrjPath;
@@ -175,6 +179,8 @@ void CDlgLogIn::OnBnClickedOk()
 	m_wMinor = pInfo->wMinor;
 	m_bVersionTempSelected = pInfo->bVerTemp;
 
+	//20260129 GBM start - 로그인 제거
+#if 0
 	CString strPath = g_stConfig.szPrjPath;
 	if (strPath.Right(1) != '\\')
 		strPath += L"\\";
@@ -194,10 +200,11 @@ void CDlgLogIn::OnBnClickedOk()
 			, F3_PRJ_DIR_DATABASE
 		);
 	}
-	
 
 	if (CheckLogin(strDBPath ,m_strUser , m_strPwd) <= 0)
 		return;
+#endif
+	//20260129 GBM end
 
 	//20240523 GBM start - 아래 행정은 CheckLogin에서 이미 하고 있으므로 불필요한 행정으로 주석처리
 	// DB 연결 해제

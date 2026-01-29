@@ -1,7 +1,7 @@
 #pragma once
 
 // 프로그램 버전 번호, 배포 전 반드시 수정할 것
-#define SLP4_VERSION_NUMBER		1.7
+#define SLP4_VERSION_NUMBER		1.8
 
 // 프로젝트 루트 폴더
 #define ROOT_FOLDER		_T("SLP4")
@@ -100,6 +100,9 @@
 #else
 #define HELP_MESSAGE_EXCEL_FILE_NAME	_T("HelpMessageList_en.xlsx")
 #endif
+
+// Windows Credential Manager를 이용해 계정 정보를 저장하기 위한 KEY
+#define WINDOWS_CREDENTIAL_MANAGER_KEY	_T("WCM_KEY_SLP4")
 
 // 수신기 타입
 enum {
@@ -427,6 +430,32 @@ enum {
 	RECHECK_OUTPUT_CONTENT_COUNT
 }RECHECK_OUTPUT_CONTENT;
 
+// Web 로그인 응답 결과
+enum {
+	LOGIN_SUCCEEDED,
+	INTERNET_OPEN_FAILED,
+	INTERNET_CONNECT_FAILED,
+	HTTP_OPEN_REQUEST_FAILED,
+	HTTP_SEND_REQUEST_FAILED,
+	SYNTAX_ERROR,
+	NO_USER,
+	EMPTY_RESPONSE_BODY,
+	JSON_PARSING_FAILED,
+	ACCOUNT_REQUIRING_EMAIL_VERIFICATION,
+	ACCOUNT_REQUIRING_ADMIN_APPROVAL,
+	BANNED_ACCOUNT,
+	EMPTY_TOKEN_VALUE,
+	UNDEFINED_RESPONSE
+}LOGIN_RESULT;
+
+// LIST 사용자 등급
+enum {
+	NO_GRADE = -1,
+	GRADE_OPERATOR,
+	GRADE_USER,
+	GRADE_CLIENT
+}USER_GRADE;
+
 // GT1 추가 입력 타입 문자열 
 static const TCHAR* g_lpszEquipmentInputType[] = {
 	_T(""),						// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
@@ -563,6 +592,13 @@ static const TCHAR * g_szRecheckOutputContent[] = {
 	_T("밸브")
 };
 
+// 웹 사용자 등급 문자열 (운영자, 사용자만 알고 의뢰자는 어떤 문자열인지 아직 모름)
+static const TCHAR* g_szUserGrade[] = {
+	_T("Operator"),
+	_T("User"),
+	_T("Client")
+};
+
 #pragma pack(push, 1)
 
 // 프로젝트 버전 정보 구조체 
@@ -640,5 +676,35 @@ typedef struct
 	std::vector<int> IDVec;
 	std::vector<CString> nameVec;
 }RECHECK_OUTPUT_CONTENT_INFO;
+
+// Web Response Json 구조체
+typedef struct
+{
+	int id;
+	CString email;
+	CString name;
+	CString role;
+	CString token;
+	CString cdt;
+	CString edt;
+	CString environmentName;
+	CString agencyName;
+	CString phone;
+	CString confirmYN;
+	CString appName;
+	CString appDt;
+	CString appYN;
+	CString blockYN;
+	CString delYN;
+	CString cName;
+	CString eName;
+}LOGIN_RESPONSE_INFO;
+
+// Web 로그인 성공 계정 정보
+typedef struct 
+{
+	CString email;
+	int grade;
+}ACCOUNT_INFO;
 
 #pragma pack(pop)

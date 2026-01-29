@@ -570,6 +570,18 @@
     <ClInclude Include="DlgPumpEditPane.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="DlgRomCreateOption.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\WebConnManager.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgWebLogin.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\WinCredManager.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -1075,6 +1087,18 @@
     </ClCompile>
     <ClCompile Include="DlgPumpEditPane.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgRomCreateOption.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\WebConnManager.cpp">
+      <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgWebLogin.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\WinCredManager.cpp">
+      <Filter>SLP3.5Func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

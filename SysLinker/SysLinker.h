@@ -336,6 +336,8 @@ public:
 	afx_msg void OnUpdateErrorCheck(CCmdUI *pCmdUI);
 
 	BOOL InitEquipmentInfoTable(CString strEquipmentDefinitionFile);	//20240516 GBM - 기본 DB의 설비 정의를 초기화
+	BOOL WebServerLogin();	//20260122 GBM - LIST 로그인 추가
+	void SetAccountInfo(CString strEmail);
 };
 
 extern CSysLinkerApp theApp;

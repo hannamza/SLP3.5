@@ -318,6 +318,10 @@
 #define IDD_PUMPEDIT_PANE               536
 #define IDB_CLOSE_ASSIGN                538
 #define IDB_CLOSE_UNASSIGN              539
+#define IDD_DIALOG_ROM_CREATE_OPTION    540
+#define IDD_DIALOG_ROM_CREATE_OPTION_EN 541
+#define IDD_DIALOG_WEB_LOGIN            542
+#define IDD_DIALOG_WEB_LOGIN_EN         543
 #define IDC_ST_LOC                      1000
 #define IDC_ED_NAME                     1001
 #define IDC_ED_SITE                     1002
@@ -366,6 +370,8 @@
 #define IDC_LIST_TYPE                   1008
 #define IDC_SP_RIGHT                    1008
 #define IDC_RD_IN_PUMP                  1008
+#define IDC_CHECK_ERROR_CHECK           1008
+#define IDC_CHECK_SAVE_ACCOUNT          1008
 #define IDC_ED_PRJ_PATH                 1009
 #define IDC_CHECK2                      1009
 #define IDC_CHKP_BUILD                  1009
@@ -375,6 +381,7 @@
 #define IDC_CHK_CURRENTFLOOR            1009
 #define IDC_ED_FLOOR                    1009
 #define IDC_RD_IN_POWER                 1009
+#define IDC_CHECK_ADMIN_MODE            1009
 #define IDC_ED_SITE_MANAGER             1010
 #define IDC_CHECK3                      1010
 #define IDC_CHK_IN_ROOM                 1010
@@ -716,6 +723,7 @@
 #define IDC_ST_PS_FULLNAME              1251
 #define IDC_BTN_INITFACP                1251
 #define IDC_BTN_ADDTEMPLETE             1252
+#define IDC_EDIT_EMAIL                  1253
 #define ID_WRITE_PASTEASHYPERLINK       32770
 #define ID_HOME_PROJECT_NEW             32772
 #define ID_HOME_PROJECT_OPEN            32773
@@ -799,9 +807,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        540
+#define _APS_NEXT_RESOURCE_VALUE        544
 #define _APS_NEXT_COMMAND_VALUE         32856
-#define _APS_NEXT_CONTROL_VALUE         1253
+#define _APS_NEXT_CONTROL_VALUE         1254
 #define _APS_NEXT_SYMED_VALUE           371
 #endif
 #endif

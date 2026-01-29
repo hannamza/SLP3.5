@@ -75,6 +75,8 @@
 #include "DlgPatternProperty.h"
 #include "../Version/Version.h"
 
+#include "DlgWebLogin.h"
+
 UINT ThreadCloseProject(LPVOID pParam)
 {
 	BOOL bRet = FALSE;
@@ -518,11 +520,21 @@ BOOL CSysLinkerApp::InitInstance()
 	CNewDBManager::New();
 	CNewExcelManager::New();
 	CHelpMsgManager::New();
+	CWebConnManager::New();
+	CWinCredManager::New();
 	//20240202 GBM end
 
 	CManualLinkManager::New();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
 
+	//20260126 GBM start - 여기서 로그인 창을 띄워서 계정 확인 후 계정 확인되면 진행, 그렇지 않으면 FALSE 리턴해서 종료
+	if (!WebServerLogin())
+	{
+		return FALSE;
+	}
+	//20260126 GBM end
+
 	OnHomeLogin();
+	
 	return TRUE;
 }
 
@@ -551,6 +563,8 @@ int CSysLinkerApp::ExitInstance()
 	CNewDBManager::Delete();
 	CNewExcelManager::Delete();
 	CHelpMsgManager::Delete();
+	CWebConnManager::Delete();
+	CWinCredManager::Delete();
 	Log::Cleanup();
 
 	//_CrtDumpMemoryLeaks();
@@ -3111,6 +3125,15 @@ int CSysLinkerApp::ConfigLoad()
 	}
 	else
 		memset(g_stConfig.szOutput, 0, sizeof(g_stConfig.szOutput));
+
+	//20260126 GBM start - 로그인 창 설정값 추가
+	nRet = GetPrivateProfileInt(L"LOGIN", L"ACCOUNT_SAVE", 0, (LPCTSTR)strPath);
+	if (nRet > 0)
+	{
+		g_stConfig.nAccountSave = nRet;
+	}
+	//20260126 GBM end
+
 	return 1;
 }
 
@@ -3188,6 +3211,14 @@ int CSysLinkerApp::ConfigSave()
 	bRet = WritePrivateProfileString(L"TREEVIEW", L"OUTPUT", g_stConfig.szOutput, strPath);
 	if (bRet == FALSE)
 		return FALSE;
+
+	//20260126 GBM start - 로그인 창 설정값 추가
+	str.Format(L"%d", g_stConfig.nAccountSave);
+	bRet = WritePrivateProfileString(L"LOGIN", L"ACCOUNT_SAVE", str, strPath);
+	if (bRet == FALSE)
+		return FALSE;
+	//20260126 GBM end
+
 	return 1;
 }
 
@@ -4906,4 +4937,82 @@ void CSysLinkerApp::OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI)
 		else
 			pCmdUI->Enable(FALSE);
 	}
+}
+
+void CSysLinkerApp::SetAccountInfo(CString strEmail)
+{
+	CString strRole = CWebConnManager::Instance()->m_lri.role;
+
+	CWebConnManager::Instance()->m_ai.email = strEmail;
+
+	int nGrade = NO_GRADE;
+	for (int i = GRADE_OPERATOR; i <= GRADE_CLIENT; i++)
+	{
+		if (strRole == g_szUserGrade[i])
+		{
+			nGrade = i;
+			break;
+		}
+	}
+
+	CWebConnManager::Instance()->m_ai.grade = nGrade;
+}
+
+BOOL CSysLinkerApp::WebServerLogin()
+{
+	BOOL bRet = FALSE;
+
+	if (!CWebConnManager::Instance()->CheckInternetConnected())
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("인터넷이 연결되어 있지 않습니다.\r\n인터넷을 확인하고 프로그램을 다시 실행해 주세요."));
+		Log::Trace("인터넷이 연결되어 있지 않습니다.\r\n인터넷을 확인하고 프로그램을 다시 실행해 주세요.");
+#else
+		AfxMessageBox(_T("The Internet is not connected.\r\nPlease check the Internet and run the program again."));
+		Log::Trace("The Internet is not connected.\r\nPlease check the Internet and run the program again.");
+#endif
+		return FALSE;
+	}
+
+	CDlgWebLogin dlg;
+	if (dlg.DoModal() == IDOK)
+	{
+		bRet = TRUE;
+
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("로그인에 성공했습니다."), MB_OK | MB_ICONINFORMATION);
+		Log::Trace("로그인에 성공했습니다.");
+#else
+		AfxMessageBox(_T("Login was successful.", MB_OK | MB_ICONINFORMATION));
+		Log::Trace("Login was successful.");
+#endif
+
+		// 로그인이 성공했을 때 계정 정보를 넣어 둠
+		SetAccountInfo(dlg.m_strEditEmail);
+
+		// 로그인 정보 메인 출력 창에 표시
+		CString strAccount = _T("");
+
+#ifdef SLP4_MODE
+#ifndef ENGLISH_MODE
+		strAccount.Format(_T("[%s] 계정으로 로그인 되었습니다."), CWebConnManager::Instance()->m_ai.email);
+#else
+		strAccount.Format(_T("You have been logged in with account [%s]"), CWebConnManager::Instance()->m_ai.email);
+#endif
+		GF_AddLog(strAccount);
+		Log::Trace("%s", CCommonFunc::WCharToChar(strAccount.GetBuffer(0)));
+#endif
+	}
+	else
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("로그인을 취소했기 때문에 프로그램을 종료합니다."));
+		Log::Trace("로그인을 취소했기 때문에 프로그램을 종료합니다.");
+#else
+		AfxMessageBox(_T("The program will close because you canceled your login."));
+		Log::Trace("The program will close because you canceled your login.");
+#endif
+	}
+
+	return bRet;
 }

@@ -25,6 +25,7 @@
 #include "DlgErrorCheck.h"
 
 #include "DlgAdminMode.h"
+#include "DlgRomCreateOption.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -1157,6 +1158,94 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
+	//20260109 GBM start - ROM 파일 생성 프로세스 변경
+#if 1
+	CDlgRomCreateOption dlg;
+	if (dlg.DoModal() != IDOK)
+	{
+		return;
+	}
+
+	BOOL bErrorCheck = dlg.m_bErrorCheck;
+	BOOL bAdminMode = dlg.m_bAdminMode;
+
+	if (bAdminMode)
+	{
+		//20240415 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
+
+		//인증 여부 초기화
+		CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
+#ifndef ENGLISH_MODE
+
+		CDlgAdminMode dlg;
+		if (dlg.DoModal() == IDOK)
+		{
+			CString strPassword = ADMIN_MODE_PASSWORD;
+			CString strUserInputPassword = _T("");
+			strUserInputPassword = dlg.m_strEditPassword;
+
+			if (strUserInputPassword.Compare(strPassword) == 0)
+			{
+				AfxMessageBox(_T("관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다."));
+				GF_AddLog(L"관리자 모드가 인증되었습니다. 인증 ROM 파일 생성을 진행합니다.");
+				Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
+				CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
+			}
+			else
+			{
+				AfxMessageBox(_T("잘못된 암호입니다."));
+				return;
+			}
+		}
+		else
+		{
+			AfxMessageBox(_T("일반 ROM 파일 생성을 진행합니다."));
+			GF_AddLog(L"일반 ROM 파일 생성을 진행합니다.");
+			Log::Trace("Proceed with creating a unauthorized ROM file.");
+		}
+
+#else
+		CDlgAdminMode dlg;
+		if (dlg.DoModal() == IDOK)
+		{
+			CString strPassword = ADMIN_MODE_PASSWORD;
+			CString strUserInputPassword = _T("");
+			strUserInputPassword = dlg.m_strEditPassword;
+
+			if (strUserInputPassword.Compare(strPassword) == 0)
+			{
+				AfxMessageBox(_T("Admin mode verified. Proceeds to generate the ROM file for authentication."));
+				GF_AddLog(L"Admin mode verified. Proceeds to generate the ROM file for authentication.");
+				Log::Trace("Administrator mode is authorized. Proceed to create a authorized ROM file.");
+				CNewInfo::Instance()->m_gi.projectInfo.authorized = true;
+			}
+			else
+			{
+				AfxMessageBox(_T("Invalid password."));
+				return;
+			}
+		}
+		else
+		{
+			AfxMessageBox(_T("Proceeds to create a generic ROM file."));
+			GF_AddLog(L"Proceeds to create a generic ROM file.");
+			Log::Trace("Proceed with creating a unauthorized ROM file.");
+		}
+#endif
+
+		//20240415 GBM end
+	}
+
+	if (bErrorCheck)
+	{
+		StartErrorCheck(ERR_CHECK_CREATELINK, this);
+	}
+	else
+	{
+		CreateFacpLink();
+	}
+
+#else
 	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴
 	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
 	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
@@ -1270,6 +1359,9 @@ void CMainFrame::OnFacpCreateLink()
 	else
 		StartErrorCheck(ERR_CHECK_CREATELINK, this);
 #endif
+
+#endif
+	//20260109 GBM end
 }
 
 void CMainFrame::OnUpdateFacpCreateLink(CCmdUI *pCmdUI)
