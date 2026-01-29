@@ -1177,7 +1177,7 @@ void CDlgPumpEditPane::OnClcnItemDelete(NMHDR *pNMHDR,LRESULT *pResult)
 #ifndef ENGLISH_MODE
 	strMsg.Format(L"선택된 %s를 삭제하시겠습니까?",pItem->GetPumpFullName());
 #else
-	strMsg.Format(L"Do you want to delete the selected [%s]?",m_pCurrentData->GetPumpName());
+	strMsg.Format(L"Do you want to delete the selected [%s]?", pItem->GetPumpFullName());
 #endif
 	if(AfxMessageBox(strMsg,MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;

@@ -1,7 +1,7 @@
 #pragma once
 
-// 프로그램 버전 번호, 배포 전 반드시 수정할 것
-#define SLP4_VERSION_NUMBER		1.8
+// 프로그램 버전 번호, 배포 전 반드시 수정할 것 -> Version.h를 이용하는 방식으로 변경
+//#define SLP4_VERSION_NUMBER		1.8
 
 // 프로젝트 루트 폴더
 #define ROOT_FOLDER		_T("SLP4")

@@ -26,6 +26,8 @@
 
 #include "DlgAdminMode.h"
 #include "DlgRomCreateOption.h"
+#include "../../Version/Version.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -320,7 +322,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #ifndef SLP4_MODE
 	strProgram = _T("SLP3");
 #else
-	strProgram.Format(_T("SLP4(ver%g)"), SLP4_VERSION_NUMBER);
+	strProgram.Format(_T("SLP4(ver%g)"), GFSP_PRODUCT_VERSION_NUM);
 #endif
 
 #ifndef ENGLISH_MODE
