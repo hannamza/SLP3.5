@@ -1361,10 +1361,10 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 
 	// 추가 부분
 #ifndef ENGLISH_MODE
-	if (AfxMessageBox(L"타입이름을 변경하면 해당 펌프를 사용하는 모든 펌프의 이름이 변경됩니다.\n진행 사시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	if (AfxMessageBox(L"타입이름을 변경하면 해당 펌프를 사용하는 모든 펌프의 이름이 변경됩니다.\n진행 하시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 #else
-	if (AfxMessageBox(L"If you change the type name, all pumps that use that pump will have their names changed.\nContinue with the next item ? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
+	if (AfxMessageBox(L"If you change the type name, all pumps that use that pump will have their names changed.\nContinue with the next item? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
 		return;
 #endif
 
