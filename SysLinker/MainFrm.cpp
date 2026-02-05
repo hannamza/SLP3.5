@@ -1160,6 +1160,9 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
+	//인증 여부 초기화
+	CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
+
 	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴
 	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
 	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
@@ -1180,9 +1183,6 @@ void CMainFrame::OnFacpCreateLink()
 	if (bAdminMode)
 	{
 		//20240415 GBM start - 연동데이터 생성 시작 시 [관리자 모드]로 실행할 지 여부를 판단
-
-		//인증 여부 초기화
-		CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
 #ifndef ENGLISH_MODE
 
 		CDlgAdminMode dlg;
