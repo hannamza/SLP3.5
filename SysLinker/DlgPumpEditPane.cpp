@@ -1347,7 +1347,7 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 	ST_PUMPTYPE * pData = nullptr;
 	POSITION pos;
 	CString str1,str2,strError;
-
+	CString strOldTypeName = L"";
 	nSel = m_ctrlPumpTypeList.GetNextItem(-1,LVNI_SELECTED);
 	if(nSel < 0)
 	{
@@ -1358,6 +1358,15 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 #endif
 		return; 
 	}
+
+	// 추가 부분
+#ifndef ENGLISH_MODE
+	if (AfxMessageBox(L"타입이름을 변경하면 해당 펌프를 사용하는 모든 펌프의 이름이 변경됩니다.\n진행 사시겠습니까?", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		return;
+#else
+	if (AfxMessageBox(L"If you change the type name, all pumps that use that pump will have their names changed.\nContinue with the next item ? ", MB_YESNO | MB_ICONQUESTION) != IDYES)
+		return;
+#endif
 
 	pData = (ST_PUMPTYPE *)m_ctrlPumpTypeList.GetItemData(nSel);
 	if(pData == nullptr)
@@ -1370,6 +1379,7 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 		return;
 	}
 
+	strOldTypeName = pData->strTypeName;
 	str2 = m_strTypeName;
 	str2.TrimLeft();
 	str2.TrimRight();
@@ -1419,6 +1429,8 @@ void CDlgPumpEditPane::OnBnClickedBtnModify()
 	pData->nPsUse = nPSUse;
 
 	m_ctrlPumpTypeList.SetItemText(nSel,0,str2);
+
+	ApplyTypeNameChangeData(strOldTypeName, m_strTypeName);
 #ifndef ENGLISH_MODE
 	AfxMessageBox(L"Pump Type을 수정하는데 성공했습니다");
 #else
@@ -1827,4 +1839,106 @@ void CDlgPumpEditPane::OnBnClickedBtnAddtemplete()
 #else
 	AfxMessageBox(L"Successfully added the template.");
 #endif
+}
+
+int CDlgPumpEditPane::ApplyTypeNameChangeData(CString strOldTypeName, CString strNewTypeName)
+{
+	POSITION pos;
+	CString strSql;
+	CString strOldTemp, strNewTemp, strType;
+	CDataPump * pPmp;
+	CDataPS * pPs;
+	YAdoDatabase * pDB;
+	std::shared_ptr<CManagerPump> spPump;
+	std::shared_ptr<CManagerPS> spPs;
+
+	pDB = m_pRefFasSysData->GetPrjDB();
+	if (pDB == nullptr)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"프로젝트 데이터베이스가 연결되지 않았습니다.");
+#else
+		AfxMessageBox(L"The project database has not been connected.");
+#endif
+		return 0;
+	}
+
+	strOldTemp = strOldTypeName;
+	strOldTemp.Remove(' ');
+
+	spPump = m_pRefFasSysData->GetPumpManager();
+	if (spPump == nullptr)
+		return 0;
+
+	spPs = m_pRefFasSysData->GetPSwitchManager();
+	if (spPs == nullptr)
+		return 0;
+
+	pDB->BeginTransaction();
+
+	pos = spPump->GetHeadPosition();
+	while (pos)
+	{
+		pPmp = spPump->GetNext(pos);
+		if (pPmp == nullptr)
+			continue;
+
+		strType = pPmp->GetTypeName();
+		strType.Remove(' ');
+
+		if (strType.CompareNoCase(strOldTemp) != 0)
+			continue;
+
+		strSql.Format(
+			L"UPDATE TB_PUMP_MST SET PMP_TYPENAME='%s' "
+			L" WHERE FACP_ID=%d AND PMP_ID=%d "
+			, strNewTypeName
+			, pPmp->GetFacpID(), pPmp->GetPumpID()
+		);
+
+		if (pDB->ExecuteSql(strSql) == FALSE)
+		{
+			pDB->RollbackTransaction();
+			return 0;
+		}
+
+		pPmp->SetTypeName(strNewTypeName);
+	}
+
+	pos = spPs->GetHeadPosition();
+
+	while (pos)
+	{
+		pPs = spPs->GetNext(pos);
+		if (pPs == nullptr)
+			continue;
+
+		strType = pPs->GetTypeName();
+		strType.Remove(' ');
+
+		if (strType.CompareNoCase(strOldTemp) != 0)
+			continue;
+
+		strSql.Format(
+			L"UPDATE TB_PSWITCH_MST SET PS_TYPENAME='%s' "
+			L" WHERE FACP_ID=%d AND PS_ID=%d "
+			, strNewTypeName
+			, pPs->GetFacpID(), pPs->GetPSwitchID()
+		);
+
+		if (pDB->ExecuteSql(strSql) == FALSE)
+		{
+			pDB->RollbackTransaction();
+			return 0;
+		}
+
+		pPs->SetTypeName(strNewTypeName);
+	}
+
+	pDB->CommitTransaction();
+
+	if (m_pCurFacpData != nullptr)
+		OnRadioFacpClicked(m_pCurFacpData->GetFacpID() + IDC_RD_FACP0 - 1);
+
+	return 1;
 }

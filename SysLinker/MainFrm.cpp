@@ -1160,6 +1160,12 @@ LRESULT CMainFrame::OnAfxWmChangingActiveTab(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::OnFacpCreateLink()
 {
+	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴
+	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
+	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
+	m_pRefFasSysData->GetFacpAndUnitType();
+	//20240808 GBM end
+
 	//20260109 GBM start - ROM 파일 생성 프로세스 변경
 #if 1
 	CDlgRomCreateOption dlg;

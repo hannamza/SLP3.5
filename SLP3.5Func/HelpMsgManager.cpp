@@ -158,12 +158,20 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 	hmociMapIter = m_helpMessageMap.find(strCheckedEqName);
 	if (hmociMapIter != m_helpMessageMap.end())
 	{
+#ifndef ENGLISH_MODE
 		strGuideMessage = strEquipmentName + _T(" 입력이 구성되는 설비는 아래와 같다.\r\n\r\n");
+#else
+		strGuideMessage.Format(_T("The equipment that consists of the %s input is as follows."), strEquipmentName);
+#endif
 		
 		// 경보_계열
 		if (hmociMapIter->second.alertTypeVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[경보_계열]-");
+#else
+			strGuideMessage += _T("[ALARM_SERIES]-");
+#endif
 
 			vecIter = hmociMapIter->second.alertTypeVec.begin();
 			for (; vecIter != hmociMapIter->second.alertTypeVec.end(); vecIter++)
@@ -178,7 +186,11 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 		// 댐퍼 계열
 		if (hmociMapIter->second.damperTypeVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[댐퍼_계열]-");
+#else
+			strGuideMessage += _T("[DAMPER_SERIES]-");
+#endif
 
 			vecIter = hmociMapIter->second.damperTypeVec.begin();
 			for (; vecIter != hmociMapIter->second.damperTypeVec.end(); vecIter++)
@@ -193,7 +205,11 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 		// 문 계열
 		if (hmociMapIter->second.doorTypeVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[문_계열]-");
+#else
+			strGuideMessage += _T("[DOOR_SERIES]-");
+#endif
 
 			vecIter = hmociMapIter->second.doorTypeVec.begin();
 			for (; vecIter != hmociMapIter->second.doorTypeVec.end(); vecIter++)
@@ -208,7 +224,11 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 		// 창문 계열
 		if (hmociMapIter->second.windowTypeVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[창문_계열]-");
+#else
+			strGuideMessage += _T("[WINDOW_SERIES]-");
+#endif
 
 			vecIter = hmociMapIter->second.windowTypeVec.begin();
 			for (; vecIter != hmociMapIter->second.windowTypeVec.end(); vecIter++)
@@ -223,7 +243,11 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 		// 휀 계열
 		if (hmociMapIter->second.fanTypeVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[휀_계열]-");
+#else
+			strGuideMessage += _T("[FAN_SERIES]-");
+#endif
 
 			vecIter = hmociMapIter->second.fanTypeVec.begin();
 			for (; vecIter != hmociMapIter->second.fanTypeVec.end(); vecIter++)
@@ -238,7 +262,11 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 		// 기타 계열
 		if (hmociMapIter->second.etcVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[기타_계열]-");
+#else
+			strGuideMessage += _T("[ETC]-");
+#endif
 
 			vecIter = hmociMapIter->second.etcVec.begin();
 			for (; vecIter != hmociMapIter->second.etcVec.end(); vecIter++)
@@ -253,7 +281,11 @@ CString CHelpMsgManager::GetGuideMessage(CString strEquipmentName)
 		// 전용
 		if (hmociMapIter->second.exclusiveVec.size() > 0)
 		{
+#ifndef ENGLISH_MODE
 			strGuideMessage += _T("[전용]-");
+#else
+			strGuideMessage += _T("[RESTRICTED]-");
+#endif
 
 			vecIter = hmociMapIter->second.exclusiveVec.begin();
 			for (; vecIter != hmociMapIter->second.exclusiveVec.end(); vecIter++)

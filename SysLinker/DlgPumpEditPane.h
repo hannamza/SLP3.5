@@ -113,4 +113,6 @@ public:
 	CEditSpecial m_edTypeName;
 	CEditSpecial m_edLcdMsg;
 	CComboBox m_cmbPSUseType;
+
+	int ApplyTypeNameChangeData(CString strOldTypeName, CString strNewTypeName);
 };
