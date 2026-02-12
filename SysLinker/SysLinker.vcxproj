@@ -579,6 +579,7 @@
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions);SLP4_MODE</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -610,6 +611,7 @@
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions);ENGLISH_MODE</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -874,6 +876,7 @@
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions);SLP4_MODE</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -908,6 +911,7 @@
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions);ENGLISH_MODE</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1178,6 +1182,26 @@
     <ClInclude Include="Ut_AutoLogic.h" />
     <ClInclude Include="Ut_AutoMake.h" />
     <ClInclude Include="ViewTree.h" />
+    <ClInclude Include="XMakeLink\XDataBtype.h" />
+    <ClInclude Include="XMakeLink\XDataBuild.h" />
+    <ClInclude Include="XMakeLink\XDataDev.h" />
+    <ClInclude Include="XMakeLink\XDataEm.h" />
+    <ClInclude Include="XMakeLink\XDataEqType.h" />
+    <ClInclude Include="XMakeLink\XDataFloor.h" />
+    <ClInclude Include="XMakeLink\XDataLink.h" />
+    <ClInclude Include="XMakeLink\XDataLogicItem.h" />
+    <ClInclude Include="XMakeLink\XDataLogicMst.h" />
+    <ClInclude Include="XMakeLink\XDataRoom.h" />
+    <ClInclude Include="XMakeLink\XDataStair.h" />
+    <ClInclude Include="XMakeLink\XListBtype.h" />
+    <ClInclude Include="XMakeLink\XListBuild.h" />
+    <ClInclude Include="XMakeLink\XListEqTypeLocDev.h" />
+    <ClInclude Include="XMakeLink\XListFloor.h" />
+    <ClInclude Include="XMakeLink\XListRoom.h" />
+    <ClInclude Include="XMakeLink\XListStair.h" />
+    <ClInclude Include="XMakeLink\XMakeLink.h" />
+    <ClInclude Include="XMakeLink\XMakeLink_Def.h" />
+    <ClInclude Include="XMakeLink\XPatternMst.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\Control\CBSpeedListCtrl.cpp" />
@@ -1503,6 +1527,26 @@
     <ClCompile Include="Ut_AutoLogic.cpp" />
     <ClCompile Include="Ut_AutoMake.cpp" />
     <ClCompile Include="ViewTree.cpp" />
+    <ClCompile Include="XMakeLink\XDataBtype.cpp" />
+    <ClCompile Include="XMakeLink\XDataBuild.cpp" />
+    <ClCompile Include="XMakeLink\XDataDev.cpp" />
+    <ClCompile Include="XMakeLink\XDataEm.cpp" />
+    <ClCompile Include="XMakeLink\XDataEqType.cpp" />
+    <ClCompile Include="XMakeLink\XDataFloor.cpp" />
+    <ClCompile Include="XMakeLink\XDataLink.cpp" />
+    <ClCompile Include="XMakeLink\XDataLogicItem.cpp" />
+    <ClCompile Include="XMakeLink\XDataLogicMst.cpp" />
+    <ClCompile Include="XMakeLink\XDataRoom.cpp" />
+    <ClCompile Include="XMakeLink\XDataStair.cpp" />
+    <ClCompile Include="XMakeLink\XListBtype.cpp" />
+    <ClCompile Include="XMakeLink\XListBuild.cpp" />
+    <ClCompile Include="XMakeLink\XListEqTypeLocDev.cpp" />
+    <ClCompile Include="XMakeLink\XListFloor.cpp" />
+    <ClCompile Include="XMakeLink\XListRoom.cpp" />
+    <ClCompile Include="XMakeLink\XListStair.cpp" />
+    <ClCompile Include="XMakeLink\XMakeLink.cpp" />
+    <ClCompile Include="XMakeLink\XMakeLink_Def.cpp" />
+    <ClCompile Include="XMakeLink\XPatternMst.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SysLinker.rc" />

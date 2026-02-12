@@ -431,13 +431,13 @@ void CFormLoadRelayTable::OnBnClickedBtnApply()
 {
 	//20240408 GBM start - 새 중계기 일람표 적용 시 프로그램 자동 종료
 #ifndef ENGLISH_MODE
-	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트 업데이트를 성공하면 자동으로 프로그램이 종료됩니다.\n"
+	if (AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트 업데이트를 성공하면 자동으로 프로그램이 재시작됩니다.\n"
 		L"진행하시겠습니까?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 	{
 		return;
 	}
 #else
-	if (AfxMessageBox(L"When the project is successfully updated using the new module table, the program will automatically exit.\n"
+	if (AfxMessageBox(L"When the project is successfully updated using the new module table, the program will automatically restart.\n"
 		L"Do you want to proceed?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 	{
 		return;
@@ -697,10 +697,10 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			{
 #ifndef ENGLISH_MODE
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 성공했습니다.\n"
-					L"프로그램이 자동으로 종료되면 다시 실행해 주시기 바랍니다.");
+					L"프로그램이 재시작됩니다.");
 #else
 				AfxMessageBox(L"Successfully updated the project using the new module table.\n"
-					L"When the program automatically exits, please run it again.");
+					L"The program will restart.");
 #endif
 
 				Log::Trace("The new module file has been successfully applied and this program ends!");
@@ -708,7 +708,7 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 				me->m_pProgressBarDlg->PostMessage(WM_CLOSE);
 				SetEvent(me->m_hThreadHandle);
 
-				theApp.m_pMainWnd->PostMessage(WM_CLOSE);
+				theApp.RequestRestart();
 			}
 			else
 			{

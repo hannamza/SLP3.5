@@ -37,6 +37,9 @@
     <Filter Include="Common\CustomList">
       <UniqueIdentifier>{e81c95b7-69ea-4a21-9c86-3f34bce73a59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="XMakeLink">
+      <UniqueIdentifier>{0dd03d15-c9fc-4ea2-b148-220d7985aa0d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -582,6 +585,66 @@
     <ClInclude Include="..\SLP3.5Func\WinCredManager.h">
       <Filter>SLP3.5Func</Filter>
     </ClInclude>
+    <ClInclude Include="XMakeLink\XDataBtype.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataBuild.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataDev.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataEm.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataEqType.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataFloor.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataLink.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataLogicItem.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataLogicMst.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataRoom.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XDataStair.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XListBtype.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XListBuild.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XListEqTypeLocDev.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XListFloor.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XListRoom.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XListStair.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XMakeLink.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XMakeLink_Def.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
+    <ClInclude Include="XMakeLink\XPatternMst.h">
+      <Filter>XMakeLink</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -1099,6 +1162,66 @@
     </ClCompile>
     <ClCompile Include="..\SLP3.5Func\WinCredManager.cpp">
       <Filter>SLP3.5Func</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataBtype.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataBuild.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataDev.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataEm.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataEqType.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataFloor.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataLink.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataLogicItem.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataLogicMst.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataRoom.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XDataStair.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XListBtype.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XListBuild.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XListEqTypeLocDev.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XListFloor.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XListRoom.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XListStair.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XMakeLink.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XMakeLink_Def.cpp">
+      <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="XMakeLink\XPatternMst.cpp">
+      <Filter>XMakeLink</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

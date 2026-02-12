@@ -525,14 +525,14 @@ BOOL CSysLinkerApp::InitInstance()
 	//20240202 GBM end
 
 	CManualLinkManager::New();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
-
+#if 1
 	//20260126 GBM start - 여기서 로그인 창을 띄워서 계정 확인 후 계정 확인되면 진행, 그렇지 않으면 FALSE 리턴해서 종료
 	if (!WebServerLogin())
 	{
 		return FALSE;
 	}
 	//20260126 GBM end
-
+#endif
 	OnHomeLogin();
 	
 	return TRUE;
@@ -5015,4 +5015,44 @@ BOOL CSysLinkerApp::WebServerLogin()
 	}
 
 	return bRet;
+}
+
+
+int CSysLinkerApp::RequestRestart()
+{
+	TCHAR szPath[MAX_PATH];
+	CString strPath;
+	GetModuleFileName(NULL,szPath,MAX_PATH);
+
+	strPath.Format(L"\"%s\"",szPath);
+
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si,sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi,sizeof(pi));
+
+	// 새 프로세스 시작
+	if(CreateProcess(
+		NULL,                               // lpApplicationName (NULL로 설정)
+		strPath.GetBuffer(),         // lpCommandLine (따옴표 + 인자 포함)
+		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi
+	))
+	{
+		// 핸들 정리
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+
+		// 2. 현재 애플리케이션을 종료합니다. (가장 확실한 방법으로)
+		//AfxGetApp()->PostThreadMessage(WM_QUIT,0,0);
+		ExitProcess(0);
+	}
+	else
+	{
+		MessageBox(NULL,_T("새 인스턴스 시작 실패!"),_T("오류"),MB_ICONERROR);
+	}
+	// 현재 인스턴스를 종료합니다.
+	//AfxGetApp()->PostThreadMessage(WM_QUIT,0,0);
+	//AfxGetMainWnd()->PostMessageW(WM_CLOSE,0,0);
+	return 0;
 }
