@@ -21,7 +21,6 @@ public:
 #endif
 
 public:
-	BOOL m_bErrorCheck;
 	BOOL m_bAdminMode;
 
 protected:
@@ -29,6 +28,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedCheckErrorCheck();
 	afx_msg void OnBnClickedCheckAdminMode();
+	virtual BOOL OnInitDialog();
 };

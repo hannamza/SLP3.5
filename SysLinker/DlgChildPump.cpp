@@ -450,8 +450,8 @@ int CDlgChildPump::GetWholeNum(int nFacp)
 	int nSize, i;
 	int nMaxID = 0, nID;
 	POSITION pos;
-	std::vector<int> vtArray(D_MAX_PATTERN_COUNT);
-	vtArray.reserve(D_MAX_FACP_COUNT);
+	std::vector<int> vtArray(D_MAX_PUMP_COUNT);			// 패턴 최대 개수를 크기로 잡았는데 맞지 않아 최대 펌프 개수로 수정, 현재 UI 기반 편집으로 바뀌었기 때문에 이 클래스 자체가 호출될 일이 없지만 수정해 둠
+	vtArray.reserve(D_MAX_PUMP_COUNT);
 	spManager = m_pRefFasSysData->GetPumpManager();
 	if (spManager == nullptr)
 		return -1;

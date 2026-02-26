@@ -7,9 +7,9 @@
 #define GFSP_PRODUCT_NAME			"GFSP"
 #define GFSP_PROGRAM_NAME			"GFSP.EXE"
 #else
-#define GFSP_PRODUCT_VERSION		"1.9"
-#define GFSP_PRODUCT_VERSION_NUM	1.9
-#define GFSP_PRODUCT_UPDATE_DATE	"SLP4 v1.9 , Last Updated On 12 Febrary 2026"
+#define GFSP_PRODUCT_VERSION		"2.0"
+#define GFSP_PRODUCT_VERSION_NUM	2.0
+#define GFSP_PRODUCT_UPDATE_DATE	"SLP4 v2.0 , Last Updated On 24 Febrary 2026"
 #define GFSP_PRODUCT_NAME			"SLP4"
 #define GFSP_PROGRAM_NAME			"SLP4.EXE"
 #endif

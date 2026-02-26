@@ -660,7 +660,7 @@ public:
 	 * @note 
 	 */
 	int MakeLinkData(CString strPath);
-	int MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+	int MakeX2RMainRom(CString strPath, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 		, UINT &uRomOffset, UINT &uMsgOffset);
 	UINT AddPatternPointerAddrX2MainRom(
 		  int nFNum, CPtrList * pList
@@ -682,8 +682,9 @@ public:
 	 * @return     return
 	 * @note 
 	 */
-	int Add63Unit0ChnX2MainRom(int nFNum,CFile *pFnCrt, CFile *pFnRom, ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+	int Add63Unit0ChnX2MainRom(int nFNum,CFile *pFnCrt, CFile *pFnRom, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 		, UINT &uRomOffset, UINT &uMsgOffset);
+
 	/*!
 	 * @fn         AddRelayAddrX2MainRom
 	 * @version    1.0
@@ -694,8 +695,9 @@ public:
 	 * @return     return
 	 * @note 
 	 */
-	int Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt,CFile *pFnRom, ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+	int Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt,CFile *pFnRom, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 		, UINT &uRomOffset, UINT &uMsgOffset);
+
 	/*!
 	 * @fn         AddPatternAddrX2MainRom
 	 * @version    1.0
@@ -705,7 +707,7 @@ public:
 	 * @return     return
 	 * @note 
 	 */
-	UINT AddPatternAddrX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFnRom, ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+	UINT AddPatternAddrX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFnRom, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 		, UINT &uRomOffset, UINT &uMsgOffset);
 	UINT AddEtcDataX2LcdRom(int nFNum, BYTE * pMsgBuff, UINT &uMsgOffset);
 	UINT AddEmergencyRom(BYTE * pEmBuff, UINT &uEmOffset);
@@ -757,7 +759,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 	//20240808 GBM start - 현재 수신기 / 유닛 타입 정보 얻음
-	void GetFacpAndUnitType();
+	void CheckAndSetFacpAndUnitType();
 	//20240808 GBM end
 
 	void SetRecheckOutputContentInfo();

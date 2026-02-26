@@ -276,7 +276,7 @@ int CDlgRETabPattern::TreePatternItemAdd(HTREEITEM hParent)
 	POSITION pos;
 	ST_CHANGE_LINKDATA * pData;
 	CDataPattern * pPtn = nullptr;
-	HTREEITEM hPtn[D_MAX_PATTERN_COUNT+1] = { nullptr };
+	HTREEITEM hPtn[MAX_PATTERN_COUNT_PATTERN_EXPASION_VERSION + 1] = { nullptr };	// 패턴 최대 개수가 ROM 파일 버전에 따라 변함에 따라 패턴 증설 버전일 때 최대 개수를 적용, 계산해서 변수를 주는 것은 비용이 너무 큼, 거기에 이 클래스는 호출되지 않음
 	pos = m_pRefChangeList->GetHeadPosition();
 	while (pos)
 	{

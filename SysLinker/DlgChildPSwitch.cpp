@@ -467,7 +467,7 @@ int CDlgChildPSwitch::GetWholeNum(int nFacp)
 	INT_PTR nSize;
 	int nMaxID = 0, nID;
 	POSITION pos;
-	std::vector<int> vtArray(D_MAX_PATTERN_COUNT);
+	std::vector<int> vtArray(D_MAX_PUMP_COUNT);		// 기존에는 패턴 개수 최대치를 크기로 잡았지만 의미적으로 맞지 않고 PS는 PUMP에 종속적이어서 최대 PUMP 개수를 넘을 수 없으므로 이렇게 수정
 	spManager = m_pRefFasSysData->GetPSwitchManager();
 	if (spManager == nullptr)
 		return -1;

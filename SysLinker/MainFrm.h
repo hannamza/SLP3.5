@@ -167,6 +167,7 @@ public:
 	afx_msg LRESULT OnLogicEditCompleteMessage(WPARAM wParam, LPARAM lParam);	// 로직 편집이 끝났다는 메세지를 받음
 	afx_msg void OnChkShowhelpmsg();
 	afx_msg void OnUpdateChkShowhelpmsg(CCmdUI *pCmdUI);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 };
 
 

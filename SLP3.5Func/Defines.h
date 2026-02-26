@@ -60,6 +60,18 @@
 // 로직 편집 완료 메세지 정의 : 현재 WM_USER + 12000 ~ 대략 WM_USER + 12100, WM_USER + 21000 프로그램에서 사용 중
 #define LOGIC_EDIT_COMPLETE_MESSAGE	WM_USER + 30000
 
+// 패턴 증설 버전 최대 패턴 개수
+#define MAX_PATTERN_COUNT_PATTERN_EXPASION_VERSION		1000
+
+// 패턴 증설 버전 최대 패턴 아이템 개수
+#define MAX_PATTERN_ITEM_COUNT_PATTERN_EXPASION_VERSION	1000
+
+// 패턴 증설 버전 한 입력 회로 당 최대 출력 개수
+#define MAX_LINK_ITEM_COUNT_PATTERN_EXPASION_VERSION	40
+
+// MAIN ROM 파일 내 회선 정보 데이터 위치(패턴 증설 버전) OFFSET
+#define LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION	0x30600
+
 // 프로젝트 정보 Excel Sheet -> 추후 변경 예정
 #define EXCEL_SHEET_PROJECT_INFO	_T("project")
 
@@ -106,13 +118,15 @@
 
 // 수신기 타입
 enum {
-	F3 = 1,
+	UNDEFINED_FACP_TYPE = 0,
+	F3,
 	GT1
 }FACP_TYPE;
 
 // 유닛 타입
 enum {
-	P형_중계반 = 1,
+	UNDEFINED_UNIT_TYPE = 0,
+	P형_중계반,
 	F3_중계반,
 	GT1_중계반,
 	F3_광센서_중계반,
@@ -456,6 +470,12 @@ enum {
 	GRADE_CLIENT
 }USER_GRADE;
 
+// ROM 파일 버전
+enum {
+	ORIGINAL_VERSION,
+	PATTERN_EXPANSION_VERSION
+}ROM_FILE_VERSION;
+
 // GT1 추가 입력 타입 문자열 
 static const TCHAR* g_lpszEquipmentInputType[] = {
 	_T(""),						// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
@@ -618,6 +638,7 @@ typedef struct
 	PROJECT_INFO projectInfo;
 	unsigned char facpType[MAX_FACP_COUNT];
 	unsigned char unitType[MAX_FACP_COUNT][MAX_UNIT_COUNT];
+	unsigned char romVersion;
 }GT1APPENDIX_INFO;
 
 // 설비 정의 데이터

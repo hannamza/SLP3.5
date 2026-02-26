@@ -402,6 +402,12 @@ int CDlgErrorCheck::ProcErrorCheck()
 	int* nCountList = new int[nListSize];
 	//20251209 GBM end
 
+	pRelayTableData->CheckAndSetFacpAndUnitType();	// 이 함수를 호출해서 ROM 파일 버전을 세팅
+	int nRomVersion = CNewInfo::Instance()->m_gi.romVersion;	
+	int nMaxPatternCount = CNewInfo::Instance()->m_nMaxPatternCount;
+	int nMaxPatternItemCount = CNewInfo::Instance()->m_nMaxPatternItemCount;
+	int nMaxLinkCount = CNewInfo::Instance()->m_nMaxLinkCount;
+
 
 	pDBUtil = new YAdoDatabase;
 	pDBUtil->MSSqlInitialize(g_stConfig.szDBPass,g_stConfig.szDBUser
@@ -478,7 +484,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 		}
 
 		//20251210 GBM start - 패턴 자체 개수 추가	
-		if (nPatternCount >= D_MAX_PATTERN_COUNT)
+		if (nPatternCount >= nMaxPatternCount)
 		{
 			// 사용자가 리스트에 아이템을 클릭하면 가장 빠른 번호의 패턴이 선택된 상태에서 트리가 펼쳐지도록 함
 			pos = spPmng->GetHeadPosition();
@@ -511,7 +517,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 			if(pPtn == nullptr)
 				continue; 
 			nItemCnt = pPtn->GetItemCount();
-			if(nItemCnt >= D_MAX_PTNITEM_COUNT)
+			if(nItemCnt >= nMaxPatternItemCount)
 			{
 				// Error 확인 - 리스트 입력
 #ifndef ENGLISH_MODE
@@ -782,7 +788,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 					}
 					else
 					{
-						if(nCCnt > D_MAX_LINKITEM_COUNT)
+						if(nCCnt > nMaxLinkCount)
 						{
 #ifndef ENGLISH_MODE
 							strDesc.Format(L"\"%s\" 연동출력 접점 개수초과:접점(%d) 출력(%d)"
@@ -794,7 +800,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 							InsertErrorList(CHK_OUTPUT_CNT,nCCnt,pDev,strDesc);
 						}
 
-						if(nRCnt > D_MAX_LINKITEM_COUNT)
+						if(nRCnt > nMaxLinkCount)
 						{
 #ifndef ENGLISH_MODE
 							strDesc.Format(L"\"%s\" 연동출력 회로 개수초과:접점(%d) 출력(%d)"

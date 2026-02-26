@@ -239,6 +239,8 @@ void CFormAutoMake::OnInitialUpdate()
 #endif
 
 	m_ctrlList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+	m_pRefFasSysData->CheckAndSetFacpAndUnitType();		// 이 클래스에서 m_nMaxLinkCount가 사용되기 때문에 미리 ROM 파일 버전을 체크
 }
 
 void CFormAutoMake::OnSize(UINT nType, int cx, int cy)
@@ -606,6 +608,8 @@ int CFormAutoMake::DisplayAutoMake_XMake()
 	CDataChannel * pChn = nullptr;
 	nF = nU = nC = nD = -1;
 	nLastF = nLastU = nLastC = nLastD = -1;
+	int nMaxLinkCount = CNewInfo::Instance()->m_nMaxLinkCount;
+
 	m_ctrlTree.SetRedraw(FALSE);
 	for(auto src : m_vtInputDev)
 	{
@@ -678,13 +682,13 @@ int CFormAutoMake::DisplayAutoMake_XMake()
 				,hChn[nF][nU][nC]);
 			m_ctrlTree.SetItemData(hItem,(DWORD_PTR)pDev);
 
-			if(pDev->m_MapLink.size() > 20)
+			if(pDev->m_MapLink.size() > nMaxLinkCount)
 			{
 				nExceptionCnt++;
 				GF_AddLog(L"** 오류 예상됨 : %s의 출력 개수가 %d개 입니다.",pDev->GetInputFullName(),pDev->m_MapLink.size());
 			}
 
-			if(pDev->m_ptrPatternList.GetCount() + pDev->m_ptrEtcList.GetCount() > 20)
+			if(pDev->m_ptrPatternList.GetCount() + pDev->m_ptrEtcList.GetCount() > nMaxLinkCount)
 			{
 				nExceptionCnt++;
 				GF_AddLog(L"** 오류 예상됨 : %s의 접점 개수가 %d개 입니다.",pDev->GetInputFullName()
@@ -693,15 +697,24 @@ int CFormAutoMake::DisplayAutoMake_XMake()
 
 		}
 	}
+
 	m_dwEnd = GetTickCount();
 	CString str;
 	str.Format(
 		L"연동데이터 자동생성을 완료 했습니다.\n"
-		L"연동 출력이 20개가 넘는 회로가 %d개 있습니다\n"
-		L"연동데이터 자동생성 시간 : %.4f"
-		,nExceptionCnt
-		,((float)(m_dwEnd - m_dwStart) / (float)1000));
+		L"연동데이터 자동생성 시간 : %.4f\n"
+		, nMaxLinkCount
+		, nExceptionCnt
+		, ((float)(m_dwEnd - m_dwStart) / (float)1000));
+
+	if (nExceptionCnt > 0)
+	{
+		CString strException;
+		strException.Format(L"연동 출력이 %d개가 넘는 회로가 %d개 있습니다\n", nMaxLinkCount, nExceptionCnt);
+		str += strException;
+	}
 	AfxMessageBox(str);
+
 	m_ctrlTree.SetRedraw();
 	m_ctrlTree.RedrawWindow();
 	return 1;
@@ -720,6 +733,7 @@ int CFormAutoMake::DisplayList_XMake(HTREEITEM hItem)
 	CString strIn,strOut,strCont,strName,strEqName,strAddr;
 	CString strB,strBType,strStair,strFloor,strRoom;
 	int nIdx = 0,nPtnCnt = 0;
+	int nMaxLinkCount = CNewInfo::Instance()->m_nMaxLinkCount;
 
 	m_ctrlList.SetRedraw(FALSE);
 	m_ctrlList.DeleteAllItems();
@@ -799,7 +813,7 @@ int CFormAutoMake::DisplayList_XMake(HTREEITEM hItem)
 		m_ctrlList.SetItemText(nIdx,9,strStair);	  //_T("계단"), LVCFMT_LEFT, 150);
 		m_ctrlList.SetItemText(nIdx,10,strFloor);	  //_T("층"), LVCFMT_LEFT, 150);
 		m_ctrlList.SetItemText(nIdx,11,strRoom);	  //_T("실"), LVCFMT_LEFT, 150);
-		if(nIdx >= 20)
+		if(nIdx >= nMaxLinkCount)
 			m_ctrlList.SetItemColors(nIdx,0,RGB(255,255,255),RGB(255,0,0));
 		nIdx++;
 
@@ -826,7 +840,7 @@ int CFormAutoMake::DisplayList_XMake(HTREEITEM hItem)
 		m_ctrlList.SetItemText(nIdx,9,strStair);	  //_T("계단"), LVCFMT_LEFT, 150);
 		m_ctrlList.SetItemText(nIdx,10,strFloor);	  //_T("층"), LVCFMT_LEFT, 150);
 		m_ctrlList.SetItemText(nIdx,11,strRoom);	  //_T("실"), LVCFMT_LEFT, 150);
-		if(nPtnCnt >= 20)
+		if(nPtnCnt >= nMaxLinkCount)
 			m_ctrlList.SetItemColors(nIdx,0,RGB(255,255,255),RGB(255,0,0));
 		nIdx++;
 		nPtnCnt ++;
@@ -871,7 +885,11 @@ int CFormAutoMake::ProcessSaveAutoLink_XMake()
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
 	if(SaveAutoLink_XMake() > 0)
 	{
-		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다.\n프로그램이 강제 종료됩니다.\n프로그램을 재 시작됩니다.",MB_OK | MB_ICONINFORMATION);
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다.\n프로그램이 재시작됩니다.",MB_OK | MB_ICONINFORMATION);
+#else
+		AfxMessageBox(L"Saving of the created linked data has been completed.\nThe program will restart.", MB_OK | MB_ICONINFORMATION);
+#endif
 		//RegisterApplicationRestart(L"--restart",RESTART_NO_CRASH | RESTART_NO_HANG);
 		//AfxGetMainWnd()->PostMessageW(WM_CLOSE);
 		theApp.RequestRestart();
@@ -887,6 +905,10 @@ int CFormAutoMake::ProcessSaveAutoLink_XMake()
 
 int CFormAutoMake::SaveAutoLink_XMake()
 {
+	//20260224 GBM start - 시간 측정
+	LARGE_INTEGER startTime, endTime;
+	QueryPerformanceCounter(&startTime);
+
 	m_nAllCnt = g_stConfig.dwTimeOut;
 	m_nAllCnt += g_stConfig.dwTimeOut;
 	m_nAllCnt += m_vtInputDev.size();
@@ -1007,6 +1029,13 @@ int CFormAutoMake::SaveAutoLink_XMake()
 	nProgOffset += g_stConfig.dwTimeOut;
 	SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_FINISH);
 	pDb->CommitTransaction();
+
+	QueryPerformanceCounter(&endTime);
+	float duringTime;
+	duringTime = CCommonFunc::GetPreciseDeltaTime(startTime, endTime);
+	Log::Trace("자동 생성된 연동데이터 적용에 걸린 시간 : %f", duringTime);
+	//20260226 GBM end
+
 	return 1;
 }
 

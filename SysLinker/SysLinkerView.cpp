@@ -3615,12 +3615,12 @@ void CSysLinkerView::OnBnClickedBtnSave2()
 	if (nRet <= 0)
 	{
 		strMessage += L"실패했습니다";
-		AfxMessageBox(strMessage);
+		AfxMessageBox(strMessage, MB_OK | MB_ICONERROR);
 	}
 	else
 	{
 		strMessage += L"성공했습니다";
-		AfxMessageBox(strMessage);
+		AfxMessageBox(strMessage, MB_OK | MB_ICONINFORMATION);
 		AddCancel();
 	}
 #else
@@ -3649,17 +3649,19 @@ void CSysLinkerView::OnBnClickedBtnSave2()
 		if (m_nAction == DATA_ADD)
 		{
 			strMessage = L"Successfully added.";
+			AfxMessageBox(strMessage, MB_OK | MB_ICONERROR);
 		}
 		else
 		{
 			strMessage += L"Successfully saved.";
+			AfxMessageBox(strMessage, MB_OK | MB_ICONINFORMATION);
 			AddCancel();
 		}
 	}
-
-	AfxMessageBox(strMessage);
 #endif
 		
+	// 수신기 / 유닛이 변경되는 시점이므로 여기서 ROM 파일 버전을 체크
+	m_pRefFasSysData->CheckAndSetFacpAndUnitType();
 }
 
 

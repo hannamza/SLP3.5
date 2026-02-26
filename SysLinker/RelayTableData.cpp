@@ -11596,26 +11596,6 @@ int CRelayTableData::LoadProjectDatabase()
 		return 0;
 	}
 
-
-#if _DBLOAD_TIME_
-	dwStart = dwEnd;
-	dwEnd = GetTickCount();
-#ifndef ENGLISH_MODE
-	GF_AddDebug(L"시간 체크 : 위치정보 가져오기 - %d", dwEnd - dwStart);
-#else
-	GF_AddDebug(L"Time Check: Retrieving Geolocation Information -  %d", dwEnd - dwStart);
-#endif
-#endif
-	if (LoadPatternMst() <= 0)
-	{
-#ifndef ENGLISH_MODE
-		GF_AddLog(L"데이터베이스에서 패턴정보를 가져오는데 실패했습니다.");
-#else
-		GF_AddLog(L"Failed to retrieve the pattern information from the database.");
-#endif
-		return 0;
-	}
-
 #if _DBLOAD_TIME_
 	dwStart = dwEnd;
 	dwEnd = GetTickCount();
@@ -11706,6 +11686,27 @@ int CRelayTableData::LoadProjectDatabase()
 		GF_AddLog(L"데이터베이스에서 연동정보를 가져오는데 실패했습니다.");
 #else
 		GF_AddLog(L"Failed to retrieve the interlock information from the database.");
+#endif
+		return 0;
+	}
+
+	CheckAndSetFacpAndUnitType();	// 아래서 패턴과 패턴 아이템 최대 개수에 대한 검사를 하기 때문에 이 시점에 ROM 파일 버전을 얻는다.
+
+#if _DBLOAD_TIME_
+	dwStart = dwEnd;
+	dwEnd = GetTickCount();
+#ifndef ENGLISH_MODE
+	GF_AddDebug(L"시간 체크 : 위치정보 가져오기 - %d", dwEnd - dwStart);
+#else
+	GF_AddDebug(L"Time Check: Retrieving Geolocation Information -  %d", dwEnd - dwStart);
+#endif
+#endif
+	if (LoadPatternMst() <= 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 패턴정보를 가져오는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to retrieve the pattern information from the database.");
 #endif
 		return 0;
 	}
@@ -13009,14 +13010,16 @@ int CRelayTableData::LoadPatternMst()
 
 	nCnt = m_pDB->GetRecordCount();
 
-	if(nCnt > D_MAX_PATTERN_COUNT)
+	int nMaxPatternCount = CNewInfo::Instance()->m_nMaxPatternCount;
+	if (nCnt > nMaxPatternCount)
 	{
 #ifndef ENGLISH_MODE
-		GF_AddLog(L"패턴개수를 초과 했습니다. 패턴개수 : %d" , nCnt);
+		GF_AddLog(L"패턴개수를 초과 했습니다. 패턴개수 : %d, (최대 패턴개수 : %d)" , nCnt, nMaxPatternCount);
 #else
-		GF_AddLog(L"The number of patterns has been exceeded. Pattern Count: %d", nCnt);
+		GF_AddLog(L"The number of patterns has been exceeded. Pattern Count: %d, (Max Pattern Count: %d)", nCnt, nMaxPatternCount);
 #endif
 	}
+
 	for (i = 0; i < nCnt; i++)
 	{
 		m_pDB->GetFieldValue(L"NET_ID", nValue);
@@ -13097,21 +13100,22 @@ int CRelayTableData::LoadPatternItem()
 		m_pDB->GetFieldValue(L"INSERT_TYPE",nValue);
 		nInType = nValue;
 		if (nLastPid != nPID)
-		{
+		{	
 			// 오류 확인
-			if(pPtn != nullptr)
+			if (pPtn != nullptr)
 			{
 				pList = pPtn->GetPtnItemList();
-				if(pList != nullptr &&pList->GetCount() > D_MAX_PTNITEM_COUNT)
+				int nMaxPatternItem = CNewInfo::Instance()->m_nMaxPatternItemCount;
+				if (pList != nullptr &&pList->GetCount() > nMaxPatternItem)
 				{
 #ifndef ENGLISH_MODE
-					GF_AddLog(L"오류 : 패턴 [%s]의 항목 개수가 %d개로 최대 개수를 초과했습니다." , pPtn->GetPatternName() , pList->GetCount());
+					GF_AddLog(L"오류 : 패턴 [%s]의 항목 개수가 [%d]개로 최대 개수[%d]를 초과했습니다.", pPtn->GetPatternName(), pList->GetCount(), nMaxPatternItem);
 #else
-					GF_AddLog(L"Error: The number of items in pattern [%s] exceeded the maximum number of [%d].", pPtn->GetPatternName(), pList->GetCount());
+					GF_AddLog(L"Error: The number of items in pattern [%s] exceeded the maximum number of [%d]. (the maximum number : %d)", pPtn->GetPatternName(), pList->GetCount(), nMaxPatternItem);
 #endif
 				}
 			}
-			
+
 			pPtn = m_spUserAddPattern->GetPattern(nPID);
 			nLastPid = nPID;
 		}
@@ -14765,6 +14769,11 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 	BOOL bFirst = TRUE;
 	POSITION posPtn , posItem;
 	CPtrList * pLinkList;
+
+	// 연동표는 패턴 증설 버전의 개수를 기준으로 고정
+	int nMaxPatternCount = MAX_PATTERN_COUNT_PATTERN_EXPASION_VERSION;
+	int nMaxPatternItemCount = MAX_PATTERN_ITEM_COUNT_PATTERN_EXPASION_VERSION;
+	int nLinkItemCount = MAX_LINK_ITEM_COUNT_PATTERN_EXPASION_VERSION;
 	for (it = m_MapSystemData.begin(); it != m_MapSystemData.end(); it++)
 	{
 		pData = it->second;
@@ -14805,7 +14814,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			xls.AddWorkSheet(L"Pattern");
 			//PATTERN Write
 			//xls.OpenData(D_MAX_PATTERN_COUNT * 2 + 1 + 1, D_MAX_DEVICE_COUNT + 3 + 1);
-			xls.OpenData(D_MAX_PATTERN_COUNT * 2 + 1 + 1,D_MAX_PATTERN_COUNT + 4 + 1);
+			xls.OpenData(nMaxPatternCount * 2 + 1 + 1, nMaxPatternItemCount + 4 + 1);
 			xls.SetData(1, 1, L"PNO");
 #ifndef ENGLISH_MODE
 			xls.SetData(1, 2, L"비고");
@@ -14814,7 +14823,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			xls.SetData(1, 2, L"NOTE");
 			xls.SetData(1, 3, L"CONTROL");
 #endif
-			for (nn = 0; nn < 20; nn++)
+			for (nn = 0; nn < nMaxPatternItemCount; nn++)
 			{
 				str.Format(L"%d", nn + 1);
 				xls.SetData(1, 4 + nn, str);
@@ -14852,7 +14861,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 					pLnk = (CDataLinked *)pLinkList->GetNext(posItem);
 					if (pLnk == nullptr)
 						continue;
-					if(nDownCol > D_MAX_PTNITEM_COUNT + 4)
+					if(nDownCol > nMaxPatternItemCount + 4)
 					{
 						xls.CloseData(1,1);
 #ifndef ENGLISH_MODE
@@ -14864,10 +14873,10 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 						xls.Close();
 #ifndef ENGLISH_MODE
 						GF_AddLog(L"패턴 출력표를 생성하는데 실패했습니다. 파일(%s),패턴(%s) 패턴아이템(%d)"
-							, strFile, pPtn->GetPatternName(), nDownCol - D_MAX_PTNITEM_COUNT);
+							, strFile, pPtn->GetPatternName(), nDownCol - nMaxPatternItemCount);
 #else
 						GF_AddLog(L"Failed to generate the pattern output table. File (%s), Pattern (%s) Pattern Items (%d)"
-							, strFile, pPtn->GetPatternName(), nDownCol - D_MAX_PTNITEM_COUNT);
+							, strFile, pPtn->GetPatternName(), nDownCol - nMaxPatternItemCount);
 #endif						
 						return 0;
 					}
@@ -14953,7 +14962,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			nLastUNum = nUNum;
 			xls.AddWorkSheet(str);
 			//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
-			xls.OpenData((256 * 4) * 2  + 1 + 1, D_MAX_LINKITEM_COUNT + 5 + 1 + 1 + 2);
+			xls.OpenData((256 * 4) * 2  + 1 + 1, nLinkItemCount + 5 + 1 + 1 + 2);
 			//20250723 GBM end
 			//xls.SetSheetName(nSheetIdx, str);
 			nUpCol = nDownCol = 6;
@@ -14968,7 +14977,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			xls.CloseData(1,1);
 			xls.AddWorkSheet(str);
 			//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
-			xls.OpenData((256 * 4) * 2 + 1 + 1, D_MAX_LINKITEM_COUNT + 5 + 1 + 1 + 2);
+			xls.OpenData((256 * 4) * 2 + 1 + 1, nLinkItemCount + 5 + 1 + 1 + 2);
 			//20250723 GBM end
 
 			//xls.SetSheetName(nSheetIdx, str);
@@ -14988,7 +14997,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 			xls.SetData(1, 4, L"OUTPUT TYPE");
 			xls.SetData(1, 5, L"CONTROL");
 #endif
-			for (nn = 0; nn < 20; nn++)
+			for (nn = 0; nn < nLinkItemCount; nn++)
 			{
 				str.Format(L"%d",nn + 1);
 				xls.SetData(1, 6 + nn, str);
@@ -14996,13 +15005,13 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 
 			//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
 #ifndef ENGLISH_MODE
-			xls.SetData(1, 26, L"LCD 표시 이름");	// 기존 누락 내용
-			xls.SetData(1, 27, L"설비명");
-			xls.SetData(1, 28, L"출력내용");
+			xls.SetData(1, nLinkItemCount + 6, L"LCD 표시 이름");	// 기존 누락 내용
+			xls.SetData(1, nLinkItemCount + 7, L"설비명");
+			xls.SetData(1, nLinkItemCount + 8, L"출력내용");
 #else
-			xls.SetData(1, 26, L"LCD DISPLAY NAME");
-			xls.SetData(1, 27, L"EQUIPMENT NAME");
-			xls.SetData(1, 28, L"OUTPUT CONTENT");
+			xls.SetData(1, nLinkItemCount + 6, L"LCD DISPLAY NAME");
+			xls.SetData(1, nLinkItemCount + 7, L"EQUIPMENT NAME");
+			xls.SetData(1, nLinkItemCount + 8, L"OUTPUT CONTENT");
 #endif
 			//20250723 GBM end
 
@@ -15033,7 +15042,7 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 		xls.SetData(nRow * 2 + 1, 5, L"IO MODULE CONTROL");
 #endif
 
-		xls.SetData(nRow * 2, 26, pDev->GetInputFullName());
+		xls.SetData(nRow * 2, nLinkItemCount + 6, pDev->GetInputFullName());
 
 		//20250723 GBM start - 연동데이터 View 프로그램에서 이용할 데이터도 출력하도록 함
 		CDataEquip* pEquipmentName = nullptr;
@@ -15041,11 +15050,11 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 
 		pEquipmentName = pDev->GetEqName();
 		if (pEquipmentName)
-			xls.SetData(nRow * 2, 27, pEquipmentName->GetEquipName());
+			xls.SetData(nRow * 2, nLinkItemCount + 7, pEquipmentName->GetEquipName());
 
 		pOutputContent = pDev->GetEqOutContents();
 		if (pOutputContent)
-			xls.SetData(nRow * 2, 28, pOutputContent->GetEquipName());
+			xls.SetData(nRow * 2, nLinkItemCount + 8, pOutputContent->GetEquipName());
 		//20250723 GBM end
 
 		nUpCol = nDownCol = 6;
@@ -15422,6 +15431,8 @@ int CRelayTableData::MakeConstructorTable(CString strPath)
 
 int CRelayTableData::MakeLinkData(CString strPath)
 {
+	int nRomFileVer = CNewInfo::Instance()->m_gi.romVersion;
+
 	// *@param      CString strPath : 절대 경로 ex) C:\SLP3\PROJECT\프로젝트명\RELEASE\ 
 	
 // 	BYTE	btRomBuff[0x7FFFFF] = { 0 };
@@ -15431,11 +15442,24 @@ int CRelayTableData::MakeLinkData(CString strPath)
 	BYTE * pMsgBuff = new BYTE[0x27FFFF];
 	UINT	uRomOffset = 0x30000, uMsgOffset = 30;
 	int nRet = 0; 
-	ST_MAINROM stMain;
-	memset((void*)&stMain, 0, sizeof(ST_MAINROM));
+
 	memset(pRomBuff, 0, 0x7FFFFF);
 	memset(pMsgBuff, 0, 0x27FFFF);
-	nRet = MakeX2RMainRom(strPath, &stMain, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+
+	// ROM 파일 버전에 따른 분기
+	if (nRomFileVer == ORIGINAL_VERSION)
+	{
+		ST_MAINROM stMain;
+		memset((void*)&stMain, 0, sizeof(ST_MAINROM));	
+		nRet = MakeX2RMainRom(strPath, &stMain, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+	}
+	else
+	{
+		ST_MAINROM_PATTERN_EXPANSION stMain;
+		memset((void*)&stMain, 0, sizeof(ST_MAINROM_PATTERN_EXPANSION));
+		uRomOffset = LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION;	// offset을 패턴 증설 버전으로 적용
+		nRet = MakeX2RMainRom(strPath, &stMain, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+	}	
 
 	delete[] pRomBuff;
 	delete[] pMsgBuff;
@@ -15445,7 +15469,7 @@ int CRelayTableData::MakeLinkData(CString strPath)
 	return 1;
 }
 
-int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
+int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 	, BYTE *pRomBuff, BYTE * pMsgBuff
 	, UINT &uRomOffset, UINT &uMsgOffset
 )
@@ -15469,6 +15493,19 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 	BYTE btEmBuff[0x1FFFF] = { 0 };
 	char szBuff[256] = { 0 };
 	int nPtnItemCount, nDldItemCnt;
+
+	ST_MAINROM* pMainRom;
+	ST_MAINROM_PATTERN_EXPANSION* pMainRomPE;
+	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
+
+	if (nRomFileVersion == ORIGINAL_VERSION)
+	{
+		pMainRom = (ST_MAINROM*)pVoidRom;
+	}
+	else
+	{
+		pMainRomPE = (ST_MAINROM_PATTERN_EXPANSION*)pVoidRom;
+	}
 
 	SetRecheckOutputContentInfo();	//20251126 GBM - 롬파일 생성 전에 재확인 출력 기준 세팅
 
@@ -15554,20 +15591,38 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			// 6. Emergency
 			// 7. 데이터 초기화
 			// 8. Crt , Rom Text file Close , New File Open
+					
+			if (nRomFileVersion == ORIGINAL_VERSION)
+			{
+				// 1. unit 63  channel 0번 : 매뉴얼엔 펌프 데이타 어드레스 ,소스코드는 PS
+				nTempRet = Add63Unit0ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+				if (nRet != 0)
+					nRet = nTempRet;
+				// 2. unit 63  channel 1번 : 매뉴얼엔 릴레이 데이터 어드레스 ,소스코드는 Pump
+				nTempRet = Add63Unit1ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+				if (nRet != 0)
+					nRet = nTempRet;
+				// 3. unit 63  channel 2번 : Pattern 데이터
+				nTempRet = AddPatternAddrX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+				if (nRet != 0)
+					nRet = nTempRet;
+			}
+			else
+			{
+				// 1. unit 63  channel 0번 : 매뉴얼엔 펌프 데이타 어드레스 ,소스코드는 PS
+				nTempRet = Add63Unit0ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRomPE, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+				if (nRet != 0)
+					nRet = nTempRet;
+				// 2. unit 63  channel 1번 : 매뉴얼엔 릴레이 데이터 어드레스 ,소스코드는 Pump
+				nTempRet = Add63Unit1ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRomPE, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+				if (nRet != 0)
+					nRet = nTempRet;
+				// 3. unit 63  channel 2번 : Pattern 데이터
+				nTempRet = AddPatternAddrX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRomPE, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+				if (nRet != 0)
+					nRet = nTempRet;
+			}
 			
-			// 1. unit 63  channel 0번 : 매뉴얼엔 펌프 데이타 어드레스 ,소스코드는 PS
-			nTempRet = Add63Unit0ChnX2MainRom(nLastFacp,&fnCrt, &fnRom,pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
-			if (nRet != 0)
-				nRet = nTempRet;
-			// 2. unit 63  channel 1번 : 매뉴얼엔 릴레이 데이터 어드레스 ,소스코드는 Pump
-			nTempRet = Add63Unit1ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
-			if (nRet != 0)
-				nRet = nTempRet;
-			// 3. unit 63  channel 2번 : Pattern 데이터
-			nTempRet = AddPatternAddrX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
-			if (nRet != 0)
-				nRet = nTempRet;
-
 			//20240329 GBM start - 수신기 Type에 따른 ROM 파일명 생성
 #if 1
 			int nFacpType = -1;
@@ -15644,15 +15699,36 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 			if (nRet != 0)
 				nRet = nTempRet;
 			WriteRomFile(strEmergency, btEmBuff, uEmOffset, TRUE);
-			WriteRomFile(strMain, (BYTE*)pMainRom, 0x02FFFF,TRUE);
-			WriteRomFile(strMain, (BYTE*)pRomBuff + 0x30000, uRomOffset - 0x30000,FALSE, 0x30000);
+
+			if (nRomFileVersion == ORIGINAL_VERSION)
+			{
+				WriteRomFile(strMain, (BYTE*)pMainRom, 0x02FFFF, TRUE);
+				WriteRomFile(strMain, (BYTE*)pRomBuff + 0x30000, uRomOffset - 0x30000, FALSE, 0x30000);
+			}
+			else
+			{
+				WriteRomFile(strMain, (BYTE*)pMainRomPE, LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION - 1, TRUE);
+				WriteRomFile(strMain, (BYTE*)pRomBuff + LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION, uRomOffset - LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION, FALSE, LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION);
+			}
+		
 			WriteRomFile(strRomLoc, (BYTE*)&stLoc, sizeof(ST_LOCATIONROM),TRUE);
 			// 7. 데이터 초기화
 			nIdx = 0; 
-			uRomOffset = 0x30000;
+
+			if (nRomFileVersion == ORIGINAL_VERSION)
+			{
+				uRomOffset = 0x30000;
+				memset((void*)pMainRom, 0, sizeof(ST_MAINROM));
+			}
+			else
+			{
+				uRomOffset = LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION;
+				memset((void*)pMainRomPE, 0, sizeof(ST_MAINROM_PATTERN_EXPANSION));
+			}
+		
 			uMsgOffset = 30;
 			uEmOffset = 3000 * 2; 
-			memset((void*)pMainRom, 0, sizeof(ST_MAINROM));
+			
 			memset(pRomBuff, 0, 0x7FFFFF);
 			memset(pMsgBuff, 0, 0x27FFFF);
 			memset(btEmBuff, 0, 0x1FFFF);
@@ -15773,9 +15849,19 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 // 		pMainRom->stLinkPointer[nIdx + 2].bt256Mod = (uRomOffset) % 0x100;
 		nIdx = (pDev->GetUnitNum() * 1024 + pDev->GetChnNum() * 256 + pDev->GetDeviceNum());
 
-		pMainRom->stLinkPointer[nIdx].bt65536Divid = (uRomOffset) / 0x10000;
-		pMainRom->stLinkPointer[nIdx].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
-		pMainRom->stLinkPointer[nIdx].bt256Mod = (uRomOffset) % 0x100;
+		if (nRomFileVersion == ORIGINAL_VERSION)
+		{
+			pMainRom->stLinkPointer[nIdx].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRom->stLinkPointer[nIdx].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRom->stLinkPointer[nIdx].bt256Mod = (uRomOffset) % 0x100;
+		}
+		else
+		{
+			pMainRomPE->stLinkPointer[nIdx].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRomPE->stLinkPointer[nIdx].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRomPE->stLinkPointer[nIdx].bt256Mod = (uRomOffset) % 0x100;
+		}
+
 		nTempRet = AddPointerAddrX2MainRom(
 			nLastFacp, pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum()
 			, nInType, nOutType, pDev->GetLinkedList(), pDev->GetEquipLocationName()
@@ -15886,18 +15972,36 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		// 6. Emergency
 		// 7. 데이터 초기화
 
-		// 1. unit 63  channel 0번 : 매뉴얼엔 펌프 데이타 어드레스 ,소스코드는 PS
-		nTempRet = Add63Unit0ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
-		if (nRet != 0)
-			nRet = nTempRet;
-		// 2. unit 63  channel 1번 : 매뉴얼엔 릴레이 데이터 어드레스 ,소스코드는 Pump
-		nTempRet = Add63Unit1ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
-		if (nRet != 0)
-			nRet = nTempRet;
-		// 3. unit 63  channel 2번 : Pattern 데이터
-		nTempRet = AddPatternAddrX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
-		if (nRet != 0)
-			nRet = nTempRet;
+		if (nRomFileVersion == ORIGINAL_VERSION)
+		{
+			// 1. unit 63  channel 0번 : 매뉴얼엔 펌프 데이타 어드레스 ,소스코드는 PS
+			nTempRet = Add63Unit0ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+			if (nRet != 0)
+				nRet = nTempRet;
+			// 2. unit 63  channel 1번 : 매뉴얼엔 릴레이 데이터 어드레스 ,소스코드는 Pump
+			nTempRet = Add63Unit1ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+			if (nRet != 0)
+				nRet = nTempRet;
+			// 3. unit 63  channel 2번 : Pattern 데이터
+			nTempRet = AddPatternAddrX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRom, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+			if (nRet != 0)
+				nRet = nTempRet;
+		}
+		else
+		{
+			// 1. unit 63  channel 0번 : 매뉴얼엔 펌프 데이타 어드레스 ,소스코드는 PS
+			nTempRet = Add63Unit0ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRomPE, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+			if (nRet != 0)
+				nRet = nTempRet;
+			// 2. unit 63  channel 1번 : 매뉴얼엔 릴레이 데이터 어드레스 ,소스코드는 Pump
+			nTempRet = Add63Unit1ChnX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRomPE, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+			if (nRet != 0)
+				nRet = nTempRet;
+			// 3. unit 63  channel 2번 : Pattern 데이터
+			nTempRet = AddPatternAddrX2MainRom(nLastFacp, &fnCrt, &fnRom, pMainRomPE, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+			if (nRet != 0)
+				nRet = nTempRet;
+		}
 
 		//20240329 GBM start - 수신기 Type에 따른 ROM 파일명 생성
 #if 1
@@ -15978,8 +16082,18 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, ST_MAINROM * pMainRom
 		if (uRest != 0)
 			uEmOffset = (uTemp + 1) * 256;
 		WriteRomFile(strEmergency, btEmBuff, uEmOffset, TRUE);
-		WriteRomFile(strMain, (BYTE*)pMainRom, 0x02FFFF, TRUE);
-		WriteRomFile(strMain, (BYTE*)pRomBuff + 0x30000, uRomOffset - 0x30000,FALSE, 0x30000);
+
+		if (nRomFileVersion == ORIGINAL_VERSION)
+		{
+			WriteRomFile(strMain, (BYTE*)pMainRom, 0x02FFFF, TRUE);
+			WriteRomFile(strMain, (BYTE*)pRomBuff + 0x30000, uRomOffset - 0x30000, FALSE, 0x30000);
+		}
+		else
+		{
+			WriteRomFile(strMain, (BYTE*)pMainRomPE, LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION - 1, TRUE);
+			WriteRomFile(strMain, (BYTE*)pRomBuff + LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION, uRomOffset - LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION, FALSE, LINK_DATA_START_OFFSET_PATTERN_EXPASION_VERSION);
+		}
+		
 		WriteRomFile(strRomLoc, (BYTE*)&stLoc, sizeof(ST_LOCATIONROM), TRUE);
 
 // 		nDldDataSize = ((3 + nLinkCnt * 3) * 4 * 256)
@@ -16884,6 +16998,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	POSITION pos;
 	BYTE btPtn[256 * 4] = { 0 };
 	BYTE btDev[256 * 4] = { 0 };
+	int nMaxLinkCount = CNewInfo::Instance()->m_nMaxLinkCount;
 
 	memset((void*)&stTemp, 0, sizeof(ST_YEONDONG));
 // 	strRomTxt = L"          ";
@@ -17063,14 +17178,14 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	uRomOffset += 3;
 
 	nTemp = pList->GetCount();
-	if (nPCnt > D_MAX_LINKITEM_COUNT || nDevCnt > D_MAX_LINKITEM_COUNT)
+	if (nPCnt > nMaxLinkCount || nDevCnt > nMaxLinkCount)
 	{
 #ifndef ENGLISH_MODE
 	 	GF_AddLog(L"오류 : 한 회선 당 최대 연동데이터 개수는 %d개인데 %s는 Pattern %d개 , 출력 %d로 최대 개수를 초과 했습니다."
-	 		, D_MAX_LINKITEM_COUNT, strName, nPCnt, nDevCnt, nTemp);
+	 		, nMaxLinkCount, strName, nPCnt, nDevCnt, nTemp);
 #else
 		GF_AddLog(L"Error: The maximum number of site logic data per line is %d, but the %s exceeds the maximum number of patterns, with %d patterns and %d outputs."
-			, D_MAX_LINKITEM_COUNT, strName, nPCnt, nDevCnt, nTemp);
+			, nMaxLinkCount, strName, nPCnt, nDevCnt, nTemp);
 #endif
 	 	nRet = 0;
 	}
@@ -17179,7 +17294,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 }
 
 // ps data
-int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFnRom, ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFnRom, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 	, UINT &uRomOffset, UINT &uMsgOffset)
 {
 	POSITION pos;
@@ -17188,6 +17303,19 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	CString strCrtTxt;
 	int nFacpID = 0, nFcvt = -1;
 	int nPs, nTempSize ,nTemp , nRet = 1;
+	ST_MAINROM* pMainRom;
+	ST_MAINROM_PATTERN_EXPANSION* pMainRomPE;
+
+	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
+	if (nRomFileVersion == ORIGINAL_VERSION)
+	{
+		pMainRom = (ST_MAINROM*)pVoidRom;
+	}
+	else
+	{
+		pMainRomPE = (ST_MAINROM_PATTERN_EXPANSION*)pVoidRom;
+	}
+
 	nTemp = m_spPresureSwitch->GetCount();
 	if (nTemp > D_MAX_PUMP_COUNT)
 	{
@@ -17217,11 +17345,19 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 		if (nFcvt < 0 || nFcvt != nFNum)
 			continue;
 
-		//nIdx = (63 * 1024 * 3) + nPs;
-		pMainRom->stPumpPointer[nPs].bt65536Divid = (uRomOffset) / 0x10000;
-		pMainRom->stPumpPointer[nPs].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
-		pMainRom->stPumpPointer[nPs].bt256Mod = (uRomOffset) % 0x100;
-		;
+		if (nRomFileVersion == ORIGINAL_VERSION)
+		{
+			pMainRom->stPumpPointer[nPs].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRom->stPumpPointer[nPs].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRom->stPumpPointer[nPs].bt256Mod = (uRomOffset) % 0x100;
+		}
+		else
+		{
+			pMainRomPE->stPumpPointer[nPs].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRomPE->stPumpPointer[nPs].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRomPE->stPumpPointer[nPs].bt256Mod = (uRomOffset) % 0x100;
+		}
+
 		AddPointerAddrX2MainRom(nFNum,0,0,0
 			, pData->GetPSwitchType(), 0, pData->GetLinkList() , pData->GetPSwitchName()
 			,pRomBuff , pMsgBuff,uRomOffset,uMsgOffset
@@ -17243,7 +17379,7 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	return nRet;
 }
 
-int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFnRom,ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFnRom, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 	, UINT &uRomOffset, UINT &uMsgOffset)
 {
 	POSITION pos;
@@ -17252,6 +17388,18 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	char szBuff[256] = { 0 };
 	CString strCrtTxt;
 	int  nPmp, nTempSize, nTemp, nRet = 1;
+	ST_MAINROM* pMainRom;
+	ST_MAINROM_PATTERN_EXPANSION* pMainRomPE;
+	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
+	if (nRomFileVersion == ORIGINAL_VERSION)
+	{
+		pMainRom = (ST_MAINROM*)pVoidRom;
+	}
+	else
+	{
+		pMainRomPE = (ST_MAINROM_PATTERN_EXPANSION*)pVoidRom;
+	}
+
 	nTemp = m_spPump->GetCount();
 	if (nTemp > D_MAX_PUMP_COUNT)
 	{
@@ -17279,11 +17427,20 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 		nPmp = pData->GetPumpID();
 		if (nPmp <= 0)
 			continue;
-		//nIdx = (63 * 1024 * 3) + 256 * 3 + nPmp;
-		pMainRom->stRelayPointer[nPmp].bt65536Divid = (uRomOffset) / 0x10000;
-		pMainRom->stRelayPointer[nPmp].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
-		pMainRom->stRelayPointer[nPmp].bt256Mod = (uRomOffset) % 0x100;
-		;
+		
+		if (nRomFileVersion == ORIGINAL_VERSION)
+		{
+			pMainRom->stRelayPointer[nPmp].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRom->stRelayPointer[nPmp].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRom->stRelayPointer[nPmp].bt256Mod = (uRomOffset) % 0x100;
+		}
+		else
+		{
+			pMainRomPE->stRelayPointer[nPmp].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRomPE->stRelayPointer[nPmp].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRomPE->stRelayPointer[nPmp].bt256Mod = (uRomOffset) % 0x100;
+		}
+		
 		AddPointerAddrX2MainRom(nFNum,0,0,0
 			, pData->GetPumpType(), 0, pData->GetLinkList(), pData->GetPumpName()
 			, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset
@@ -17299,7 +17456,7 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	return 1;
 }
 
-UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pFnRom, ST_MAINROM * pMainRom, BYTE *pRomBuff, BYTE * pMsgBuff
+UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pFnRom, void * pVoidRom, BYTE *pRomBuff, BYTE * pMsgBuff
 	, UINT &uRomOffset, UINT &uMsgOffset)
 {
 	POSITION pos;
@@ -17307,16 +17464,30 @@ UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pF
 	int nIdx = 0, nPt , nItemCount=0 , nTemp;
 	UINT nRet = 1; 
 	CPtrList * pList;
+	ST_MAINROM* pMainRom;
+	ST_MAINROM_PATTERN_EXPANSION* pMainRomPE;
+	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
+	if (nRomFileVersion == ORIGINAL_VERSION)
+	{
+		pMainRom = (ST_MAINROM*)pVoidRom;
+	}
+	else
+	{
+		pMainRomPE = (ST_MAINROM_PATTERN_EXPANSION*)pVoidRom;
+	}
+
+	int nMaxPatternCount = CNewInfo::Instance()->m_nMaxPatternCount;
+	int nMaxPatternItemCount = CNewInfo::Instance()->m_nMaxPatternItemCount;
 	
 	nTemp = m_spUserAddPattern->GetCount();
-	if (nTemp > D_MAX_PATTERN_COUNT)
+	if (nTemp > nMaxPatternCount)
 	{
 #ifndef ENGLISH_MODE
 		GF_AddLog(L"오류 : 패턴 최대 개수는 %d개 이며 현재 프로젝트는 %d개로 최대 패턴개수를 초과 했습니다."
-			, D_MAX_PATTERN_COUNT, nTemp);
+			, nMaxPatternCount, nTemp);
 #else
 		GF_AddLog(L"Error: The maximum number of patterns is %d and the current project has exceeded the maximum number of patterns with %d."
-			, D_MAX_PATTERN_COUNT, nTemp);
+			, nMaxPatternCount, nTemp);
 #endif
 		nRet = 0;
 	}
@@ -17333,22 +17504,31 @@ UINT CRelayTableData::AddPatternAddrX2MainRom(int nFNum,CFile *pFnCrt, CFile *pF
 		//nIdx = (63 * 1024 * 3) + 256 * 2 * 3 + nPt;
 		pList = pData->GetPtnItemList();
 		nItemCount = pList->GetCount();
-		if (nItemCount > D_MAX_PTNITEM_COUNT)
+		if (nItemCount > nMaxPatternItemCount)
 		{
 #ifndef ENGLISH_MODE
 			GF_AddLog(L"오류 : 한 패턴 당 최대 연동 출력 개수는 %d개 이며 [%s] 패턴은 연동된 출력이 %d개로 한 패턴 당 최대 연동 출력 개수를 초과했습니다."
-				, D_MAX_PTNITEM_COUNT, pData->GetPatternName(), nItemCount);
+				, nMaxPatternItemCount, pData->GetPatternName(), nItemCount);
 #else
 			GF_AddLog(L"Error: The maximum number of interlock outputs per pattern is %d and the [%s] pattern has exceeded the maximum number of interlock outputs per pattern with %d interlock outputs."
-				, D_MAX_PTNITEM_COUNT, pData->GetPatternName(), nItemCount);
+				, nMaxPatternItemCount, pData->GetPatternName(), nItemCount);
 #endif
 			nRet = 0; 
 			//continue;
 		}
 
-		pMainRom->stPatternPointer[nPt].bt65536Divid = (uRomOffset) / 0x10000;
-		pMainRom->stPatternPointer[nPt].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
-		pMainRom->stPatternPointer[nPt].bt256Mod = (uRomOffset) % 0x100;
+		if (nRomFileVersion == ORIGINAL_VERSION)
+		{
+			pMainRom->stPatternPointer[nPt].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRom->stPatternPointer[nPt].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRom->stPatternPointer[nPt].bt256Mod = (uRomOffset) % 0x100;
+		}
+		else
+		{
+			pMainRomPE->stPatternPointer[nPt].bt65536Divid = (uRomOffset) / 0x10000;
+			pMainRomPE->stPatternPointer[nPt].bt256DMod = ((uRomOffset) / 0x100) % 0x100;
+			pMainRomPE->stPatternPointer[nPt].bt256Mod = (uRomOffset) % 0x100;
+		}
 
 		AddPatternPointerAddrX2MainRom(nFNum, pData->GetPtnItemList()
 			, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset
@@ -17367,7 +17547,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 	  int nFNum, CPtrList * pList
 	, BYTE *pRomBuff, BYTE * pMsgBuff
 	, UINT &uRomOffset, UINT &uMsgOffset
-)
+)	
 {
 	// 1. Pattern 입력
 	// 2. 회로 입력
@@ -17382,6 +17562,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 	POSITION pos;
 	BYTE btPtn[256 * 4] = { 0 };
 	BYTE btDev[256 * 4] = { 0 };
+	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
 
 	memset((void*)&stTemp, 0, sizeof(ST_YEONDONG));
 	nSrcFacpID = CvtFacpNumToID(nFNum);
@@ -17475,9 +17656,23 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 		btPtn[nPCnt * 3 + 2] = btRest;
 		nPCnt++;
 	}
-	// ROM BUFFER : 1 Byte. 연동개수
-	pRomBuff[uRomOffset] = nDevCnt + nPCnt;
-	uRomOffset ++;
+
+	// 패턴 증설 버전일 경우 연동 개수 2bytes를 사용
+	if (nRomFileVersion == PATTERN_EXPANSION_VERSION)
+	{
+		// ROM BUFFER : 2 Byte. 연동개수
+		btDiv = (nDevCnt + nPCnt) / 256;
+		btRest = (nDevCnt + nPCnt) % 256;
+		pRomBuff[uRomOffset] = btDiv;
+		pRomBuff[uRomOffset + 1] = btRest;
+		uRomOffset += 2;
+	}
+	else
+	{
+		// ROM BUFFER : 1 Byte. 연동개수
+		pRomBuff[uRomOffset] = nDevCnt + nPCnt;
+		uRomOffset++;
+	}
 
 	// MEMORY COPY : DEVICE DATA
 	// MEMORY COPY : PATTERN DATA
@@ -20693,7 +20888,7 @@ int CRelayTableData::Check_InputWithNoOutput()
 	return 1;
 }
 
-void CRelayTableData::GetFacpAndUnitType()
+void CRelayTableData::CheckAndSetFacpAndUnitType()
 {
 	CMapSystemData::iterator it;
 	CDataSystem * pData;
@@ -20706,6 +20901,10 @@ void CRelayTableData::GetFacpAndUnitType()
 	int nUnit = 0;
 	int nFacpType = 0;
 	int nUnitType = 0;
+
+	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
+	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
+
 	for (it = m_MapSystemData.begin(); it != m_MapSystemData.end(); it++)
 	{
 		pData = it->second;
@@ -20739,6 +20938,8 @@ void CRelayTableData::GetFacpAndUnitType()
 			break;
 		}
 	}
+
+	CNewInfo::Instance()->CheckAndSetRomFileVersion();	// ROM 파일 버전 정보 체크 추가
 }
 
 void CRelayTableData::MakeEBSheet(CExcelWrapper* xls)
@@ -20803,10 +21004,13 @@ void CRelayTableData::MakePumpSheet(CExcelWrapper* xls)
 	CDataPump* pTempPump;
 	CDataFacpRelay* pTempContact;
 
+	// 연동표는 패턴 증설 버전의 개수를 기준으로 고정
+	int nMaxLinkCount = MAX_LINK_ITEM_COUNT_PATTERN_EXPASION_VERSION;
+
 	// 펌프
 	str.Format(L"Pump");
 	xls->AddWorkSheet(str);
-	xls->OpenData(D_MAX_PUMP_COUNT * 2 + 1, 6 + 20);	// Row : 80 (최대 펌프 개수) * 2 (접점 제어 / 중계기 제어) + 1 (헤더), Column : 6 (수신기 번호 ~ 제어) + 20 (출력 최대 개수)
+	xls->OpenData(D_MAX_PUMP_COUNT * 2 + 1, 6 + nMaxLinkCount);	// Row : 80 (최대 펌프 개수) * 2 (접점 제어 / 중계기 제어) + 1 (헤더), Column : 6 (수신기 번호 ~ 제어) + 20 (출력 최대 개수)
 
 	// 헤더
 #ifndef ENGLISH_MODE
@@ -20824,7 +21028,7 @@ void CRelayTableData::MakePumpSheet(CExcelWrapper* xls)
 	xls->SetData(0, 4, L"LCD name");
 	xls->SetData(0, 5, L"Control");
 #endif
-	for (int nOutputNum = 1; nOutputNum <= D_MAX_LINKITEM_COUNT; nOutputNum++)
+	for (int nOutputNum = 1; nOutputNum <= nMaxLinkCount; nOutputNum++)
 	{
 		CString strNumber = _T("");
 		strNumber.Format(_T("%d"), nOutputNum);
@@ -20967,10 +21171,13 @@ void CRelayTableData::MakePSSheet(CExcelWrapper* xls)
 	CDataPump* pTempPump;
 	CDataFacpRelay* pTempContact;
 
+	// 연동표는 패턴 증설 버전의 개수를 기준으로 고정
+	int nMaxLinkCount = MAX_LINK_ITEM_COUNT_PATTERN_EXPASION_VERSION;
+
 	// 압력스위치
 	str.Format(L"PS");
 	xls->AddWorkSheet(str);
-	xls->OpenData(D_MAX_PUMP_COUNT * 2 + 1, 6 + 20);	// Row : 80 (최대 압력스위치 개수) * 2 (접점 제어 / 중계기 제어) + 1 (헤더), Column : 6 (수신기 번호 ~ 제어) + 20 (출력 최대 개수)
+	xls->OpenData(D_MAX_PUMP_COUNT * 2 + 1, 6 + nMaxLinkCount);	// Row : 80 (최대 압력스위치 개수) * 2 (접점 제어 / 중계기 제어) + 1 (헤더), Column : 6 (수신기 번호 ~ 제어) + 20 (출력 최대 개수)
 
 	// 헤더
 #ifndef ENGLISH_MODE
@@ -20988,7 +21195,7 @@ void CRelayTableData::MakePSSheet(CExcelWrapper* xls)
 	xls->SetData(0, 4, L"LCD name");
 	xls->SetData(0, 5, L"Control");
 #endif
-	for (int nOutputNum = 1; nOutputNum <= D_MAX_LINKITEM_COUNT; nOutputNum++)
+	for (int nOutputNum = 1; nOutputNum <= nMaxLinkCount; nOutputNum++)
 	{
 		CString strNumber = _T("");
 		strNumber.Format(_T("%d"), nOutputNum);

@@ -45,7 +45,7 @@
 #define D_MAX_DEVICE_COUNT			252
 #define DEVICE_TABLE_COLUMN_COUNT	13
 #define D_MAX_NAME					50
-#define D_MAX_PATTERN_COUNT			511
+#define D_MAX_PATTERN_COUNT			511			
 #define D_MAX_PUMP_COUNT			80
 #define D_MAX_EMERGENCY_COUNT		3000
 #define D_MAX_AUTOLOGIC_COUNT		1024
@@ -55,8 +55,8 @@
 
 #define D_NUM_AUTO_PTN_LOGIC_ID		1000
 
-#define D_MAX_PTNITEM_COUNT			250
-#define D_MAX_LINKITEM_COUNT		20
+#define D_MAX_PTNITEM_COUNT			250			
+#define D_MAX_LINKITEM_COUNT		20			
 
 #define	D_MAX_INPUTTYPE_COUNT		20
 // 1.4버전 수정 [11/3/2021 KHS]
@@ -574,6 +574,21 @@ struct ST_MAINROM
 	BYTE		*  btBuffer;
 };
 
+struct ST_MAINROM_PATTERN_EXPANSION
+{
+	// Index 계산 : (unit * 102 + channel * 256 + 회로) * 3
+	ST_YEONDONG 	stLinkPointer[63 * 4 * 256]; 	// 256회선 * 3Byte * 4계통 * 63유닛
+													// = 193,536Byte(0x02F400) 
+	ST_YEONDONG 	stPumpPointer[256];
+	ST_YEONDONG 	stRelayPointer[256];
+	ST_YEONDONG 	stPatternPointer[1024];
+	//BYTE		btBuffer[256 * 4 * 63 *(6 +(256*3)) ];	// 256회선 * 4계통 * 63유닛
+	// = 64,504 회선
+	// 6 : 연동데이터개수(1) + 감지기입력타입(1) + 중계기 출력타입(1) + 메세지 어드레스(3) 
+	// 256 : 연동데이터 최대개수
+	// 3 : Address Pointer
+	BYTE		*  btBuffer;
+};
 
 
 struct ST_LOCTYPEBIT

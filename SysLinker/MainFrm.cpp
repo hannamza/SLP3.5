@@ -32,6 +32,65 @@
 #define new DEBUG_NEW
 #endif
 
+UINT ThreadMakeLinkData(LPVOID pParam)
+{
+	CMainFrame* pMain = (CMainFrame*)pParam;
+	pMain->m_bThreadSucceeded = TRUE;
+	
+	CString strPath, strPrjPath, strFullPath, strDBPath;
+	int nRet;
+
+	strPrjPath = g_stConfig.szPrjPath;
+	if (strPrjPath.Right(1) != '\\')
+		strPrjPath += "\\";
+
+	strFullPath = strPrjPath + theApp.m_pFasSysData->GetPrjName();
+	strPath.Format(L"%s\\%s\\Release"
+		, strFullPath, F3_VERSIONTEMPFOLDER_NAME
+	);
+	GF_CreateFolder(strPath);
+
+	nRet = theApp.m_pFasSysData->MakeLinkData(strPath);
+	if (nRet != 1)
+	{
+		pMain->m_bThreadSucceeded = FALSE;
+	}
+
+	pMain->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pMain->m_hThreadHandle);
+
+	return 0;
+}
+
+UINT ThreadMakeConstructorTable(LPVOID pParam)
+{
+	CMainFrame* pMain = (CMainFrame*)pParam;
+	pMain->m_bThreadSucceeded = TRUE;
+
+	CString strPath, strPrjPath, strFullPath;
+	int nRet;
+
+	strPrjPath = g_stConfig.szPrjPath;
+	if (strPrjPath.Right(1) != '\\')
+		strPrjPath += "\\";
+
+	strFullPath = strPrjPath + theApp.m_pFasSysData->GetPrjName();
+	strPath.Format(L"%s\\%s\\Release"
+		, strFullPath, F3_VERSIONTEMPFOLDER_NAME
+	);
+
+	nRet = theApp.m_pFasSysData->MakeConstructorTable(strPath);
+	if (nRet != 1)
+	{
+		pMain->m_bThreadSucceeded = FALSE;
+	}
+
+	pMain->m_pProgressBarDlg->PostMessage(WM_CLOSE);
+	SetEvent(pMain->m_hThreadHandle);
+
+	return 0;
+}
+
 UINT ThreadGetHelpMessageList(LPVOID pParam)
 {
 	CMainFrame* pMain = (CMainFrame*)pParam;
@@ -155,6 +214,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_MESSAGE(LOGIC_EDIT_COMPLETE_MESSAGE, &CMainFrame::OnLogicEditCompleteMessage)
 	ON_COMMAND(ID_CHK_SHOWHELPMSG, &CMainFrame::OnChkShowhelpmsg)
 	ON_UPDATE_COMMAND_UI(ID_CHK_SHOWHELPMSG, &CMainFrame::OnUpdateChkShowhelpmsg)
+	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
 // CMainFrame 생성/소멸
@@ -1164,9 +1224,7 @@ void CMainFrame::OnFacpCreateLink()
 	CNewInfo::Instance()->m_gi.projectInfo.authorized = false;
 
 	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴
-	memset(CNewInfo::Instance()->m_gi.facpType, NULL, MAX_FACP_COUNT);
-	memset(CNewInfo::Instance()->m_gi.unitType, NULL, MAX_FACP_COUNT * MAX_UNIT_COUNT);
-	m_pRefFasSysData->GetFacpAndUnitType();
+	m_pRefFasSysData->CheckAndSetFacpAndUnitType();
 	//20240808 GBM end
 
 	//20260109 GBM start - ROM 파일 생성 프로세스 변경
@@ -1177,7 +1235,29 @@ void CMainFrame::OnFacpCreateLink()
 		return;
 	}
 
-	BOOL bErrorCheck = dlg.m_bErrorCheck;
+	// 어떤 버전의 롬 파일 생성인지를 프로그램에 표시
+	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
+	if (nRomFileVersion == ORIGINAL_VERSION)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"패턴 확장 버전이 아닌 ROM 파일 생성을 시작합니다.");
+		Log::Trace("패턴 확장 버전이 아닌 ROM 파일 생성을 시작합니다.");
+#else
+		GF_AddLog(L"Start creating a ROM file that is not a pattern expansion version.");
+		Log::Trace("Start creating a ROM file that is not a pattern expansion version.");
+#endif
+	}
+	else
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"패턴 확장 버전 ROM 파일 생성을 시작합니다.");
+		Log::Trace("패턴 확장 버전 ROM 파일 생성을 시작합니다.");
+#else
+		GF_AddLog(L"Start creating the pattern extension version ROM file.");
+		Log::Trace("Start creating the pattern extension version ROM file.");
+#endif
+	}
+
 	BOOL bAdminMode = dlg.m_bAdminMode;
 
 	if (bAdminMode)
@@ -1244,14 +1324,8 @@ void CMainFrame::OnFacpCreateLink()
 		//20240415 GBM end
 	}
 
-	if (bErrorCheck)
-	{
-		StartErrorCheck(ERR_CHECK_CREATELINK, this);
-	}
-	else
-	{
-		CreateFacpLink();
-	}
+	// 에러 체크를 무조건 하도록 함
+	StartErrorCheck(ERR_CHECK_CREATELINK, this);
 
 #else
 	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴
@@ -1389,7 +1463,7 @@ int CMainFrame::CreateFacpLink()
 	int nRet = 0;
 	CString strPath;
 	//CRelayTableData * pRefTable = m_pRefFasSysData;
-	if(m_pRefFasSysData == nullptr)
+	if (m_pRefFasSysData == nullptr)
 	{
 #ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트가 닫힌 상태 입니다. 프로젝트를 여시고 다시 시도하여주십시오.");
@@ -1400,19 +1474,29 @@ int CMainFrame::CreateFacpLink()
 #endif
 		return 0;
 	}
-	CString strPrjPath,strFullPath,strDBPath;
 
-	strPrjPath = g_stConfig.szPrjPath;
-	if(strPrjPath.Right(1) != '\\')
-		strPrjPath += "\\";
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
+	CString strMsg = _T("ROM 파일을 생성 중입니다. 잠시 기다려 주세요.");
+#else
+	CString strMsg = _T("Creating ROM file. Please wait a moment.");
+#endif
+	CProgressBarDlg dlg(strMsg);
+	m_pProgressBarDlg = &dlg;
 
-	strFullPath = strPrjPath + m_pRefFasSysData->GetPrjName();
-	strPath.Format(L"%s\\%s\\Release"
-		,strFullPath,F3_VERSIONTEMPFOLDER_NAME
-	);
-	GF_CreateFolder(strPath);
-	nRet = m_pRefFasSysData->MakeLinkData(strPath);
-	if(nRet > 0)
+	CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadMakeLinkData, this);
+	dlg.DoModal();
+
+	DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw: %d", dw);
+	}
+
+	m_pProgressBarDlg = nullptr;
+
+	if (m_bThreadSucceeded)
 	{
 #ifndef ENGLISH_MODE
 		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동데이터 생성 성공)");
@@ -1510,88 +1594,60 @@ int CMainFrame::CreateFacpLink()
 		//20240730 GBM start - 프로젝트 DB 대신 기존의 프로젝트 파일의 버전 정보를 사용하기로 하므로써 아래 주석처리
 		//20240305 GBM start - 연동데이터 생성이 성공한 시점에 프로젝트 번호 업데이트 및 중계기 일람표 적용
 		//수신기 타입 정보에서 GT1 타입이 하나도 없으면 아래 행정을 하지 않음 (F3만 있으면 의미가 없기 때문)
-// 		BOOL bGT1TypeExist = FALSE;
-// 		for (int i = 0; i < MAX_FACP_COUNT; i++)
-// 		{
-// 			if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
-// 			{
-// 				bGT1TypeExist = TRUE;
-// 				break;
-// 			}
-// 		}
-// 
-// 		if (bGT1TypeExist)
-// 		{
-// 			int nModuleTableVerNum = -1;
-// 			int nLinkedDataVerNum = -1;
-// 			bool bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
-// 			CString strAuthorized = _T("");
-// 			if (bAuthorized)
-// 			{
-// 				strAuthorized = _T("A");
-// 			}
-// 			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
-// 			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
-// 			BOOL bRet = FALSE;
-// 			CString strMsg = _T("");
-// 
-// 			//프로젝트 버전 DB 적용
-// 			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
-// 			if (bRet)
-// 			{
-// #ifndef ENGLISH_MODE
-// 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-// #else
-// 				GF_AddLog(L"Successfully updated the project number in the database [Project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-// #endif
-// 				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-// 			}
-// 			else
-// 			{
-// #ifndef ENGLISH_MODE
-// 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-// #else
-// 				GF_AddLog(L"Failed to update the project number in the database. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-// #endif
-// 				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
-// 			}
-// 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
-// 		}
+		// 		BOOL bGT1TypeExist = FALSE;
+		// 		for (int i = 0; i < MAX_FACP_COUNT; i++)
+		// 		{
+		// 			if (CNewInfo::Instance()->m_gi.facpType[i] == GT1)
+		// 			{
+		// 				bGT1TypeExist = TRUE;
+		// 				break;
+		// 			}
+		// 		}
+		// 
+		// 		if (bGT1TypeExist)
+		// 		{
+		// 			int nModuleTableVerNum = -1;
+		// 			int nLinkedDataVerNum = -1;
+		// 			bool bAuthorized = CNewInfo::Instance()->m_gi.projectInfo.authorized;
+		// 			CString strAuthorized = _T("");
+		// 			if (bAuthorized)
+		// 			{
+		// 				strAuthorized = _T("A");
+		// 			}
+		// 			nModuleTableVerNum = CNewInfo::Instance()->m_gi.projectInfo.moduleTableVerNum;
+		// 			nLinkedDataVerNum = CNewInfo::Instance()->m_gi.projectInfo.linkedDataVerNum;
+		// 			BOOL bRet = FALSE;
+		// 			CString strMsg = _T("");
+		// 
+		// 			//프로젝트 버전 DB 적용
+		// 			bRet = CNewDBManager::Instance()->InsertDataIntoProjectInfoTable();
+		// 			if (bRet)
+		// 			{
+		// #ifndef ENGLISH_MODE
+		// 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 성공했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		// #else
+		// 				GF_AddLog(L"Successfully updated the project number in the database [Project version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		// #endif
+		// 				strMsg.Format(_T("Successfully updated project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		// 			}
+		// 			else
+		// 			{
+		// #ifndef ENGLISH_MODE
+		// 				GF_AddLog(L"데이터베이스에 프로젝트 번호를 업데이트하는 데에 실패했습니다.[프로젝트 버전: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		// #else
+		// 				GF_AddLog(L"Failed to update the project number in the database. [Project Version: %02d.%02d%s]", nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		// #endif
+		// 				strMsg.Format(_T("Failed to update project number in the database.[Project Ver: %02d.%02d%s]"), nModuleTableVerNum, nLinkedDataVerNum, strAuthorized);
+		// 			}
+		// 			Log::Trace("%s", CCommonFunc::WCharToChar(strMsg.GetBuffer(0)));
+		// 		}
 		//20240730 GBM end
 #endif
 		//20240703 GBM end
 	}
 	else
 	{
-		if(strPath.Right(1) != '\\')
-			strPath += L"\\";
-		strPath += L"*.*";
-		//GF_DeleteDir(strPath);
-#ifndef ENGLISH_MODE
-		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동데이터 생성 실패)");
-		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.",MB_OK | MB_ICONSTOP);
-#else
-		GF_AddLog(L"Failed to compile the project. (Failed to generate Data)");
-		AfxMessageBox(L"Failed to compile the project.", MB_OK | MB_ICONSTOP);
-#endif
-		return 0;
-		//AfxMessageBox(L"프로젝트를 컴파일 하는데 실패했습니다.");
-	}
-	nRet = m_pRefFasSysData->MakeConstructorTable(strPath);
-	if(nRet > 0)
-	{
-#ifndef ENGLISH_MODE
-		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동출력표 생성 성공)");
-		AfxMessageBox(L"프로젝트를 컴파일하는데 성공했습니다.",MB_OK | MB_ICONINFORMATION);
-#else
-		GF_AddLog(L"Successfully compiled the project (interlock output table generation succeeded)");
-		AfxMessageBox(L"Successfully compiled the project.", MB_OK | MB_ICONINFORMATION);
-#endif
-		return 1;
-	}
-	else
-	{
-		if(strPath.Right(1) != '\\')
+		if (strPath.Right(1) != '\\')
 			strPath += L"\\";
 		strPath += L"*.*";
 		//GF_DeleteDir(strPath);
@@ -1602,7 +1658,58 @@ int CMainFrame::CreateFacpLink()
 		GF_AddLog(L"Failed to compile the project. (Failed to generate Data)");
 		AfxMessageBox(L"Failed to compile the project.", MB_OK | MB_ICONSTOP);
 #endif
-		return 0; 
+		return 0;
+		//AfxMessageBox(L"프로젝트를 컴파일 하는데 실패했습니다.");
+	}
+
+	//
+	m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
+	strMsg = _T("연동표 파일을 생성 중입니다. 잠시 기다려 주세요.");
+#else
+	strMsg = _T("An interlock output table is being created. Please wait a moment.");
+#endif
+	CProgressBarDlg dlg2(strMsg);
+	m_pProgressBarDlg = &dlg2;
+
+	CWinThread* pThread2 = AfxBeginThread((AFX_THREADPROC)ThreadMakeConstructorTable, this);
+	dlg2.DoModal();
+
+	dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+	if (dw != WAIT_OBJECT_0)
+	{
+		Log::Trace("스레드 대기 실패! dw: %d", dw);
+	}
+	//
+
+	m_pProgressBarDlg = nullptr;
+
+	if (m_bThreadSucceeded)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"프로젝트를 컴파일하는데 성공했습니다.(연동출력표 생성 성공)");
+		AfxMessageBox(L"프로젝트를 컴파일하는데 성공했습니다.", MB_OK | MB_ICONINFORMATION);
+#else
+		GF_AddLog(L"Successfully compiled the project (interlock output table generation succeeded)");
+		AfxMessageBox(L"Successfully compiled the project.", MB_OK | MB_ICONINFORMATION);
+#endif
+		return 1;
+	}
+	else
+	{
+		if (strPath.Right(1) != '\\')
+			strPath += L"\\";
+		strPath += L"*.*";
+		//GF_DeleteDir(strPath);
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"프로젝트를 컴파일하는데 실패했습니다.(연동데이터 생성 실패)");
+		AfxMessageBox(L"프로젝트를 컴파일하는데 실패했습니다.", MB_OK | MB_ICONSTOP);
+#else
+		GF_AddLog(L"Failed to compile the project. (Failed to generate Data)");
+		AfxMessageBox(L"Failed to compile the project.", MB_OK | MB_ICONSTOP);
+#endif
+		return 0;
 	}
 }
 
@@ -1615,7 +1722,6 @@ void CMainFrame::StartErrorCheck(int nCheckType , CWnd * pTargetWnd)
 	}
 	m_pDlgErrorCheck->ShowWindow(SW_SHOW);
 	m_pDlgErrorCheck->StartErrorCheck(nCheckType,pTargetWnd);
-
 }
 
 LRESULT CMainFrame::OnErrorCheckAfterCreateLink(WPARAM wp,LPARAM lp)
@@ -1623,6 +1729,7 @@ LRESULT CMainFrame::OnErrorCheckAfterCreateLink(WPARAM wp,LPARAM lp)
 	CreateFacpLink();
 	return 0;
 }
+
 LRESULT CMainFrame::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
 {
 	switch(wp)
@@ -1631,14 +1738,20 @@ LRESULT CMainFrame::OnErrorCheckEnd(WPARAM wp,LPARAM lp)
 		break;
 	case ERR_CHECK_CREATELINK:
 #ifndef ENGLISH_MODE
- 		if(lp == 0)
-			PostMessage(UWM_ERRORCHECK_CREATELINK,wp,lp);
+		if (lp == 0)
+		{
+			PostMessage(UWM_ERRORCHECK_CREATELINK, wp, lp);
+			m_pDlgErrorCheck->ShowWindow(FALSE);		// 정상적으로 오류검사를 마쳤으므로 창을 닫음
+		}
  		else if(lp == -1)
  			AfxMessageBox(L"사용자가 취소했습니다.");
  // 		else if(lp == -2)
  // 			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
- 		else
- 			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
+		else
+		{
+			AfxMessageBox(L"오류가 발생하여 컴파일 할 수 없습니다.");
+			GF_AddLog(L"오류가 발생하여 컴파일 할 수 없습니다.");
+		}
 #else
 		if (lp == 0)
 			PostMessage(UWM_ERRORCHECK_CREATELINK, wp, lp);
@@ -1764,4 +1877,16 @@ void CMainFrame::OnUpdateChkShowhelpmsg(CCmdUI *pCmdUI)
 {
 	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
 	pCmdUI->SetCheck(m_bShowHelpMsg);
+}
+
+
+void CMainFrame::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	// 최소 크기 설정 (예: 너비 1280, 높이 720)
+	lpMMI->ptMinTrackSize.x = 1280;
+	lpMMI->ptMinTrackSize.y = 720;
+
+	CMDIFrameWndEx::OnGetMinMaxInfo(lpMMI);
 }

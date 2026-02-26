@@ -2005,10 +2005,8 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "확인",IDOK,63,77,50,14
     PUSHBUTTON      "취소",IDCANCEL,124,77,50,14
-    CONTROL         "ROM 파일 생성 전 오류 검사를 하려면 체크해 주세요.",IDC_CHECK_ERROR_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,52,191,10
     CONTROL         "관리자 모드로 ROM 파일을 생성하려면 체크해 주세요.",IDC_CHECK_ADMIN_MODE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,38,191,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,45,191,10
     CTEXT           "ROM 파일을 생성하시겠습니까?",IDC_STATIC,7,16,225,8
 END
 
@@ -4636,12 +4634,10 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "ROM FILE CREATION"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "??",IDOK,63,77,50,14
-    PUSHBUTTON      "??",IDCANCEL,124,77,50,14
-    CONTROL         "Check to check for errors before creating the ROM file.",IDC_CHECK_ERROR_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,52,191,10
+    DEFPUSHBUTTON   "OK",IDOK,63,77,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,124,77,50,14
     CONTROL         "Check to create ROM files in administrator mode.",IDC_CHECK_ADMIN_MODE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,36,191,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,43,191,10
     CTEXT           "Would you like to create a ROM file?",IDC_STATIC,7,16,225,8
 END
 
