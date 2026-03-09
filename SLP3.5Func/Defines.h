@@ -116,6 +116,9 @@
 // Windows Credential Manager를 이용해 계정 정보를 저장하기 위한 KEY
 #define WINDOWS_CREDENTIAL_MANAGER_KEY	_T("WCM_KEY_SLP4")
 
+// 연동데이터 자동 생성 DB Bulk Insert csv 파일 이름
+#define BULK_INSERT_CSV_FILE	_T("TB_LINK_RELAY_STAGE.csv")
+
 // 수신기 타입
 enum {
 	UNDEFINED_FACP_TYPE = 0,

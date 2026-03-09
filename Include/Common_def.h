@@ -558,14 +558,19 @@ struct ST_YEONDONG
 	BYTE bt256Mod;
 };
 
+#define ST_MAINROM_LINK_POINTER_ARRAY_SIZE		63 * 4 * 256
+#define ST_MAINROM_PUMP_POINTER_ARRAY_SIZE		256
+#define ST_MAINROM_PELAY_POINTER_ARRAY_SIZE		256
+#define ST_MAINROM_PATTERN_POINTER_ARRAY_SIZE	512
+
 struct ST_MAINROM
 {
 	// Index 계산 : (unit * 102 + channel * 256 + 회로) * 3
-	ST_YEONDONG 	stLinkPointer[63 * 4 * 256]; 	// 256회선 * 3Byte * 4계통 * 63유닛
+	ST_YEONDONG 	stLinkPointer[ST_MAINROM_LINK_POINTER_ARRAY_SIZE]; 	// 256회선 * 3Byte * 4계통 * 63유닛
 														// = 193,536Byte(0x02F400) 
-	ST_YEONDONG 	stPumpPointer[256];
-	ST_YEONDONG 	stRelayPointer[256];
-	ST_YEONDONG 	stPatternPointer[512];
+	ST_YEONDONG 	stPumpPointer[ST_MAINROM_PUMP_POINTER_ARRAY_SIZE];
+	ST_YEONDONG 	stRelayPointer[ST_MAINROM_PELAY_POINTER_ARRAY_SIZE];
+	ST_YEONDONG 	stPatternPointer[ST_MAINROM_PATTERN_POINTER_ARRAY_SIZE];
 	//BYTE		btBuffer[256 * 4 * 63 *(6 +(256*3)) ];	// 256회선 * 4계통 * 63유닛
 	// = 64,504 회선
 	// 6 : 연동데이터개수(1) + 감지기입력타입(1) + 중계기 출력타입(1) + 메세지 어드레스(3) 
@@ -577,11 +582,11 @@ struct ST_MAINROM
 struct ST_MAINROM_PATTERN_EXPANSION
 {
 	// Index 계산 : (unit * 102 + channel * 256 + 회로) * 3
-	ST_YEONDONG 	stLinkPointer[63 * 4 * 256]; 	// 256회선 * 3Byte * 4계통 * 63유닛
+	ST_YEONDONG 	stLinkPointer[ST_MAINROM_LINK_POINTER_ARRAY_SIZE]; 	// 256회선 * 3Byte * 4계통 * 63유닛
 													// = 193,536Byte(0x02F400) 
-	ST_YEONDONG 	stPumpPointer[256];
-	ST_YEONDONG 	stRelayPointer[256];
-	ST_YEONDONG 	stPatternPointer[1024];
+	ST_YEONDONG 	stPumpPointer[ST_MAINROM_PUMP_POINTER_ARRAY_SIZE];
+	ST_YEONDONG 	stRelayPointer[ST_MAINROM_PELAY_POINTER_ARRAY_SIZE];
+	ST_YEONDONG 	stPatternPointer[ST_MAINROM_PATTERN_POINTER_ARRAY_SIZE * 2];	// 패턴 증설 버전은 기존의 두 배
 	//BYTE		btBuffer[256 * 4 * 63 *(6 +(256*3)) ];	// 256회선 * 4계통 * 63유닛
 	// = 64,504 회선
 	// 6 : 연동데이터개수(1) + 감지기입력타입(1) + 중계기 출력타입(1) + 메세지 어드레스(3) 

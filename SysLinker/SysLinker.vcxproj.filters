@@ -645,6 +645,9 @@
     <ClInclude Include="XMakeLink\XPatternMst.h">
       <Filter>XMakeLink</Filter>
     </ClInclude>
+    <ClInclude Include="..\SLP3.5Func\CsvBulkWriter.h">
+      <Filter>SLP3.5Func</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -1222,6 +1225,9 @@
     </ClCompile>
     <ClCompile Include="XMakeLink\XPatternMst.cpp">
       <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SLP3.5Func\CsvBulkWriter.cpp">
+      <Filter>SLP3.5Func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

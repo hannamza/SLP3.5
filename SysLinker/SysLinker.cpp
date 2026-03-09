@@ -525,8 +525,8 @@ BOOL CSysLinkerApp::InitInstance()
 	//20240202 GBM end
 
 	CManualLinkManager::New();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
-#if 1
-	//20260126 GBM start - 여기서 로그인 창을 띄워서 계정 확인 후 계정 확인되면 진행, 그렇지 않으면 FALSE 리턴해서 종료
+#ifndef _DEBUG
+	//20260126 GBM start - 여기서 로그인 창을 띄워서 계정 확인 후 계정 확인되면 진행, 그렇지 않으면 FALSE 리턴해서 종료, 디버그 모드일 때는 건너뜀
 	if (!WebServerLogin())
 	{
 		return FALSE;
@@ -4172,6 +4172,8 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 		GF_AddLog(L"Failed to open the project DB.");
 #endif
 		Log::Trace("Failed to open project DB.");
+
+		return -1;
 	}
 
 #else

@@ -17557,11 +17557,15 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 	CDataFacpRelay * pFCont;
 	ST_YEONDONG stTemp;
 	int nPCnt = 0, nDevCnt = 0, nSrcFacpID = -1, nLnkFacp = 0;
-	char szStrBuff[256] = { 0 };
 	BYTE btCmd = 0, btDiv, btRest;
 	POSITION pos;
-	BYTE btPtn[256 * 4] = { 0 };
-	BYTE btDev[256 * 4] = { 0 };
+
+	//20240309 GBM start - 패턴 증설 버전 적용에 따라 기존 256 * 4 버퍼 크기를 아래와 같이 늘림
+	//ST_MAINROM 구조체 내 최대 패턴 개수 * 2 (패턴 증설 버전 적용) * 4 (command 1 + address 2 + 여분 1) 
+	BYTE btPtn[ST_MAINROM_PATTERN_POINTER_ARRAY_SIZE * 2 * 4] = { 0 };
+	BYTE btDev[ST_MAINROM_PATTERN_POINTER_ARRAY_SIZE * 2 * 4] = { 0 };
+	//20240309 GBM end
+
 	int nRomFileVersion = CNewInfo::Instance()->m_gi.romVersion;
 
 	memset((void*)&stTemp, 0, sizeof(ST_YEONDONG));
@@ -17658,7 +17662,13 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 	}
 
 	// 패턴 증설 버전일 경우 연동 개수 2bytes를 사용
-	if (nRomFileVersion == PATTERN_EXPANSION_VERSION)
+	if (nRomFileVersion == ORIGINAL_VERSION)
+	{
+		// ROM BUFFER : 1 Byte. 연동개수
+		pRomBuff[uRomOffset] = nDevCnt + nPCnt;
+		uRomOffset++;
+	}
+	else
 	{
 		// ROM BUFFER : 2 Byte. 연동개수
 		btDiv = (nDevCnt + nPCnt) / 256;
@@ -17666,12 +17676,6 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 		pRomBuff[uRomOffset] = btDiv;
 		pRomBuff[uRomOffset + 1] = btRest;
 		uRomOffset += 2;
-	}
-	else
-	{
-		// ROM BUFFER : 1 Byte. 연동개수
-		pRomBuff[uRomOffset] = nDevCnt + nPCnt;
-		uRomOffset++;
 	}
 
 	// MEMORY COPY : DEVICE DATA

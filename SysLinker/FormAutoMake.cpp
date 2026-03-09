@@ -5,6 +5,8 @@
 #include "SysLinker.h"
 #include "FormAutoMake.h"
 
+#include "CsvBulkWriter.h"
+
 #include "DataAutoPattern.h"
 #include "DataAutoDevice.h"
 #include "DataAutoLogic.h"
@@ -702,18 +704,17 @@ int CFormAutoMake::DisplayAutoMake_XMake()
 	CString str;
 	str.Format(
 		L"연동데이터 자동생성을 완료 했습니다.\n"
-		L"연동데이터 자동생성 시간 : %.4f\n"
-		, nMaxLinkCount
-		, nExceptionCnt
+		L"연동데이터 자동생성 시간 : %.4f"
 		, ((float)(m_dwEnd - m_dwStart) / (float)1000));
 
 	if (nExceptionCnt > 0)
 	{
 		CString strException;
-		strException.Format(L"연동 출력이 %d개가 넘는 회로가 %d개 있습니다\n", nMaxLinkCount, nExceptionCnt);
+		strException.Format(L"\n연동 출력이 %d개가 넘는 회로가 %d개 있습니다.", nMaxLinkCount, nExceptionCnt);
 		str += strException;
 	}
 	AfxMessageBox(str);
+	Log::Trace("%s", CCommonFunc::WCharToChar(str.GetBuffer(0)));
 
 	m_ctrlTree.SetRedraw();
 	m_ctrlTree.RedrawWindow();
@@ -883,15 +884,15 @@ int CFormAutoMake::ProcessSaveAutoLink_XMake()
 	GetDlgItem(IDC_BTN_MAKE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BTN_SAVE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
-	if(SaveAutoLink_XMake() > 0)
+	//if (SaveAutoLink_XMake() > 0)
+	if (SaveAutoLink_XMake_BulkInsert() > 0)
 	{
 #ifndef ENGLISH_MODE
 		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다.\n프로그램이 재시작됩니다.",MB_OK | MB_ICONINFORMATION);
 #else
 		AfxMessageBox(L"Saving of the created linked data has been completed.\nThe program will restart.", MB_OK | MB_ICONINFORMATION);
 #endif
-		//RegisterApplicationRestart(L"--restart",RESTART_NO_CRASH | RESTART_NO_HANG);
-		//AfxGetMainWnd()->PostMessageW(WM_CLOSE);
+		theApp.CloseProject();	// 사용자가 다시 현재 프로젝트를 열거라는 전제에서는 할 필요없지만 꼭 그렇다고 볼 수는 없으므로 프로젝트 DB 파일을 Detach하기 위해 실행
 		theApp.RequestRestart();
 		return 0;
 	}
@@ -947,9 +948,11 @@ int CFormAutoMake::SaveAutoLink_XMake()
 	}
 	SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_TIMER_END);
 	nProgOffset = g_stConfig.dwTimeOut;
+
 	strSql.Format(L"DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=%d",LOGIC_ALL_AUTO);
 	if(pDb->ExecuteSql(strSql) == FALSE)
 	{
+		Log::Trace("DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=3 failed.");
 		SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
 		AfxMessageBox(L"전체 연동출력을 삭제하는데 실패 했습니다.");
 		pDb->RollbackTransaction();
@@ -1040,6 +1043,389 @@ int CFormAutoMake::SaveAutoLink_XMake()
 }
 
 
+
+
+// -----------------------------------------------------------------------------
+// [2026/03/04] Bulk insert using CSV + staging table
+//  - CSV contains 12 columns (ALL except ADD_DATE):
+//    SRC_FACP,SRC_UNIT,SRC_CHN,SRC_RLY,LINK_TYPE,LG_TYPE,LG_ID,
+//    TGT_FACP,TGT_UNIT,TGT_CHN,TGT_RLY,ADD_USER
+//  - BULK INSERT into dbo.TB_LINK_RELAY_STAGE
+//  - INSERT INTO dbo.TB_LINK_RELAY(..., ADD_USER) SELECT ... (ADD_DATE uses DEFAULT GETDATE())
+// -----------------------------------------------------------------------------
+
+bool CFormAutoMake::EnsureDirectoryExistsA(const CString& dir)
+{
+    if(dir.IsEmpty())
+        return false;
+
+    DWORD attr = ::GetFileAttributes(dir);
+    if(attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY))
+        return true;
+
+    // Create parents recursively.
+    int pos = 0;
+    while(true)
+    {
+        int next = dir.Find(L'\\', pos);
+        CString part = (next < 0) ? dir : dir.Left(next);
+
+        // Skip drive root like "C:"
+        if(part.GetLength() >= 3 && part.Right(1) != L":")
+            ::CreateDirectory(part, nullptr);
+
+        if(next < 0) break;
+        pos = next + 1;
+    }
+
+    attr = ::GetFileAttributes(dir);
+    return (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+CString CFormAutoMake::GetDefaultBulkCsvPathA()
+{
+    // Use ProgramData so SQL Server service account can usually read it.
+	CString strPrjPath = g_stConfig.szPrjPath;
+	CString dir;
+	dir.Format(_T("%s\\%s\\%s"), strPrjPath, m_pRefFasSysData->GetPrjName(), F3_VERSIONTEMPFOLDER_NAME);
+
+	// 폴더 없으면 빈 문자열 리턴
+	if (!EnsureDirectoryExistsA(dir))
+	{
+		return _T("");
+	}
+
+	CString file = BULK_INSERT_CSV_FILE;
+	return dir + _T("\\") + file;
+}
+
+bool CFormAutoMake::EnsureStageTableA(YAdoDatabase* pDb)
+{
+    // Stage table excludes ADD_DATE (datetime default in final table)
+    CString sql =
+        L"IF OBJECT_ID('dbo.TB_LINK_RELAY_STAGE','U') IS NULL "
+        L"BEGIN "
+        L"  CREATE TABLE dbo.TB_LINK_RELAY_STAGE ("
+        L"    SRC_FACP  INT NOT NULL,"
+        L"    SRC_UNIT  INT NOT NULL,"
+        L"    SRC_CHN   INT NOT NULL,"
+        L"    SRC_RLY   INT NOT NULL,"
+        L"    LINK_TYPE SMALLINT NOT NULL,"
+        L"    LG_TYPE   SMALLINT NOT NULL,"
+        L"    LG_ID     INT NOT NULL,"
+        L"    TGT_FACP  INT NOT NULL,"
+        L"    TGT_UNIT  INT NOT NULL,"
+        L"    TGT_CHN   INT NOT NULL,"
+        L"    TGT_RLY   INT NOT NULL,"
+        L"    ADD_USER  VARCHAR(50) NOT NULL"
+        L"  );"
+        L"END";
+
+    if(!pDb->ExecuteSql(sql))
+        return false;
+
+    // Clean stage for this run
+    if(!pDb->ExecuteSql(L"TRUNCATE TABLE dbo.TB_LINK_RELAY_STAGE"))
+        return false;
+
+    return true;
+}
+
+int CFormAutoMake::SaveIndividualAutoLink_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev, BOOL /*bCross*/)
+{
+    for(auto it : pInputDev->m_MapLink)
+    {
+        CXDataLink* pLink = it.second;
+        if(pLink == nullptr || pLink->GetFacpID() < 0 || pLink->GetUnitID() < 0 || pLink->GetChnID() < 0 || pLink->GetDeviceID() < 0)
+            continue;
+
+        w.AppendRow(
+            pInputDev->GetFacpID(), pInputDev->GetUnitID(), pInputDev->GetChnID(), pInputDev->GetDeviceID(),
+            LK_TYPE_RELEAY, LOGIC_ALL_AUTO, pLink->m_nLogicID,
+            pLink->GetFacpID(), pLink->GetUnitID(), pLink->GetChnID(), pLink->GetDeviceID(),
+            m_pRefFasSysData->GetCurrentUser()
+        );
+    }
+    return 1;
+}
+
+int CFormAutoMake::SaveIndividualEmergency_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev)
+{
+    POSITION pos;
+    CPtrList* pList = &pInputDev->m_ptrEtcList;
+    pos = pList->GetHeadPosition();
+    while(pos)
+    {
+        CXDataLink* pLink = (CXDataLink*)pList->GetNext(pos);
+        if(pLink == nullptr)
+            continue;
+
+        w.AppendRow(
+            pInputDev->GetFacpID(), pInputDev->GetUnitID(), pInputDev->GetChnID(), pInputDev->GetDeviceID(),
+            LK_TYPE_EMERGENCY, LOGIC_ALL_AUTO, pLink->m_nLogicID,
+            pLink->GetEmID(), 0, 0, 0,
+            m_pRefFasSysData->GetCurrentUser()
+        );
+    }
+    return 1;
+}
+
+int CFormAutoMake::SaveIndividualPattern_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev)
+{
+    POSITION pos;
+    CPtrList* pList = &pInputDev->m_ptrPatternList;
+    pos = pList->GetHeadPosition();
+    while(pos)
+    {
+        CXPatternMst* pMst = (CXPatternMst*)pList->GetNext(pos);
+        if(pMst == nullptr)
+            continue;
+
+        w.AppendRow(
+            pInputDev->GetFacpID(), pInputDev->GetUnitID(), pInputDev->GetChnID(), pInputDev->GetDeviceID(),
+            LK_TYPE_PATTERN, LOGIC_ALL_AUTO, D_NUM_AUTO_PTN_LOGIC_ID,
+            pMst->m_nPatternID, 0, 0, 0,
+            m_pRefFasSysData->GetCurrentUser()
+        );
+    }
+    return 1;
+}
+
+int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
+{
+	//20260304 GBM start - 시간 측정
+	LARGE_INTEGER startTime, endTime;
+	QueryPerformanceCounter(&startTime);
+
+    // Keep progress logic similar to SaveAutoLink_XMake, but insert via CSV + BULK.
+    m_nAllCnt = g_stConfig.dwTimeOut;
+    m_nAllCnt += g_stConfig.dwTimeOut;
+    m_nAllCnt += (int)m_vtInputDev.size();
+
+    if(m_pRefFasSysData == nullptr)
+    {
+        SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_ERROR);
+        AfxMessageBox(L"Project is not loaded.");
+        return 0;
+    }
+
+    int nIdx = 0, nRet = 0;
+    int n1, n2;
+    int nProgOffset = 0;
+    BOOL bCross = FALSE;
+    CString strSql;
+    YAdoDatabase* pDb = m_pRefFasSysData->GetPrjDB();
+
+    if(pDb->DropCleanBuffer() == FALSE)
+    {
+        AfxMessageBox(L"Database clean buffer failed.");
+        return 0;
+    }
+
+    pDb->BeginTransaction();
+
+    SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_TIMER_END);
+    SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_TIMER_START);
+
+    if(m_pRefFasSysData->TempFunc_DropIndex() <= 0)
+    {
+        SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_TIMER_END);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+    SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_TIMER_END);
+    nProgOffset = g_stConfig.dwTimeOut;
+
+	// 기존 자동 연동데이터 지우는데 시간이 아무래도 단 건보다 오래 걸리므로 Timeout을 0(무한정)으로 주고 실행한 뒤 원래 값으로 원복
+	long nOldTimeout = pDb->m_pCommand->CommandTimeout;
+	pDb->m_pCommand->CommandTimeout = 0;
+
+    // Delete existing auto rows
+    strSql.Format(L"DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=%d", LOGIC_ALL_AUTO);
+    if(pDb->ExecuteSql(strSql) == FALSE)
+    {
+		GF_AddLog(pDb->GetLastErrorString());
+		Log::Trace("DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=3 failed.");
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+    // Stage table
+    if(!EnsureStageTableA(pDb))
+    {
+        GF_AddLog(pDb->GetLastErrorString());
+		Log::Trace("EnsureStageTableA failed.");
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+    // CSV create
+    CString csvPath = GetDefaultBulkCsvPathA();
+	if (csvPath.IsEmpty())
+	{
+		Log::Trace("GetDefaultBulkCsvPathA failed.");
+		SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_ERROR);
+		pDb->RollbackTransaction();
+		return 0;
+	}
+
+    CCsvBulkWriter writer;
+    if(!writer.Open(csvPath))
+    {
+		Log::Trace("CCsvBulkWriter Open failed.");
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+    writer.WriteHeaderOnce();
+
+    // Fill CSV
+    for(auto it : m_vtInputDev)
+    {
+        if(m_bStopFlag == TRUE)
+        {
+            writer.Close();
+            pDb->RollbackTransaction();
+            return -1;
+        }
+
+        CXDataDev* pInputDev = it.second;
+        if(pInputDev == nullptr)
+        {
+            writer.Close();
+			Log::Trace("pInputDev == nullptr");
+            SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+            pDb->RollbackTransaction();
+            return 0;
+        }
+
+        bCross = FALSE;
+        n1 = n2 = 0;
+        if(pInputDev->GetEqInput())
+            n1 = pInputDev->GetEqInput()->GetEquipID();
+
+        if(n1 == INTYPE_CROSSA || n1 == INTYPE_CROSSB
+            || n1 == INTYPE_CROSS16_A || n1 == INTYPE_CROSS17_B
+            || n1 == INTYPE_CROSS18_A || n1 == INTYPE_CROSS19_B)
+            bCross = TRUE;
+
+        nRet = SaveIndividualAutoLink_XMake_Csv(writer, pInputDev, bCross);
+        if(nRet <= 0) 
+		{ 
+			Log::Trace("SaveIndividualAutoLink_XMake_Csv failed.");
+			writer.Close(); 
+			SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR); 
+			pDb->RollbackTransaction(); return 0; 
+		}
+
+        nRet = SaveIndividualEmergency_XMake_Csv(writer, pInputDev);
+        if(nRet <= 0) 
+		{ 
+			Log::Trace("SaveIndividualEmergency_XMake_Csv failed.");
+			writer.Close(); 
+			SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR); 
+			pDb->RollbackTransaction(); 
+			return 0; 
+		}
+
+        nRet = SaveIndividualPattern_XMake_Csv(writer, pInputDev);
+        if(nRet <= 0) 
+		{ 
+			Log::Trace("SaveIndividualPattern_XMake_Csv failed.");
+			writer.Close(); 
+			SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR); 
+			pDb->RollbackTransaction(); 
+			return 0; 
+		}
+
+        nIdx++;
+        nProgOffset += 1;
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_STEP);
+    }
+
+    writer.Close();
+
+    // BULK INSERT into stage
+    CString bulkSql;
+    bulkSql.Format(
+        L"BULK INSERT dbo.TB_LINK_RELAY_STAGE FROM '%s' WITH (FIRSTROW=2,FIELDTERMINATOR=',',ROWTERMINATOR='0x0d0a',TABLOCK,BATCHSIZE=50000,CODEPAGE='65001');",
+        writer.GetPath().GetString()
+    );
+
+    if(!pDb->ExecuteSql(bulkSql))
+    {
+        GF_AddLog(pDb->GetLastErrorString());
+		Log::Trace("Bulk Insert failed.");
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+	// csv 파일 삭제
+	DeleteFile(writer.GetPath());
+
+    // Move into final table. ADD_DATE uses DEFAULT GETDATE() because we omit it.
+    CString moveSql =
+        L"INSERT INTO dbo.TB_LINK_RELAY("
+        L"SRC_FACP,SRC_UNIT,SRC_CHN,SRC_RLY,"
+        L"LINK_TYPE,LG_TYPE,LG_ID,"
+        L"TGT_FACP,TGT_UNIT,TGT_CHN,TGT_RLY,"
+        L"ADD_USER)"
+        L" SELECT "
+        L"SRC_FACP,SRC_UNIT,SRC_CHN,SRC_RLY,"
+        L"LINK_TYPE,LG_TYPE,LG_ID,"
+        L"TGT_FACP,TGT_UNIT,TGT_CHN,TGT_RLY,"
+        L"ADD_USER"
+        L" FROM dbo.TB_LINK_RELAY_STAGE;";
+
+    if(!pDb->ExecuteSql(moveSql))
+    {
+        GF_AddLog(pDb->GetLastErrorString());
+		Log::Trace("Copying data from Stage Table failed.");
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+    // Remove duplicates between manual/auto (existing logic)
+    nRet = DeleteManualLink_XMake(pDb);
+    if(nRet <= 0)
+    {
+		GF_AddLog(pDb->GetLastErrorString());
+		Log::Trace("DeleteManualLink_XMake failed.");
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+	//DB Timeout 원복
+	pDb->m_pCommand->CommandTimeout = nOldTimeout;
+
+    SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_TIMER_START);
+    if(m_pRefFasSysData->TempFunc_CheckIndex() <= 0)
+    {
+        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
+        pDb->RollbackTransaction();
+        return 0;
+    }
+
+    nProgOffset += g_stConfig.dwTimeOut;
+    SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_FINISH);
+    pDb->CommitTransaction();
+
+	QueryPerformanceCounter(&endTime);
+	float duringTime;
+	duringTime = CCommonFunc::GetPreciseDeltaTime(startTime, endTime);
+	Log::Trace("자동 생성된 연동데이터 적용에 걸린 시간 : %f", duringTime);
+	//20260304 GBM end
+
+    return 1;
+}
+
+
 int CFormAutoMake::SaveIndividualAutoLink_XMake(YAdoDatabase * pDb,CXDataDev * pInputDev,BOOL bCross)
 {
 	CString strSql = L"",strtemp = L"";
@@ -1072,6 +1458,7 @@ int CFormAutoMake::SaveIndividualAutoLink_XMake(YAdoDatabase * pDb,CXDataDev * p
 		if(strSql.GetLength() > MAX_QUERY_STRING_SIZE)
 		{
 			pDb->ExecuteSql(strSql);
+			strSql.Empty();
 			nCnt = 0;
 		}
 	}
@@ -1079,6 +1466,7 @@ int CFormAutoMake::SaveIndividualAutoLink_XMake(YAdoDatabase * pDb,CXDataDev * p
 	if(nCnt > 0)
 	{
 		pDb->ExecuteSql(strSql);
+		strSql.Empty();
 		nCnt = 0;
 	}
 	// 수동으로 넣은 항목이 있는지 확인

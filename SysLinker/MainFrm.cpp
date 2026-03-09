@@ -382,7 +382,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #ifndef SLP4_MODE
 	strProgram = _T("SLP3");
 #else
-	strProgram.Format(_T("SLP4(ver%g)"), GFSP_PRODUCT_VERSION_NUM);
+	strProgram.Format(_T("SLP4(ver%.2f)"), GFSP_PRODUCT_VERSION_NUM);
 #endif
 
 #ifndef ENGLISH_MODE
@@ -1324,8 +1324,12 @@ void CMainFrame::OnFacpCreateLink()
 		//20240415 GBM end
 	}
 
+#ifndef _DEBUG
 	// 에러 체크를 무조건 하도록 함
 	StartErrorCheck(ERR_CHECK_CREATELINK, this);
+#else
+	CreateFacpLink();
+#endif
 
 #else
 	//20240808 GBM start - 현재 수신기/유닛 타입 정보를 가져옴

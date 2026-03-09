@@ -19,6 +19,7 @@ class CDataNewAutoPtn;
 // 자동 생성 속도 개선
 class CXMakeLink;
 class CXDataDev;
+class CCsvBulkWriter;
 
 // CFormAutoMake 폼 뷰입니다.
 typedef std::map<CString ,CDataAutoMake*> CMapAutoSystem;
@@ -102,11 +103,22 @@ public:
 
 
 	int SaveAutoLink_XMake();
+
 	int SaveIndividualAutoLink_XMake(YAdoDatabase * pDb,CXDataDev * pInputDev,BOOL bCross);
 	int SaveIndividualEmergency_XMake(YAdoDatabase * pDb,CXDataDev * pInputDev);
 	int SaveIndividualPattern_XMake(YAdoDatabase * pDb,CXDataDev * pInputDev);
 	int DeleteManualLink_XMake(YAdoDatabase * pDb);
 	int ProcessSaveAutoLink_XMake();
+
+	// [2026/3/4] Bulk insert using CSV + staging table
+	int SaveAutoLink_XMake_BulkInsert();
+	int SaveIndividualAutoLink_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev, BOOL bCross);
+	int SaveIndividualEmergency_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
+	int SaveIndividualPattern_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
+
+	bool EnsureDirectoryExistsA(const CString& dir);
+	CString GetDefaultBulkCsvPathA();
+	bool EnsureStageTableA(YAdoDatabase* pDb);
 };
 
 

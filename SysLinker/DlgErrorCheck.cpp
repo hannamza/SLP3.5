@@ -484,7 +484,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 		}
 
 		//20251210 GBM start - 패턴 자체 개수 추가	
-		if (nPatternCount >= nMaxPatternCount)
+		if (nPatternCount > nMaxPatternCount)
 		{
 			// 사용자가 리스트에 아이템을 클릭하면 가장 빠른 번호의 패턴이 선택된 상태에서 트리가 펼쳐지도록 함
 			pos = spPmng->GetHeadPosition();
@@ -517,7 +517,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 			if(pPtn == nullptr)
 				continue; 
 			nItemCnt = pPtn->GetItemCount();
-			if(nItemCnt >= nMaxPatternItemCount)
+			if(nItemCnt > nMaxPatternItemCount)
 			{
 				// Error 확인 - 리스트 입력
 #ifndef ENGLISH_MODE

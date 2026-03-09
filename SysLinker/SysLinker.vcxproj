@@ -844,6 +844,7 @@
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1025,6 +1026,7 @@
     <ClInclude Include="..\Common\XList\XTrace.h" />
     <ClInclude Include="..\Include\Common_def.h" />
     <ClInclude Include="..\SLP3.5Func\CommonFunc.h" />
+    <ClInclude Include="..\SLP3.5Func\CsvBulkWriter.h" />
     <ClInclude Include="..\SLP3.5Func\Defines.h" />
     <ClInclude Include="..\SLP3.5Func\HelpMsgManager.h" />
     <ClInclude Include="..\SLP3.5Func\HelpMsgManagerWrapper.h" />
@@ -1354,6 +1356,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='UniCode_Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\SLP3.5Func\CommonFunc.cpp" />
+    <ClCompile Include="..\SLP3.5Func\CsvBulkWriter.cpp" />
     <ClCompile Include="..\SLP3.5Func\HelpMsgManager.cpp" />
     <ClCompile Include="..\SLP3.5Func\HelpMsgManagerWrapper.cpp" />
     <ClCompile Include="..\SLP3.5Func\Log.cpp" />
