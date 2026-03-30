@@ -495,7 +495,10 @@ public:
 	// --> LINK --> 
 	int CheckColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"");
 	int CheckAutoLogicColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"");
-	int CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"");
+	int CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"", CString strDefault = L"");
+
+	int ChangeColumnDataType(CString strTable, CString strColumn, CString strNewDataType);	// 20260324 GBM - 컬럼 데이터 타입 변경 매서드
+
 	int TempFunc_CheckAutoLogicTable();
 	int TempFunc_CheckTempSaveTable();
 	int TempFunc_CheckTempUsedPtnTable();

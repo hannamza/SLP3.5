@@ -184,7 +184,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UniCode_Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -222,7 +222,7 @@
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UniCode_Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -608,7 +608,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions);ENGLISH_MODE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions);ENGLISH_MODE;SLP4_MODE</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
@@ -878,6 +878,7 @@
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -909,17 +910,19 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions);ENGLISH_MODE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions);ENGLISH_MODE;SLP4_MODE</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>./;../Common;../Common/Utils;%(AdditionalIncludeDirectories);../SLP3.5Func</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <OutputFile>../../Run\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>../../Run\$(Platform)\$(Configuration)\SLP4.exe</OutputFile>
       <AdditionalLibraryDirectories>../../lib/$(Platform)\$(Configuration)/</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>$(OutDir)SLP4.pdb</ProgramDatabaseFile>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>

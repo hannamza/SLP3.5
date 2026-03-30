@@ -702,15 +702,26 @@ int CFormAutoMake::DisplayAutoMake_XMake()
 
 	m_dwEnd = GetTickCount();
 	CString str;
+#ifndef ENGLISH_MODE
 	str.Format(
 		L"연동데이터 자동생성을 완료 했습니다.\n"
 		L"연동데이터 자동생성 시간 : %.4f"
 		, ((float)(m_dwEnd - m_dwStart) / (float)1000));
+#else
+	str.Format(
+		L"Automatic generation of linked data has been completed.\n"
+		L"Linked data automatic generation time : %.4f"
+		, ((float)(m_dwEnd - m_dwStart) / (float)1000));
+#endif
 
 	if (nExceptionCnt > 0)
 	{
 		CString strException;
+#ifndef ENGLISH_MODE
 		strException.Format(L"\n연동 출력이 %d개가 넘는 회로가 %d개 있습니다.", nMaxLinkCount, nExceptionCnt);
+#else
+		strException.Format(L"\nThere are %d circuits with more than %d interlocked outputs.", nExceptionCnt, nMaxLinkCount);
+#endif
 		str += strException;
 	}
 	AfxMessageBox(str);

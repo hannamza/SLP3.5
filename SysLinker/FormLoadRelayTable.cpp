@@ -697,10 +697,10 @@ DWORD CFormLoadRelayTable::Thread_RelayProc(LPVOID lpData)
 			{
 #ifndef ENGLISH_MODE
 				AfxMessageBox(L"새로운 중계기 일람표를 사용하여 프로젝트를 업데이트 하는데 성공했습니다.\n"
-					L"프로그램이 재시작됩니다.");
+					L"프로그램이 재시작됩니다.", MB_OK | MB_ICONINFORMATION);
 #else
 				AfxMessageBox(L"Successfully updated the project using the new module table.\n"
-					L"The program will restart.");
+					L"The program will restart.", MB_OK | MB_ICONINFORMATION);
 #endif
 
 				Log::Trace("The new module file has been successfully applied and this program ends!");
@@ -858,40 +858,16 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 	// 중복되는 회로를 사용하거나 중복회로 제외한 수동입력 리스트 생성
 	GetManualLinkData(&m_ptrManualLink, pOldTable);
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
-#ifdef _DEBUG
-	CDataDevice * pDevTemp;
-	CString strTemp;
-	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 0, 0, 95);
-	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
-#endif
 	// 중복되는 회로를 사용하는 수동입력 리스트 생성
 	MakeDuplicationManualOutputLink(pOldTable, m_vtIntersection, m_ptrUSINGDupList);
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
-#ifdef _DEBUG
-// 	CDataDevice * pDevTemp;
-// 	CString strTemp;
-	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 0, 0, 95);
-	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
-#endif
 	// 중복되는 회로의 수동입력 리스트
 	MakeDuplicationManualInputLink(pOldTable, m_vtIntersection, m_ptrUSEDDupList);
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
-#ifdef _DEBUG
-// 	CDataDevice * pDevTemp;
-// 	CString strTemp;
-	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 0, 0, 95);
-	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
-#endif
 	// 1.5이전 버전에서 PATTERN ITEM DB에 있는데 RELAY TABLE에 있는건 그대로 유지 - 연동데이터 생성 시 오류 발생[5/16/2022 KHS]
 	// 1.5에서는 DB에 있지만 RELAY TABLE에 없는건 바로 삭제 시킴
 	// 패턴 변경 리스트 - 
 	MakePtnChangeData(pNewTable, pOldTable, m_ptrPatternUsedDupList);
-#ifdef _DEBUG
-// 	CDataDevice * pDevTemp;
-// 	CString strTemp;
-	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 0, 0, 95);
-	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
-#endif
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
 	if (m_pDlgInput)
 		m_pDlgInput->DisplayCompareResult(m_nCompareType
@@ -922,13 +898,6 @@ int CFormLoadRelayTable::MakeDiffDataProc()
 	AfxMessageBox(L"미리보기를 완료했습니다.");
 #else
 	AfxMessageBox(L"Preview complete.");
-#endif
-
-#ifdef _DEBUG
-// 	CDataDevice * pDevTemp;
-// 	CString strTemp;
-	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 0, 0, 95);
-	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
 #endif
 
 	return 1;
@@ -1228,12 +1197,6 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
  	}
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_DETAIL_COMPLETE, 0, 0);
 
-#ifdef _DEBUG
-	CDataDevice * pDevTemp;
-	//CString strTemp;
-	strTemp = GF_GetSysDataKey(SE_RELAY, 0, 2, 2, 28);
-	pDevTemp = m_pNewRelayTable->GetDevice(strTemp);
-#endif
 	// 	// 추가된 수신기가 있으면 추가
 // 	nRet = AddFacpUnitChannel(pNewTable, pOldTable);
 // 	if (nRet <= 0)
@@ -1355,9 +1318,9 @@ int CFormLoadRelayTable::ApplyDiffDataProc()
 
 	m_pNewRelayTable->SendProgStep(this, PROG_RESULT_FINISH, 0, 0);
 #ifndef ENGLISH_MODE
-	AfxMessageBox(L"새로운 일람표 적용을 완료했습니다.");
+	AfxMessageBox(L"새로운 일람표 적용을 완료했습니다.", MB_OK | MB_ICONINFORMATION);
 #else
-	AfxMessageBox(L"Applied the new table.");
+	AfxMessageBox(L"Applied the new table.", MB_OK | MB_ICONINFORMATION);
 #endif
 	return 1;
 }
@@ -2021,14 +1984,6 @@ BOOL CFormLoadRelayTable::CompareByName(CRelayTableData * pOld , CRelayTableData
 		pNewDev = (CDataDevice*)pNewSys->GetSysData();
 		pOldDev = (CDataDevice*)pOldSys->GetSysData();
 
-#ifdef _DEBUG
-		if (pNewDev->GetDeviceNum() == 28 && pNewDev->GetUnitNum() == 2
-			&& pNewDev->GetFacpNum() == 0 && pNewDev->GetChnNum() == 2)
-		{
-			TRACE(_T(""));
-		}
-#endif
-
 		strIDKey = GF_GetIDSysDataKey(SE_RELAY, pOldDev->GetFacpID(), pOldDev->GetUnitID()
 			, pOldDev->GetChnID(), pOldDev->GetDeviceID());
 		
@@ -2175,11 +2130,7 @@ BOOL CFormLoadRelayTable::CompareByName(CRelayTableData * pOld , CRelayTableData
 		pNewDev->SetRelayIndex(pOld->GetLastRelayIndex() + nAddRIdx);
 		nAddRIdx ++;
 		//pNewDev->SetRelayIndex(pOld->GetNewRelayIndex());
-#ifdef _DEBUG
-		if(strKey == L"00.00.2.001.4")
-			TRACE(L"");
 
-#endif
 		pItem = new CRUpdateItem;
 		pItem->m_pNewCopyDev = new CDataDevice;
 		pItem->m_pOldCopyDev = nullptr;
@@ -2366,11 +2317,6 @@ BOOL CFormLoadRelayTable::CompareByAddress(CRelayTableData * pOld, CRelayTableDa
 
 		
 		pNewDev = (CDataDevice*)pNewSys->GetSysData();
-#ifdef _DEBUG
-		if(strKey == L"00.00.2.001.4")
-			TRACE(L"");
-
-#endif
 		pNewDev->SetRelayIndex(pOld->GetLastRelayIndex() + nAddRIdx);
 		nAddRIdx ++;
 		pItem = new CRUpdateItem;
@@ -2821,6 +2767,12 @@ int CFormLoadRelayTable::GetManualLinkData(CPtrList * pList , CRelayTableData * 
 		strSql += strExcept;
 	}
 
+	//20260310 GBM start - test
+#ifdef _DEBUG
+	OutputDebugString(strSql);
+#endif
+	//20260310 GBM end
+
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
 		USERLOG(L"연동출력을 가져오는데 실패 했습니다.");
@@ -2944,6 +2896,13 @@ int CFormLoadRelayTable::MakeDuplicationManualOutputLink(
 	strSql += L" ORDER BY SRC_FACP , SRC_UNIT , SRC_CHN , SRC_RLY,TGT_FACP,TGT_UNIT,TGT_CHN,TGT_RLY ";
 
 	TRACE(strSql + L"\n");
+
+	//20260310 GBM start - test
+#ifdef _DEBUG
+	OutputDebugString(strSql);
+#endif
+	//20260310 GBM end
+
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
 		USERLOG(L"연동출력을 가져오는데 실패 했습니다.");
@@ -3087,6 +3046,13 @@ int CFormLoadRelayTable::MakeDuplicationManualInputLink(
 //	strSql += L" ORDER BY SRC_FACP , SRC_UNIT , SRC_CHN , SRC_RLY,TGT_FACP,TGT_UNIT,TGT_CHN,TGT_RLY ";
 
 	TRACE(strSql + L"\n");
+
+	//20260310 GBM start - test
+#ifdef _DEBUG
+	OutputDebugString(strSql);
+#endif
+	//20260310 GBM end
+
 	if (pDB->OpenQuery(strSql) == FALSE)
 	{
 		USERLOG(L"연동출력을 가져오는데 실패 했습니다.");
@@ -3172,11 +3138,7 @@ int CFormLoadRelayTable::MakePtnChangeData(
 		nStep++;
 		pNew = spNewMng->GetNext(pos);
 		if (pNew == nullptr)
-			continue; 
-		TRACE(L"pNew->GetPatternName() : %s\n" ,pNew->GetPatternName());
-
-		if(pNew->GetPatternName().Find(L"경보출력20F") >= 0)
-			TRACE(L"pNew->GetPatternName().Find(L\"경보출력20F\")");
+			continue;
 
 		pOld = spOldMng->FindPatternData(pNew->GetPatternName());
 		if (pOld == nullptr)

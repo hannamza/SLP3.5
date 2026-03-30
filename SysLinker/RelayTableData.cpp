@@ -1170,6 +1170,13 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 		//수신기 타입을 기존 -1넣는 것을 중계기 일람표에서 읽어온 값으로 넣음
 #if 1
 		int nFacpType = CNewInfo::Instance()->m_gi.facpType[nFNum];
+
+		//수신기 타입이 설정되어 있지 않다면 기본 값을 GT1으로 세팅
+		if (nFacpType == UNDEFINED_FACP_TYPE)
+		{
+			nFacpType = CNewInfo::Instance()->m_gi.facpType[nFNum] = GT1;
+		}
+
 		pData = AddSystemFacpDataByNum(nFNum, nFid, nFacpType, str);
 #else
 		pData = AddSystemFacpDataByNum(nFNum, nFid, -1, str);
@@ -1252,6 +1259,13 @@ int CRelayTableData::ProcessDeviceTable(CString strPath, int &nRelayIndex, int n
 				//20240808 GBM start - 유닛 타입을 기존 -1넣는 것을 중계기 일람표에서 읽어온 값으로 넣음
 #if 1
 				int nUnitType = CNewInfo::Instance()->m_gi.unitType[nFNum][nUNum];
+
+				//유닛 타입이 설정되어 있지 않다면 기본값을 GT1_중계반으로 세팅
+				if (nUnitType == UNDEFINED_UNIT_TYPE)
+				{
+					nUnitType = CNewInfo::Instance()->m_gi.unitType[nFNum][nUNum] = GT1_중계반;
+				}
+
 				pData = AddSystemUnitDataByNum(nFNum, nUNum, -1, nUnitType);
 #else
 				pData = AddSystemUnitDataByNum(nFNum, nUNum);
@@ -7739,6 +7753,32 @@ int CRelayTableData::InsertPrjBaseData()
 		return 0;
 	}
 
+	//20260324 GBM start - 기존 +N층 column 데이터 타입 변경, 로직 테이블에 컬럼 추가, 테스트 필요
+#if 1
+	if (ChangeColumnDataType(L"TB_AUTO_LOGIC_V2", L"LG_USE_UPPER_FLOOR", L"int") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR 컬럼의 데이터 타입을 변경하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR 컬럼의 데이터 타입을 변경하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to change the data type of the LG_USE_UPPER_FLOOR column in TB_AUTO_LOGIC_V2 in the database.");
+#endif
+		return 0;
+	}
+
+	if(CheckAddColumn(L"TB_AUTO_LOGIC_V2", L"LG_USE_UPPER_FLOOR_START", TRUE, L"int", L"0") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR_START 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR_START 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the LG_USE_UPPER_FLOOR_START column to TB_AUTO_LOGIC_V2 in the database.");
+#endif
+		return 0;
+	}
+#endif
+	//20260324 GBM end
+
 	if (TempFunc_CheckTempSaveTable() == 0)
 	{
 #ifndef ENGLISH_MODE
@@ -10661,7 +10701,7 @@ int CRelayTableData::CheckAutoLogicColumn(CString strTable, CString strColumn, B
 	return 1;
 }
 
-int CRelayTableData::CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate, CString strType)
+int CRelayTableData::CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate, CString strType, CString strDefault)
 {
 	CString strSql;
 	int nCnt;
@@ -10686,15 +10726,221 @@ int CRelayTableData::CheckAddColumn(CString strTable, CString strColumn, BOOL bC
 	if (nCnt == 0 && bCreate == FALSE)
 		return 2;
 
-	strSql.Format(L"ALTER TABLE %s ADD %s %s"
-		, strTable, strColumn, strType
-	);
+	// Default 값이 있으면 적용
+	if (!strDefault.IsEmpty())
+	{
+		CString strConstraintName;
+		strConstraintName.Format(_T("DF_%s_%s"), strTable, strColumn);
+		strSql.Format(
+			L"ALTER TABLE %s "
+			L"ADD %s %s NOT NULL "
+			L"CONSTRAINT [%s] DEFAULT (%s)",
+			strTable,
+			strColumn,
+			strType,
+			strConstraintName,
+			strDefault
+		);
+	}
+	else
+	{
+		strSql.Format(L"ALTER TABLE %s ADD %s %s"
+			, strTable, strColumn, strType
+		);
+	}
 
 	if (m_pDB->ExecuteSql(strSql) == FALSE)
 		return 0;
+
 	return 1;
 }
 
+// 20260324 GBM start - 컬럼 데이터 타입 변경 매서드
+int CRelayTableData::ChangeColumnDataType(CString strTable, CString strColumn, CString strNewDataType)
+{
+	if (m_pDB == nullptr || m_pDB->IsOpen() == FALSE)
+	{
+		USERLOG(L"Project Database Not Opened");
+		return 0;
+	}
+
+	if (strTable.IsEmpty() || strColumn.IsEmpty() || strNewDataType.IsEmpty())
+	{
+		USERLOG(L"ChangeColumnDataType invalid parameter");
+		return 0;
+	}
+
+	if (strTable.Find(L"]") >= 0 || strColumn.Find(L"]") >= 0)
+	{
+		USERLOG(L"ChangeColumnDataType invalid table/column name");
+		return 0;
+	}
+
+	CString strSql;
+	CString strDefaultConstraintName;
+	CString strDefaultDefinition;
+	CString strNullable;
+	CString strCurrentDataType;
+	CString strNewTypeUpper;
+	CString strCurrentTypeUpper;
+	CString strTableQ;
+	CString strColumnQ;
+
+	int nIsNullable = 0;
+	int nRecordCnt = 0;
+
+	strTableQ.Format(L"[%s]", strTable);
+	strColumnQ.Format(L"[%s]", strColumn);
+
+	// 공백 제거 + 대문자 통일
+	strNewDataType.Trim();
+	strNewTypeUpper = strNewDataType;
+	strNewTypeUpper.MakeUpper();
+
+	// 1) 대상 컬럼 정보 조회
+	strSql.Format(
+		L"SELECT "
+		L"    ty.name AS CurrentDataType, "
+		L"    c.is_nullable, "
+		L"    dc.name AS DefaultConstraintName, "
+		L"    dc.definition AS DefaultDefinition "
+		L"FROM sys.columns c "
+		L"INNER JOIN sys.tables t "
+		L"    ON c.object_id = t.object_id "
+		L"INNER JOIN sys.types ty "
+		L"    ON c.user_type_id = ty.user_type_id "
+		L"LEFT JOIN sys.default_constraints dc "
+		L"    ON c.default_object_id = dc.object_id "
+		L"WHERE t.name = N'%s' "
+		L"  AND c.name = N'%s'",
+		strTable, strColumn);
+
+	if (m_pDB->OpenQuery(strSql) == FALSE)
+	{
+		USERLOG(L"ChangeColumnDataType column info query failed");
+		return 0;
+	}
+
+	nRecordCnt = m_pDB->GetRecordCount();
+	if (nRecordCnt <= 0)
+	{
+		m_pDB->RSClose();
+		USERLOG(L"ChangeColumnDataType target column not found");
+		return 0;
+	}
+
+	if (m_pDB->GetFieldValue(L"CurrentDataType", strCurrentDataType) == FALSE)
+	{
+		m_pDB->RSClose();
+		USERLOG(L"ChangeColumnDataType read CurrentDataType failed");
+		return 0;
+	}
+
+	if (m_pDB->GetFieldValue(L"is_nullable", nIsNullable) == FALSE)
+	{
+		m_pDB->RSClose();
+		USERLOG(L"ChangeColumnDataType read is_nullable failed");
+		return 0;
+	}
+
+	m_pDB->GetFieldValue(L"DefaultConstraintName", strDefaultConstraintName);
+	m_pDB->GetFieldValue(L"DefaultDefinition", strDefaultDefinition);
+
+	m_pDB->RSClose();
+
+	strCurrentDataType.Trim();
+	strCurrentTypeUpper = strCurrentDataType;
+	strCurrentTypeUpper.MakeUpper();
+
+	// 2) 현재 타입과 변경 타입이 같으면 아무 작업도 하지 않음
+	if (strCurrentTypeUpper == strNewTypeUpper)
+	{
+		USERLOG(L"ChangeColumnDataType skipped - same data type");
+		return 1;
+	}
+
+	strNullable = (nIsNullable != 0) ? L"NULL" : L"NOT NULL";
+
+	// 3) 트랜잭션 시작
+	if (m_pDB->BeginTransaction() == FALSE)
+	{
+		USERLOG(L"ChangeColumnDataType begin transaction failed");
+		return 0;
+	}
+
+	BOOL bSuccess = FALSE;
+
+	do
+	{
+		// 4) 기존 default constraint 제거
+		if (strDefaultConstraintName.IsEmpty() == FALSE)
+		{
+			CString strConstraintQ;
+			strConstraintQ.Format(L"[%s]", strDefaultConstraintName);
+
+			strSql.Format(
+				L"ALTER TABLE %s DROP CONSTRAINT %s",
+				strTableQ, strConstraintQ);
+
+			if (m_pDB->ExecuteSql(strSql) == FALSE)
+			{
+				USERLOG(L"ChangeColumnDataType drop default constraint failed");
+				break;
+			}
+		}
+
+		// 5) 컬럼 타입 변경
+		strSql.Format(
+			L"ALTER TABLE %s ALTER COLUMN %s %s %s",
+			strTableQ,
+			strColumnQ,
+			strNewDataType,
+			strNullable);
+
+		if (m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			USERLOG(L"ChangeColumnDataType alter column failed");
+			break;
+		}
+
+		// 6) 기존 default constraint 복원
+		if (strDefaultConstraintName.IsEmpty() == FALSE &&
+			strDefaultDefinition.IsEmpty() == FALSE)
+		{
+			CString strConstraintQ;
+			strConstraintQ.Format(L"[%s]", strDefaultConstraintName);
+
+			strSql.Format(
+				L"ALTER TABLE %s "
+				L"ADD CONSTRAINT %s DEFAULT %s FOR %s",
+				strTableQ,
+				strConstraintQ,
+				strDefaultDefinition,
+				strColumnQ);
+
+			if (m_pDB->ExecuteSql(strSql) == FALSE)
+			{
+				USERLOG(L"ChangeColumnDataType recreate default constraint failed");
+				break;
+			}
+		}
+
+		bSuccess = TRUE;
+
+	} while (FALSE);
+
+	if (bSuccess)
+	{
+		m_pDB->CommitTransaction();
+		return 1;
+	}
+	else
+	{
+		m_pDB->RollbackTransaction();
+		return 0;
+	}
+}
+// 20260324 GBM end
 
 int CRelayTableData::TempFunc_CheckAutoLogicTable()
 {
@@ -11558,6 +11804,32 @@ int CRelayTableData::LoadProjectDatabase()
 #endif
 		return 0;
 	}
+
+	//20260324 GBM start - 기존 +N층 column 데이터 타입 변경, 로직 테이블에 컬럼 추가, 테스트 필요
+#if 1
+	if (ChangeColumnDataType(L"TB_AUTO_LOGIC_V2", L"LG_USE_UPPER_FLOOR", L"int") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR 컬럼의 데이터 타입을 변경하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR 컬럼의 데이터 타입을 변경하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to change the data type of the LG_USE_UPPER_FLOOR column in TB_AUTO_LOGIC_V2 in the database.");
+#endif
+		return 0;
+	}
+
+	if (CheckAddColumn(L"TB_AUTO_LOGIC_V2", L"LG_USE_UPPER_FLOOR_START", TRUE, L"int", L"0") == 0)
+	{
+		USERLOG(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR_START 컬럼을 추가하는데 실패했습니다.");
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"데이터베이스에서 TB_AUTO_LOGIC_V2에 LG_USE_UPPER_FLOOR_START 컬럼을 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add the LG_USE_UPPER_FLOOR_START column to TB_AUTO_LOGIC_V2 in the database.");
+#endif
+		return 0;
+	}
+#endif
+	//20260324 GBM end
 
 #if _DBLOAD_TIME_
 	dwEnd = GetTickCount();

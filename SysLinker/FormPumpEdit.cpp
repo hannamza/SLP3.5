@@ -2766,7 +2766,11 @@ void CFormPumpEdit::OnPtnlkMenuDelptn()
 	pPump = m_pCurrentPump->GetDataPump();
 	if(m_pCurrentPump == nullptr || m_pCurrentPump->GetDataPump() == nullptr)
 	{
+#ifndef ENGLISH_MODE
 		AfxMessageBox(L"선택된 펌프가 없습니다.");
+#else
+		AfxMessageBox(L"No pump selected.");
+#endif
 		return;
 	}
 	pLink = (CDataLinked*)m_ctrlPatternList.GetItemData(nIdx);

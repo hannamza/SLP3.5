@@ -1795,6 +1795,7 @@ void CSysLinkerApp::OnHomeProjectNew()
 		GF_AddLog(L"Failed to create a new project.");
 #endif
 		Log::Trace("New project creation was failed.");
+		return;
 	}
 
 	CMainFrame * pMainWnd = nullptr;
@@ -2298,7 +2299,7 @@ void CSysLinkerApp::OnBasicSetLogicEdit()
 #ifndef ENGLISH_MODE
 		CString strMsg = strLogicEditorCaption + "가 이미 실행 중입니다.";
 #else
-		CString strMsg = "The " + strLogicEditorCaption + "is already running.";
+		CString strMsg = _T("The ") + strLogicEditorCaption + "is already running.";
 #endif
 		AfxMessageBox(strMsg);
 	}

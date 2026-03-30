@@ -226,6 +226,8 @@ CSysLinkerView::CSysLinkerView()
 
 	m_nAddType = -1;
 	m_pRefPtrSelectedItems = nullptr;
+
+	m_pDlgManualCopy = nullptr;			//20250617 GBM - 수동 연동데이터 일괄 편집 기능
 }
 #endif
 
@@ -1469,7 +1471,7 @@ void CSysLinkerView::OnPtnlkMenuDelptn()
 #ifndef ENGLISH_MODE
 	AfxMessageBox(L"연동된 접점 정보를 삭제하는데 성공했습니다.");
 #else
-	AfxMessageBox(L"연동된 접점 정보를 삭제하는데 성공했습니다.");
+	AfxMessageBox(L"Successfully deleted linked contact information.");
 #endif
 }
 

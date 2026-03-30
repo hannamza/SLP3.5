@@ -645,6 +645,7 @@
 #define IDC_STATIC_MESSAGE              1170
 #define IDC_BUTTON_COPY                 1173
 #define IDC_BUTTON_PASTE                1174
+#define IDC_BUTTON_COPY2                1174
 #define IDC_EDIT_INPUT                  1176
 #define IDC_ED_SEARCH                   1177
 #define IDC_BTN_SEARCH                  1178

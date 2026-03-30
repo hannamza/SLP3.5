@@ -72,8 +72,6 @@ CDataDevice* CManualLinkManager::GetCurrentInputCircuit()
 
 CPtrList* CManualLinkManager::GetManualLinkListOnly()
 {
-	CPtrList pList;
-
 	return &m_manualPtrList;
 }
 
