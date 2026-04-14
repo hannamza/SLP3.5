@@ -408,6 +408,8 @@ enum
 	UNIT_TYPE_REDBOX,
 	UNIT_TYPE_ESCAPE_LADDER_MODULE,
 	UNIT_TYPE_NMS,
+	UNIT_TYPE_PLD,		// GSI 중계기 타입
+	UNIT_TYPE_ALD,		// GSI 아날로그 타입
 	UNIT_TYPE_COUNT,
 };
 
@@ -422,6 +424,8 @@ static TCHAR * g_szUnitTypeString[] = {
 	_T("RedboX"),
 	_T("피난사다리모듈"),
 	_T("NMS"),
+	_T("PLD (GSI 중계기)"),
+	_T("ALD (GSI 아날로그)"),
 	NULL
 };
 #else
@@ -435,6 +439,8 @@ static TCHAR * g_szUnitTypeString[] = {
 	_T("RedboX"),
 	_T("ESCAPE LADDER MODULE"),
 	_T("NMS"),
+	_T("PLD (GSI REPEATER"),
+	_T("ALD (GSI ANALOG"),
 	NULL
 };
 #endif
