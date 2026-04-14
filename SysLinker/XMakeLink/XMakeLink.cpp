@@ -644,7 +644,7 @@ void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem)
 		if(pItem->MatchEmergency(pDev,pEm))
 		{
 			pDev->AddLinkEtc(pEm, pItem->GetLgId());
-			break;
+			//break;	//20260407 - 비상방송이 하나만 설정되는 오류 수정
 		}
 	}
 }
