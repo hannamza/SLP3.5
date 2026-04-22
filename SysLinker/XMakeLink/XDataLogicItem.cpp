@@ -16,8 +16,6 @@ CXDataLogicItem::CXDataLogicItem()
 	m_nInStartLevelNum = 0;
 	m_btInToOperator = L_OP_NONE;
 	m_btInFromOperator = L_OP_NONE;
-	m_strEndLevelName = L"";
-	m_strStartLevelName = L"";
 
 	m_nOutStartLevelNum = 0;
 	m_nOutEndLevelNum = 0;
@@ -26,7 +24,8 @@ CXDataLogicItem::CXDataLogicItem()
 
 	m_btEmergency = 0;
 	m_btSameAddrOutput = 0;
-	m_nPluseNFloor = 0;
+	m_nPlusNStart = 0;
+	m_nPlusNEnd = 0;
 
 	m_suMatchUnder.btLoctype = 0;
 	m_suMatchGround.btLoctype = 0;
@@ -75,10 +74,15 @@ BYTE CXDataLogicItem::SetMatchCondition(
 	suData.stLoctype.btBType = btMatchBType;
 	suData.stLoctype.btStair = btMatchStair;
 	// +N층일 때는 무조건 층일치 들어가야된다.
-	if(m_nPluseNFloor != 0)
+	if(m_nPlusNStart != 0 || m_nPlusNEnd != 0)
 		suData.stLoctype.btFloor = 1;
 	else
 		suData.stLoctype.btFloor = btMatchFloor;
+
+// 	if(m_nPluseNFloor != 0)
+// 		suData.stLoctype.btFloor = 1;
+// 	else
+// 		suData.stLoctype.btFloor = btMatchFloor;
 	suData.stLoctype.btRoom = btMatchRoom;
 	switch(btType)
 	{
@@ -99,8 +103,7 @@ void CXDataLogicItem::SetAutoLogic(
 	int nId,int nInType,int nOutType,int nEqName,int nOutCond
 	,CStringArray * pArrBuild,CStringArray * pArrStair
 	,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
-	,CString strStartLevelName,CString strEndLevelName
-	,BYTE btEmer,BYTE btSameout,int nNFloor
+	,BYTE btEmer,BYTE btSameout,int nNFloorStart,int nNFloorEnd
 	,BYTE btUseUnderLogic,BYTE btUseParkLogic
 	,BYTE btMatchGround,BYTE btMatchUnder,BYTE btMatchPark
 	,BYTE btUnder1F,BYTE btUnderB1F
@@ -117,8 +120,6 @@ void CXDataLogicItem::SetAutoLogic(
 
 	m_nInEndLevelNum = nEndLevelNum;
 	m_nInStartLevelNum = nStartLevelNum;
-	m_strEndLevelName = strEndLevelName;
-	m_strStartLevelName = strStartLevelName;
 	m_btInToOperator = btToOperator;
 	m_btInFromOperator = btFromOperator;
 
@@ -133,7 +134,8 @@ void CXDataLogicItem::SetAutoLogic(
 	m_btEmergency = btEmer;
 
 	m_btSameAddrOutput = btSameout;
-	m_nPluseNFloor = nNFloor;
+	m_nPlusNStart = nNFloorStart;
+	m_nPlusNEnd = nNFloorEnd;
 
 	//m_btUseUnderLogic = btUseUnderLogic;
 	m_btUnder1F = btUnder1F;
@@ -172,8 +174,7 @@ void CXDataLogicItem::SetAutoLogic(
 	int nId,int nInType,int nOutType,int nEqName,int nOutCond
 	,CStringArray * pArrBuild,CStringArray * pArrStair
 	,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
-	,CString strStartLevelName,CString strEndLevelName
-	,BYTE btEmer,BYTE btSameout,int nNFloor
+	,BYTE btEmer,BYTE btSameout,int nNFloorStart,int nNFloorEnd
 	,BYTE btUseUnderLogic,BYTE btUseParkLogic
 	,BYTE btMatchGroundBuild,BYTE btMatchGroundBType,BYTE btMatchGroundStair,BYTE btMatchGroundFloor,BYTE btMatchGroundRoom
 	,BYTE btMatchUnderBuild,BYTE btMatchUnderBType,BYTE btMatchUnderStair,BYTE btMatchUnderFloor,BYTE btMatchUnderRoom
@@ -192,8 +193,6 @@ void CXDataLogicItem::SetAutoLogic(
 
 	m_nInEndLevelNum = nEndLevelNum;
 	m_nInStartLevelNum = nStartLevelNum;
-	m_strEndLevelName = strEndLevelName;
-	m_strStartLevelName = strStartLevelName;
 	m_btInToOperator = btToOperator;
 	m_btInFromOperator = btFromOperator;
 
@@ -208,7 +207,8 @@ void CXDataLogicItem::SetAutoLogic(
 	m_btEmergency = btEmer;
 
 	m_btSameAddrOutput = btSameout;
-	m_nPluseNFloor = nNFloor;
+	m_nPlusNStart = nNFloorStart;
+	m_nPlusNEnd = nNFloorEnd;
 
 	//m_btUseUnderLogic = btUseUnderLogic;
 	m_btUnder1F = btUnder1F;
@@ -252,15 +252,13 @@ void CXDataLogicItem::SetLogicMst(int nId,int nInType,int nOutType,int nEqName,i
 
 void CXDataLogicItem::SetLogicInputLoc(CStringArray * pArrBuild,CStringArray * pArrStair
 	,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
-	,CString strStartLevelName,CString strEndLevelName)
+	)
 {
 	CopyArray(&m_arrBuildName,pArrBuild);
 	CopyArray(&m_arrStairName,pArrStair);
 
 	m_nInEndLevelNum = nEndLevelNum;
 	m_nInStartLevelNum = nStartLevelNum;
-	m_strEndLevelName = strEndLevelName;
-	m_strStartLevelName = strStartLevelName;
 	m_btInToOperator = btToOperator;
 	m_btInFromOperator = btFromOperator;
 
@@ -270,8 +268,9 @@ void CXDataLogicItem::SetLogicInputLoc(CStringArray * pArrBuild,CStringArray * p
 		m_btUseLevelRange = 1;
 }
 
+
 void CXDataLogicItem::SetLogicOutputCondition(
-	BYTE btEmer,BYTE btSameout,int nNFloor
+	BYTE btEmer,BYTE btSameout,int nNFloorStart,int nFloorEnd
 	,BYTE btUseUnderLogic,BYTE btUseParkLogic
 	,BYTE btUnder1F,BYTE btUnderB1F
 )
@@ -279,7 +278,9 @@ void CXDataLogicItem::SetLogicOutputCondition(
 	m_btEmergency = btEmer;
 
 	m_btSameAddrOutput = btSameout;
-	m_nPluseNFloor = nNFloor;
+
+	m_nPlusNStart = nNFloorStart;
+	m_nPlusNEnd = nFloorEnd;
 
 	//m_btUseUnderLogic = btUseUnderLogic;
 	m_btUnder1F = btUnder1F;
@@ -308,159 +309,6 @@ void CXDataLogicItem::SetLogicOutputCondition(
 	// 	}
 }
 
-
-BYTE CXDataLogicItem::IsNeedCheckMatchBuild(CXDataDev * pInputDev)
-{
-	if(pInputDev == nullptr)
-		return 0;
-	int nFNum = pInputDev->GetLocFloorNumber();
-	// 	CString strPark;
-	// 	strPark = pInputDev->GetLocRoomName();
-
-	// 	if(m_btUseUnderLogic && m_btUseParkLogic && nFNum <= 1)
-	// 		return 0; 
-
-	//지하 주차장 로직 - 입력이 지하 주차장이면 지하 전체 
-	// 계단에서 층조건 검색 - 건물,계단 상관없이 조건에 대한 판단은 계단에서 실행 
-	// 	if(strPark.Find(PARKING_SUBSCRIPT) >= 0)
-	// 	{
-	// 		if(m_btUseUnderLogic && m_btUseParkLogic)
-	// 			return 0; 
-	// 	}
-	// 건물명을 체크 할 수 없는 경우 - 대상이 되는 출력 회로의 정보가 없다 
-	// 1. 지상1F로직 : 출력이 지상부분은 건물일치가 체크 , 지하 부분은 건물일치가 체크되지 않을 경우
-	//                건물명 일치하는지는 건물정보에서는 체크 할 수없다.
-	// 2. 지하1F로직 : 위와 같은 이유
-	// 3. 주차장 : 위와 같은 이유
-	// 따라서 이부분은 층정보에서 확인해야된다.
-	// 지상1F로직,지하1F로직,주차장 로직이 있으면 비교할 내용이 많아진다.
-	// 각 단계(건물,종류,계단)에서 확인 할 경우 비교 내용이 줄어들 수도 있다
-
-	// 입력이 지상 1F일때 지하 전체 출력이 있을 때
-	// 지하 1층 발화 시 지상1층 출력 있을 때
-	if(nFNum <= 1)
-	{
-		// 대상이 되는 출력회로의 위치가 정해지지 않았기 때문에 
-		// 지하로직,주차장 로직이 설정되어 있으면 
-		// 건물 정보를 체크하지 않는다
-		if(m_btUseUnderLogic)
-		{
-			//return 0; // 건물정보 체크 할 수 없음
-			if(m_btUseParkLogic)
-			{
-				// 2개 이상 확인해야되서
-				return 1;
-			}
-			else
-				return GetMatchUnderBuild();
-		}
-		else
-			return GetMatchGroundBuild();
-	}
-	else
-		return GetMatchGroundBuild();
-
-	return 0;
-}
-
-
-BYTE CXDataLogicItem::IsNeedCheckMatchBType(CXDataDev * pInputDev)
-{
-	if(pInputDev == nullptr)
-		return 0;
-	int nFNum = pInputDev->GetLocFloorNumber();
-	// 	CString strPark;
-	// 	strPark = pInputDev->GetLocRoomName();
-	// 
-	// 	//지하 주차장 로직 - 입력이 지하 주차장이면 지하 전체 
-	// 	// 계단에서 층조건 검색 - 건물,계단 상관없이 조건에 대한 판단은 계단에서 실행 
-	// 	if(strPark.Find(PARKING_SUBSCRIPT) >= 0)
-	// 	{
-	// 		if(m_btUseUnderLogic && m_btUseParkLogic)
-	// 			return 0;
-	// 	}
-
-	if(nFNum <= 1)
-	{
-		// 대상이 되는 출력회로의 위치가 정해지지 않았기 때문에 
-		// 지하로직,주차장 로직이 설정되어 있으면 
-		// 체크하지 않는다
-		if(m_btUseUnderLogic)
-		{
-			//return 0; // 건물정보 체크 할 수 없음
-			if(m_btUseParkLogic)
-				return GetMatchParkBType();
-			else
-				return GetMatchUnderBType();
-		}
-		else
-			return GetMatchGroundBType();
-	}
-	else
-		return GetMatchGroundBType();
-	return 0;
-}
-
-BYTE CXDataLogicItem::IsNeedCheckMatchStair(CXDataDev * pInputDev)
-{
-	if(pInputDev == nullptr)
-		return 0;
-	int nFNum = pInputDev->GetLocFloorNumber();
-	// 	CString strPark;
-	// 	strPark = pInputDev->GetLocRoomName();
-	// 
-	// 	//지하 주차장 로직 - 입력이 지하 주차장이면 지하 전체 
-	// 	// 계단에서 층조건 검색 - 건물,계단 상관없이 조건에 대한 판단은 계단에서 실행 
-	// 	if(strPark.Find(PARKING_SUBSCRIPT) >= 0)
-	// 	{
-	// 		if(m_btUseUnderLogic && m_btUseParkLogic)
-	// 			return 0;
-	// 	}
-
-	if(nFNum <= 1)
-	{
-		// 대상이 되는 출력회로의 위치가 정해지지 않았기 때문에 
-		// 지하로직,주차장 로직이 설정되어 있으면 
-		// 체크하지 않는다
-		if(m_btUseUnderLogic)
-		{
-			if(m_btUseParkLogic)
-				return GetMatchParkStair();
-			else
-				return GetMatchUnderStair();
-		}
-		else
-			return GetMatchGroundStair();
-	}
-	else
-		return GetMatchGroundStair();
-	return 0;
-}
-
-BYTE CXDataLogicItem::IsNeedCheckMatchFloor(CXDataDev * pInputDev)
-{
-	if(pInputDev == nullptr)
-		return 0;
-	int nFNum = pInputDev->GetLocFloorNumber();
-	// 	CString strPark;
-	// 	strPark = pInputDev->GetLocRoomName();
-	// 
-	if(m_btUseUnderLogic == 0 || nFNum > 1)
-	{
-		// +N층 , 건물정보 매칭
-		// +N층 일때 자동으로 층 일치가 들어간다 --> 조건이 있다
-		return GetMatchGroundFloor();
-	}
-
-	// 조건 체크 필요
-	if(m_btUnderB1F || m_btUnder1F)
-		return 1;
-
-	if(m_btUseUnderLogic)
-		return 1;
-	return 0;
-}
-
 BYTE CXDataLogicItem::IsNeedCheckMatchRoom(CXDataDev * pInputDev)
 {
 	if(pInputDev == nullptr)
@@ -482,75 +330,53 @@ BYTE CXDataLogicItem::IsNeedCheckMatchRoom(CXDataDev * pInputDev)
 	return 0;
 }
 
-// 
-BOOL CXDataLogicItem::CheckOutputRange(CXDataFloor * pFloor)
+BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tgt)
 {
-	int nFlNum;
-	int nStart,nEnd;
-	BYTE btOpStart,btOpEnd;
-	BOOL (*leftOp)(int,int) = nullptr; // A >= X ?
-	BOOL (*rightOp)(int,int) = nullptr;   // A <= Y ?
+	if(pInputDev == nullptr || tgt == nullptr)
+		return 0;
 
-	nEnd = GetOutEndLevelNum();
-	nStart = GetOutStartLevelNum();
-	btOpStart = GetOutFromOperator();
-	btOpEnd = GetOutToOperator();
-	nFlNum = pFloor->GetFloorNumber();
+	int nInBuild,nOutBuild;
+	std::vector<int> vtTarget;
+	nInBuild = pInputDev->GetBuildIndex();
+	nOutBuild = tgt->GetBuildIndex();
+	
+	if(nInBuild <= 0 || nOutBuild <= 0)
+		return 0; 
+	// 1. 입력이 연계건물의 Source , 출력이 연계건물의 대상 일 때 
+	//     -->출력건물에 대상건물이 포함되는지 확인 : 포함될 때 Return 1
+	// 2. 입력이 연계건물의 Source , 출력이 연계건물의 대상이 아닐 때
+	//     --> 출력 건물에 대상 건물이 포함 되는지 확인 : 포함될 때 Return 1
+	// 3. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 일 때
+	// 4. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 아닐 때
 
-
-	// 대상 범위가 설정되지 않음 (전체 출력)
-	if(nEnd == 0 && nStart == 0)
-		return TRUE;
-
-	switch(btOpStart)
+	if(g_MapIdxLinkedBuild.find(nInBuild) != g_MapIdxLinkedBuild.end())
 	{
-	case L_OP_EQUALEQUAL:
-		leftOp = Equal_equal;
-		break;
-	case L_OP_LESSEQUAL:
-		leftOp = Equal_equal;
-		break;
-	case L_OP_GREATEREQUAL:
-		leftOp = Equal_equal;
-		break;
-	case L_OP_LESS:
-		leftOp = Equal_equal;
-		break;
-	case L_OP_GREATER:
-		leftOp = Equal_equal;
-		break;
-	default:
-		leftOp = None_none;
-		break;
+		// 1. 입력이 연계건물의 Source , 출력이 연계건물의 대상 일 때 
+		//     -->출력건물에 대상건물이 포함되는지 확인
+		// 2. 입력이 연계건물의 Source , 출력이 연계건물의 대상이 아닐 때
+		//     --> 출력 건물에 대상 건물이 포함 되는지 확인
+		vtTarget = g_MapIdxLinkedBuild[nInBuild];
+		// 대상건물에 출력 건물이 포함 되는지 확인
+		if(std::find(vtTarget.begin(),vtTarget.end(),nOutBuild) != vtTarget.end())
+			return 1;
+		else
+			return 0; 
 	}
 
-	switch(btOpStart)
+	if(g_MapIdxLinkedBuild.find(nOutBuild) != g_MapIdxLinkedBuild.end())
 	{
-	case L_OP_EQUALEQUAL:
-		rightOp = Equal_equal;
-		break;
-	case L_OP_LESSEQUAL:
-		rightOp = Equal_equal;
-		break;
-	case L_OP_GREATEREQUAL:
-		rightOp = Equal_equal;
-		break;
-	case L_OP_LESS:
-		rightOp = Equal_equal;
-		break;
-	case L_OP_GREATER:
-		rightOp = Equal_equal;
-		break;
-	default:
-		rightOp = None_none;
-		break;
+		// 3. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 일 때
+		// 4. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 아닐 때
+		vtTarget = g_MapIdxLinkedBuild[nOutBuild];
+		// 대상건물에 출력 건물이 포함 되는지 확인
+		if(std::find(vtTarget.begin(),vtTarget.end(),nInBuild) != vtTarget.end())
+			return 1;
+		else
+			return 0;
 	}
 
-	if(leftOp(nFlNum,nStart) && rightOp(nFlNum,nEnd))
-		return TRUE;
-	return FALSE;
+	return 0;
 }
-
 
 BOOL CXDataLogicItem::MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
@@ -584,12 +410,13 @@ BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 	int nTgtFlNum = tgt->GetFloorNumber();
 	if(GetMatchGroundFloor() == 1)
 	{
-		if(m_nPluseNFloor > 0)
-			bRet = (nSrcFlNum <= nTgtFlNum && nSrcFlNum + m_nPluseNFloor >= nTgtFlNum) ? TRUE : FALSE;
-		else if(m_nPluseNFloor < 0)
-			bRet = (nSrcFlNum >= nTgtFlNum && nSrcFlNum + m_nPluseNFloor <= nTgtFlNum) ? TRUE : FALSE;
-		else
-			bRet = src->GetFloorIndex() == tgt->GetIndex() ? TRUE : FALSE;
+		if(nTgtFlNum >= nSrcFlNum + m_nPlusNStart
+			&& nTgtFlNum <= nSrcFlNum + m_nPlusNEnd)
+		{
+			bRet = TRUE;
+		}
+		else 
+			bRet = FALSE;
 	}
 	else
 		bRet = TRUE;

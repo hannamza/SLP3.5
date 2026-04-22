@@ -22,8 +22,6 @@ public:
 	SIMPLE_FUNC_IMPL(BYTE,InToOperator,m_btInToOperator);
 	SIMPLE_FUNC_IMPL(int,InStartLevelNum,m_nInStartLevelNum);
 	SIMPLE_FUNC_IMPL(int,InEndLevelNum,m_nInEndLevelNum);
-	SIMPLE_FUNC_IMPL(CString,StartLevelName,m_strStartLevelName);
-	SIMPLE_FUNC_IMPL(CString,EndLevelName,m_strEndLevelName);
 
 
 	SIMPLE_FUNC_IMPL(BYTE,OutFromOperator,m_btOutFromOperator);
@@ -40,7 +38,8 @@ public:
 	//출력 조건
 	SIMPLE_FUNC_IMPL(BYTE,UseEmergency,m_btEmergency);
 	SIMPLE_FUNC_IMPL(BYTE,UseSameAddrOutput,m_btSameAddrOutput);
-	SIMPLE_FUNC_IMPL(int,UsePluseNFloor,m_nPluseNFloor);
+	SIMPLE_FUNC_IMPL(int,PlusNStart,m_nPlusNStart);
+	SIMPLE_FUNC_IMPL(int,PlusNEnd,m_nPlusNEnd);
 	SIMPLE_FUNC_IMPL(BYTE,Under1F,m_btUnder1F);
 	SIMPLE_FUNC_IMPL(BYTE,UnderB1F,m_btUnderB1F);
 
@@ -103,8 +102,8 @@ protected:
 
 												  // [2025/8/19 8:36:00 KHS] 
 												  // 현재는 사용하지 않지만 향후 층이름으로 검색할 수 있도록 변수만 지정한다
-	CString						m_strStartLevelName; // 층이름을 층번호로 바꾼다.
-	CString						m_strEndLevelName;
+	//CString						m_strStartLevelName; // 층이름을 층번호로 바꾼다.
+	//CString						m_strEndLevelName;
 
 	// [2025/8/19 8:36:56 KHS] 
 	// 로직의 조건에 따라 출력 대상을 프로그램적으로 설정
@@ -120,7 +119,8 @@ protected:
 	int							m_nOutStartLevelNum; // 0 일때 사용안함 , 기본적으로 층번호(PIT층)
 	int							m_nOutEndLevelNum; // 0 일때 사용안함
 
-	int		m_nPluseNFloor;
+	int		m_nPlusNStart;
+	int		m_nPlusNEnd;
 	BYTE	m_btEmergency;
 	BYTE	m_btSameAddrOutput; // 입력과 같은 어드레스
 
@@ -150,24 +150,32 @@ public:
 
 	// 조건이 맞는지가 아니고 조건이 있는지 확인
 	// 조건이 없으면 다음 조건(계단,층...)으로 이동
-	BYTE IsNeedCheckMatchBuild(CXDataDev * pInputDev);
-	BYTE IsNeedCheckMatchBType(CXDataDev * pInputDev);
-	BYTE IsNeedCheckMatchStair(CXDataDev * pInputDev);
+	//BYTE IsNeedCheckMatchBuild(CXDataDev * pInputDev);
+	//BYTE IsNeedCheckMatchBType(CXDataDev * pInputDev);
+	//BYTE IsNeedCheckMatchStair(CXDataDev * pInputDev);
 
-	BYTE IsNeedCheckMatchFloor(CXDataDev * pInputDev);
+	//BYTE IsNeedCheckMatchFloor(CXDataDev * pInputDev);
 	BYTE IsNeedCheckMatchRoom(CXDataDev * pInputDev);
 
+	// [2026/3/31 16:42:44 KHS] 
+	// 연계 건물 때문에 주차장 구분 부분을 체크
+	// 입력이 1층,지하1층일때 호출,
+	// 1) 입력이 연계 건물의 대상일 때
+	// 2) 출력이 연계 건물의 대상일 때
+	// 3) 입력이 연계 건물의 주차장 일때
+	BYTE CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tgt);
+
 	// 주어진 층이 로직 범위에 있는지 확인한다.
-	BOOL CheckOutputRange(CXDataFloor * pFloor);
+	//BOOL CheckOutputRange(CXDataFloor * pFloor);
 
 	//BOOL CheckFloorCondition(CXDataDev * pInputDev,CXDataFloor * pFloor);
 
 	void SetLogicMst(int nId,int nInType,int nOutType,int nEqName,int nOutCond);
 	void SetLogicInputLoc(CStringArray * pArrBuild,CStringArray * pArrStair
 		,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
-		,CString strStartLevelName,CString strEndLevelName);
+		);
 	void SetLogicOutputCondition(
-		BYTE btEmer,BYTE btSameout,int nNFloor
+		BYTE btEmer,BYTE btSameout,int nNFloorStart,int nNFloorEnd
 		,BYTE btUseUnderLogic,BYTE btUseParkLogic
 		,BYTE btUnder1F,BYTE btUnderB1F
 	);
@@ -176,8 +184,7 @@ public:
 		int nId,int nInType,int nOutType,int nEqName,int nOutCond
 		,CStringArray * pArrBuild,CStringArray * pArrStair
 		,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
-		,CString strStartLevelName,CString strEndLevelName
-		,BYTE btEmer,BYTE btSameout,int nNFloor
+		,BYTE btEmer,BYTE btSameout,int nNFloorStart , int nNFloorEnd 
 		,BYTE btUseUnderLogic,BYTE btUseParkLogic
 		,BYTE btMatchGround,BYTE btMatchUnder,BYTE btMatchPark
 		,BYTE btUnder1F,BYTE btUnderB1F
@@ -187,8 +194,7 @@ public:
 		int nId,int nInType,int nOutType,int nEqName,int nOutCond
 		,CStringArray * pArrBuild,CStringArray * pArrStair
 		,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
-		,CString strStartLevelName,CString strEndLevelName
-		,BYTE btEmer,BYTE btSameout,int nNFloor
+		,BYTE btEmer,BYTE btSameout,int nNFloorStart,int nNFloorEnd
 		,BYTE btUseUnderLogic,BYTE btUseParkLogic
 		,BYTE btMatchGroundBuild,BYTE btMatchGroundBType,BYTE btMatchGroundStair,BYTE btMatchGroundFloor,BYTE btMatchGroundRoom
 		,BYTE btMatchUnderBuild,BYTE btMatchUnderBType,BYTE btMatchUnderStair,BYTE btMatchUnderFloor,BYTE btMatchUnderRoom

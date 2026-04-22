@@ -48,7 +48,7 @@ CXMakeLink::CXMakeLink()
 	g_MapIdxFloor.clear();
 	g_MapIdxStair.clear();
 	g_MapIdxRoom.clear();
-
+	g_MapIdxLinkedBuild.clear();
 	m_pVtPatterns = nullptr;
 }
 
@@ -118,6 +118,7 @@ void CXMakeLink::RemoveAllData()
 	g_MapIdxFloor.clear();
 	g_MapIdxStair.clear();
 	g_MapIdxRoom.clear();
+	g_MapIdxLinkedBuild.clear();
 }
 int CXMakeLink::InitBasicLinkData(CWnd * pMakeWnd)
 {
@@ -134,7 +135,9 @@ int CXMakeLink::InitBasicLinkData(CWnd * pMakeWnd)
 	{
 		return 0; 
 	}
+	MakeRangeLogicItem();
 	MakeBasicPattern();
+	MakeLinkedBuild();
 	MakeEmBcData();
 	m_pMakeWnd = pMakeWnd;
 	return nRet;
@@ -644,7 +647,7 @@ void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem)
 		if(pItem->MatchEmergency(pDev,pEm))
 		{
 			pDev->AddLinkEtc(pEm, pItem->GetLgId());
-			//break;	//20260407 - 비상방송이 하나만 설정되는 오류 수정
+			//break;
 		}
 	}
 }
@@ -660,6 +663,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 	CPtrList * pList;
 	int i = 0 , nCurLogic =0 ;
 	DWORD dwStart,dwEnd,dwSort,dwPtn;
+	BOOL bAllLink = FALSE;
 	sortingArray.clear();
 
 	dwStart = GetTickCount();
@@ -677,6 +681,9 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 		pMst = (CXDataLogicMst*)pList->GetNext(pos);
 		if(pMst == nullptr)
 			continue;
+		// [2026/4/14 16:47:10 KHS] 
+		// 전체 경보 방식인지 확인 필요
+		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID]) == 0 ? TRUE : FALSE;
 
 		/// Logic Item은 1이 기본값이다.
 		for(i = MAX_LOGIC_ITEM_CNT; i >= 0; i--)
@@ -684,6 +691,11 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 			if(pMst->m_pArrLgItem[i] == nullptr)
 				continue;
 
+			// [2026/4/14 16:48:43 KHS] 
+			// 전체 경보 방식일 때 주로직 만 실행 시키기 위해 다른 범위로직은 추가하지 않는다.
+			if(bAllLink == TRUE && i != 1)
+				continue; 
+			
 			mapInDev.clear();
 			//lstInList.RemoveAll();
 			// 로직의 입력 부분에 해당하는 회로목록을 가져온다.
@@ -967,7 +979,7 @@ int CXMakeLink::MakeBasicLogic()
 		pLg = pList->GetNext(pos);
 		if(pLg == nullptr)
 			continue;
-		nIdx = 0;
+		nIdx = 1;
 		pMst = new CXDataLogicMst;
 		pMst->SetLogicMst(pLg->GetLgId(),pLg->GetInType(),pLg->GetOutType(),pLg->GetEqName(),pLg->GetOutContents());
 
@@ -982,10 +994,9 @@ int CXMakeLink::MakeBasicLogic()
 		pItem->SetLogicInputLoc(
 			nullptr,nullptr
 			,0,0,0,0
-			,L"",L""
 		);
 		pItem->SetLogicOutputCondition(
-			pLg->GetUseEmergency(),pLg->GetUseOutput(),pLg->GetUsePluseNFloor()
+			pLg->GetUseEmergency(),pLg->GetUseOutput(),pLg->GetPlusNFloorStart(),pLg->GetPlusNFloorEnd()
 			,pLg->GetUseUnderBasic(),pLg->GetUseUnderParking()
 			,pLg->GetUseUnder1F(),pLg->GetUseUnderB1F()
 		);
@@ -1015,8 +1026,426 @@ int CXMakeLink::MakeBasicLogic()
 			,0
 			,0
 		);
-		pItem->SetPriority(1);
+		pItem->SetPriority(LOGIC_PRIORITY_ID);
 		m_ptrLogicList.AddTail(pMst);
 	}
 	return m_ptrLogicList.GetCount();
 }
+
+
+int CXMakeLink::MakeRangeLogicItem()
+{
+	if(m_pRefRelayData == nullptr)
+		return 0;
+	CString strSql;
+	int nCnt,i,nIdx;
+	POSITION pos;
+	CXDataLogicMst * pMst;
+	CXDataLogicItem * pItem,*pMain;
+	int nId,nPriority;
+	int nPlusNStart,nPlusNEnd,nRangeStartFloor,nRangeEndFloor;
+	BYTE btUseRangeBuild,btUseRangeStair,btUseRangeFloor;
+	CString strName,strRangeBuild,strRangeStair,strRangeStartFloor,strRangeEndFloor;
+	CStringArray saBuild,saStair;
+
+	BYTE btAllFloor,btEmergency,btOutput,btGround1F,btUnder1F;
+	BYTE btMatchGroundBuild,btMatchGroundBType,btMatchGroundStair,btMatchGroundFloor,btMatchGroundRoom;
+	BYTE btUseUnderLogic,btMatchUnderAll,btMatchUnderBuild,btMatchUnderBtype,btMatchUnderStair,btMatchUnderFloor,btMatchUnderRoom;
+	BYTE btUseParkingLogic,btMatchParkingAll,btMatchParkingBuild,btMatchParkingBtype,btMatchParkingStair,btMatchParkingFloor,btMatchParkingRoom;
+
+	nId = nPriority = 0;
+	nRangeStartFloor = nRangeEndFloor = 0;
+	btUseRangeBuild = btUseRangeStair = btUseRangeFloor = 0;
+	nPlusNEnd = nPlusNStart = 0;
+	strName = strRangeBuild = strRangeStair = strRangeStartFloor = strRangeEndFloor = L"";
+	btAllFloor = btEmergency = btOutput = btGround1F = btUnder1F = 0;
+	btMatchGroundBuild = btMatchGroundBType = btMatchGroundStair = btMatchGroundFloor = btMatchGroundRoom = 0;
+	btUseUnderLogic = btMatchUnderAll = btMatchUnderBuild = btMatchUnderBtype = btMatchUnderStair = btMatchUnderFloor = btMatchUnderRoom = 0;
+	btUseParkingLogic = btMatchParkingAll = btMatchParkingBuild = btMatchParkingBtype = btMatchParkingStair = btMatchParkingFloor = btMatchParkingRoom = 0;
+
+	YAdoDatabase * pDb = m_pRefRelayData->GetPrjDB();
+	if(pDb == nullptr)
+		return 0;
+	// SQL문에서 ORDER BY RG_PRIORITY DESC 이유
+	// Priority 낮은 순으로(Priority 숫자가 낮을 수록 우선 순위가 높다) 
+	// 범위중에 중복되는 경우도 발생 할 수가 있음 --> 우선순위가 높은것(숫자가 낮은)부터 처리
+	// MakeLinkList에서 우선순위가 높은 입력회로를 전체 입력 회로(입력타입+설비명의 전체회로)에서 삭제하고 
+	// 남은 입력회로는 일반 로직을 적용한다.
+	// 따라서 pMst->m_pArrLgItem[i]에 숫자가 높은 priority넘버 순으로 입력하면
+	// 나중에 pMst->m_pArrLgItem[i]의 역순으로 연동데이터를 만들면 된다.
+	// 참고로 DB에 있는 Priority는 이곳 이외는 사용하지 않는다.
+	strSql.Format(L"SELECT * FROM TB_AUTORANGE ORDER BY RG_PRIORITY DESC");
+	if(pDb->OpenQuery(strSql) == FALSE)
+	{
+		return 0;
+	}
+
+	nCnt = pDb->GetRecordCount();
+	for(i = 0; i < nCnt; i++)
+	{
+		if(pDb->GetFieldValue(L"RG_ID",nId) == FALSE)
+		{
+			pDb->MoveNext();
+			continue;
+		}
+
+		pDb->GetFieldValue(L"RG_PRIORITY",nPriority);
+		pDb->GetFieldValue(L"RG_ITEM_NAME",strName);
+		pDb->GetFieldValue(L"RG_USE_RANGE_BUILD",btUseRangeBuild);
+		pDb->GetFieldValue(L"RG_USE_RANGE_STAIR",btUseRangeStair);
+		pDb->GetFieldValue(L"RG_USE_RANGE_FLOOR",btUseRangeFloor);
+
+		pDb->GetFieldValue(L"RG_RANGE_BUILD_ARRAY",strRangeBuild);
+		pDb->GetFieldValue(L"RG_RANGE_STAIR_ARRAY",strRangeStair);
+		pDb->GetFieldValue(L"RG_RANGE_FLOOR_START",strRangeStartFloor);
+		pDb->GetFieldValue(L"RG_RANGE_FLOOR_END",strRangeEndFloor);
+
+
+		pDb->GetFieldValue(L"RG_MATCH_ALL",btAllFloor);
+		pDb->GetFieldValue(L"RG_MATCH_SAME_CIRCUIT",btOutput);
+		pDb->GetFieldValue(L"RG_USE_EMER_MAKE",btEmergency);
+		pDb->GetFieldValue(L"RG_PLUSN_START",nPlusNStart);
+		pDb->GetFieldValue(L"RG_PLUSN_END",nPlusNEnd);
+
+		pDb->GetFieldValue(L"RG_MATCH_GROUND_BUILD",btMatchGroundBuild);
+		pDb->GetFieldValue(L"RG_MATCH_GROUND_BTYPE",btMatchGroundBType);
+		pDb->GetFieldValue(L"RG_MATCH_GROUND_STAIR",btMatchGroundStair);
+		pDb->GetFieldValue(L"RG_MATCH_GROUND_FLOOR",btMatchGroundFloor);
+		pDb->GetFieldValue(L"RG_MATCH_GROUND_ROOM",btMatchGroundRoom);
+
+		pDb->GetFieldValue(L"RG_USE_UNDER_LOGIC",btUseUnderLogic);
+		pDb->GetFieldValue(L"RG_MATCH_UNDER_ALL",btMatchUnderAll);
+		pDb->GetFieldValue(L"RG_MATCH_UNDER_BUILD",btMatchUnderBuild);
+		pDb->GetFieldValue(L"RG_MATCH_UNDER_BTYPE",btMatchUnderBtype);
+		pDb->GetFieldValue(L"RG_MATCH_UNDER_STAIR",btMatchUnderStair);
+		pDb->GetFieldValue(L"RG_MATCH_UNDER_FLOOR",btMatchUnderFloor);
+		pDb->GetFieldValue(L"RG_MATCH_UNDER_ROOM",btMatchUnderRoom);
+
+		pDb->GetFieldValue(L"RG_USE_UNDER_B1F_FIRE",btUnder1F);
+		pDb->GetFieldValue(L"RG_USE_UNDER_1F_FIRE",btGround1F);
+
+		pDb->GetFieldValue(L"RG_USE_PARKING_LOGIC",btUseParkingLogic);
+		pDb->GetFieldValue(L"RG_MATCH_PARKING_ALL",btMatchParkingAll);
+		pDb->GetFieldValue(L"RG_MATCH_PARKING_BUILD",btMatchParkingBuild);
+		pDb->GetFieldValue(L"RG_MATCH_PARKING_BTYPE",btMatchParkingBtype);
+		pDb->GetFieldValue(L"RG_MATCH_PARKING_STAIR",btMatchParkingStair);
+		pDb->GetFieldValue(L"RG_MATCH_PARKING_FLOOR",btMatchParkingFloor);
+		pDb->GetFieldValue(L"RG_MATCH_PARKING_ROOM",btMatchParkingRoom);
+
+		nRangeEndFloor = _wtoi(strRangeEndFloor);
+		nRangeStartFloor = _wtoi(strRangeStartFloor);
+		//GF_SplitString()
+		saStair.RemoveAll();
+		saBuild.RemoveAll();
+		GF_SplitString2(strRangeBuild,STR_LINKEDBUILD_SEPERATOR,&saBuild);
+		GF_SplitString2(strRangeStair,STR_LINKEDBUILD_SEPERATOR,&saStair);
+
+		pos = m_ptrLogicList.GetHeadPosition();
+		while(pos)
+		{
+			pMst = (CXDataLogicMst *)m_ptrLogicList.GetNext(pos);
+			if(pMst == nullptr)
+				continue;
+			nIdx = pMst->GetEmptyIdx();
+			if(nIdx < 0)
+				continue;
+			if(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID] == nullptr)
+				continue;
+
+			pItem = new CXDataLogicItem;
+
+//////////////////////////////////////////////////////////////////////////////////////////////			
+// [2026/3/26 16:10:49 KHS] 기본로직에서 조건 Copy
+// 아래 부분은 현재 버전에 맞게 사용하지 않는 예비 부분을 기본 로직에서 copy해오는 부분
+// 향후 다른 조건들(지하 건물 일치 ,주차장 건물일치 등...)을 사용하게 되면 
+// 사용되는 조건 부분은 주석 처리한다.
+// 현재 사용중 : 비상방송 , 건물,계단 
+			pMain = pMst->m_pArrLgItem[LOGIC_PRIORITY_ID];// 숫자 1 은 주로직 --> 기본로직
+			//btEmergency = pMain->GetUseEmergency();
+			btOutput = pMain->GetUseSameAddrOutput();
+			nPlusNStart = pMain->GetPlusNStart();
+			nPlusNEnd = pMain->GetPlusNEnd();
+			btUseUnderLogic = pMain->GetUseUnderLogic();
+			btUseParkingLogic = pMain->GetUseParkLogic();
+			btGround1F = pMain->GetUnder1F();
+			btUnder1F = pMain->GetUnderB1F();
+
+			//btMatchGroundBuild = pMain->GetMatchGroundBuild();
+			btMatchGroundBType = pMain->GetMatchGroundBType();
+			//btMatchGroundStair = pMain->GetMatchGroundStair();
+			btMatchGroundFloor = pMain->GetMatchGroundFloor();
+			btMatchGroundRoom = pMain->GetMatchGroundRoom();
+
+			btMatchUnderBuild = pMain->GetMatchUnderBuild();
+			btMatchUnderBtype = pMain->GetMatchUnderBType();
+			btMatchUnderStair = pMain->GetMatchUnderStair();
+			btMatchUnderFloor = pMain->GetMatchUnderFloor();
+			btMatchUnderRoom = pMain->GetMatchUnderRoom();
+
+			btMatchParkingBuild = pMain->GetMatchParkBuild();
+			btMatchParkingBtype = pMain->GetMatchParkBType();
+			btMatchParkingStair = pMain->GetMatchParkStair();
+			btMatchParkingFloor = pMain->GetMatchParkFloor();
+			btMatchParkingRoom = pMain->GetMatchParkRoom();
+// End : 기본로직에서 조건 Copy
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+			pMst->m_pArrLgItem[nIdx] = pItem;
+			//L_OP_GREATEREQUAL : 범위 입력할 때 <,<= ,... 등등 구분하려고 --> 같거나 큰으로 통일
+			pItem->SetLogicMst(pMst->GetLgId(),pMst->GetInType(),pMst->GetOutType(),pMst->GetEqName(),pMst->GetOutContents());
+			pItem->SetLogicInputLoc(
+				&saBuild,&saStair
+				,nRangeStartFloor,nRangeEndFloor,L_OP_GREATEREQUAL,L_OP_LESSEQUAL
+			);
+
+			pItem->SetLogicOutputCondition(
+				btEmergency,btOutput,nPlusNStart,nPlusNEnd
+				,btUseUnderLogic,btUseParkingLogic
+				,btGround1F,btUnder1F
+			);
+
+			pItem->SetMatchCondition(
+				MATCH_GROUND
+				,btMatchGroundBuild
+				,btMatchGroundBType
+				,btMatchGroundStair
+				,btMatchGroundFloor
+				,btMatchGroundRoom
+			);
+
+			pItem->SetMatchCondition(
+				MATCH_UNDER
+				,btMatchUnderBuild
+				,btMatchUnderBtype
+				,btMatchUnderStair
+				,btMatchUnderFloor
+				,btMatchUnderRoom
+			);
+
+			pItem->SetMatchCondition(
+				MATCH_PARK
+				,btMatchParkingBuild
+				,btMatchParkingBtype
+				,btMatchParkingStair
+				,btMatchParkingFloor
+				,btMatchParkingRoom
+			);
+			pItem->SetPriority(nIdx);
+		}
+
+		pDb->MoveNext();
+
+	}
+}
+
+
+int CXMakeLink::MakeLinkedBuild()
+{
+	if(m_pRefRelayData == nullptr)
+			return 0;
+	CString strSql;
+	int i,nCnt,nSp,x,nID; 
+	CXLocStrMap::iterator it;
+	int nSrcBuildIdx,nTgtBuildIdx;
+	CString strSrcBuild,strConnBuild,strtemp,strUpper;
+	std::vector<CString> vtConnBuild;
+	std::vector<int> vtBuild;
+	YAdoDatabase * pDb = m_pRefRelayData->GetPrjDB();
+	if(pDb == nullptr)
+		return 0;
+	strSql.Format(L"SELECT * FROM TB_AUTOCONNECT ORDER BY CONN_ID DESC");
+	if(pDb->OpenQuery(strSql) == FALSE)
+	{
+		return 0;
+	}
+
+	nCnt = pDb->GetRecordCount();
+	for(i = 0; i < nCnt; i++)
+	{
+		pDb->GetFieldValue(L"CONN_ID",nID);
+		if(nID <= 0)
+		{
+			pDb->MoveNext();
+			continue;
+		}
+
+		// 연계건물의 source(대상건물)
+		pDb->GetFieldValue(L"CONN_TARGET_BUILD",strSrcBuild);
+		if(strSrcBuild.GetLength() <= 0)
+		{
+			pDb->MoveNext();
+			continue;
+		}
+
+		// 연결 건물의 연결 건문
+		pDb->GetFieldValue(L"CONN_CONN_BUILD_ARRAY",strConnBuild);
+		if(strConnBuild.GetLength() <= 0)
+		{
+			pDb->MoveNext();
+			continue; 
+		}
+
+		strUpper = strSrcBuild;
+		strUpper.Trim();
+		strUpper.MakeUpper();
+		// 연계 건물의 Source 건물의 Index를 찾는다.
+		it = g_MapIdxBuild.find(strUpper);
+		// 연계 건물의 Source 건물의 인덱스 확인
+		if(it == g_MapIdxBuild.end() || it->second <= 0)
+		{
+			pDb->MoveNext();
+			continue;
+		}
+		nSrcBuildIdx = it->second;
+
+		// 연계건물의 대상건물목록은 구분자 ';'로 구분되어 있음
+		vtConnBuild = GF_SplitString(strConnBuild,STR_LINKEDBUILD_SEPERATOR);
+		if(vtConnBuild.size() <= 0)
+		{
+			pDb->MoveNext();
+			continue;
+		}
+		// 대상 건물의 인덱스 목록 초기화
+		vtBuild.clear();
+		for(x = 0; x < vtConnBuild.size(); x++)
+		{
+			strUpper = vtConnBuild[x];
+			if(strUpper.GetLength() <= 0)
+				continue; 
+			strUpper.Trim();
+			strUpper.MakeUpper();
+			it = g_MapIdxBuild.find(strUpper);
+			if(it == g_MapIdxBuild.end() || it->second <= 0 )
+				continue;
+			nTgtBuildIdx = it->second;
+			vtBuild.push_back(nTgtBuildIdx);
+		}
+
+		if(vtBuild.size() > 0)
+		{
+			g_MapIdxLinkedBuild[nSrcBuildIdx] = vtBuild;
+		}
+
+		pDb->MoveNext();
+	}
+	return 0;
+}
+
+int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
+{
+	// 전체 경보 방식 
+	// 1. 경종,시각,시각경보,음성,음성점멸
+	// 2. 실 일치 선택 안됨
+	// 3. +n == 0
+
+	BOOL bFound = FALSE;
+	int i; 
+	int nContID;
+	CDataEquip * pCont;
+	CString strName,strtemp;
+	int nPriority = pItem->GetPriority();
+	if(nPriority != LOGIC_PRIORITY_ID)
+		return 1;
+
+	nContID = pItem->GetOutContents();
+	if(nContID <= 0)
+		return 2;
+
+	pCont = m_pRefRelayData->GetEquipData(ET_OUTCONTENTS,nContID);
+	if(pCont == nullptr)
+		return 2;
+
+	strName = pCont->GetEquipName();
+	if(strName.IsEmpty() == TRUE)
+		return 2;
+
+	// 1. 경종,시각,시각경보,음성,음성점멸
+	strName.MakeUpper();
+	for(i = 0; g_pSzAllAlertEquip[i] != nullptr; i++)
+	{
+		strtemp = g_pSzAllAlertEquip[i];
+		strtemp.MakeUpper();
+		if(strName.Find(strtemp) >= 0)
+		{
+			bFound = TRUE;
+			break;
+		}
+	}
+
+	if(bFound == FALSE)
+		return 2; 
+	// 2. 실 일치 선택 안됨
+	if(pItem->GetMatchGroundFloor() != 0)
+		return 2; 
+
+	if(pItem->GetInEndLevelNum() != 0)
+		return 2; 
+	return 0;
+}
+
+// 
+// int CXMakeLink::CheckAllAlertLogic()
+// {
+// 	// 전체 경보 방식 
+// 	// 1. 경종,시각,시각경보,음성,음성점멸
+// 	// 2. 실 일치 선택 안됨
+// 	// 3. +n == 0
+// 
+// 	BOOL bFound = FALSE;
+// 	int i;
+// 	int nContID;
+// 	CDataEquip * pCont;
+// 	CString strName,strtemp;
+// 	POSITION pos;
+// 	CXDataLogicMst * pMst;
+// 	CXDataLogicItem * pItem;
+// 	BYTE btCheck[4] = {  };
+// 	pos = m_ptrLogicList.GetHeadPosition();
+// 	while(pos)
+// 	{
+// 		pMst = (CXDataLogicMst*)m_ptrLogicList.GetNext(pos);
+// 		if(pMst == nullptr)
+// 			continue;
+// 		/// Logic Item은 1이 기본값이다.
+// 		if(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID] == nullptr
+// 			|| pMst->m_pArrLgItem[LOGIC_PRIORITY_ID]->GetPriority() != LOGIC_PRIORITY_ID)
+// 			continue;
+// 		pItem = pMst->m_pArrLgItem[LOGIC_PRIORITY_ID];
+// 
+// 		nContID = pItem->GetOutContents();
+// 		if(nContID <= 0)
+// 			continue;
+// 
+// 		pCont = m_pRefRelayData->GetEquipData(ET_OUTCONTENTS,nContID);
+// 		if(pCont == nullptr)
+// 			continue;
+// 		strName = pCont->GetEquipName();
+// 		if(strName.IsEmpty() == TRUE)
+// 			continue;
+// 		// 1. 경종,시각,시각경보,음성,음성점멸
+// 		strName.MakeUpper();
+// 		for(i = 0; g_pSzAllAlertEquip[i] != nullptr; i++)
+// 		{
+// 			strtemp = g_pSzAllAlertEquip[i];
+// 			strtemp.MakeUpper();
+// 			if(strName.Find(strtemp) >= 0)
+// 			{
+// 				bFound = TRUE;
+// 				break;
+// 			}
+// 		}
+// 		if(bFound == FALSE)
+// 		{
+// 
+// 			continue;
+// 		}
+// 		// 2. 실 일치 선택 안됨
+// 		if(pItem->GetMatchGroundFloor() != 0)
+// 			continue;
+// 
+// 		if(pItem->GetInEndLevelNum() != 0)
+// 			continue;
+// 	}
+// 
+// 	return 0;
+// }

@@ -571,7 +571,16 @@ int CSysLinkerApp::ExitInstance()
 	//20240202 GBM end
 
 	CManualLinkManager::Delete();	//20250617 GBM - 수동 연동데이터 일괄 편집 기능
-
+// #ifndef ENGLISH_MODE
+// 	CString strLogicEditorCaption = L"로직 편집기";
+// #else
+// 	CString strLogicEditorCaption = L"Logic Editor";
+// #endif
+// 	HWND hwnd = FindWindow(NULL,strLogicEditorCaption);		//캡션명으로 해야 할 듯
+// 	if(hwnd != nullptr)
+// 	{
+// 		PostMessage(hwnd,WM_CLOSE,0,0);
+// 	}
 	return CWinAppEx::ExitInstance();
 }
 
@@ -4132,8 +4141,42 @@ int CSysLinkerApp::OpenProject(CString strPrjName, CString strPrjFullPath, DWORD
 		m_pFasSysData = new CRelayTableData;
 	}
 
+
 	OpenProjectInfoFile(m_pFasSysData , strPrjFullPath, strPrjName);
 	OpenVersionInfoFile(m_pFasSysData, HIWORD(dwVer), LOWORD(dwVer), strPrjFullPath, strPrjName,bVerTemp);
+
+	//20260422 GBM start - SQL 버전을 확인하는 코드로 코드 자체는 정상이나 이후에 처리하려던 내용이 잘 되지 않아서 의미가 없다고 함
+#if 0
+	CString strTempDB;
+	int nSqlVer = SQL_UNKNOWN;
+	strTempDB.Format(L"%s%s\\%s\\%s_DATA.MDF"
+		,strPrjFullPath
+		,F3_VERSIONTEMPFOLDER_NAME
+		,F3_PRJ_DIR_DATABASE
+		,strPrjName);
+	nSqlVer = GF_GetSqlVersion(strTempDB);
+	if(nSqlVer < SQL_2022)
+	{
+		//GF_AddLog(L"프로젝트 정보를 가져오는데 실패했습니다.");
+		CString strErr;
+		// 		strErr.Format(L"프로젝트[%s]는 \'%s\' 버전 입니다.\n"
+		// 			L"SLP4 프로젝트가 맞습니까?\n"
+		// 			L"   -Yes 선택 시: 데이터가 SQL 2022로 업그레이드 되고"
+		// 			L"       \tSQL 2014로 되돌릴 수 없습니다.\n"
+		// 			L"   -No 선택 시 : 다시 프로젝트 열기로 돌아감\n"
+		// 			,strPrjName
+		// 			,GF_GetSqlName(nSqlVer)
+		// 		);
+		strErr.Format(L"[%s]는 \'%s\' 버전 입니다.\n"
+			L"SLP4 프로젝트가 맞는지 확인해주시기 바랍니다"
+			,strPrjName
+			,GF_GetSqlName(nSqlVer)
+		);
+		if(AfxMessageBox(strErr,MB_YESNO | MB_ICONQUESTION) != IDYES)
+			return -1;
+	}
+#endif
+	//20260422 GBM end
 
 	//20240523 GBM start - 프로젝트 로드 시 가장 시간이 많이 걸리는 아래 행정을 스레드로 대체
 #if 1

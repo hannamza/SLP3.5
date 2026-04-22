@@ -137,7 +137,7 @@ int CXDataStair::CompareData(int nIndex)
 BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem)
 {
 	POSITION pos;
-	int nTgtFlNum,nSrcFlNum,nUpFloor = 0;
+	int nTgtFlNum,nSrcFlNum;
 	CXDataFloor * pFloor;
 	int n1,n2,n3,n4,nParkBuild;
 	if(m_pListFloor == nullptr)
@@ -147,7 +147,6 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 	// 		return TRUE; 
 	// #endif
 	nParkBuild = g_MapIdxBuild[L"주차장"];
-	nUpFloor = pItem->GetUsePluseNFloor();
 	nSrcFlNum = pDev->GetLocFloorNumber();
 	pos = m_pListFloor->GetHeadPosition();
 	while(pos)
@@ -170,9 +169,14 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 
 		if(nSrcFlNum < -1)
 		{
+
+// 			if(pItem->GetUseParkLogic() == 1
+// 				&& (pDev->GetBuildIndex() == nParkBuild || pFloor->GetBuildIndex() == nParkBuild))
 			if(pItem->GetUseParkLogic() == 1
-				&& (pDev->GetBuildIndex() == nParkBuild || pFloor->GetBuildIndex() == nParkBuild))
+				&& pItem->CheckMatchLinkedBuild(pDev,pFloor)
+				)
 			{
+				// 입력회로가 주차장 또는 출력이 주차장이면 
 				n1 = n2 = n3 = n4 = (nTgtFlNum <= -1) ? 1 : 0;
 			}
 			else
@@ -189,8 +193,11 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 		}
 		else if(nSrcFlNum == -1)
 		{
+			//if(pItem->GetUseParkLogic() == 1
+			//	&& (pDev->GetBuildIndex() == nParkBuild || pFloor->GetBuildIndex() == nParkBuild))
 			if(pItem->GetUseParkLogic() == 1
-				&& (pDev->GetBuildIndex() == nParkBuild || pFloor->GetBuildIndex() == nParkBuild))
+				&& pItem->CheckMatchLinkedBuild(pDev,pFloor)
+				)
 			{
 				n1 = n2 = n3 = n4 = (nTgtFlNum <= 1) ? 1 : 0;
 			}
@@ -219,7 +226,8 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 		{
 			if(pItem->GetUseParkLogic() == 1)
 			{
-				if(pDev->GetBuildIndex() == nParkBuild || pFloor->GetBuildIndex() == nParkBuild)
+				//if(pDev->GetBuildIndex() == nParkBuild || pFloor->GetBuildIndex() == nParkBuild)
+				if(pItem->CheckMatchLinkedBuild(pDev,pFloor))
 				{
 					n1 = n2 = n3 = n4 = (nTgtFlNum <= -1) ? 1 : 0;
 				}

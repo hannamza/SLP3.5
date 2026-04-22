@@ -35,7 +35,8 @@ public:
 	SIMPLE_FUNC_IMPL(BYTE, UseAllFloor, m_btAllFloor);
 	SIMPLE_FUNC_IMPL(BYTE, UseEmergency, m_btEmergency);
 	SIMPLE_FUNC_IMPL(BYTE, UseOutput, m_btOutput);
-	SIMPLE_FUNC_IMPL(BYTE, UsePluseNFloor, m_btPluseNFloor);
+	SIMPLE_FUNC_IMPL(int,PlusNFloorStart,m_nPlusNStart);
+	SIMPLE_FUNC_IMPL(int, PlusNFloorEnd,m_nPlusNEnd);
 						   
 	SIMPLE_FUNC_IMPL(BYTE, UseMatchBuild, m_btMatchBuild);
 	SIMPLE_FUNC_IMPL(BYTE, UseMatchBType, m_btMatchBType);
@@ -73,7 +74,9 @@ protected:
 	BYTE	m_btAllFloor;
 	BYTE	m_btEmergency;
 	BYTE	m_btOutput;
-	BYTE	m_btPluseNFloor;
+	//BYTE	m_btPluseNFloor;
+	int		m_nPlusNStart;
+	int		m_nPlusNEnd;
 
 	BYTE	m_btMatchBuild;
 	BYTE	m_btMatchBType;
@@ -91,8 +94,8 @@ protected:
 	BYTE	m_btUnderParking;
 public:
 	void SetAutoLogic(
-		int nId, int nIntype, int nOuttype, int nName, int nCont
-		, BYTE btEmer, BYTE btAll, BYTE btout , BYTE btNFloor
+		int nId,int nIntype,int nOuttype,int nName,int nCont
+		,BYTE btEmer,BYTE btAll,BYTE btout,int nNFloorStart,int nNFloorEnd
 		, BYTE btMatchBuild, BYTE btMatchBType, BYTE btMatchStair, BYTE btMatchFloor, BYTE btMatchRoom
 		, BYTE btUnderBasic, BYTE btUnderBuild, BYTE btUnderBType, BYTE btUnderStair, BYTE btUnder1F, BYTE btUnderB1F
 		, BYTE btUnderParking

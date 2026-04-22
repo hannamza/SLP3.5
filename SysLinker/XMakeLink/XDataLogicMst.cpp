@@ -38,3 +38,13 @@ void CXDataLogicMst::SetLogicMst(int nLgId,int nInType,int nOutType,int nEqName,
 	m_nEqName = nEqName;
 	m_nOutContents = nOutCond;
 }
+
+int CXDataLogicMst::GetEmptyIdx()
+{
+	for(int i = 1; i < MAX_LOGIC_ITEM_CNT + 1; i++)
+	{
+		if(m_pArrLgItem[i] == nullptr)
+			return i;
+	}
+	return -1;
+}

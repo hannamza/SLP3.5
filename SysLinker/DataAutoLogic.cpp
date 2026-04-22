@@ -19,7 +19,8 @@ CDataAutoLogic::CDataAutoLogic()
 	m_btAllFloor = 0;
 	m_btEmergency = 0;
 	m_btOutput = 0;
-	m_btPluseNFloor = 0;
+	m_nPlusNStart = 0;
+	m_nPlusNEnd = 0;
 
 	m_btMatchBuild = 0;
 	m_btMatchBType = 0;
@@ -46,7 +47,7 @@ CDataAutoLogic::~CDataAutoLogic()
 // CDataAutoLogic ¸â¹ö ÇÔ¼ö
 void CDataAutoLogic::SetAutoLogic(
 	int nId, int nIntype, int nOuttype, int nName, int nCont
-	, BYTE btEmer, BYTE btAll, BYTE btout, BYTE btNFloor
+	, BYTE btEmer, BYTE btAll, BYTE btout,int nNFloorStart,int nNFloorEnd
 	, BYTE btMatchBuild, BYTE btMatchBType, BYTE btMatchStair, BYTE btMatchFloor, BYTE btMatchRoom
 	, BYTE btUnderBasic, BYTE btUnderBuild, BYTE btUnderBType, BYTE btUnderStair, BYTE btUnder1F, BYTE btUnderB1F
 	, BYTE btUnderParking
@@ -63,7 +64,8 @@ void CDataAutoLogic::SetAutoLogic(
 	m_btEmergency = btEmer;
 	m_btAllFloor = btAll;
 	m_btOutput = btout;
-	m_btPluseNFloor = btNFloor;
+	m_nPlusNStart = nNFloorStart;
+	m_nPlusNEnd = nNFloorEnd;
 
 	m_btMatchBuild = btMatchBuild;
 	m_btMatchBType = btMatchBType;

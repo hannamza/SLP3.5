@@ -16,7 +16,8 @@
 #include "stdafx.h"
 #include "SysLinker.h"
 #include "../Common/Control/DTreeCtrl.h"
-
+#include <iostream>
+#include <fstream>
 #include <vector>
 using namespace std;
 
@@ -151,6 +152,25 @@ vector<CString>  GF_SplitString(CString strString, CString strToken)
  	}
 	return vtRet;
 }
+
+
+BOOL  GF_SplitString2(CString strString,CString strToken , CStringArray *pArr)
+{
+	int pos = 0;
+	CString str;
+	vector<CString> vtRet;
+
+	if(pArr == nullptr)
+		return FALSE;
+	while(AfxExtractSubString(str,strString,pos,strToken.GetAt(0)))
+	{
+		// Prepare to move to the next substring
+		pos++;
+		pArr->Add(str);
+	}
+	return TRUE;
+}
+
 size_t GetSizeOfFile(const std::wstring& path)
 {
 	struct _stat fileinfo;
@@ -952,4 +972,52 @@ CString GF_GetSafeArrayValue(COleSafeArray * pSa,int nRow,int nCol)
 
 	return strRet;
 
+}
+
+CString GF_GetSqlName(int nVersion)
+{
+	if(nVersion >= SQL_2022) return _T("SQL Server 2022");
+	if(nVersion >= SQL_2019) return _T("SQL Server 2019");
+	if(nVersion >= SQL_2017) return _T("SQL Server 2017");
+	if(nVersion >= SQL_2016) return _T("SQL Server 2016");
+	if(nVersion >= SQL_2014) return _T("SQL Server 2014");
+	if(nVersion >= SQL_2012) return _T("SQL Server 2012");
+	if(nVersion >= SQL_2008R2) return _T("SQL Server 2008 R2");
+	return _T("Unknown / Older Version");
+}
+
+//SQL Server Version 	Internal MDF Version
+//SQL Server 2025			998
+//SQL Server 2022			957
+//SQL Server 2019			895 (or 904 for later updates)
+//SQL Server 2017			869
+//SQL Server 2016			852
+//SQL Server 2014			782
+//SQL Server 2012			706
+//SQL Server 2008 R2		661
+//SQL Server 2008			655
+//SQL Server 2005			611
+//SQL Server 2000			539
+
+int		GF_GetSqlVersion(const CString& strPath)
+{
+	CFile mdfFile;
+	CFileException ex;
+
+	// 1. 파일 열기 (읽기 전용, 바이너리 모드)
+	if(mdfFile.Open(strPath,CFile::modeRead | CFile::typeBinary | CFile::shareDenyNone,&ex))
+	{
+		unsigned short fileVersion = 0;
+		mdfFile.Seek(0x12064,CFile::begin);
+		mdfFile.Read(&fileVersion,sizeof(fileVersion));
+		mdfFile.Close();
+		return fileVersion;
+	}
+	else
+	{
+		TCHAR szError[1024];
+		ex.GetErrorMessage(szError,1024);
+		AfxMessageBox(szError);
+	}
+	return -1;
 }

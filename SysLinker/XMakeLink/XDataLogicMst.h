@@ -23,5 +23,6 @@ protected:
 
 public:
 	void SetLogicMst(int nLgId,int nInType,int nOutType,int nEqName,int nOutCond);
+	int GetEmptyIdx();
 };
 

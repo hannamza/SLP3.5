@@ -495,9 +495,20 @@ public:
 	// --> LINK --> 
 	int CheckColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"");
 	int CheckAutoLogicColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"");
-	int CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"", CString strDefault = L"");
 
-	int ChangeColumnDataType(CString strTable, CString strColumn, CString strNewDataType);	// 20260324 GBM - 컬럼 데이터 타입 변경 매서드
+	// [2026/4/14 10:57:42 KHS] 
+	// Column Type 변경 시 Index가 걸려 있으면 인덱스 삭제 하고 해야됨
+	int CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate = FALSE, CString strType = L"", CString strDefault = L"");
+	
+	// [2026/4/14 8:29:19 KHS] 
+	// TB_AUTOCONNECT TABLE이 없으면 생성하고
+	// 있으면 모든 컬럼이 있는지 확인하고 틀리면 수정하고 , TABLE DROP 다시 생성
+	int MakeAutoConnectTable();
+	int MakeAutoRangeTable();
+
+	int ChangeColumnDataType(CString strTable,CString strColumn,CString strNewDataType);	// 20260324 GBM - 컬럼 데이터 타입 변경 매서드
+	int ChangeColumnDataType2(CString strTable,CString strColumn,CString strNewDataType,CString strDefault =L"");
+	
 
 	int TempFunc_CheckAutoLogicTable();
 	int TempFunc_CheckTempSaveTable();

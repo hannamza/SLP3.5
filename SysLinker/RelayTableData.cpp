@@ -8552,17 +8552,17 @@ int CRelayTableData::InsertPrjBaseAutoLogicDB()
  			continue;
  
  		strSql.Format(L"INSERT TB_AUTO_LOGIC_V2(LG_ID,LG_INTYPE_ID,LG_OUTTYPE_ID , LG_EQNAME_ID ,LG_OUTCONT_ID " //5개
-			L",LG_USE_EMER_MAKE,LG_USE_ALL_OUTPUT,LG_USE_OUTPUT,LG_USE_UPPER_FLOOR " //4개
+			L",LG_USE_EMER_MAKE,LG_USE_ALL_OUTPUT,LG_USE_OUTPUT,LG_USE_UPPER_FLOOR_START,LG_USE_UPPER_FLOOR " //5개
 			L",LG_USE_LOC_BUILD_MATCH,LG_USE_LOC_BTYPE_MATCH,LG_USE_LOC_STAIR_MATCH,LG_USE_LOC_FLOOR_MATCH ,LG_USE_LOC_ROOM_MATCH " //5개
 			L",LG_USE_UNDER_BASIC,LG_USE_UNDER_BUILD_CLASSIFY,LG_USE_UNDER_BTYPE_CLASSIFY,LG_USE_UNDER_STAIR_CLASSIFY, LG_USE_UNDER_GROUND_FLOOR,LG_USE_UNDER_B1_FLOOR " //6개
 			L",LG_USE_PARKING_BASIC,LG_USE_PARKING_BUILD,LG_USE_PARKING_STAIR,LG_USE_PARKING_GROUND_FLOOR,LG_USE_PARKING_B1_FLOOR )  " //5개
  			L" VALUES(%d,%d,%d,%d,%d"
-			L",%d,%d,%d,%d"
+			L",%d,%d,%d,%d,%d"
 			L",%d,%d,%d,%d,%d"
 			L",%d,%d,%d,%d,%d,%d"
  			L",%d,0,0,0,0) "
  			, pAuto->GetLgId(), pAuto->GetInType(), pAuto->GetOutType(), pAuto->GetEqName(), pAuto->GetOutContents()
- 			, pAuto->GetUseEmergency(), pAuto->GetUseAllFloor(), pAuto->GetUseOutput(), pAuto->GetUsePluseNFloor()
+ 			, pAuto->GetUseEmergency(), pAuto->GetUseAllFloor(), pAuto->GetUseOutput(), pAuto->GetPlusNFloorStart(),pAuto->GetPlusNFloorEnd()
 			, pAuto->GetUseMatchBuild(), pAuto->GetUseMatchBType(), pAuto->GetUseMatchStair(), pAuto->GetUseMatchFloor(), pAuto->GetUseMatchRoom()
 			, pAuto->GetUseUnderBasic(), pAuto->GetUseUnderClassBuild(), pAuto->GetUseUnderClassBType(), pAuto->GetUseUnderClassStair(), pAuto->GetUseUnder1F(), pAuto->GetUseUnderB1F()
 			, pAuto->GetUseUnderParking()
@@ -10703,7 +10703,7 @@ int CRelayTableData::CheckAutoLogicColumn(CString strTable, CString strColumn, B
 
 int CRelayTableData::CheckAddColumn(CString strTable, CString strColumn, BOOL bCreate, CString strType, CString strDefault)
 {
-	CString strSql;
+	CString strSql,strtemp;
 	int nCnt;
 	strSql.Format(L"SELECT * FROM INFORMATION_SCHEMA.COLUMNS "
 		L"WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'"
@@ -10716,42 +10716,482 @@ int CRelayTableData::CheckAddColumn(CString strTable, CString strColumn, BOOL bC
 	}
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
+		USERLOG(L"table : INFORMATION_SCHEMA.COLUMNS open failed[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	nCnt = m_pDB->GetRecordCount();
+
+
+	if(nCnt <= 0)
+	{
+		if(bCreate == FALSE)
+			return 2;
+		else
+		{
+			// [2026/4/14 10:26:18 KHS] 
+			// Create 값 체크 하지 않는 오류 수정
+			strSql.Format(L"ALTER TABLE %s ADD %s %s"
+				,strTable,strColumn,strType
+			);
+			if(m_pDB->ExecuteSql(strSql) == FALSE)
+			{
+				USERLOG(L"CheckAddColumn : Add Column Type Error[%s]",m_pDB->GetLastErrorString());
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		m_pDB->GetFieldValue(L"DATA_TYPE",strtemp);
+		if(strType.CompareNoCase(strtemp) != 0) 
+		{
+			// Column Type 변경
+			strSql.Format(
+				L"ALTER TABLE %s "
+				L"ALTER COLUMN %s %s"
+				,strTable,strColumn,strType
+			);
+			if(m_pDB->ExecuteSql(strSql) == FALSE)
+			{
+				USERLOG(L"CheckAddColumn : Change Column Type Error[%s]",m_pDB->GetLastErrorString());
+				return 0;
+			}
+		}
+	}
+
+	if(strDefault == L"")
+		1;
+	if(ChangeColumnDataType2(strTable,strColumn,strType,strDefault) == 0)
+	{
+		USERLOG(L"ChangeColumnDataType2 : [%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	return 1;
+}
+
+int CRelayTableData::MakeAutoConnectTable()
+{
+	CString strSql;
+	int nCnt;
+	strSql.Format(L"SELECT * FROM INFORMATION_SCHEMA.COLUMNS "
+		L"WHERE TABLE_NAME = '%s' "
+		L"ORDER BY COLUMN_NAME "
+		,L"TB_AUTOCONNECT"
+	);
+	if(m_pDB == nullptr || m_pDB->IsOpen() == FALSE)
+	{
+		USERLOG(L"Project Database Not Opened");
+		return 0;
+	}
+	if(m_pDB->OpenQuery(strSql) == FALSE)
+	{
 		USERLOG(L"table : tb_facp open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
-	if (nCnt == 1)
-		return 1;
-
-	if (nCnt == 0 && bCreate == FALSE)
-		return 2;
-
-	// Default 값이 있으면 적용
-	if (!strDefault.IsEmpty())
+	if(nCnt >= 1)
 	{
-		CString strConstraintName;
-		strConstraintName.Format(_T("DF_%s_%s"), strTable, strColumn);
-		strSql.Format(
-			L"ALTER TABLE %s "
-			L"ADD %s %s NOT NULL "
-			L"CONSTRAINT [%s] DEFAULT (%s)",
-			strTable,
-			strColumn,
-			strType,
-			strConstraintName,
-			strDefault
-		);
-	}
-	else
-	{
-		strSql.Format(L"ALTER TABLE %s ADD %s %s"
-			, strTable, strColumn, strType
-		);
+		// COLUMN 정보 확인 -> 이름만 확인
+		// 컬럼 정보 틀리면 DROP
+
+		CString strId,strTarget,strConn;
+		// 1. COLUMN 정보 확인
+		m_pDB->GetFieldValue(L"COLUMN_NAME",strId);
+		m_pDB->MoveNext();
+		m_pDB->GetFieldValue(L"COLUMN_NAME",strTarget);
+		m_pDB->MoveNext();
+		m_pDB->GetFieldValue(L"COLUMN_NAME",strConn);
+		m_pDB->RSClose();
+
+		if((strId.CompareNoCase(L"CONN_ID") == 0)
+			&& (strId.CompareNoCase(L"CONN_TARGET_BUILD") == 0)
+			&& (strId.CompareNoCase(L"CONN_CONN_BUILD_ARRAY") == 0)
+			)
+		{
+			return 1;
+		}
+		strSql.Format(L"DROP TABLE TB_AUTOCONNECT");
+		if(m_pDB->ExecuteSql(strSql) == 0)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to drop the TB_AUTOCONNECT table.");
+			return 0; 
+		}
+		
 	}
 
-	if (m_pDB->ExecuteSql(strSql) == FALSE)
+	strSql.Format(
+		L"CREATE TABLE[dbo].[TB_AUTOCONNECT]( "
+		L"[CONN_ID][int] NOT NULL, "
+		L"[CONN_TARGET_BUILD][varchar](50) NOT NULL, "
+		L"[CONN_CONN_BUILD_ARRAY][varchar](256) NULL, "
+		L"CONSTRAINT[PK_TB_AUTOCONNECT] PRIMARY KEY CLUSTERED "
+		L"( "
+		L"	[CONN_ID] ASC "
+		L")WITH (PAD_INDEX = OFF,STATISTICS_NORECOMPUTE = OFF,IGNORE_DUP_KEY = OFF,ALLOW_ROW_LOCKS = ON,ALLOW_PAGE_LOCKS = ON) ON[PRIMARY] "
+		L") ON[PRIMARY] "
+		//L"GO "
+	);
+
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to create the TB_AUTOCONNECT table.");
 		return 0;
+	}
 
+	return 1;
+}
+
+
+int CRelayTableData::MakeAutoRangeTable()
+{
+	CString strSql;
+	BOOL isExist = TRUE;
+	TCHAR *szColumn[]=
+	{
+		L"RG_ID",
+		L"RG_ITEM_NAME",
+		L"RG_MATCH_ALL",
+		L"RG_MATCH_GROUND_BTYPE",
+		L"RG_MATCH_GROUND_BUILD",
+		L"RG_MATCH_GROUND_FLOOR",
+		L"RG_MATCH_GROUND_ROOM",
+		L"RG_MATCH_GROUND_STAIR",
+		L"RG_MATCH_PARKING_ALL",
+		L"RG_MATCH_PARKING_BTYPE",
+		L"RG_MATCH_PARKING_BUILD",
+		L"RG_MATCH_PARKING_FLOOR",
+		L"RG_MATCH_PARKING_ROOM",
+		L"RG_MATCH_PARKING_STAIR",
+		L"RG_MATCH_SAME_CIRCUIT",
+		L"RG_MATCH_UNDER_ALL",
+		L"RG_MATCH_UNDER_BTYPE",
+		L"RG_MATCH_UNDER_BUILD",
+		L"RG_MATCH_UNDER_FLOOR",
+		L"RG_MATCH_UNDER_ROOM",
+		L"RG_MATCH_UNDER_STAIR",
+		L"RG_PLUSN_END",
+		L"RG_PLUSN_START",
+		L"RG_PRIORITY",
+		L"RG_RANGE_BUILD_ARRAY",
+		L"RG_RANGE_FLOOR_END",
+		L"RG_RANGE_FLOOR_START",
+		L"RG_RANGE_STAIR_ARRAY",
+		L"RG_USE_EMER_MAKE",
+		L"RG_USE_PARKING_LOGIC",
+		L"RG_USE_RANGE_BUILD",
+		L"RG_USE_RANGE_FLOOR",
+		L"RG_USE_RANGE_STAIR",
+		L"RG_USE_UNDER_1F_FIRE",
+		L"RG_USE_UNDER_B1F_FIRE",
+		L"RG_USE_UNDER_LOGIC"
+	};
+	int nCnt;
+	strSql.Format(L"SELECT * FROM INFORMATION_SCHEMA.COLUMNS "
+		L"WHERE TABLE_NAME = '%s' "
+		L"ORDER BY COLUMN_NAME "
+		,L"TB_AUTORANGE"
+	);
+	if(m_pDB == nullptr || m_pDB->IsOpen() == FALSE)
+	{
+		USERLOG(L"Project Database Not Opened[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	if(m_pDB->OpenQuery(strSql) == FALSE)
+	{
+		USERLOG(L"table : TB_AUTORANGE open failed[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	nCnt = m_pDB->GetRecordCount();
+	if(nCnt >= 1)
+	{
+		// COLUMN 정보 확인 -> 이름만 확인
+		// 컬럼 정보 틀리면 DROP
+		CString strCol[36];
+		for(int i = 0; i < 36; i++)
+		{
+			m_pDB->GetFieldValue(L"COLUMN_NAME",strCol[i]);
+			m_pDB->MoveNext();
+
+			if(strCol[i].CompareNoCase(szColumn[i]) != 0)
+			{
+				m_pDB->RSClose();
+				strSql.Format(L"DROP TABLE TB_AUTORANGE");
+				if(m_pDB->ExecuteSql(strSql) == 0)
+				{
+					// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+					USERLOG(L"Failed to drop the TB_AUTORANGE table.[%s]",m_pDB->GetLastErrorString());
+					return 0;
+				}
+				isExist = FALSE;
+				break;
+			}
+		}
+		if(isExist == TRUE)
+			return 1;
+	}
+
+	strSql.Format(
+		L"CREATE TABLE[dbo].[TB_AUTORANGE]( "
+			L"[RG_ID][int] NOT NULL, "
+			L"[RG_PRIORITY][int] NOT NULL, "
+			L"[RG_ITEM_NAME][varchar](50) NULL, "
+			L"[RG_USE_RANGE_BUILD][tinyint] NOT NULL, "
+			L"[RG_USE_RANGE_STAIR][tinyint] NOT NULL, "
+			L"[RG_USE_RANGE_FLOOR][tinyint] NOT NULL, "
+			L"[RG_RANGE_BUILD_ARRAY][varchar](256) NULL, "
+			L"[RG_RANGE_STAIR_ARRAY][varchar](256) NULL, "
+			L"[RG_RANGE_FLOOR_START][varchar](256) NULL, "
+			L"[RG_RANGE_FLOOR_END][varchar](256) NULL, "
+			L"[RG_MATCH_ALL][tinyint] NOT NULL, "
+			L"[RG_MATCH_SAME_CIRCUIT][tinyint] NOT NULL, "
+			L"[RG_MATCH_GROUND_BUILD][tinyint] NOT NULL, "
+			L"[RG_MATCH_GROUND_BTYPE][tinyint] NOT NULL, "
+			L"[RG_MATCH_GROUND_STAIR][tinyint] NOT NULL, "
+			L"[RG_MATCH_GROUND_FLOOR][tinyint] NOT NULL, "
+			L"[RG_MATCH_GROUND_ROOM][tinyint] NOT NULL, "
+			L"[RG_PLUSN_START][int] NOT NULL, "
+			L"[RG_PLUSN_END][int] NOT NULL, "
+			L"[RG_USE_EMER_MAKE][tinyint] NOT NULL, "
+			L"[RG_USE_UNDER_LOGIC][tinyint] NOT NULL, "
+			L"[RG_MATCH_UNDER_ALL][tinyint] NOT NULL, "
+			L"[RG_MATCH_UNDER_BUILD][tinyint] NOT NULL, "
+			L"[RG_MATCH_UNDER_BTYPE][tinyint] NOT NULL, "
+			L"[RG_MATCH_UNDER_STAIR][tinyint] NOT NULL, "
+			L"[RG_MATCH_UNDER_FLOOR][tinyint] NOT NULL, "
+			L"[RG_MATCH_UNDER_ROOM][tinyint] NOT NULL, "
+			L"[RG_USE_UNDER_B1F_FIRE][tinyint] NOT NULL, "
+			L"[RG_USE_UNDER_1F_FIRE][tinyint] NOT NULL, "
+			L"[RG_USE_PARKING_LOGIC][tinyint] NOT NULL, "
+			L"[RG_MATCH_PARKING_ALL][tinyint] NOT NULL, "
+			L"[RG_MATCH_PARKING_BUILD][tinyint] NOT NULL, "
+			L"[RG_MATCH_PARKING_BTYPE][tinyint] NOT NULL, "
+			L"[RG_MATCH_PARKING_STAIR][tinyint] NOT NULL, "
+			L"[RG_MATCH_PARKING_FLOOR][tinyint] NOT NULL, "
+			L"[RG_MATCH_PARKING_ROOM][tinyint] NOT NULL, "
+			L"CONSTRAINT[PK_TB_AUTORANGE] PRIMARY KEY CLUSTERED "
+			L"( "
+			L"	[RG_ID] ASC "
+			L")WITH (PAD_INDEX = OFF,STATISTICS_NORECOMPUTE = OFF,IGNORE_DUP_KEY = OFF,ALLOW_ROW_LOCKS = ON,ALLOW_PAGE_LOCKS = ON,OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON[PRIMARY] "
+			L") ON[PRIMARY] "
+	);
+
+
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to create the TB_AUTORANGE table.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+
+	strSql.Format(
+		L"ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_ALL]  DEFAULT ((0)) FOR[RG_MATCH_ALL]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_SAME_CIRCUIT]  DEFAULT ((0)) FOR[RG_MATCH_SAME_CIRCUIT]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_GROUND_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_GROUND_BTYPE]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_GROUND_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_GROUND_FLOOR]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_GROUND_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_GROUND_ROOM]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTORANGE_RG_PLUSN_START]  DEFAULT ((0)) FOR[RG_PLUSN_START]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTORANGE_RG_PLUSN_END]  DEFAULT ((0)) FOR[RG_PLUSN_END]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_LOGIC]  DEFAULT ((0)) FOR[RG_USE_UNDER_LOGIC]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_ALL]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_ALL]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_BUILD]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_BUILD]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_BTYPE]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_STAIR]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_STAIR]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_FLOOR]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_ROOM]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_B1F_FIRE]  DEFAULT ((0)) FOR[RG_USE_UNDER_B1F_FIRE]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_1F_FIRE]  DEFAULT ((0)) FOR[RG_USE_UNDER_1F_FIRE]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_PARKING_LOGIC]  DEFAULT ((0)) FOR[RG_USE_PARKING_LOGIC]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_ALL]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_ALL]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_BUILD]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_BUILD]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_BTYPE]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_STAIR]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_STAIR]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_FLOOR]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+		strSql.Format(
+			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_ROOM]"
+		);
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+			return 0;
+		}
+	}
 	return 1;
 }
 
@@ -10941,6 +11381,195 @@ int CRelayTableData::ChangeColumnDataType(CString strTable, CString strColumn, C
 	}
 }
 // 20260324 GBM end
+
+int CRelayTableData::ChangeColumnDataType2(CString strTable,CString strColumn,CString strNewDataType,CString strDefault)
+{
+	if(m_pDB == nullptr || m_pDB->IsOpen() == FALSE)
+	{
+		USERLOG(L"Project Database Not Opened");
+		return 0;
+	}
+
+	if(strTable.IsEmpty() || strColumn.IsEmpty() || strNewDataType.IsEmpty())
+	{
+		USERLOG(L"ChangeColumnDataType invalid parameter");
+		return 0;
+	}
+
+	if(strTable.Find(L"]") >= 0 || strColumn.Find(L"]") >= 0)
+	{
+		USERLOG(L"ChangeColumnDataType invalid table/column name");
+		return 0;
+	}
+
+	CString strSql,strChangeDefault;
+	CString strDefaultConstraintName;
+	CString strDefaultDefinition;
+	CString strNullable;
+	CString strCurrentDataType;
+	CString strNewTypeUpper;
+	CString strCurrentTypeUpper;
+	CString strTableQ;
+	CString strColumnQ;
+
+	int nIsNullable = 0;
+	int nRecordCnt = 0;
+
+	strTableQ.Format(L"[%s]",strTable);
+	strColumnQ.Format(L"[%s]",strColumn);
+
+	// 공백 제거 + 대문자 통일
+	strNewDataType.Trim();
+	strNewTypeUpper = strNewDataType;
+	strNewTypeUpper.MakeUpper();
+
+	// 1) 대상 컬럼 정보 조회
+	strSql.Format(
+		L"SELECT "
+		L"    ty.name AS CurrentDataType, "
+		L"    c.is_nullable, "
+		L"    dc.name AS DefaultConstraintName, "
+		L"    dc.definition AS DefaultDefinition "
+		L"FROM sys.columns c "
+		L"INNER JOIN sys.tables t "
+		L"    ON c.object_id = t.object_id "
+		L"INNER JOIN sys.types ty "
+		L"    ON c.user_type_id = ty.user_type_id "
+		L"LEFT JOIN sys.default_constraints dc "
+		L"    ON c.default_object_id = dc.object_id "
+		L"WHERE t.name = N'%s' "
+		L"  AND c.name = N'%s'",
+		strTable,strColumn);
+
+	if(m_pDB->OpenQuery(strSql) == FALSE)
+	{
+		USERLOG(L"ChangeColumnDataType column info query failed");
+		return 0;
+	}
+
+	nRecordCnt = m_pDB->GetRecordCount();
+	if(nRecordCnt <= 0)
+	{
+		m_pDB->RSClose();
+		USERLOG(L"ChangeColumnDataType target column not found");
+		return 0;
+	}
+
+	if(m_pDB->GetFieldValue(L"CurrentDataType",strCurrentDataType) == FALSE)
+	{
+		m_pDB->RSClose();
+		USERLOG(L"ChangeColumnDataType read CurrentDataType failed");
+		return 0;
+	}
+
+	if(m_pDB->GetFieldValue(L"is_nullable",nIsNullable) == FALSE)
+	{
+		m_pDB->RSClose();
+		USERLOG(L"ChangeColumnDataType read is_nullable failed");
+		return 0;
+	}
+
+	m_pDB->GetFieldValue(L"DefaultConstraintName",strDefaultConstraintName);
+	m_pDB->GetFieldValue(L"DefaultDefinition",strDefaultDefinition);
+
+	m_pDB->RSClose();
+
+	strCurrentDataType.Trim();
+	strCurrentTypeUpper = strCurrentDataType;
+	strCurrentTypeUpper.MakeUpper();
+
+	// 2) 현재 타입과 변경 타입이 같으면 아무 작업도 하지 않음
+	if(strCurrentTypeUpper == strNewTypeUpper)
+	{
+		USERLOG(L"ChangeColumnDataType skipped - same data type");
+		return 1;
+	}
+
+	strNullable = (nIsNullable != 0) ? L"NULL" : L"NOT NULL";
+
+	// 3) 트랜잭션 시작
+	if(m_pDB->BeginTransaction() == FALSE)
+	{
+		USERLOG(L"ChangeColumnDataType begin transaction failed");
+		return 0;
+	}
+
+	BOOL bSuccess = FALSE;
+
+	do
+	{
+		// 4) 기존 default constraint 제거
+		if(strDefaultConstraintName.IsEmpty() == FALSE)
+		{
+			CString strConstraintQ;
+			strConstraintQ.Format(L"[%s]",strDefaultConstraintName);
+
+			strSql.Format(
+				L"ALTER TABLE %s DROP CONSTRAINT %s",
+				strTableQ,strConstraintQ);
+
+			if(m_pDB->ExecuteSql(strSql) == FALSE)
+			{
+				USERLOG(L"ChangeColumnDataType drop default constraint failed");
+				break;
+			}
+		}
+
+		// 5) 컬럼 타입 변경
+		strSql.Format(
+			L"ALTER TABLE %s ALTER COLUMN %s %s %s",
+			strTableQ,
+			strColumnQ,
+			strNewDataType,
+			strNullable);
+
+		if(m_pDB->ExecuteSql(strSql) == FALSE)
+		{
+			USERLOG(L"ChangeColumnDataType alter column failed");
+			break;
+		}
+
+		// 6) 기존 default constraint 복원
+		if(strDefault.IsEmpty() != FALSE)
+			strChangeDefault.Format(L"((%s))",strDefault);
+		else
+			strChangeDefault = strDefaultDefinition;
+		if(strDefaultConstraintName.IsEmpty() == FALSE &&
+			strChangeDefault.IsEmpty() == FALSE)
+		{
+			CString strConstraintQ;
+			strConstraintQ.Format(L"[%s]",strDefaultConstraintName);
+
+			strSql.Format(
+				L"ALTER TABLE %s "
+				L"ADD CONSTRAINT %s DEFAULT %s FOR %s",
+				strTableQ,
+				strConstraintQ,
+				strDefaultDefinition,
+				strColumnQ);
+
+			if(m_pDB->ExecuteSql(strSql) == FALSE)
+			{
+				USERLOG(L"ChangeColumnDataType recreate default constraint failed");
+				break;
+			}
+		}
+
+		bSuccess = TRUE;
+
+	} while(FALSE);
+
+	if(bSuccess)
+	{
+		m_pDB->CommitTransaction();
+		return 1;
+	}
+	else
+	{
+		m_pDB->RollbackTransaction();
+		return 0;
+	}
+}
 
 int CRelayTableData::TempFunc_CheckAutoLogicTable()
 {
@@ -11376,7 +12005,7 @@ int CRelayTableData::TempFunc_CheckIndex()
 	BYTE btCheck[SQL_IDX_CNT] = { 0 };
 	if(m_pDB == nullptr || m_pDB->IsOpen() == FALSE)
 	{
-		GF_AddLog(L"Project Database Not Opened(TempFunc_MakeStoredProcedure)");
+		GF_AddLog(L"Project Database Not Opened(TempFunc_CheckIndex)");
 		return 0;
 	}
 	
@@ -11670,16 +12299,6 @@ int CRelayTableData::LoadProjectDatabase()
 		return 0;
 	}
 
-	if(TempFunc_CheckIndex() == 0)
-	{
-#ifndef ENGLISH_MODE
-		GF_AddLog(L"이전버전의 데이터베이스에 인덱스를 추가하는데 실패했습니다.");
-#else
-		GF_AddLog(L"Failed to add an index to the older version of the database.");
-#endif
-		return 0;
-	}
-
 	if(CheckAddColumn(L"TB_PATTERN_ITEM",L"INSERT_TYPE",TRUE,L"SMALLINT") == 0)
 	{
 #ifndef ENGLISH_MODE
@@ -11805,6 +12424,27 @@ int CRelayTableData::LoadProjectDatabase()
 		return 0;
 	}
 
+	// [2026/4/14 8:52:37 KHS] 
+	// TB_AUTOCONNECT  추가
+	if(MakeAutoConnectTable() == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"TB_AUTOCONNECT 생성하는데 실패했습니다");
+#else
+		GF_AddLog(L"Failed to Create TB_AUTOCONNECT Table");
+#endif
+		return 0;
+	}
+	if(MakeAutoRangeTable() == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"TB_AUTORANGE 생성하는데 실패했습니다");
+#else
+		GF_AddLog(L"Failed to Create TB_AUTORANGE Table");
+#endif
+		return 0;
+	}
+
 	//20260324 GBM start - 기존 +N층 column 데이터 타입 변경, 로직 테이블에 컬럼 추가, 테스트 필요
 #if 1
 	if (ChangeColumnDataType(L"TB_AUTO_LOGIC_V2", L"LG_USE_UPPER_FLOOR", L"int") == 0)
@@ -11829,6 +12469,18 @@ int CRelayTableData::LoadProjectDatabase()
 		return 0;
 	}
 #endif
+
+
+	if(TempFunc_CheckIndex() == 0)
+	{
+#ifndef ENGLISH_MODE
+		GF_AddLog(L"이전버전의 데이터베이스에 인덱스를 추가하는데 실패했습니다.");
+#else
+		GF_AddLog(L"Failed to add an index to the older version of the database.");
+#endif
+		return 0;
+	}
+
 	//20260324 GBM end
 
 #if _DBLOAD_TIME_
@@ -13896,13 +14548,13 @@ int CRelayTableData::LoadAutMakeLogic()
  	CString strSql, strType, strFile;
  	CDataAutoLogic * pLg;
  	int nCnt = 0,  i;
- 	int nId,nIntype , nOuttype , nName , nCont ;
-	BYTE btAllFloor,btEmergency,btOutput,btPluseNFloor;
+ 	int nId,nIntype , nOuttype , nName , nCont ,nPlusStart,nPlusEnd;
+	BYTE btAllFloor,btEmergency,btOutput;
 	BYTE btMatchBuild, btMatchBType, btMatchStair, btMatchFloor, btMatchRoom;
 	BYTE btUnderBasic, btUnderClassBuild, btUnderClassBType, btUnderClassStair, btUnder1F, btUnderB1F;
 	BYTE btParkingBasic, btParkingClassBuild, btParkingClassStair, btParking1F, btParkingB1F;
 
-	btAllFloor = btEmergency = btOutput = btPluseNFloor = 0;
+	btAllFloor = btEmergency = btOutput = nPlusStart = nPlusEnd = 0;
 	btMatchBuild = btMatchBType = btMatchStair = btMatchFloor = btMatchRoom = 0;
 	btUnderBasic = btUnderClassBuild = btUnderClassBType = btUnderClassStair = btUnder1F = btUnderB1F = 0;
 	btParkingBasic = btParkingClassBuild = btParkingClassStair = btParking1F = btParkingB1F = 0;
@@ -13946,8 +14598,8 @@ int CRelayTableData::LoadAutMakeLogic()
  	{
  		if (m_pDB->GetFieldValue(L"LG_ID", nId) == FALSE)
  			continue;
-
-		btAllFloor = btEmergency = btOutput = btPluseNFloor = 0;
+		nPlusStart = nPlusEnd = 0; 
+		btAllFloor = btEmergency = btOutput = 0;
 		btMatchBuild = btMatchBType = btMatchStair = btMatchFloor = btMatchRoom = 0;
 		btUnderBasic = btUnderClassBuild = btUnderClassBType = btUnderClassStair = btUnder1F = btUnderB1F = 0;
 		btParkingBasic = btParkingClassBuild = btParkingClassStair = btParking1F = btParkingB1F = 0;
@@ -13965,7 +14617,8 @@ int CRelayTableData::LoadAutMakeLogic()
 		m_pDB->GetFieldValue(L"LG_USE_EMER_MAKE", btEmergency);
 		m_pDB->GetFieldValue(L"LG_USE_ALL_OUTPUT", btAllFloor);
 		m_pDB->GetFieldValue(L"LG_USE_OUTPUT", btOutput);
-		m_pDB->GetFieldValue(L"LG_USE_UPPER_FLOOR", btPluseNFloor);
+		m_pDB->GetFieldValue(L"LG_USE_UPPER_FLOOR_START",nPlusStart);
+		m_pDB->GetFieldValue(L"LG_USE_UPPER_FLOOR",nPlusEnd);
 
 		m_pDB->GetFieldValue(L"LG_USE_LOC_BUILD_MATCH", btMatchBuild);
 		m_pDB->GetFieldValue(L"LG_USE_LOC_BTYPE_MATCH", btMatchBType);
@@ -13987,7 +14640,7 @@ int CRelayTableData::LoadAutMakeLogic()
 
  		pLg = new CDataAutoLogic;
  		pLg->SetAutoLogic(nId, nIntype, nOuttype, nName, nCont
-			, btEmergency, btAllFloor, btOutput, btPluseNFloor
+			, btEmergency, btAllFloor, btOutput, nPlusStart,nPlusEnd
 			, btMatchBuild, btMatchBType, btMatchStair, btMatchFloor, btMatchRoom
 			, btUnderBasic, btUnderClassBuild, btUnderClassBType, btUnderClassStair, btUnder1F, btUnderB1F
 			, btParkingBasic
@@ -14586,15 +15239,16 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  	CDataAutoLogic * pAuto;
  	YAdoDatabase * pDB;
  	CDataEquip * pEq;
-	int nNum, nIn, nName, nOut, nCont;// nEm, nAll, nRm, nUnder, nCur, nRelay, nPlus;
+	int nNum,nIn,nName,nOut,nCont,nPlusStart,nPlusEnd;// nEm, nAll, nRm, nUnder, nCur, nRelay, nPlus;
 
  	int i = 0, nCnt;
 
-	BYTE btAllFloor, btEmergency, btOutput, btPluseNFloor;
+	BYTE btAllFloor, btEmergency, btOutput;
 	BYTE btMatchBuild, btMatchBType, btMatchStair, btMatchFloor, btMatchRoom;
 	BYTE btUnderBasic, btUnderClassBuild, btUnderClassBType, btUnderClassStair, btUnder1F, btUnderB1F , btUnderParking;
 
-	btAllFloor = btEmergency = btOutput = btPluseNFloor = 0;
+	nPlusStart = nPlusEnd = 0; 
+	btAllFloor = btEmergency = btOutput = 0;
 	btMatchBuild = btMatchBType = btMatchStair = btMatchFloor = btMatchRoom = 0;
 	btUnderBasic = btUnderClassBuild = btUnderClassBType = btUnderClassStair = btUnder1F = btUnderB1F = btUnderParking = 0;
 
@@ -14611,7 +15265,8 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
  		if (strIn == L"")
  			continue; 
 		nNum = nIn = nName = nOut = nCont = 0;
-		btAllFloor = btEmergency = btOutput = btPluseNFloor = 0;
+		nPlusStart = nPlusEnd = 0; 
+		btAllFloor = btEmergency = btOutput = 0;
 		btMatchBuild = btMatchBType = btMatchStair = btMatchFloor = btMatchRoom = 0;
 		btUnderBasic = btUnderClassBuild = btUnderClassBType = btUnderClassStair = btUnder1F = btUnderB1F = btUnderParking= 0;
 
@@ -14743,7 +15398,7 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
 		str = pxls->GetItemText(2 + i, 9); //< Plus N층
 		try
 		{
-			btPluseNFloor = _wtoi(str);
+			nPlusEnd = _wtoi(str);
 		}
 		catch (...)
 		{
@@ -14787,11 +15442,20 @@ int CRelayTableData::ParsingAutoLogicData(CExcelWrapper * pxls, std::shared_ptr<
 		if (str.CompareNoCase(L"O") == 0)
 			btUnderParking = 1;
 
+		str = pxls->GetItemText(2 + i,22); //< Plus N층
+		try
+		{
+			nPlusStart = _wtoi(str);
+		}
+		catch(...)
+		{
+		}
+
  		nNum = GetWholeAutoLogicID();
  		pAuto = new CDataAutoLogic;
 
 		pAuto->SetAutoLogic(nNum, nIn, nOut, nName, nCont
-			, btEmergency, btAllFloor, btOutput, btPluseNFloor
+			,btEmergency,btAllFloor,btOutput,nPlusStart,nPlusEnd
 			, btMatchBuild, btMatchBType, btMatchStair, btMatchFloor, btMatchRoom
 			, btUnderBasic, btUnderClassBuild, btUnderClassBType, btUnderClassStair, btUnder1F, btUnderB1F
 			, btUnderParking

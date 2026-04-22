@@ -422,7 +422,8 @@ CString		GF_GetIDSysDataKey(int nType, int nFID, int nUID = -1
 CString		GF_GetVersionFolderName(WORD wMajor, WORD wMinor);
 CString		GF_GetDatabaseName(CString strPrjName , BOOL bData);
 
-std::vector<CString> GF_SplitString(CString strString, CString strToken);
+std::vector<CString> GF_SplitString(CString strString,CString strToken);
+BOOL GF_SplitString2(CString strString,CString strToken,CStringArray * pArr);
 BOOL GF_IsExistFile(CString strFullPath);
 CString		GF_CopyDir(CString strTo, CString strFrom);
 CString		GF_DeleteDir(CString strPath);
@@ -465,6 +466,23 @@ void WriteMainLog(const WCHAR * szFmt, ...);
 
 CString GF_GetSafeArrayValue(COleSafeArray * pSa,int nRow,int nCol);
 
+// [2026/4/17 11:00:00 KHS] 
+// Database file version : MDF 파일의 버전 확인
+enum 
+{
+	SQL_UNKNOWN = 0 ,
+	SQL_2008R2 = 661,
+	SQL_2012 = 706,
+	SQL_2014 = 782,
+	SQL_2016 = 852,
+	SQL_2017 = 869,
+	SQL_2019 = 895,
+	SQL_2022 = 957,
+	SQL_2025 = 998,
+};
+
+int		GF_GetSqlVersion(const CString& strPath);
+CString GF_GetSqlName(int nVersion);
 extern CString g_strAppPath;
 extern ST_CONFIG g_stConfig;
 

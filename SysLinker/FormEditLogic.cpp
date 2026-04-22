@@ -508,7 +508,7 @@ int CFormEditLogic::DataAdd()
  	pLogic = new CDataAutoLogic;
 	pLogic->SetAutoLogic(
 		nID, nInType, nOutType, nName, nCont
-		, m_bEmergency, m_bAllFloor, m_bOutput, m_nPluseNFloor
+		, m_bEmergency, m_bAllFloor, m_bOutput,0, m_nPluseNFloor
 		, m_bMatchBuild, m_bMatchBType, m_bMatchStair, m_bMatchFloor, m_bMatchRoom
 		, m_bUnderBasic, m_bUnderClassBuild, m_bUnderClassBType, m_bUnderClassStair, m_bUnder1F, m_bUnderB1F
 		, m_bUnderParking
@@ -544,7 +544,7 @@ int CFormEditLogic::DataAdd()
  	m_ctrlLogic.SetItemText(nCnt, 6, str);
  	str = pLogic->GetUseOutput() == 1 ? L"O" : L"X";
  	m_ctrlLogic.SetItemText(nCnt, 7, str);
-	str.Format(L"%d", pLogic->GetUsePluseNFloor());
+	str.Format(L"%d", pLogic->GetPlusNFloorEnd());
 	m_ctrlLogic.SetItemText(nCnt, 8, str);
 
  	str = pLogic->GetUseMatchBuild() == 1 ? L"O" : L"X";
@@ -572,6 +572,8 @@ int CFormEditLogic::DataAdd()
 	m_ctrlLogic.SetItemText(nCnt, 19, str);
 	str = pLogic->GetUseUnderParking() == 1 ? L"O" : L"X";
 	m_ctrlLogic.SetItemText(nCnt, 20, str);
+	str.Format(L"%d",pLogic->GetPlusNFloorStart());
+	m_ctrlLogic.SetItemText(nCnt,21,str);
  	m_ctrlLogic.SetItemData(nCnt, (DWORD_PTR)pLogic);
  	AddCancel();
 
@@ -700,7 +702,7 @@ int CFormEditLogic::DataSave()
  	}
  
  	pData->SetAutoLogic(pData->GetLgId(), nInType, nOutType, nName, nCont
-		, m_bEmergency, m_bAllFloor, m_bOutput, m_nPluseNFloor
+		, m_bEmergency, m_bAllFloor, m_bOutput, 0, m_nPluseNFloor
 		, m_bMatchBuild, m_bMatchBType, m_bMatchStair, m_bMatchFloor, m_bMatchRoom
 		, m_bUnderBasic, m_bUnderClassBuild, m_bUnderClassBType, m_bUnderClassStair, m_bUnder1F, m_bUnderB1F
 		, m_bUnderParking
@@ -712,7 +714,7 @@ int CFormEditLogic::DataSave()
 	m_ctrlLogic.SetItemText(nIdx, 6, str);
 	str = pData->GetUseOutput() == 1 ? L"O" : L"X";
 	m_ctrlLogic.SetItemText(nIdx, 7, str);
-	str.Format(L"%d", pData->GetUsePluseNFloor());
+	str.Format(L"%d", pData->GetPlusNFloorEnd());
 	m_ctrlLogic.SetItemText(nIdx, 8, str);
 
 	str = pData->GetUseMatchBuild() == 1 ? L"O" : L"X";
@@ -740,6 +742,8 @@ int CFormEditLogic::DataSave()
 	m_ctrlLogic.SetItemText(nIdx, 19, str);
 	str = pData->GetUseUnderParking() == 1 ? L"O" : L"X";
 	m_ctrlLogic.SetItemText(nIdx, 20, str);
+	str.Format(L"%d",pData->GetPlusNFloorStart());
+	m_ctrlLogic.SetItemText(nIdx,21,str);
  	m_ctrlLogic.SetItemData(nIdx, (DWORD_PTR)pData);
 	return 1;
 }
@@ -1057,7 +1061,7 @@ int CFormEditLogic::InitForm()
 		m_ctrlLogic.SetItemText(nIdx, 6, str);
 		str = pData->GetUseOutput() == 1 ? L"O" : L"X";
 		m_ctrlLogic.SetItemText(nIdx, 7, str);
-		str.Format(L"%d", pData->GetUsePluseNFloor());
+		str.Format(L"%d", pData->GetPlusNFloorEnd());
 		m_ctrlLogic.SetItemText(nIdx, 8, str);
 
 		str = pData->GetUseMatchBuild() == 1 ? L"O" : L"X";
@@ -1086,6 +1090,8 @@ int CFormEditLogic::InitForm()
 
 		str = pData->GetUseUnderParking() == 1 ? L"O" : L"X";
 		m_ctrlLogic.SetItemText(nIdx, 20, str);
+		str.Format(L"%d",pData->GetPlusNFloorStart());
+		m_ctrlLogic.SetItemText(nIdx,21,str);
  		m_ctrlLogic.SetItemData(nIdx, (DWORD_PTR)pData);
  		nIdx++;
  	}
@@ -1139,7 +1145,8 @@ int CFormEditLogic::DisplayItem(int nItem)
 	m_bEmergency		= pData->GetUseEmergency() > 0;
 	m_bAllFloor			= pData->GetUseAllFloor() > 0;
 	m_bOutput			= pData->GetUseOutput();
-	m_nPluseNFloor		= pData->GetUsePluseNFloor();
+	m_nPluseNFloor		= pData->GetPlusNFloorEnd();
+	//m_nPluseNFloor		= pData->GetPlusNFloorStart();
 	m_bMatchBuild		= pData->GetUseMatchBuild();
 	m_bMatchBType		= pData->GetUseMatchBType();
 	m_bMatchStair		= pData->GetUseMatchStair();
@@ -1582,7 +1589,7 @@ int CFormEditLogic::WriteOutput(CRelayTableData * pRelayTable , CDataAutoLogic *
 	pXls->SetItemText(nStartRow, 6 + 1, str);
 	str = pAuto->GetUseOutput() == 1 ? L"O" : L"X";
 	pXls->SetItemText(nStartRow, 7 + 1, str);
-	str.Format(L"%d", pAuto->GetUsePluseNFloor());
+	str.Format(L"%d", pAuto->GetPlusNFloorEnd());
 	pXls->SetItemText(nStartRow, 8 + 1, str);
 
 	str = pAuto->GetUseMatchBuild() == 1 ? L"O" : L"X";
@@ -1611,6 +1618,8 @@ int CFormEditLogic::WriteOutput(CRelayTableData * pRelayTable , CDataAutoLogic *
 
 	str = pAuto->GetUseUnderParking() == 1 ? L"O" : L"X";
 	pXls->SetItemText(nStartRow, 20 + 1, str);
+	str.Format(L"%d",pAuto->GetPlusNFloorStart());
+	pXls->SetItemText(nStartRow,21 + 1,str);
 	return nStartRow + 1;
 }
 

@@ -102,6 +102,7 @@ class CXDataLink;
 typedef std::unordered_map<DWORD,CXDataDev*> CXMapDev;
 typedef std::unordered_map<DWORD,CXDataLink*> CXMapLink;
 typedef std::map<CString,int> CXLocStrMap;
+typedef std::map<int,std::vector<int>> CXLinkBuildMap; // 연계 건물 컨테이너
 
 inline void cpuid(int out[4],int op,int sub = 0) {
 #if defined(_MSC_VER)
@@ -346,6 +347,7 @@ extern CXLocStrMap	g_MapIdxBtype;
 extern CXLocStrMap	g_MapIdxFloor;
 extern CXLocStrMap	g_MapIdxStair;
 extern CXLocStrMap	g_MapIdxRoom;
+extern CXLinkBuildMap	g_MapIdxLinkedBuild;// 연계 건물의 Source의 Index
 
 // [2025/8/1 11:12:00 KHS] 
 // 로직 처리를 위해 Define
@@ -354,6 +356,20 @@ extern CXLocStrMap	g_MapIdxRoom;
 #if USE_PARKING_SUBSTRING
 	#define PARKING_SUBSTRING		L"@PK"
 #endif
+
+
+#define STR_LINKEDBUILD_SEPERATOR		L";"
+#define LOGIC_PRIORITY_ID				1
+
+static TCHAR *g_pSzAllAlertEquip[] = {
+	L"경종",
+	L"시각",
+	L"시각경보",
+	L"음성",
+	L"음성점멸",
+	nullptr
+};
+
 
 extern BOOL Less_than(int a,int b);
 extern BOOL Greater_than(int a,int b);
@@ -373,4 +389,5 @@ extern BOOL GF_GetBit(uint64_t * pBuf,int nIdx);
 
 extern void WriteXMakeLinkLog(const WCHAR * szFmt,...);
 
+// 수신기의 모든 회로의 상태로 bit로 표시 bit개수/uint64 - 메모리 할당
 #define BITCNT_FACPITEM		((32 * 62 * 4 * 256) + 63)/64
