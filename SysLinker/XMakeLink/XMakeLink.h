@@ -6,7 +6,7 @@ class CXDataLogicMst;
 class CXDataLogicItem;
 class CXListEqTypeLocDev;
 class CXPatternMst;
-
+class CXDataEqType;
 class CXMakeLink
 {
 public:
@@ -45,7 +45,7 @@ public:
 	// [2025/7/31 7:47:37 KHS] 
 	// 선택된 설비명 로직의 위치 조건에 맞는 회로 목록을 만든다.
 	// 로직별로 실행하며 
-	BOOL MakeInputRangeRelay(CXMapDev * pDevList,CXDataLogicMst * pMst,CXDataLogicItem * pItem);
+	BOOL MakeInputRangeRelay(CXMapDev * pDevList,CXDataLogicItem * pItem,CXDataEqType * pCopyType);
 
 	int	MakeEmBcData();
 	void AddEMergency(CXDataDev * pDev ,CXDataLogicItem * pItem);

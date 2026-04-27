@@ -117,3 +117,24 @@ CXDataStair* CXListStair::SortedAddData(CXDataBtype * pParent,CXDataDev * pPnt,B
 	}
 	return nullptr;
 }
+
+
+BOOL CXListStair::CopyData(CXListStair * pSrcList)
+{
+	if(pSrcList == nullptr)
+		return FALSE;
+
+	CXDataStair * pData , *pOrg;// ,* pNew;
+	POSITION pos;
+	pos = pSrcList->GetHeadPosition();
+	while(pos)
+	{
+		pOrg = pSrcList->GetNext(pos);
+		if(pOrg == nullptr)
+			continue; 
+		pData = new CXDataStair;
+		pData->CopyData(pOrg);
+		AddTail(pData);
+	}
+	return TRUE;
+}

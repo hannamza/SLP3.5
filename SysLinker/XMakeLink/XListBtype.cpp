@@ -115,3 +115,26 @@ CXDataBtype* CXListBtype::SortedAddData(CXDataBuild * pParent,CXDataDev * pPnt,B
 	}
 	return nullptr;
 }
+
+
+BOOL CXListBtype::CopyData(CXListBtype * pSrcList)
+{
+	if(pSrcList == nullptr)
+		return FALSE;
+
+
+	CXDataBtype * pData , * pOrg;// ,* pNew;
+	POSITION pos;
+
+	pos = pSrcList->GetHeadPosition();
+	while(pos)
+	{
+		pOrg = pSrcList->GetNext(pos);
+		if(pOrg == nullptr)
+			continue; 
+		pData = new CXDataBtype;
+		pData->CopyData(pOrg);
+		AddTail(pData);
+	}
+	return TRUE;
+}

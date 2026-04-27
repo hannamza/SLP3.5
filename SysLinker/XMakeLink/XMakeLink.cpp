@@ -625,9 +625,11 @@ int CXMakeLink::MakeBasicData()
 }
 
 
-BOOL CXMakeLink::MakeInputRangeRelay(CXMapDev * pDevList,CXDataLogicMst * pMst,CXDataLogicItem * pItem)
+BOOL CXMakeLink::MakeInputRangeRelay(CXMapDev * pDevList,CXDataLogicItem * pItem,CXDataEqType * pCopyType)
 {
-	if(m_pInTypeLocDevList->GetLogicInputConditionDevice(pDevList,pMst,pItem) == FALSE)
+	if(pCopyType == nullptr)
+		return FALSE;
+	if(pCopyType->GetLogicInputConditionDevice(pDevList,pItem) == FALSE)
 		return FALSE;
 	return TRUE;
 }
@@ -664,6 +666,8 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 	int i = 0 , nCurLogic =0 ;
 	DWORD dwStart,dwEnd,dwSort,dwPtn;
 	BOOL bAllLink = FALSE;
+	CXDataEqType * pCopyType = nullptr;
+
 	sortingArray.clear();
 
 	dwStart = GetTickCount();
@@ -685,6 +689,17 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 		// 전체 경보 방식인지 확인 필요
 		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID]) == 0 ? TRUE : FALSE;
 
+		// [2026/4/23 15:46:05 KHS] 
+		// Type별 입력의 복사본 가져오기 
+		// --> 입력범위 밖의 입력 회로는 기본 로직으로 처리하는 방식이기 때문에
+		//     입력범위안의 입력회로를 처리하고 Type list에서 삭제하면
+		//     자연스럽게 범위 밖의 회로만 남는다 , 남는것은 기본로직으로 처리
+		// 여기서 문제점은 입력타입에 있는 입력 회로를 삭제하다 보니
+		// 입력타입에 여러 출력이 로직으로 걸려 있을 때
+		// 입력할 회로가 없어져 버린다
+		// 그래서 해당 타입의 복사 본을 가져온다
+		pCopyType = m_pInTypeLocDevList->GetCopyTypeData(pMst->GetInType(),pMst->GetEqName());
+
 		/// Logic Item은 1이 기본값이다.
 		for(i = MAX_LOGIC_ITEM_CNT; i >= 0; i--)
 		{
@@ -693,14 +708,14 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 
 			// [2026/4/14 16:48:43 KHS] 
 			// 전체 경보 방식일 때 주로직 만 실행 시키기 위해 다른 범위로직은 추가하지 않는다.
-			if(bAllLink == TRUE && i != 1)
+			if(bAllLink == TRUE && i != LOGIC_PRIORITY_ID)
 				continue; 
 			
 			mapInDev.clear();
 			//lstInList.RemoveAll();
 			// 로직의 입력 부분에 해당하는 회로목록을 가져온다.
 			// InputTypeList의 항목의 내용을 조건별로 삭제하면서 진행한다.
-			if(MakeInputRangeRelay(&mapInDev,pMst,pMst->m_pArrLgItem[i]) == FALSE)
+			if(MakeInputRangeRelay(&mapInDev,pMst->m_pArrLgItem[i],pCopyType) == FALSE)
 				continue;
 
 			for(auto it : mapInDev)
@@ -733,6 +748,11 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 			//lstAllInItem.ListAdd(&lstInList);
 		}
 
+		if(pCopyType)
+		{
+			delete pCopyType;
+			pCopyType = nullptr;
+		}
 		nCurLogic ++;
 		m_pMakeWnd->SendMessage(CSWM_PROGRESS_STEP,nCurLogic,PROG_RESULT_STEP);
 

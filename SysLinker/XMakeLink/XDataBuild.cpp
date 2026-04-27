@@ -212,3 +212,25 @@ int CXDataBuild::IsIncluded(CString strNamePart)
 	nRet = m_strName.Find(strNamePart);
 	return nRet;
 }
+
+
+BOOL CXDataBuild::CopyData(CXDataBuild* pSrc)
+{
+	BOOL bRet = FALSE;
+	CXListBtype * pList;
+	if(pSrc == nullptr)
+		return FALSE;
+	m_pParent = pSrc->GetParent();
+	m_strName = pSrc->GetName();
+	m_nId = pSrc->GetId();
+	m_bInputItem = pSrc->IsInputType();
+	m_nNameIndex = pSrc->GetIndex();
+	
+	pList = pSrc->GetListBtype();
+	if(pList == nullptr)
+		return TRUE;
+	m_pListBtype = new CXListBtype;
+	bRet = m_pListBtype->CopyData(pList);
+
+	return bRet;
+}

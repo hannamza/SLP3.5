@@ -219,3 +219,19 @@ BOOL CXListEqTypeLocDev::GetAllTypeLocDevList(CXMapDev * pDevList,BOOL bRemoveDe
 	retList.clear();
 	return TRUE;
 }
+
+
+CXDataEqType * CXListEqTypeLocDev::GetCopyTypeData(int nType,int nName)
+{
+	POSITION pos;
+	CXDataEqType * pRetData = nullptr , *pCopyType = nullptr;
+	pos = FindTypeData(nType,nName);
+	if(pos == nullptr)
+		return nullptr;
+	pRetData = GetAt(pos);
+	if(pRetData == nullptr)
+		return nullptr;
+	pCopyType = new CXDataEqType;
+	pCopyType->CopyData(pRetData);
+	return pCopyType;
+}

@@ -256,3 +256,28 @@ BOOL CXDataFloor::GetFloorAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 	return TRUE;
 }
 
+BOOL CXDataFloor::CopyData(CXDataFloor * pSrc)
+{
+	if(pSrc == nullptr)
+		return FALSE;
+	m_pParent = pSrc->GetParent();
+	m_strName = pSrc->GetName();
+	m_nId  = pSrc->GetId();
+	m_nFlNum = pSrc->GetFloorNumber();
+	m_bInputItem = pSrc->IsInputType();
+	m_nNameIndex = pSrc->GetIndex();
+	m_nBuildIndex = pSrc->GetBuildIndex();
+	m_nBtypeIndex = pSrc->GetBtypeIndex();
+	m_nStairIndex = pSrc->GetStairIndex();
+
+	CXListRoom * pList;
+	pList = pSrc->GetListRoom();
+	if(pList == nullptr)
+		return TRUE;
+
+	if(m_pListRoom == nullptr)
+		m_pListRoom = new CXListRoom;
+
+	BOOL bRet = m_pListRoom->CopyData(pList);
+	return bRet;
+}

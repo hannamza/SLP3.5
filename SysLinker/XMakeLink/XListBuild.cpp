@@ -107,3 +107,23 @@ CXDataBuild * CXListBuild::SortedAddData(CXDataEqType * pParent,CXDataDev * pPnt
 	}
 	return nullptr;
 }
+
+BOOL CXListBuild::CopyData(CXListBuild * pSrcList)
+{
+	if(pSrcList == nullptr)
+		return FALSE;
+	CXDataBuild * pData,*pOrg;// ,* pNew;
+	POSITION pos;
+	pos = pSrcList->GetHeadPosition();
+	while(pos)
+	{
+		pOrg = pSrcList->GetNext(pos);
+		if(pOrg == nullptr)
+			continue; 
+		pData = new CXDataBuild;
+		pData->CopyData(pOrg);
+		AddTail(pData);
+	}
+	
+	return TRUE;
+}

@@ -11,5 +11,6 @@ public:
 public:
 	void RemoveAllData();
 	CXDataBuild * SortedAddData(CXDataEqType * pParent,CXDataDev * pPnt,BOOL bInputItem = TRUE);
+	BOOL CopyData(CXListBuild * pSrcList);
 };
 

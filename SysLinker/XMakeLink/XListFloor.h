@@ -10,5 +10,6 @@ public:
 public:
 	void RemoveAllData();
 	CXDataFloor * SortedAddData(CXDataStair * pParent,CXDataDev * pPnt,BOOL bInputItem = TRUE);
+	BOOL CopyData(CXListFloor * pSrcList);
 };
 

@@ -23,11 +23,11 @@ public:
 	void SetInputType(BOOL bIn) { m_bInputItem = bIn; }
 public:
 	CXDataEqType	*	m_pParent;
-	CXListBtype	*	m_pListBtype;
-	CString			m_strName;
-	int				m_nId;
-	BOOL			m_bInputItem;
-	int				m_nNameIndex; // 건물 String UnOrdered Set의 인덱스 Key : ID
+	CXListBtype		*	m_pListBtype;
+	CString				m_strName;
+	int					m_nId;
+	BOOL				m_bInputItem;
+	int					m_nNameIndex; // 건물 String UnOrdered Set의 인덱스 Key : ID
 public:
 	void RemoveAllData();
 
@@ -48,5 +48,7 @@ public:
 	BOOL GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem);
 
 	BOOL GetBuildAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
+
+	BOOL CopyData(CXDataBuild* pSrc);
 };
 

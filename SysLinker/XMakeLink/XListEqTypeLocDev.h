@@ -21,7 +21,7 @@ public:
 	// 이미 존재하면 존재하는 항목 리턴,없으면 생성해서 리턴
 	// 생성 또는 이미 있는 데이터에서 건물정보를 추가한다.
 	CXDataEqType * SortedAddData(CXDataDev * pPnt,BOOL bInputItem = TRUE);
-	CXDataEqType * GetTypeData(int nType,int nName);
+	CXDataEqType * GetTypeData(int nType,int nName); // 사용안할거 같음 --> GetCopyTypeData로 변경
 	POSITION FindTypeData(int nType,int nName);
 
 	BOOL GetAllTypeLocDevList(CXMapDev * pDevList,BOOL bRemoveDev);
@@ -32,5 +32,6 @@ public:
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem);
 
+	CXDataEqType *  GetCopyTypeData(int nType,int nName);
 };
 

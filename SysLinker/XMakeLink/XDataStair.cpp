@@ -433,3 +433,25 @@ BOOL CXDataStair::GetStairAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 	retList.clear();
 	return TRUE;
 }
+
+BOOL CXDataStair::CopyData(CXDataStair * pSrc)
+{
+	if(pSrc == nullptr)
+		return FALSE;
+	CXListFloor * pList;
+	m_pParent = pSrc->GetParent();
+	m_strName = pSrc->GetName();
+	m_nId  = pSrc->GetId();
+	m_bInputItem= pSrc->IsInputType();
+	m_nNameIndex = pSrc->GetIndex();
+	m_nBuildIndex = pSrc->GetBuildIndex();
+	m_nBtypeIndex = pSrc->GetBtypeIndex();
+
+	pList = pSrc->GetListFloor();
+	if(pList == nullptr)
+		return TRUE;
+
+	m_pListFloor = new CXListFloor;
+	m_pListFloor->CopyData(pList);
+	return TRUE;
+}

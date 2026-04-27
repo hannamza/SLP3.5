@@ -59,5 +59,7 @@ public:
 	//BOOL CheckFloorCondition(BOOL bUseMatch,int nUpLevel,int nSrcFl,int nTgtFl);
 
 	BOOL GetStairAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
+
+	BOOL CopyData(CXDataStair * pSrc);
 };
 

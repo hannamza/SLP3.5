@@ -117,3 +117,24 @@ CXDataRoom* CXListRoom::SortedAddData(CXDataFloor * pParent,CXDataDev * pPnt,BOO
 	}
 	return nullptr;
 }
+BOOL CXListRoom::CopyData(CXListRoom * pList)
+{
+	if(pList == nullptr)
+		return FALSE;
+
+	POSITION pos;
+	CXDataRoom * pData,*pOrg;
+	pos = pList->GetHeadPosition();
+	while(pos)
+	{
+		pOrg = pList->GetNext(pos);
+		if(pOrg == nullptr)
+			continue; 
+
+		pData = new CXDataRoom;
+		pData->CopyData(pOrg);
+		AddTail(pData);
+	}
+
+	return TRUE;
+}

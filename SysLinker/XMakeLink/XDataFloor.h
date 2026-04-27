@@ -54,5 +54,6 @@ public:
 	BOOL GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem);
 
 	BOOL GetFloorAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
+	BOOL CopyData(CXDataFloor * pSrc);
 };
 

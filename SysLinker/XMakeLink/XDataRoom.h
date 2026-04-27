@@ -58,5 +58,7 @@ public:
 	BOOL GetRoomAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
 
 	BOOL RetriveAllLink(CXMapLink * pDevLink,int nLogicID);
+
+	BOOL CopyData(CXDataRoom * pSrc);
 };
 

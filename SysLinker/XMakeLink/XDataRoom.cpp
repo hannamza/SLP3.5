@@ -263,3 +263,31 @@ BOOL CXDataRoom::RetriveAllLink(CXMapLink * pDevLink , int nLogicID)
 	return TRUE;
 }
 
+
+BOOL CXDataRoom::CopyData(CXDataRoom * pSrc)
+{
+	if(pSrc == nullptr)
+		return FALSE;
+	m_pParent = pSrc->GetParent();
+	m_strName = pSrc->GetName();
+	m_nId  = pSrc->GetId();
+	m_bInputItem = pSrc->IsInputType();
+	m_nNameIndex = pSrc->GetIndex();
+	m_nBuildIndex = pSrc->GetBuildIndex();
+	m_nBtypeIndex = pSrc->GetBtypeIndex();
+	m_nStairIndex = pSrc->GetStairIndex();
+	m_nFloorIndex = pSrc->GetFloorIndex();
+
+	CXMapDev * pMap;
+	pMap = pSrc->GetIncludeDevices();
+	if(pMap == nullptr)
+		return TRUE;
+	if(m_pMapDev == nullptr)
+		m_pMapDev = new CXMapDev;
+
+// 	BOOL bRet = m_pMapDev->CopyData(pMap);
+// 
+// 	m_pMapDev = pMap;
+	m_pMapDev->insert(pMap->begin(),pMap->end());
+	return TRUE;
+}

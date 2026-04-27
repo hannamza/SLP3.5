@@ -286,3 +286,25 @@ BOOL CXDataEqType::GetTypeAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 	retList.clear();
 	return TRUE;
 }
+
+
+BOOL CXDataEqType::CopyData(CXDataEqType * pSrc)
+{
+	CXListBuild * pList;
+	if(pSrc == nullptr)
+		return FALSE;
+	m_strType = pSrc->GetType();
+	m_strName = pSrc->GetName();
+	m_strKey = pSrc->GetKey();
+	m_pEqType = pSrc->GetEqType(); // 타입 : 입력,출력
+	m_pEqName = pSrc->GetEqName(); // 이름 : 설비명 , 출력설명
+
+	m_bInputItem = pSrc->IsInputType(); // 설비명인지 ?
+	pList = pSrc->GetListBuild();
+	if(pList == nullptr)
+		return TRUE;
+	m_pListBuild = new CXListBuild;
+	m_pListBuild->CopyData(pList);
+	return TRUE;
+}
+
