@@ -178,7 +178,8 @@ int CXDataEqType::CompareData(int nType,int nName)
 	return nRet;
 }
 
-BOOL CXDataEqType::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem)
+BOOL CXDataEqType::GetLogicOutputConditionDevice(
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
 {
 	POSITION pos;
 	CXDataBuild * pBuild;
@@ -198,7 +199,7 @@ BOOL CXDataEqType::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pD
 
 		if(pBuild == nullptr)
 			continue;
-		pBuild->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
+		pBuild->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic);
 	}
 	return TRUE;
 }

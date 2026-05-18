@@ -5,6 +5,7 @@
 #include "XDataStair.h"
 #include "XDataDev.h"
 #include "XDataFloor.h"
+#include "XDataLogicMst.h"
 #include "XDataLogicItem.h"
 #include "XListFloor.h"
 
@@ -134,14 +135,23 @@ int CXDataStair::CompareData(int nIndex)
 
 
 /// 변환전 함수
-BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem)
+BOOL CXDataStair::GetLogicOutputConditionDevice(
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
 {
 	POSITION pos;
+	CXDataLogicItem * pItem;
 	int nTgtFlNum,nSrcFlNum;
 	CXDataFloor * pFloor;
 	int n1,n2,n3,n4,nParkBuild;
+#if _DEBUG
+	int nDebugTargetBuildIdx = 0,nDebugSrcBuildIdx;
+	nDebugTargetBuildIdx = g_MapIdxBuild[L"3111동"];
+	nDebugSrcBuildIdx = pDev->GetBuildIndex();
+#endif
 	if(m_pListFloor == nullptr)
 		return FALSE;
+
+	//입력이 범위로직일 때는 범위로직 사용
 	// #ifdef _DEBUG
 	// 	if(m_pParent->GetParent()->GetName() != L"105동")
 	// 		return TRUE; 
@@ -153,6 +163,27 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 	{
 		pFloor = m_pListFloor->GetNext(pos);
 		if(pFloor == nullptr)
+			continue;
+
+#if _DEBUG
+		if(nSrcFlNum == 2 
+			&& nDebugTargetBuildIdx == nDebugSrcBuildIdx
+			&& pFloor->GetBuildIndex() == nDebugTargetBuildIdx)
+			TRACE(L"");
+#endif
+		// 범위로직이 있을 때는 어떤 로직을 사용할 지 알 수 없음
+		// 층에 맞는 로직을 가져온다.
+		// 입력회로가 입력범위로직일 때는 그 로직 사용
+		if(nRangeLogic != MAINLOGIC_PRIORITYID)
+		{
+			pItem = pMst->GetLogicItem(nRangeLogic);
+		}
+		else
+		{
+			pItem = pMst->GetFloorLogicItem(pDev,pFloor);
+		}
+		
+		if(pItem == nullptr)
 			continue;
 		nTgtFlNum = pFloor->GetFloorNumber();
 
@@ -323,6 +354,8 @@ BOOL CXDataStair::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicIt
 				continue;
 			continue;
 		}
+
+		
 
 		nEnd = pItem->GetInEndLevelNum();
 		nStart = pItem->GetInStartLevelNum();

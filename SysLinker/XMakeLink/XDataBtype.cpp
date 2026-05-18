@@ -135,7 +135,8 @@ int CXDataBtype::CompareData(int nIndex)
 }
 
 
-BOOL CXDataBtype::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem)
+BOOL CXDataBtype::GetLogicOutputConditionDevice(
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
 {
 	POSITION pos;
 	CXDataStair * pStair;
@@ -149,7 +150,7 @@ BOOL CXDataBtype::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 		pStair = m_pListStair->GetNext(pos);
 		if(pStair == nullptr)
 			continue;
-		pStair->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
+		pStair->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic);
 	}
 
 	//pDevList->insert(retList.begin(),retList.end());

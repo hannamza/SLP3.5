@@ -5,6 +5,7 @@ class CXListBuild;
 class CDataAutoLogic;
 class CXDataDev;
 class CXListDev;
+class CXDataLogicMst;
 class CXDataLogicItem;
 
 class CXDataEqType : public CObject
@@ -52,7 +53,9 @@ public:
 	BOOL GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem);
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
-	BOOL GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem);
+	BOOL GetLogicOutputConditionDevice(
+		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst
+		,int nRangeLogic);
 
 	BOOL CopyData(CXDataEqType * pSrc);
 };

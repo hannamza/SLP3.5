@@ -70,9 +70,12 @@ public:
 
 	SIMPLE_FUNC_IMPL(BYTE,UseUnderLogic,m_btUseUnderLogic);
 	SIMPLE_FUNC_IMPL(BYTE,UseParkLogic,m_btUseParkLogic);
+	SIMPLE_FUNC_IMPL(BYTE,UseRangeLogicOverFloor,m_btUseRangeLogicOverFloor);
 
 	CStringArray * GetBuildArray() { return &m_arrBuildName; }
 	CStringArray * GetStairArray() { return &m_arrStairName; }
+
+
 
 protected:
 	int m_nLgId;
@@ -146,6 +149,9 @@ protected:
 	// 주차장 로직에 맞는 옵션 
 
 	//BYTE	m_btUseParkingLogic; // 주차장로직
+
+	BYTE	m_btUseRangeLogicOverFloor;// +N층으로 인해 출력범위가 입력범위를 초과하는 부분에 대한 로직 적용우선순위
+									// TRUE일때 범위로직 우선 적용
 public:
 
 	// 조건이 맞는지가 아니고 조건이 있는지 확인
@@ -170,7 +176,7 @@ public:
 
 	//BOOL CheckFloorCondition(CXDataDev * pInputDev,CXDataFloor * pFloor);
 
-	void SetLogicMst(int nId,int nInType,int nOutType,int nEqName,int nOutCond);
+	void SetLogicMst(int nId,int nInType,int nOutType,int nEqName,int nOutCond , BYTE bUseRangeLogicOverfloor);
 	void SetLogicInputLoc(CStringArray * pArrBuild,CStringArray * pArrStair
 		,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
 		);
@@ -212,5 +218,8 @@ public:
 	BOOL MatchFloorRange(CXDataDev* src,CXDataFloor* tgt);
 
 	BOOL MatchEmergency(CXDataDev* src,CXDataEm* tgt);
+
+	BOOL CheckInputRangeBuild(int nBuildIdx);
+	BOOL CheckInputRangeStair(int nStairIndex);
 };
 

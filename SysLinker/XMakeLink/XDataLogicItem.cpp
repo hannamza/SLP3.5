@@ -30,6 +30,8 @@ CXDataLogicItem::CXDataLogicItem()
 	m_suMatchUnder.btLoctype = 0;
 	m_suMatchGround.btLoctype = 0;
 	m_suMatchPark.btLoctype = 0;
+
+	m_btUseRangeLogicOverFloor = FALSE;
 }
 
 
@@ -241,13 +243,14 @@ void CXDataLogicItem::SetAutoLogic(
 	}
 }
 
-void CXDataLogicItem::SetLogicMst(int nId,int nInType,int nOutType,int nEqName,int nOutCond)
+void CXDataLogicItem::SetLogicMst(int nId,int nInType,int nOutType,int nEqName,int nOutCond,BYTE btUseRangeLogicOverfloor)
 {
 	m_nLgId = nId;
 	m_nInType = nInType;
 	m_nOutType = nOutType;
 	m_nEqName = nEqName;
 	m_nOutContents = nOutCond;
+	m_btUseRangeLogicOverFloor = btUseRangeLogicOverfloor;
 }
 
 void CXDataLogicItem::SetLogicInputLoc(CStringArray * pArrBuild,CStringArray * pArrStair
@@ -335,11 +338,20 @@ BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tg
 	if(pInputDev == nullptr || tgt == nullptr)
 		return 0;
 
-	int nInBuild,nOutBuild;
+	int nInBuild,nOutBuild,nParkBuild;
 	std::vector<int> vtTarget;
 	nInBuild = pInputDev->GetBuildIndex();
 	nOutBuild = tgt->GetBuildIndex();
-	
+
+	// [2026/5/7 12:56:14 KHS] 
+	// 주차장일 때 처리 - 연결 건물 처리방안 ? 
+// 	nParkBuild = g_MapIdxBuild[L"주차장"];
+// 	if(GetUseParkLogic() == 1
+// 		&& (nInBuild == nParkBuild || nOutBuild == nParkBuild))
+// 	{
+// 		return 1;
+// 	}
+
 	if(nInBuild <= 0 || nOutBuild <= 0)
 		return 0; 
 	// 1. 입력이 연계건물의 Source , 출력이 연계건물의 대상 일 때 
@@ -435,15 +447,75 @@ BOOL CXDataLogicItem::MatchEmergency(CXDataDev* src,CXDataEm* tgt)
 	{
 		n1 = GetMatchGroundBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : 1;
 		n2 = GetMatchGroundStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : 1;
-		n3 = GetMatchGroundFloor() ? (src->GetFloorIndex() == tgt->GetFloorIndex()) : 1;
+		// [2026/5/7 17:11:29 KHS] 
+		// 비상방송
+		if(m_btPriority != MAINLOGIC_PRIORITYID) // 범위로직일때 비상방송은 무조건 층일치 BY 표종완
+			n3 = (src->GetFloorIndex() == tgt->GetFloorIndex());
+		else
+			n3 = GetMatchGroundFloor() ? (src->GetFloorIndex() == tgt->GetFloorIndex()) : 1;
 	}
 	else
 	{
 		n1 = GetMatchUnderBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : 1;
 		n2 = GetMatchUnderStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : 1;
-		n3 = GetMatchUnderFloor() ? (src->GetFloorIndex() == tgt->GetFloorIndex()) : 1;
+		// [2026/5/7 17:11:29 KHS] 
+		// 비상방송
+		if(m_btPriority != MAINLOGIC_PRIORITYID) // 범위로직일때 비상방송은 무조건 층일치 BY 표종완
+			n3 = (src->GetFloorIndex() == tgt->GetFloorIndex());
+		else
+			n3 = GetMatchUnderFloor() ? (src->GetFloorIndex() == tgt->GetFloorIndex()) : 1;
 	}
 	if(n1 == 1 && n2 == 1 && n3 == 1)
 		return TRUE;
+	return FALSE;
+}
+
+BOOL CXDataLogicItem::CheckInputRangeBuild(int nBuildIdx)
+{
+	int nSize,i;
+	CString strBuildName;
+	CXLocStrMap::iterator it;
+	
+	nSize = m_arrBuildName.GetSize();
+	if(nSize <= 0)
+		return TRUE;
+	for(i = 0; i < nSize; i++)
+	{
+		strBuildName = m_arrBuildName.GetAt(i);
+		if(strBuildName.GetLength() <= 0)
+			continue;
+
+		it = g_MapIdxBuild.find(strBuildName);
+		if(it == g_MapIdxBuild.end())
+			continue;
+
+		if(nBuildIdx == it->second)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+
+BOOL CXDataLogicItem::CheckInputRangeStair(int nStairIndex)
+{
+	int nSize,i;
+	CString strStairName;
+	CXLocStrMap::iterator it;
+	nSize = m_arrStairName.GetSize();
+	if(nSize <= 0)
+		return TRUE;
+	for(i = 0; i < nSize; i++)
+	{
+		strStairName = m_arrStairName.GetAt(i);
+		if(strStairName.GetLength() <= 0)
+			continue;
+
+		it = g_MapIdxStair.find(strStairName);
+		if(it == g_MapIdxStair.end())
+			continue;
+
+		if(nStairIndex == it->second)
+			return TRUE;
+	}
 	return FALSE;
 }

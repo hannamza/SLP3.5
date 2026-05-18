@@ -43,7 +43,13 @@ enum
 	MATCH_PARK = 3
 };
 
-
+enum RANGE_RESULT
+{
+	// 범위내 , 범위 위 , 범위 아래, 범위포함 안됨
+	RET_RANGE_BELOW = -1,
+	RET_RANGE_INSIDE = 0,
+	RET_RANGE_OVER = 1,
+};
 
 #pragma pack(push,1)
 
@@ -94,6 +100,17 @@ union SU_LOGIC_LOC
 	DWORD			dwLoc;
 };
 
+struct ST_RANGE
+{
+	short nStartLevel;
+	short nEndLevel;
+};
+
+union SU_RANGE
+{
+	int nRange;
+	ST_RANGE stRange;
+};
 
 #pragma pack(pop)
 
@@ -351,15 +368,12 @@ extern CXLinkBuildMap	g_MapIdxLinkedBuild;// 연계 건물의 Source의 Index
 
 // [2025/8/1 11:12:00 KHS] 
 // 로직 처리를 위해 Define
-// #define NAME_PARKING_KOR	L"주차장"	
-// #define NAME_PARKING_ENG	L"PARKING"	
-#if USE_PARKING_SUBSTRING
-	#define PARKING_SUBSTRING		L"@PK"
-#endif
-
+#define NAME_PARKING_KOR	L"주차장"	
+#define NAME_PARKING_ENG	L"PARKING"	
 
 #define STR_LINKEDBUILD_SEPERATOR		L";"
-#define LOGIC_PRIORITY_ID				1
+//#define LOGIC_PRIORITY_ID				1
+#define MAINLOGIC_PRIORITYID			1
 
 static TCHAR *g_pSzAllAlertEquip[] = {
 	L"경종",

@@ -169,15 +169,17 @@ POSITION CXListEqTypeLocDev::FindTypeData(int nType,int nName)
 }
 
 
-BOOL CXListEqTypeLocDev::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem)
+BOOL CXListEqTypeLocDev::GetLogicOutputConditionDevice(
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst
+	,int nRangeLogic)
 {
 	CXDataEqType * pType = nullptr;
 
-	pType = GetTypeData(pItem->GetOutType(),pItem->GetOutContents());
+	pType = GetTypeData(pMst->GetOutType(),pMst->GetOutContents());
 	if(pType == nullptr)
 		return FALSE;
 
-	if(pType->GetLogicOutputConditionDevice(pDev,pDevList,pItem) == FALSE)
+	if(pType->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic) == FALSE)
 		return FALSE;
 	return TRUE;
 }

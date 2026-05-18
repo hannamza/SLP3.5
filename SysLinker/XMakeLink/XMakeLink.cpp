@@ -687,7 +687,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 			continue;
 		// [2026/4/14 16:47:10 KHS] 
 		// 전체 경보 방식인지 확인 필요
-		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID]) == 0 ? TRUE : FALSE;
+		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]) == 0 ? TRUE : FALSE;
 
 		// [2026/4/23 15:46:05 KHS] 
 		// Type별 입력의 복사본 가져오기 
@@ -708,7 +708,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 
 			// [2026/4/14 16:48:43 KHS] 
 			// 전체 경보 방식일 때 주로직 만 실행 시키기 위해 다른 범위로직은 추가하지 않는다.
-			if(bAllLink == TRUE && i != LOGIC_PRIORITY_ID)
+			if(bAllLink == TRUE && i != MAINLOGIC_PRIORITYID)
 				continue; 
 			
 			mapInDev.clear();
@@ -717,6 +717,10 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 			// InputTypeList의 항목의 내용을 조건별로 삭제하면서 진행한다.
 			if(MakeInputRangeRelay(&mapInDev,pMst->m_pArrLgItem[i],pCopyType) == FALSE)
 				continue;
+
+			// [2026/5/11 11:25:14 KHS] 
+			// 범위 로직일 때 , pDev(입력회로)가 범위로직에 의한건지 확인 index가 MAINLOGIC_PRIORITY가 아닌경우
+			// 아래 로직에서 m_pArrLgItem을 선택해서 넘겨준다.
 
 			for(auto it : mapInDev)
 			{
@@ -733,8 +737,9 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 // 				if(pMst->m_pArrLgItem[i]->GetUseEmergency() == 1)
 // 					AddEMergency(pDev,pMst->m_pArrLgItem[i]);
 // --> 수정후
+
 				if(m_pOutTypeLocDevList->GetLogicOutputConditionDevice(
-					pDev,&mapOutDev,pMst->m_pArrLgItem[i]) == TRUE)
+					pDev,&mapOutDev,pMst,i) == TRUE)
 				{
 				//	continue;
 					pDev->AddLinkMap(&mapOutDev);
@@ -1010,7 +1015,10 @@ int CXMakeLink::MakeBasicLogic()
 
 		pItem = new CXDataLogicItem;
 		pMst->m_pArrLgItem[nIdx] = pItem;
-		pItem->SetLogicMst(pLg->GetLgId(),pLg->GetInType(),pLg->GetOutType(),pLg->GetEqName(),pLg->GetOutContents());
+		// [2026/5/15 11:17:19 KHS] 
+		// 기본 로직은 입력범위를 초과하는 출력에 대해 기본 로직을 사용한다.
+		pItem->SetLogicMst(pLg->GetLgId(),pLg->GetInType(),pLg->GetOutType()
+			,pLg->GetEqName(),pLg->GetOutContents(),0);
 		pItem->SetLogicInputLoc(
 			nullptr,nullptr
 			,0,0,0,0
@@ -1046,7 +1054,7 @@ int CXMakeLink::MakeBasicLogic()
 			,0
 			,0
 		);
-		pItem->SetPriority(LOGIC_PRIORITY_ID);
+		pItem->SetPriority(MAINLOGIC_PRIORITYID);
 		m_ptrLogicList.AddTail(pMst);
 	}
 	return m_ptrLogicList.GetCount();
@@ -1072,7 +1080,7 @@ int CXMakeLink::MakeRangeLogicItem()
 	BYTE btMatchGroundBuild,btMatchGroundBType,btMatchGroundStair,btMatchGroundFloor,btMatchGroundRoom;
 	BYTE btUseUnderLogic,btMatchUnderAll,btMatchUnderBuild,btMatchUnderBtype,btMatchUnderStair,btMatchUnderFloor,btMatchUnderRoom;
 	BYTE btUseParkingLogic,btMatchParkingAll,btMatchParkingBuild,btMatchParkingBtype,btMatchParkingStair,btMatchParkingFloor,btMatchParkingRoom;
-
+	BYTE btUseRangeLogicOverfloor = 0;
 	nId = nPriority = 0;
 	nRangeStartFloor = nRangeEndFloor = 0;
 	btUseRangeBuild = btUseRangeStair = btUseRangeFloor = 0;
@@ -1151,6 +1159,7 @@ int CXMakeLink::MakeRangeLogicItem()
 		pDb->GetFieldValue(L"RG_MATCH_PARKING_STAIR",btMatchParkingStair);
 		pDb->GetFieldValue(L"RG_MATCH_PARKING_FLOOR",btMatchParkingFloor);
 		pDb->GetFieldValue(L"RG_MATCH_PARKING_ROOM",btMatchParkingRoom);
+		pDb->GetFieldValue(L"RG_LOGIC_OVERFLOOR",btUseRangeLogicOverfloor);
 
 		nRangeEndFloor = _wtoi(strRangeEndFloor);
 		nRangeStartFloor = _wtoi(strRangeStartFloor);
@@ -1169,7 +1178,7 @@ int CXMakeLink::MakeRangeLogicItem()
 			nIdx = pMst->GetEmptyIdx();
 			if(nIdx < 0)
 				continue;
-			if(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID] == nullptr)
+			if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID] == nullptr)
 				continue;
 
 			pItem = new CXDataLogicItem;
@@ -1180,7 +1189,7 @@ int CXMakeLink::MakeRangeLogicItem()
 // 향후 다른 조건들(지하 건물 일치 ,주차장 건물일치 등...)을 사용하게 되면 
 // 사용되는 조건 부분은 주석 처리한다.
 // 현재 사용중 : 비상방송 , 건물,계단 
-			pMain = pMst->m_pArrLgItem[LOGIC_PRIORITY_ID];// 숫자 1 은 주로직 --> 기본로직
+			pMain = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];// 숫자 1 은 주로직 --> 기본로직
 			//btEmergency = pMain->GetUseEmergency();
 			btOutput = pMain->GetUseSameAddrOutput();
 			nPlusNStart = pMain->GetPlusNStart();
@@ -1212,7 +1221,8 @@ int CXMakeLink::MakeRangeLogicItem()
 
 			pMst->m_pArrLgItem[nIdx] = pItem;
 			//L_OP_GREATEREQUAL : 범위 입력할 때 <,<= ,... 등등 구분하려고 --> 같거나 큰으로 통일
-			pItem->SetLogicMst(pMst->GetLgId(),pMst->GetInType(),pMst->GetOutType(),pMst->GetEqName(),pMst->GetOutContents());
+			pItem->SetLogicMst(pMst->GetLgId(),pMst->GetInType(),pMst->GetOutType()
+				,pMst->GetEqName(),pMst->GetOutContents(),btUseRangeLogicOverfloor);
 			pItem->SetLogicInputLoc(
 				&saBuild,&saStair
 				,nRangeStartFloor,nRangeEndFloor,L_OP_GREATEREQUAL,L_OP_LESSEQUAL
@@ -1251,6 +1261,7 @@ int CXMakeLink::MakeRangeLogicItem()
 				,btMatchParkingRoom
 			);
 			pItem->SetPriority(nIdx);
+			pMst->SetHaveRange(TRUE);
 		}
 
 		pDb->MoveNext();
@@ -1258,13 +1269,22 @@ int CXMakeLink::MakeRangeLogicItem()
 	}
 }
 
-
+BOOL ContainsDigit(const CString& str)
+{
+	for(int i = 0; i < str.GetLength(); ++i) {
+		if(isdigit(str[i])) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
 int CXMakeLink::MakeLinkedBuild()
 {
 	if(m_pRefRelayData == nullptr)
 			return 0;
 	CString strSql;
 	int i,nCnt,nSp,x,nID; 
+	BOOL bFindParking = FALSE;
 	CXLocStrMap::iterator it;
 	int nSrcBuildIdx,nTgtBuildIdx;
 	CString strSrcBuild,strConnBuild,strtemp,strUpper;
@@ -1273,6 +1293,38 @@ int CXMakeLink::MakeLinkedBuild()
 	YAdoDatabase * pDb = m_pRefRelayData->GetPrjDB();
 	if(pDb == nullptr)
 		return 0;
+//  	for(auto &kv : g_MapIdxBuild)
+//  	{
+//  		strUpper = kv.first;
+//  		nSrcBuildIdx = kv.second;
+//  		if((strUpper.Find(NAME_PARKING_KOR) != -1) 
+//  			|| (strUpper.Find(NAME_PARKING_ENG) != -1))
+//  		{
+//  			vtBuild.clear();
+//  			for(auto &it : g_MapIdxBuild)
+//  			{
+//  				strtemp = it.first;
+//  				nTgtBuildIdx = it.second;
+//  				if(nSrcBuildIdx == nTgtBuildIdx)
+//  					continue; 
+//  				if((strUpper.Find(NAME_PARKING_KOR) != -1)
+//  					|| (strUpper.Find(NAME_PARKING_ENG) != -1))
+//  				{
+//  
+//  				}
+//  				else
+//  				{
+//  					if(ContainsDigit(strtemp) == FALSE)
+//  						continue;
+//  				}
+//  					
+//  				if(find(vtBuild.begin(),vtBuild.end(),nTgtBuildIdx) == vtBuild.end())
+//  					vtBuild.push_back(nTgtBuildIdx);
+//  			}
+//  			g_MapIdxLinkedBuild[nSrcBuildIdx] = vtBuild;
+//  		}
+//  	}
+
 	strSql.Format(L"SELECT * FROM TB_AUTOCONNECT ORDER BY CONN_ID DESC");
 	if(pDb->OpenQuery(strSql) == FALSE)
 	{
@@ -1338,14 +1390,35 @@ int CXMakeLink::MakeLinkedBuild()
 			if(it == g_MapIdxBuild.end() || it->second <= 0 )
 				continue;
 			nTgtBuildIdx = it->second;
-			vtBuild.push_back(nTgtBuildIdx);
+			if(find(vtBuild.begin(),vtBuild.end(),nTgtBuildIdx) == vtBuild.end())
+				vtBuild.push_back(nTgtBuildIdx);
 		}
 
 		if(vtBuild.size() > 0)
 		{
-			g_MapIdxLinkedBuild[nSrcBuildIdx] = vtBuild;
-		}
+			//g_MapIdxLinkedBuild[nSrcBuildIdx] = vtBuild;
+// 			g_MapIdxLinkedBuild[nSrcBuildIdx].insert(
+// 				g_MapIdxLinkedBuild[nSrcBuildIdx].end(),
+// 				vtBuild.begin(),
+// 				vtBuild.end()
+// 			);
 
+			auto it = g_MapIdxLinkedBuild.find(nSrcBuildIdx);
+			if(it != g_MapIdxLinkedBuild.end())
+			{
+				// 이미 존재하는 경우 → 기존 vector에 추가
+				it->second.insert(
+					g_MapIdxLinkedBuild[nSrcBuildIdx].end(),
+					vtBuild.begin(),
+					vtBuild.end()
+				);
+			}
+			else
+			{
+				// 존재하지 않는 경우 → 새 vector 생성 후 삽입
+				g_MapIdxLinkedBuild[nSrcBuildIdx] = vtBuild;
+			}
+		}
 		pDb->MoveNext();
 	}
 	return 0;
@@ -1364,7 +1437,7 @@ int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
 	CDataEquip * pCont;
 	CString strName,strtemp;
 	int nPriority = pItem->GetPriority();
-	if(nPriority != LOGIC_PRIORITY_ID)
+	if(nPriority != MAINLOGIC_PRIORITYID)
 		return 1;
 
 	nContID = pItem->GetOutContents();
@@ -1427,10 +1500,10 @@ int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
 // 		if(pMst == nullptr)
 // 			continue;
 // 		/// Logic Item은 1이 기본값이다.
-// 		if(pMst->m_pArrLgItem[LOGIC_PRIORITY_ID] == nullptr
-// 			|| pMst->m_pArrLgItem[LOGIC_PRIORITY_ID]->GetPriority() != LOGIC_PRIORITY_ID)
+// 		if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID] == nullptr
+// 			|| pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetPriority() != MAINLOGIC_PRIORITYID)
 // 			continue;
-// 		pItem = pMst->m_pArrLgItem[LOGIC_PRIORITY_ID];
+// 		pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
 // 
 // 		nContID = pItem->GetOutContents();
 // 		if(nContID <= 0)

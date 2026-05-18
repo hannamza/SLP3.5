@@ -10885,7 +10885,8 @@ int CRelayTableData::MakeAutoRangeTable()
 		L"RG_MATCH_PARKING_BTYPE",
 		L"RG_MATCH_PARKING_STAIR",
 		L"RG_MATCH_PARKING_FLOOR",
-		L"RG_MATCH_PARKING_ROOM"
+		L"RG_MATCH_PARKING_ROOM",
+		L"RG_LOGIC_OVERFLOOR"
 	};
 	int nCnt;
 	strSql.Format(L"SELECT * FROM INFORMATION_SCHEMA.COLUMNS "
@@ -10908,8 +10909,8 @@ int CRelayTableData::MakeAutoRangeTable()
 	{
 		// COLUMN 정보 확인 -> 이름만 확인
 		// 컬럼 정보 틀리면 DROP
-		CString strCol[36];
-		for(int i = 0; i < 36; i++)
+		CString strCol[37];
+		for(int i = 0; i < 37; i++)
 		{
 			m_pDB->GetFieldValue(L"COLUMN_NAME",strCol[i]);
 			m_pDB->MoveNext();
@@ -10970,6 +10971,7 @@ int CRelayTableData::MakeAutoRangeTable()
 			L"[RG_MATCH_PARKING_STAIR][tinyint] NOT NULL, "
 			L"[RG_MATCH_PARKING_FLOOR][tinyint] NOT NULL, "
 			L"[RG_MATCH_PARKING_ROOM][tinyint] NOT NULL, "
+			L"[RG_LOGIC_OVERFLOOR][tinyint] NOT NULL,"
 			L"CONSTRAINT[PK_TB_AUTORANGE] PRIMARY KEY CLUSTERED "
 			L"( "
 			L"	[RG_ID] ASC "
@@ -11056,141 +11058,150 @@ int CRelayTableData::MakeAutoRangeTable()
 		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
 		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
 		return 0;
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_ALL]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_ALL]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_BUILD]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_BUILD]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_BTYPE]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_STAIR]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_STAIR]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_FLOOR]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_ROOM]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_B1F_FIRE]  DEFAULT ((0)) FOR[RG_USE_UNDER_B1F_FIRE]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_1F_FIRE]  DEFAULT ((0)) FOR[RG_USE_UNDER_1F_FIRE]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_PARKING_LOGIC]  DEFAULT ((0)) FOR[RG_USE_PARKING_LOGIC]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_ALL]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_ALL]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_BUILD]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_BUILD]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_BTYPE]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_STAIR]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_STAIR]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_FLOOR]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
-		strSql.Format(
-			L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_ROOM]"
-		);
-		if(m_pDB->ExecuteSql(strSql) == FALSE)
-		{
-			// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
-			USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
-			return 0;
-		}
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_ALL]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_ALL]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_BUILD]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_BUILD]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_BTYPE]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_STAIR]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_STAIR]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_FLOOR]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_UNDER_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_UNDER_ROOM]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_B1F_FIRE]  DEFAULT ((0)) FOR[RG_USE_UNDER_B1F_FIRE]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_UNDER_1F_FIRE]  DEFAULT ((0)) FOR[RG_USE_UNDER_1F_FIRE]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_USE_PARKING_LOGIC]  DEFAULT ((0)) FOR[RG_USE_PARKING_LOGIC]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_ALL]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_ALL]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_BUILD]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_BUILD]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_BTYPE]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_BTYPE]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_STAIR]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_STAIR]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_FLOOR]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_FLOOR]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_MATCH_PARKING_ROOM]  DEFAULT ((0)) FOR[RG_MATCH_PARKING_ROOM]"
+	);
+	if(m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]",m_pDB->GetLastErrorString());
+		return 0;
+	}
+	strSql.Format(
+		L"		ALTER TABLE[dbo].[TB_AUTORANGE] ADD  CONSTRAINT[DF_TB_AUTOLOGIC_ITEM_LG_LOGIC_OVERFLOOR]  DEFAULT ((0)) FOR[RG_LOGIC_OVERFLOOR]"
+	);
+	if (m_pDB->ExecuteSql(strSql) == FALSE)
+	{
+		// TB_AUTOCONNECT Table을 삭제하는데 실패 했습니다.
+		USERLOG(L"Failed to set the default value for the column.[%s]", m_pDB->GetLastErrorString());
+		return 0;
 	}
 	return 1;
 }

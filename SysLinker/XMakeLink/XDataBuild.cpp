@@ -131,7 +131,8 @@ int CXDataBuild::CompareData(int nIdx)
 		return 1;
 }
 
-BOOL CXDataBuild::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem)
+BOOL CXDataBuild::GetLogicOutputConditionDevice(
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
 {
 	POSITION pos;
 	BYTE btCheck = 0;
@@ -144,7 +145,7 @@ BOOL CXDataBuild::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
+		pBtype->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic);
 	}
 	return TRUE;
 }
