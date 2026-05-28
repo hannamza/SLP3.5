@@ -291,13 +291,17 @@ public:
 	);
 	int FillConditionTree(CTreeCtrl* pCtrl, CPtrList * pItemList , BOOL bInput);
 
-
+	//20260526 GBM start - 불필요한 패턴 종류 및 트리 노드 삭제
+#if 0
 	int MakePatternBuild();
 	int MakePatternBType(bool bBTypeBuild);
 	int MakePatternStair(bool bStairBuild, bool bStairBType);
 	int MakePatternFloor(bool bFloorBuild, bool bFloorBType, bool bFloorStair);
 	int MakePatternRoom (bool bRoomBuild, bool bRoomBType, bool bRoomStair, bool bRoomFloor);
 	int MakePatternEquip(bool bEquipBuild, bool bEquipBType, bool bEquipStair, bool bEquipFloor);
+#endif
+	//20260526 GBM end
+
 	int AddDeviceToLocPattern();
 // 	int AddDeviceToLocPattern(bool bBuild
 // 		, bool bBType, bool bBTypeBuild

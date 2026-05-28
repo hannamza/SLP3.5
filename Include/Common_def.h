@@ -333,19 +333,19 @@ static TCHAR * g_szFacpTypeString[] = {
 };
 #endif
 
-enum 
+enum
 {
 	PTN_PATTERN = 0,
 	PTN_BUILD = 1,
 	PTN_BTYPE = 2,
 	PTN_STAIR = 3,
-	PTN_FLOOR = 4, 
-	PTN_ROOM = 5, 
-	PTN_EQUIP_IN = 6, 
+	PTN_FLOOR = 4,
+	PTN_ROOM = 5,
+	PTN_EQUIP_IN = 6,
 	PTN_EQUIP_OUT = 7,
 	PTN_CONTENTS = 8,
 	PTN_EQUIPNAME = 9,
-	PTN_DEVICE=10,		// 기타 패턴
+	PTN_DEVICE = 10,	// 기타 패턴
 	PTN_CUSTOM = 11,	// 사용자 패턴
 	PTN_SEARCH = 12,	// 검색결과
 	PTN_COUNT,

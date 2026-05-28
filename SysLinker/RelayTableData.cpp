@@ -3640,6 +3640,8 @@ int CRelayTableData::ProcessingPattern(
 // 	m_spUserAddPattern->RemoveAll();
 // 	m_spUserAddPattern->AddTail(m_spOnlyPattern.get());
 
+	//20260526 GBM start - 불필요한 패턴 종류 및 트리 노드 삭제
+#if 0
 	if (bBuild)
 		MakePatternBuild();
 
@@ -3657,11 +3659,15 @@ int CRelayTableData::ProcessingPattern(
 
 	if (bEquip)
 		MakePatternEquip(bEquipBuild, bEquipBType, bEquipStair, bEquipFloor);
+#endif
+	//20260526 GBM end
 
 	AddDeviceToLocPattern();
 	return 1;
 }
 
+//20260526 GBM start - 불필요한 패턴 종류 및 트리 노드 삭제
+#if 0
 int CRelayTableData::MakePatternBuild()
 {
 	// Location검색
@@ -4547,6 +4553,9 @@ int CRelayTableData::MakePatternEquip(bool bEquipBuild, bool bEquipBType, bool b
 	}
 	return 1;
 }
+#endif
+//20260526 GBM end
+
 // 
 // 
 // int CRelayTableData::AddDeviceToLocPattern()
@@ -8755,6 +8764,34 @@ int CRelayTableData::FillPatternTree(CTreeCtrl * pCtrl, CPtrList * pItemList)
 
 	if (m_spUserAddPattern == nullptr)
 		return 0;
+
+	//20260526 GBM start - 불필요한 패턴 종류 및 트리 노드 삭제
+#if 1
+
+	// 패턴 노드
+	hItem = pCtrl->InsertItem(g_szPatternTypeString[PTN_PATTERN], PTN_PATTERN, PTN_PATTERN, TVI_ROOT);
+	pItem = new ST_TREEITEM;
+	pItem->nDataType = PTN_PATTERN;
+	pItem->hItem = TVI_ROOT;
+	pItem->hParent = hItem;
+	pItem->pData = (LPVOID)PTN_PATTERN;
+	pCtrl->SetItemData(hItem, (DWORD_PTR)pItem);
+	hPtn[PTN_PATTERN] = hItem;
+	if (pItemList)
+		pItemList->AddTail(pItem);
+
+	// 검색 노드
+	hItem = pCtrl->InsertItem(g_szPatternTypeString[PTN_SEARCH], PTN_SEARCH, PTN_SEARCH, TVI_ROOT);
+	pItem = new ST_TREEITEM;
+	pItem->nDataType = PTN_SEARCH;
+	pItem->hItem = TVI_ROOT;
+	pItem->hParent = hItem;
+	pItem->pData = (LPVOID)PTN_SEARCH;
+	pCtrl->SetItemData(hItem, (DWORD_PTR)pItem);
+	hPtn[PTN_SEARCH] = hItem;
+	if (pItemList)
+		pItemList->AddTail(pItem);
+#else
 	for (i = 0; i < PTN_COUNT; i++)
 	{
 		hItem = pCtrl->InsertItem(g_szPatternTypeString[i], i, i, TVI_ROOT);
@@ -8768,6 +8805,8 @@ int CRelayTableData::FillPatternTree(CTreeCtrl * pCtrl, CPtrList * pItemList)
 		if (pItemList)
 			pItemList->AddTail(pItem);
 	}
+#endif
+	//20260526 GBM end
 
 	pos = m_spUserAddPattern->GetHeadPosition();
 	while (pos)
@@ -16509,6 +16548,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 			fTxtLoc.Open(strTxtLoc, CFile::modeCreate | CFile::modeReadWrite);
 			nLastUnit = nUnit;// = pDev->GetUnitNum();
 
+			//20260526 GBM start - ROM 파일 역변환 기능을 사용하지 않음에 따른 주석 처리
+#if 0
 			// [KHS 2020-12-9 14:33:09] 
 			// 역변환 정보 파일 
 			strFnRvRelay.Format(L"%s%s.csv", strPath, FN_RVRELAYINFO);
@@ -16526,6 +16567,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 			nTempSize = GF_Unicode2ASCII(strRvLine.GetBuffer(), szBuff, 256);
 			fRvRelay.Write(szBuff, nTempSize);
 #endif
+#endif
+			//20260526 GBM end
 		}
 
 		if (nFacp != nLastFacp)
@@ -16884,7 +16927,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 		nTempSize = GF_Unicode2ASCII(strLocLine.GetBuffer(), szBuff, 256);
 		fTxtLoc.Write(szBuff, nTempSize);
 
-
+		//20260526 GBM start - ROM 파일 역변환 기능을 사용하지 않음에 따른 주석 처리
+#if 0
 		// [KHS 2020-12-9 14:33:09] 
 		// 역변환 정보 파일 
 		// 수신기,유닛,계통,회로,입력이름,출력이름,설비명,출력설명,설비번호,입력건물,입력종류,입력계단,입력층,입력실,출력건물,출력종류,출력계단,출력층,입력실
@@ -16905,6 +16949,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 		fRvRelay.Write(szBuff, nTempSize);
 #endif
 		//WriteCrtText();
+#endif
+		//20260526 GBM end
 	}
 
 	// 마지막은 파일 생성 되지 않는다.
@@ -17064,6 +17110,9 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 	fnCrt.Close();
 	fnRom.Close();
 	fTxtLoc.Close();
+
+	//20260526 GBM start - ROM 파일 역변환 기능을 사용하지 않음에 따른 주석 처리
+#if 0
 	// [KHS 2020-12-9 14:33:09] 
 	// 역변환 정보 파일 
 	fRvRelay.Close();
@@ -17074,6 +17123,9 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 	MakeRvEmergencyInfo(strPath);
 	MakeRvPatternInfo(strPath);
 	MakeRvContactInfo(strPath);
+#endif
+	//20260526 GBM end
+
 	MakeManualOutput(strPath);
 
 	//20240329 GBM start - GT1APPENDIX.ROM 생성

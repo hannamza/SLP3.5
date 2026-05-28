@@ -422,20 +422,34 @@ void CFormPattern::OnInitialUpdate()
 #endif
 	m_ctrlRelayList.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-	int i = 0; 
+	//20260526 GBM start - 불필요한 패턴 종류 및 트리 노드 삭제
+#if 1
+	m_cmbPtnType.InsertString(PTN_PATTERN, g_szPatternTypeString[PTN_PATTERN]);
+	m_cmbPtnType.SetItemData(0, PTN_PATTERN);
+#else
+	int i = 0;
 	// [2025/7/9 16:39:28 KHS] 
 	//  PTN_SEARCH 제외
 	for (i = 0; i < PTN_COUNT - 1; i++)
 	{
-		m_cmbPtnType.InsertString(i,g_szPatternTypeString[i]);
-		m_cmbPtnType.SetItemData(i ,i );
+		m_cmbPtnType.InsertString(i, g_szPatternTypeString[i]);
+		m_cmbPtnType.SetItemData(i, i);
 	}
+#endif
+	//20260526 GBM end
+
 	theApp.SetFormViewInitComplete(FV_MAKEPATTERN);
 	m_ctrlPtnTree.SetCursorResourceID(IDC_DROPADD_CURSOR);
 	m_ctrlPtnTree.SetSendEventContainer(TRUE);
 	m_ctrlPtnTree.SetAllowDragFlag(TRUE);
 
+	//20260526 GBM start - 불필요한 패턴 종류 및 트리 노드 삭제
+#if 1
 	m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_SEARCH], FALSE);
+#else
+	m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_PATTERN], FALSE);
+#endif
+	//20260526 GBM end
 }
 
 
@@ -2401,7 +2415,7 @@ void CFormPattern::OnBnClickedBtnSearch()
 	}
 
 	if (m_hResultRoot == nullptr)
-		m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_CUSTOM], FALSE);
+		m_hResultRoot = GF_FindTreeByText(&m_ctrlPtnTree, m_ctrlPtnTree.GetRootItem(), g_szPatternTypeString[PTN_SEARCH], FALSE);
 	RemoveSearchResult();
 	nInsertCnt = m_pRefFasSysData->FillSearchResultPattern(&m_ctrlPtnTree, m_hResultRoot, &m_ptrResultList, strText);
 #ifndef ENGLISH_MODE

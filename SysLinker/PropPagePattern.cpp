@@ -125,6 +125,19 @@ BOOL CPropPagePattern::OnInitDialog()
 	m_ctrlPatternList.InsertColumn(2, _T("TYPE"), LVCFMT_CENTER, 80);
 #endif
 	m_ctrlPatternList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+	// 패턴 생성 및 미리 보기 기능을 비활성화하고 패턴을 바로 보여줌
+	m_pRefFasSysData->ProcessingPattern(
+		nullptr
+		, m_bBuild
+		, m_bBtype, m_bBtypeBuild
+		, m_bStair, m_bStairBuild, m_bStairBtype
+		, m_bLevel, m_bLevelBuild, m_bLevelBType, m_bLevelStair
+		, m_bRoom, m_bRoomBuild, m_bRoomBType, m_bRoomStair, m_bRoomLevel
+		, m_bEquip, m_bEquipBuild, m_bEquipBType, m_bEquipStair, m_bEquipLevel
+	);
+	m_pRefFasSysData->FillPatternList(&m_ctrlPatternList);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
