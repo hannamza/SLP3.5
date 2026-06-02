@@ -781,6 +781,8 @@ public:
 	//20240808 GBM end
 
 	void SetRecheckOutputContentInfo();
+
+	int GetEquipIDByName(int nEqType, CString strEqName);	//20260602 GBM - 설비 타입과 이름으로 id를 얻는 매서드 추가
 };
 
 

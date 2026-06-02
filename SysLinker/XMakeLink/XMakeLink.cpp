@@ -679,6 +679,11 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 	}
 	//WriteXMakeLinkLog(L"==================== Start ======================");
 
+	//20260602 GBM start - 비상방송 설비 ID 얻기
+	int nEBOutType = m_pRefRelayData->GetEquipIDByName(ET_OUTPUTTYPE, _T("비상방송"));
+	int nEBOutContents = m_pRefRelayData->GetEquipIDByName(ET_OUTCONTENTS, _T("비상방송"));
+	//20260602 GBM end
+
 	pos = pList->GetHeadPosition();
 	while(pos)
 	{
@@ -744,7 +749,8 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 				//	continue;
 					pDev->AddLinkMap(&mapOutDev);
 				}
-				if(pMst->m_pArrLgItem[i]->GetUseEmergency() == 1)
+				if((nEBOutType == pMst->m_pArrLgItem[i]->GetOutType())
+					&& (nEBOutContents == pMst->m_pArrLgItem[i]->GetOutContents()))
 					AddEMergency(pDev,pMst->m_pArrLgItem[i]);
 			}
 

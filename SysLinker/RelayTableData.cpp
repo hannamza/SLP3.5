@@ -22406,3 +22406,32 @@ void CRelayTableData::SetRecheckOutputContentInfo()
 		}
 	}
 }
+
+int CRelayTableData::GetEquipIDByName(int nEqType, CString strEqName)
+{
+	std::shared_ptr<CManagerEquip> spManager = GetEquipManager(nEqType);
+	if (spManager == nullptr)
+	{
+		return -1;
+	}
+
+	CDataEquip* pData;
+	POSITION pos;
+
+	pos = spManager->GetHeadPosition();
+	while (pos)
+	{
+		pData = spManager->GetNext(pos);
+		if (pData == nullptr)
+			break;
+
+		CString strName = pData->GetEquipName();
+		if (strName.Compare(strEqName) == 0)
+		{
+			int nEqID = pData->GetEquipID();
+			return nEqID;
+		}
+	}
+
+	return -1;
+}
