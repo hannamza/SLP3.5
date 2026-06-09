@@ -736,7 +736,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 		}
 		// 20251209 GBM end
 
-		if(m_nCheckType == 2) // 연동데이터 생성
+		if(m_nCheckType != ERR_CHECK_SIMPLE) // 연동데이터 생성, 롬파일 생성일 경우 아래 행정을 하지 않음
 			continue; 
 
 
