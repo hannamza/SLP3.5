@@ -290,6 +290,10 @@ void CFormAutoMake::OnBnClickedBtnMake()
 	m_ctrlList.DeleteAllItems();
 	m_ctrlTree.DeleteAllItems();
 	
+	//20260609 GBM start - 연동데이터 자동 생성 오류 검사 안함
+#if 1
+	AutoMakeStart_XMake();
+#else
 #ifndef ENGLISH_MODE
 	if(AfxMessageBox(L"연동데이터 자동생성 시작전 오류검사를 진행하실려면\nYes : 오류검사 후 연동데이터 생성\nNo:오류검사없이 연동데이터 생성",MB_YESNO | MB_ICONQUESTION) != IDYES)
 	{
@@ -323,6 +327,8 @@ void CFormAutoMake::OnBnClickedBtnMake()
 		pMainWnd->StartErrorCheck(ERR_CHECK_MAKEAUTOLINK, this);
 	}
 #endif
+#endif
+	//20260609 GBM end
 	
 }
 

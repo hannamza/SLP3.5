@@ -472,112 +472,115 @@ int CDlgErrorCheck::ProcErrorCheck()
 	SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_STEP);
 	//nProgress = 0;
 	nOffset = 0;
-	if(spPmng)
+
+	if (m_nCheckType == ERR_CHECK_SIMPLE) // 단순 오류 검사일 경우에만 아래 행정을 실행
 	{
-		if(m_bStopFlag == TRUE)
+		if (spPmng)
 		{
-			SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_CANCEL);
-			pDBUtil->DBClose();
-			delete pDBUtil;
-			pDBUtil = nullptr;
-			return 0; 
-		}
-
-		//20251210 GBM start - 패턴 자체 개수 추가	
-		if (nPatternCount > nMaxPatternCount)
-		{
-			// 사용자가 리스트에 아이템을 클릭하면 가장 빠른 번호의 패턴이 선택된 상태에서 트리가 펼쳐지도록 함
-			pos = spPmng->GetHeadPosition();
-			pPtn = spPmng->GetNext(pos);
-			if (pPtn != nullptr)
+			if (m_bStopFlag == TRUE)
 			{
-#ifndef ENGLISH_MODE
-				strDesc.Format(L"패턴 개수 초과 - %d개", nPatternCount);
-#else
-				strDesc.Format(L"Number of patterns exceeded - %d", nPatternCount);
-#endif
-				InsertErrorList(CHK_PATTERN_CNT, nPatternCount, (LPVOID)pPtn, strDesc);
-			}
-		}
-		SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
-		nOffset++;
-		//20251210 GBM end
-
-		nItemCnt = 0;
-		pos = spPmng->GetHeadPosition();
-		while(pos)
-		{
-			if(m_bStopFlag == TRUE)
-			{
-				SendMessage(CSWM_PROGRESS_STEP,0,PROG_RESULT_CANCEL);
+				SendMessage(CSWM_PROGRESS_STEP, 0, PROG_RESULT_CANCEL);
+				pDBUtil->DBClose();
+				delete pDBUtil;
+				pDBUtil = nullptr;
 				return 0;
 			}
-			pPtn = spPmng->GetNext(pos);
-			
-			if(pPtn == nullptr)
-				continue; 
-			nItemCnt = pPtn->GetItemCount();
-			if(nItemCnt > nMaxPatternItemCount)
+
+			//20251210 GBM start - 패턴 자체 개수 추가	
+			if (nPatternCount > nMaxPatternCount)
 			{
-				// Error 확인 - 리스트 입력
+				// 사용자가 리스트에 아이템을 클릭하면 가장 빠른 번호의 패턴이 선택된 상태에서 트리가 펼쳐지도록 함
+				pos = spPmng->GetHeadPosition();
+				pPtn = spPmng->GetNext(pos);
+				if (pPtn != nullptr)
+				{
 #ifndef ENGLISH_MODE
-				strDesc.Format(L"패턴 : %s 개수초과 - %d개" , pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
+					strDesc.Format(L"패턴 개수 초과 - %d개", nPatternCount);
 #else
-				strDesc.Format(L"Pattern : %s count limit exceeded - [%d] patterns", pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
+					strDesc.Format(L"Number of patterns exceeded - %d", nPatternCount);
 #endif
-				InsertErrorList(CHK_PATTERN_ITEM_CNT,nItemCnt,pPtn,strDesc);
+					InsertErrorList(CHK_PATTERN_CNT, nPatternCount, (LPVOID)pPtn, strDesc);
 			}
-			nOffset ++;
-			SendMessage(CSWM_PROGRESS_STEP,nOffset,PROG_RESULT_STEP);
 		}
-	}
-	else
-	{
-		nOffset += nPtnCnt;
-		SendMessage(CSWM_PROGRESS_STEP,nOffset,PROG_RESULT_STEP);
-	}
+			SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
+			nOffset++;
+			//20251210 GBM end
 
-	// 층번호 중복
-	strSql.Format(
-		L"SELECT A.* FROM TB_LOC_FLOOR A ,"
-		L"	(SELECT BD_ID,BTYPE_ID,STAIR_ID,FL_NUM,COUNT(*) AS CNT FROM TB_LOC_FLOOR"
-		L"		WHERE FL_NUM < 1000"
-		L"		GROUP BY FL_NUM,BD_ID,BTYPE_ID,STAIR_ID"
-		L"		HAVING COUNT(*) > 1) B"
-		L"	WHERE A.BD_ID = B.BD_ID AND A.BTYPE_ID = B.BTYPE_ID  AND A.FL_NUM = B.FL_NUM");
+			nItemCnt = 0;
+			pos = spPmng->GetHeadPosition();
+			while (pos)
+			{
+				if (m_bStopFlag == TRUE)
+				{
+					SendMessage(CSWM_PROGRESS_STEP, 0, PROG_RESULT_CANCEL);
+					return 0;
+				}
+				pPtn = spPmng->GetNext(pos);
 
-	if(pDBUtil->OpenQuery(strSql))
-	{
-		nCnt = pDBUtil->GetRecordCount();
-		for(i = 0; i < nCnt; i++)
+				if (pPtn == nullptr)
+					continue;
+				nItemCnt = pPtn->GetItemCount();
+				if (nItemCnt > nMaxPatternItemCount)
+				{
+					// Error 확인 - 리스트 입력
+#ifndef ENGLISH_MODE
+					strDesc.Format(L"패턴 : %s 개수초과 - %d개", pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
+#else
+					strDesc.Format(L"Pattern : %s count limit exceeded - [%d] patterns", pPtn->GetPatternName(), nItemCnt);	//20240611 GBM - 오류 수정, 패턴 명 변수 미입력
+#endif
+					InsertErrorList(CHK_PATTERN_ITEM_CNT, nItemCnt, pPtn, strDesc);
+				}
+				nOffset++;
+				SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
+			}
+	}
+		else
 		{
-			pDBUtil->GetFieldValue(L"BD_ID",nBid);
-			pDBUtil->GetFieldValue(L"BTYPE_ID",nBtype);
-			pDBUtil->GetFieldValue(L"STAIR_ID",nSid);
-			pDBUtil->GetFieldValue(L"FL_ID",nFlid);
-			pDBUtil->GetFieldValue(L"FL_NUM",nFlNum);
-			pDBUtil->GetFieldValue(L"FL_NAME",strName);
-			pLoc = (CDataLocStair*)m_pRefFasSysData->GetLocation(nBid,nBtype,nSid);
-			if(pLoc == nullptr)
-			{
-				pDBUtil->MoveNext();
-				continue; 
-			}
-#ifndef ENGLISH_MODE
-			strDesc.Format(L"\"%s %s %s %s\" 층번호 중복 : %d "
-				,pLoc->GetBuildName() ,pLoc->GetBTypeName() ,pLoc->GetStairName() ,strName
-				,nFlNum);
-#else
-			strDesc.Format(L"\"%s %s %s %s\" floor number duplicate: %d "
-				, pLoc->GetBuildName(), pLoc->GetBTypeName(), pLoc->GetStairName(), strName
-				, nFlNum);
-#endif
-			InsertErrorList(CHK_LEVEL_DUP,nSize,pLoc,strDesc);
-			pDBUtil->MoveNext();
+			nOffset += nPtnCnt;
+			SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
 		}
-		pDBUtil->RSClose();
-	}
 
+		// 층번호 중복
+		strSql.Format(
+			L"SELECT A.* FROM TB_LOC_FLOOR A ,"
+			L"	(SELECT BD_ID,BTYPE_ID,STAIR_ID,FL_NUM,COUNT(*) AS CNT FROM TB_LOC_FLOOR"
+			L"		WHERE FL_NUM < 1000"
+			L"		GROUP BY FL_NUM,BD_ID,BTYPE_ID,STAIR_ID"
+			L"		HAVING COUNT(*) > 1) B"
+			L"	WHERE A.BD_ID = B.BD_ID AND A.BTYPE_ID = B.BTYPE_ID  AND A.FL_NUM = B.FL_NUM");
+
+		if (pDBUtil->OpenQuery(strSql))
+		{
+			nCnt = pDBUtil->GetRecordCount();
+			for (i = 0; i < nCnt; i++)
+			{
+				pDBUtil->GetFieldValue(L"BD_ID", nBid);
+				pDBUtil->GetFieldValue(L"BTYPE_ID", nBtype);
+				pDBUtil->GetFieldValue(L"STAIR_ID", nSid);
+				pDBUtil->GetFieldValue(L"FL_ID", nFlid);
+				pDBUtil->GetFieldValue(L"FL_NUM", nFlNum);
+				pDBUtil->GetFieldValue(L"FL_NAME", strName);
+				pLoc = (CDataLocStair*)m_pRefFasSysData->GetLocation(nBid, nBtype, nSid);
+				if (pLoc == nullptr)
+				{
+					pDBUtil->MoveNext();
+					continue;
+				}
+#ifndef ENGLISH_MODE
+				strDesc.Format(L"\"%s %s %s %s\" 층번호 중복 : %d "
+					, pLoc->GetBuildName(), pLoc->GetBTypeName(), pLoc->GetStairName(), strName
+					, nFlNum);
+#else
+				strDesc.Format(L"\"%s %s %s %s\" floor number duplicate: %d "
+					, pLoc->GetBuildName(), pLoc->GetBTypeName(), pLoc->GetStairName(), strName
+					, nFlNum);
+#endif
+				InsertErrorList(CHK_LEVEL_DUP, nSize, pLoc, strDesc);
+				pDBUtil->MoveNext();
+			}
+			pDBUtil->RSClose();
+		}
+	}
 
 	for(it = pRefMap->begin(); it != pRefMap->end(); it++)
 	{
@@ -589,21 +592,100 @@ int CDlgErrorCheck::ProcErrorCheck()
 			pDBUtil = nullptr;
 			return 0;
 		}
-		
+
+		//
 		pData = it->second;
-		if(pData == nullptr)
+		if (pData == nullptr)
 			continue;
 		strKey = it->first;
-		if(strKey == L"")
+		if (strKey == L"")
 			continue;
-		if(pData->GetSysData() == nullptr || pData->GetDataType() != SE_RELAY)
+		if (pData->GetSysData() == nullptr || pData->GetDataType() != SE_RELAY)
 			continue;
-		SendMessage(CSWM_PROGRESS_STEP,nOffset,PROG_RESULT_STEP);
-		if(m_nCheckType != ERR_CHECK_MAKEAUTOLINK)
+		SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
+		if (m_nCheckType != ERR_CHECK_MAKEAUTOLINK)
 			nOffset += 4;
 		else
 			nOffset += 2;
 		pDev = (CDataDevice *)pData->GetSysData();
+		//
+
+		//
+		// 20251209 GBM start - 아래에서 연동데이터 자동 생성 시 진행하지 않으므로 여기서 가스, 밸브 중복 여부를 판단해야 함
+		// 가스, 밸브 중복 여부 판단
+		CString strRecheckErr = _T("");
+		memset(nCountList, 0, sizeof(int) * nListSize);
+		CDataLinked* pDataLinked = nullptr;
+		int nType = -1;
+		CPtrList* pList = pDev->GetLinkedList();
+		pos = pList->GetHeadPosition();
+		while (pos)
+		{
+			pDataLinked = (CDataLinked*)pList->GetNext(pos);
+			if (pDataLinked == nullptr)
+				continue;
+
+			nType = pDataLinked->GetLinkType();
+			switch (nType)
+			{
+			case LK_TYPE_RELEAY:
+				pTemp = pRelayTableData->GetDeviceByID(pDataLinked->GetTgtFacp(), pDataLinked->GetTgtUnit(), pDataLinked->GetTgtChn(), pDataLinked->GetTgtDev());
+				if (pTemp == nullptr)
+					break;
+
+				for (int i = 0; i < nListSize; i++)
+				{
+					int nEquipID = pRelayTableData->m_roci.IDVec[i];
+					CDataEquip* pDataEquip = pTemp->GetEqOutContents();
+					if (pDataEquip != nullptr)
+					{
+						if (nEquipID == pDataEquip->GetEquipID())
+						{
+							nCountList[i]++;
+						}
+					}
+				}
+
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		BOOL bAlert = FALSE;
+		if (nListSize > 0)
+		{
+#ifndef ENGLISH_MODE
+			strRecheckErr.Format(_T("[%02d%02d-%d%03d] %s의 연동데이터에 문제가 있습니다. "), pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum(), pDev->GetEquipLocationName());
+#else
+			strRecheckErr.Format(_T("There is a problem with [%02d%02d-%d%03d] %s linked data. "), pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum(), pDev->GetEquipLocationName());
+#endif
+			for (int i = 0; i < nListSize; i++)
+			{
+				if (nCountList[i] > 1)
+				{
+					CString strTemp = _T("");
+#ifndef ENGLISH_MODE
+					strTemp.Format(_T("[%s]의 연동데이터 개수가 %d개 입니다. "), pRelayTableData->m_roci.nameVec[i], nCountList[i]);
+#else
+					strTemp.Format(_T("The number of linked data for [%s] is %d "), pRelayTableData->m_roci.nameVec[i], nCountList[i]);
+#endif
+					strRecheckErr += strTemp;
+					bAlert = TRUE;
+				}
+			}
+		}
+
+		if (bAlert)
+		{
+			InsertErrorList(CHK_GAS_VALVE_REDUNDANCY, 0, pDev, strRecheckErr);
+		}
+		// 20251209 GBM end
+		//
+
+		if (m_nCheckType != ERR_CHECK_SIMPLE) // 연동데이터 생성에는 오류검사 자체를 진행하지 않고, 롬파일 생성일 경우 아래 행정을 하지 않음
+			continue;
 
 		TRACE(L"=================1. %s\n" , pDev->GetInputFullName());
 		// 이름 길이
@@ -663,85 +745,6 @@ int CDlgErrorCheck::ProcErrorCheck()
 #endif
 			InsertErrorList(CHK_NOINPUT,0,pDev,strDesc);
 		}
-
-		// 20251209 GBM start - 아래에서 연동데이터 자동 생성 시 진행하지 않으므로 여기서 가스, 밸브 중복 여부를 판단해야 함
-		// 가스, 밸브 중복 여부 판단
-		CString strRecheckErr = _T("");
-		memset(nCountList, 0, sizeof(int) * nListSize);
-		CDataLinked* pDataLinked = nullptr;
-		int nType = -1;
-		CPtrList* pList = pDev->GetLinkedList();
-		pos = pList->GetHeadPosition();
-		while (pos)
-		{
-			pDataLinked = (CDataLinked*)pList->GetNext(pos);
-			if(pDataLinked == nullptr)
-				continue;
-
-			nType = pDataLinked->GetLinkType();
-			switch (nType)
-			{
-			case LK_TYPE_RELEAY:
-				pTemp = pRelayTableData->GetDeviceByID(pDataLinked->GetTgtFacp(), pDataLinked->GetTgtUnit(), pDataLinked->GetTgtChn(), pDataLinked->GetTgtDev());
-				if (pTemp == nullptr)
-					break;
-
-				for (int i = 0; i < nListSize; i++)
-				{
-					int nEquipID = pRelayTableData->m_roci.IDVec[i];
-					CDataEquip* pDataEquip = pTemp->GetEqOutContents();
-					if (pDataEquip != nullptr)
-					{
-						if (nEquipID == pDataEquip->GetEquipID())
-						{
-							nCountList[i]++;
-						}
-					}
-				}
-
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		BOOL bAlert = FALSE;
-		if (nListSize > 0)
-		{
-#ifndef ENGLISH_MODE
-			strRecheckErr.Format(_T("[%02d%02d-%d%03d] %s의 연동데이터에 문제가 있습니다. "), pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum(), pDev->GetEquipLocationName());
-#else
-			strRecheckErr.Format(_T("There is a problem with [%02d%02d-%d%03d] %s linked data. "), pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum(), pDev->GetEquipLocationName());
-#endif
-			for (int i = 0; i < nListSize; i++)
-			{
-				if (nCountList[i] > 1)
-				{
-					CString strTemp = _T("");
-#ifndef ENGLISH_MODE
-					strTemp.Format(_T("[%s]의 연동데이터 개수가 %d개 입니다. "), pRelayTableData->m_roci.nameVec[i], nCountList[i]);
-#else
-					strTemp.Format(_T("The number of linked data for [%s] is %d "), pRelayTableData->m_roci.nameVec[i], nCountList[i]);
-#endif
-					strRecheckErr += strTemp;
-					bAlert = TRUE;
-				}
-			}
-		}
-		
-		if (bAlert)
-		{
-			InsertErrorList(CHK_GAS_VALVE_REDUNDANCY, 0, pDev, strRecheckErr);
-		}
-		// 20251209 GBM end
-
-		if(m_nCheckType != ERR_CHECK_SIMPLE) // 연동데이터 생성, 롬파일 생성일 경우 아래 행정을 하지 않음
-			continue; 
-
-
-//////////////////////////////////////////////////////////////////////////
-/// 연동데이터 자동 생성 시 확인하지 않음
 
 		// 4. 연동출력 개수 확인 - 접점 , 회로
 		// 5. 출력 없는 입력 - 점점 + 회로
