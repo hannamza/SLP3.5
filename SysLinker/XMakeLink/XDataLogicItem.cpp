@@ -416,7 +416,10 @@ BOOL CXDataLogicItem::MatchStair(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 
 BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 {
-
+	// [2026/6/10 10:07:16 KHS] 
+	// 발생 층이 지하 일때도 범위 적용
+	// 지하 로직 - 사용 때 : ?
+	//          - 사용하지 않을 때 : ?
 	BOOL bRet = FALSE;
 	int nSrcFlNum = src->GetLocFloorNumber();
 	int nTgtFlNum = tgt->GetFloorNumber();
@@ -431,7 +434,9 @@ BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 			bRet = FALSE;
 	}
 	else
+	{
 		bRet = TRUE;
+	}
 	return bRet;
 }
 

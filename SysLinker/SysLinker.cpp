@@ -1165,7 +1165,6 @@ BOOL CSysLinkerApp::PostMessageAllView(UINT uMsg, WPARAM wp, LPARAM lp)
 	PostMessageFormView(FV_RELAYEDIT, uMsg, wp, lp);
 	PostMessageFormView(FV_AUTOMAKE, uMsg, wp, lp);
 	PostMessageFormView(FV_LOGICEDIT, uMsg, wp, lp);
-	PostMessageFormView(FV_LOGICEDIT, uMsg, wp, lp);
 	PostMessageFormView(FV_LOADRELAYTABLE, uMsg, wp, lp);
 	return TRUE;
 }
