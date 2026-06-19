@@ -193,7 +193,8 @@ public:
 	void CopyTreeItem(ST_TREEITEM * pCurData, ST_TREEITEM * pNewData);
 	BOOL ChangeTreeItem(ST_TREEITEM * pSourceData, ST_TREEITEM * pTargetData);
 	void DeleteTreeItem(ST_TREEITEM * pNewData);
-	void SetNewTreeItem(int nType, ST_TREEITEM * pNewData);
+	void SetNewTreeItem(int nType);
+	void ClearNewData();
 	void AddInit(int nAddType);
 	void AddCancel();
 	int DataAdd();

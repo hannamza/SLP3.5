@@ -207,20 +207,10 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(
 			}
 			else
 			{
-				if(pItem->GetUseUnderLogic())
-				{
-					n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
-					n2 = pItem->MatchBType(pDev,pFloor,FALSE);
-					n3 = pItem->MatchStair(pDev,pFloor,FALSE);
-					n4 = nTgtFlNum <= -1 ? 1 : 0;
-				}
-				else
-				{
-					n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-					n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-					n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-					n4 = pItem->MatchFloorRange(pDev,pFloor);
-				}
+				n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
+				n2 = pItem->MatchBType(pDev,pFloor,FALSE);
+				n3 = pItem->MatchStair(pDev,pFloor,FALSE);
+				n4 = nTgtFlNum <= -1 ? 1 : 0;
 			}
 
 			if(n1 && n2 && n3 && n4)
@@ -236,20 +226,10 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(
 			{
 				if(nTgtFlNum <= -1)
 				{
-					if(pItem->GetUseUnderLogic())
-					{
-						n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
-						n2 = pItem->MatchBType(pDev,pFloor,FALSE);
-						n3 = pItem->MatchStair(pDev,pFloor,FALSE);
-						n4 = 1;
-					}
-					else
-					{
-						n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-						n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-						n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-						n4 = pItem->MatchFloorRange(pDev,pFloor);
-					}
+					n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
+					n2 = pItem->MatchBType(pDev,pFloor,FALSE);
+					n3 = pItem->MatchStair(pDev,pFloor,FALSE);
+					n4 = 1;
 				}
 				else
 				{
@@ -278,20 +258,10 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(
 			{
 				if(nTgtFlNum < 0)
 				{
-					if(pItem->GetUseUnderLogic())
-					{
-						n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
-						n2 = pItem->MatchBType(pDev,pFloor,FALSE);
-						n3 = pItem->MatchStair(pDev,pFloor,FALSE);
-						n4 = pItem->GetUnder1F() == 1 ? 1 : 0;
-					}
-					else
-					{
-						n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-						n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-						n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-						n4 = pItem->MatchFloorRange(pDev,pFloor);
-					}
+					n1 = pItem->MatchBuild(pDev, pFloor, FALSE);
+					n2 = pItem->MatchBType(pDev, pFloor, FALSE);
+					n3 = pItem->MatchStair(pDev, pFloor, FALSE);
+					n4 = pItem->GetUnder1F() == 1 ? 1 : 0;
 				}
 				else
 				{
@@ -308,15 +278,7 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(
 		{
 			if(nTgtFlNum < 0)
 			{
-				if(pItem->GetUseUnderLogic())
-					n1 = n2 = n3 = n4 = 0;
-				else
-				{
-					n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-					n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-					n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-					n4 = pItem->MatchFloorRange(pDev,pFloor);
-				}
+				n1 = n2 = n3 = n4 = 0;
 			}
 			else
 			{

@@ -103,8 +103,9 @@ POSITION CDataPattern::FindItemByID(int nType, int nFacpID, int nUnitID, int nCh
 		pLnk = (CDataLinked *)m_ptrPtnItemList.GetNext(pos);
 		if (pLnk == nullptr)
 			continue;
+
 		if (pLnk->GetLinkType() != nType)
-			continue; 
+			continue;
 		if (pLnk->GetTgtFacp() != nFacpID)
 			continue; 
 		if (pLnk->GetTgtUnit() != nUnitID)
@@ -113,6 +114,7 @@ POSITION CDataPattern::FindItemByID(int nType, int nFacpID, int nUnitID, int nCh
 			continue;
 		if (pLnk->GetTgtDev() != nRelayID)
 			continue;
+
 		return savePos;
 	}
 	return nullptr;
@@ -123,8 +125,19 @@ BOOL CDataPattern::DeleteItemByID(int nType, int nFacpID, int nUnitID, int nChnI
 	POSITION pos = nullptr, savePos = nullptr;
 	pos = FindItemByID(nType,nFacpID, nUnitID, nChnID, nRelayID);
 	if (pos == nullptr)
-		return TRUE;
+		return FALSE;
+
+	// 메모리 누수 방지
+	CDataLinked* pDataLinked = (CDataLinked*)m_ptrPtnItemList.GetAt(pos);
+	if (pDataLinked != nullptr)
+	{
+		delete pDataLinked;
+		pDataLinked = nullptr;
+	}
+	//20260615 GBM end
+
 	m_ptrPtnItemList.RemoveAt(pos);
+	
 	return TRUE;
 }
 

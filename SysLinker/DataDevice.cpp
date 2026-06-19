@@ -857,3 +857,10 @@ CString CDataDevice::GetEquipLocationName()
 	}
 	return strRet;
 }
+
+void CDataDevice::UpdateFullName()
+{
+	m_strFullInputName = MakeFullName(ET_INPUTTYPE);
+	m_strFullOutputName = MakeFullName(ET_OUTPUTTYPE);
+	m_strFullOutCotents = MakeFullName(ET_OUTCONTENTS);
+}

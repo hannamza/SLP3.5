@@ -2036,13 +2036,11 @@ void CSysLinkerView::OnAddFacp()
 	ShowChildPage(m_nAddType);
 	if (m_pNewData->nDataType == SE_FACP)
 	{
-		DeleteTreeItem(m_pNewData);
 		CopyTreeItem(m_pRefCurData, m_pNewData);
 	}
 	else
 	{
-		DeleteTreeItem(m_pNewData);
-		SetNewTreeItem(SE_FACP, m_pNewData);
+		SetNewTreeItem(SE_FACP);
 	}
 // 	DeleteTreeItem(m_pNewData);
 // 	SetNewTreeItem(SE_FACP, m_pNewData);
@@ -2059,15 +2057,13 @@ void CSysLinkerView::OnAddUnit()
 	ShowChildPage(m_nAddType);
 	if (m_pNewData->nDataType == SE_UNIT)
 	{
-		DeleteTreeItem(m_pNewData);
 		CopyTreeItem(m_pRefCurData, m_pNewData);
 		m_pNewData->hItem = nullptr;
 		m_pNewData->hParent = nullptr;
 	}
 	else
 	{
-		DeleteTreeItem(m_pNewData);
-		SetNewTreeItem(SE_UNIT, m_pNewData);
+		SetNewTreeItem(SE_UNIT);
 	}
 //  	DeleteTreeItem(m_pNewData);
 //  	SetNewTreeItem(SE_UNIT, m_pNewData);
@@ -2084,15 +2080,13 @@ void CSysLinkerView::OnAddChn()
 	//m_bPreviewComplete = TRUE;
 	if (m_pNewData->nDataType == SE_CHANNEL)
 	{
-		DeleteTreeItem(m_pNewData);
 		CopyTreeItem(m_pRefCurData, m_pNewData);
 		m_pNewData->hItem = nullptr;
 		m_pNewData->hParent = nullptr;
 	}
 	else
 	{
-		DeleteTreeItem(m_pNewData);
-		SetNewTreeItem(SE_CHANNEL, m_pNewData);
+		SetNewTreeItem(SE_CHANNEL);
 	}
 	
 	m_pPage[m_nAddType]->DisplayItem(nullptr, m_pNewData);
@@ -2109,15 +2103,13 @@ void CSysLinkerView::OnAddRelay()
 
 	if (m_pNewData->nDataType == SE_RELAY)
 	{
-		DeleteTreeItem(m_pNewData);
 		CopyTreeItem(m_pRefCurData, m_pNewData);
 		m_pNewData->hItem = nullptr;
 		m_pNewData->hParent = nullptr;
 	}
 	else
 	{
-		DeleteTreeItem(m_pNewData);
-		SetNewTreeItem(SE_RELAY, m_pNewData);
+		SetNewTreeItem(SE_RELAY);
 	}
 	m_pPage[m_nAddType]->DisplayItem(nullptr, m_pNewData);
 	m_pPage[m_nAddType]->SetAddFlag(TRUE);
@@ -2222,14 +2214,33 @@ void CSysLinkerView::DeleteTreeItem(ST_TREEITEM * pNewData)
 // 	memset((void*)pNewData, 0, sizeof(ST_TREEITEM));
 }
 
-void CSysLinkerView::SetNewTreeItem(int nType, ST_TREEITEM * pNewData)
+void CSysLinkerView::SetNewTreeItem(int nType)
 {
-	CDataSystem * pSys = new CDataSystem;
+	ClearNewData();
+
+	CDataSystem* pSys = new CDataSystem;
 	pSys->SetNewSysData(nType);
-	pNewData->hItem = nullptr;
-	pNewData->hParent = nullptr;
-	pNewData->nDataType = nType;
-	pNewData->pData = pSys;
+
+	m_pNewData->hItem = nullptr;
+	m_pNewData->hParent = nullptr;
+	m_pNewData->nDataType = nType;
+	m_pNewData->pData = pSys;
+}
+
+void CSysLinkerView::ClearNewData()
+{
+	if (m_pNewData == nullptr)
+		return;
+
+	if (m_pNewData->pData != nullptr)
+	{
+		delete (CDataSystem*)m_pNewData->pData;
+		m_pNewData->pData = nullptr;
+	}
+
+	m_pNewData->hItem = nullptr;
+	m_pNewData->hParent = nullptr;
+	m_pNewData->nDataType = -1;
 }
 
 void CSysLinkerView::AddInit(int nAddType)
@@ -2474,6 +2485,10 @@ int CSysLinkerView::DeleteMemoryRelationLowerItems()
 		if (pPs == nullptr)
 			continue; 
 		pPs->DeleteLink(pRm->btLinkType, pRm->nTgtFacp, pRm->nTgtUnit, pRm->nTgtChn, pRm->nTgtDev);
+
+		// 메모리 누수 방지
+		delete pRm;
+		pRm = nullptr;
 	}
 	
 	// 2. 펌프 삭제
@@ -2486,6 +2501,10 @@ int CSysLinkerView::DeleteMemoryRelationLowerItems()
 		if (pPmp == nullptr)
 			continue;
 		pPmp->DeleteLink(pRm->btLinkType, pRm->nTgtFacp, pRm->nTgtUnit, pRm->nTgtChn, pRm->nTgtDev);
+
+		// 메모리 누수 방지
+		delete pRm;
+		pRm = nullptr;
 	}
 
 	// 3. 패턴 삭제
@@ -2498,6 +2517,10 @@ int CSysLinkerView::DeleteMemoryRelationLowerItems()
 		if (pPtn == nullptr)
 			continue;
 		pPtn->DeleteItemByID(pRm->btLinkType, pRm->nTgtFacp, pRm->nTgtUnit, pRm->nTgtChn, pRm->nTgtDev);
+
+		// 메모리 누수 방지
+		delete pRm;
+		pRm = nullptr;
 	}
 
 	// 4. Output 삭제
@@ -2509,7 +2532,9 @@ int CSysLinkerView::DeleteMemoryRelationLowerItems()
 		pRm = (ST_REMOVE_LINKED*)m_ptrDeleteRelationOutputLinkItems.RemoveHead();
 		if (pRm == nullptr)
 			continue;
-		strKey = GF_GetIDSysDataKey(SE_RELAY, pRm->nSrcFacp, pRm->nSrcUnit, pRm->nSrcChn, pRm->nSrcDev);
+
+		//번호는 회로를 제외하고 ID - 1
+		strKey = GF_GetSysDataKey(SE_RELAY, pRm->nSrcFacp - 1, pRm->nSrcUnit - 1, pRm->nSrcChn - 1, pRm->nSrcDev);
 		pTemp = (*pMap)[strKey];
 		if (pTemp == nullptr || pTemp->GetSysData() == nullptr || pTemp->GetDataType() != SE_RELAY)
 			continue;
@@ -2517,6 +2542,10 @@ int CSysLinkerView::DeleteMemoryRelationLowerItems()
 		if (pDev == nullptr)
 			continue;
 		pDev->DeleteLinkByID(pRm->btLinkType, pRm->nTgtFacp, pRm->nTgtUnit, pRm->nTgtChn, pRm->nTgtDev);
+
+		// 메모리 누수 방지
+		delete pRm;
+		pRm = nullptr;
 	}
 
 	// 5. 유닛 삭제
@@ -3057,6 +3086,7 @@ int CSysLinkerView::DataSaveRelay(YAdoDatabase * pDB)
 	if (pSys->GetDataType() != SE_RELAY || pSys->GetSysData() == nullptr)
 		return 0;
 	pNew = (CDataDevice*)pSys->GetSysData();
+	pNew->UpdateFullName();		// 20260617 GBM - 회로 정보 저장 후 입력 회로 트리에서 회로 이름이 업데이트되지 않는 오류 수정
 
 	strSql.Format(L"SELECT * FROM TB_RELAY_LIST WHERE FACP_ID=%d AND UNIT_ID=%d AND CHN_ID=%d AND RLY_ID=%d "
 		, pNew->GetFacpID(), pNew->GetUnitID(), pNew->GetChnID(), pNew->GetDeviceID()
@@ -3169,12 +3199,13 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 		m_vtDeleteRelationFacp.push_back(nF);
 
 		strDelFacp.Format(L"DELETE FROM TB_FACP WHERE FACP_ID=%d ", pFacp->GetFacpID());
-		strSelectFacp.Format(L"SELECT  * FROM TB_UNIT WHERE FACP_ID=%d ", pFacp->GetFacpID());
+		strSelectFacp.Format(L"SELECT  * FROM TB_FACP WHERE FACP_ID=%d ", pFacp->GetFacpID());
 		strDelUnit.Format(L"DELETE FROM TB_UNIT WHERE FACP_ID=%d ", pFacp->GetFacpID());
-		strSelectChn.Format(L"SELECT * FROM TB_CHANNEL WHERE FACP_ID=%d ", pFacp->GetFacpID());
+		strSelectUnit.Format(L"SELECT * FROM TB_UNIT WHERE FACP_ID=%d", pFacp->GetFacpID());
 		strDelChn.Format(L"DELETE FROM TB_CHANNEL WHERE FACP_ID=%d ", pFacp->GetFacpID());
-		strSelectDev.Format(L"SELECT * FROM TB_RELAY_LIST WHERE FACP_ID=%d ", pFacp->GetFacpID());
+		strSelectChn.Format(L"SELECT * FROM TB_CHANNEL WHERE FACP_ID=%d ", pFacp->GetFacpID());
 		strDelDev.Format(L"DELETE FROM TB_RELAY_LIST WHERE FACP_ID=%d ", pFacp->GetFacpID());
+		strSelectDev.Format(L"SELECT * FROM TB_RELAY_LIST WHERE FACP_ID=%d ", pFacp->GetFacpID());
 		strDelInputLink.Format(L"DELETE FROM TB_LINK_RELAY WHERE SRC_FACP=%d ", pFacp->GetFacpID());
 		strSelectOutput.Format(L"SELECT * FROM TB_LINK_RELAY WHERE LINK_TYPE=%d AND TGT_FACP=%d "
 			, LK_TYPE_RELEAY, pFacp->GetFacpID());
@@ -3195,6 +3226,7 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 		break;
 	case TTYPE_DEV_UNIT:
 		pUnit = (CDataUnit*)pSys->GetSysData();
+		nF = pUnit->GetFacpNum();
 		nif = pUnit->GetFacpID();
 		nU = pUnit->GetUnitNum();
 		niu = pUnit->GetUnitID();
@@ -3378,6 +3410,8 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 				strKey.Format(L"%02d.%02d", nF, nU);
 				m_vtDeleteRelationUnit.push_back(strKey);
 			}
+
+			pDB->MoveNext();
 		}
 	}
 
@@ -3397,10 +3431,13 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 			if (pDB->GetFieldValue(L"CHN_ID", nic) == FALSE)
 				continue;
 
-			strKey = GF_GetIDSysDataKey(SE_CHANNEL, nif, niu, nic);
+			// 번호는 회로번호를 제외하고 ID - 1
+			strKey = GF_GetSysDataKey(SE_CHANNEL, nif - 1, niu - 1, nic - 1);
 			pTemp = (*pMap)[strKey];
 			if (pTemp)
 				m_ptrDeleteRelationLowerItems.AddTail(pTemp);
+
+			pDB->MoveNext();
 		}
 	}
 
@@ -3425,10 +3462,13 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 			if (pDB->GetFieldValue(L"RLY_ID", nir) == FALSE)
 				continue;
 
-			strKey = GF_GetIDSysDataKey(SE_RELAY, nif, niu, nic, nir);
+			// 번호는 회로번호를 제외하고 ID - 1
+			strKey = GF_GetSysDataKey(SE_RELAY, nif - 1, niu - 1, nic - 1, nir);
 			pTemp = (*pMap)[strKey];
 			if (pTemp)
 				m_ptrDeleteRelationLowerItems.AddTail(pTemp);
+
+			pDB->MoveNext();
 		}
 		if (pDB->ExecuteSql(strDelDev) == FALSE)
 			return 0;
@@ -3485,6 +3525,8 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 		pRm->nTgtDev = ntr;
 		pRm->btLinkType = nlnkType;
 		m_ptrDeleteRelationOutputLinkItems.AddTail(pRm);
+
+		pDB->MoveNext();
 	}
 	if (pDB->ExecuteSql(strDelOutput) == FALSE)
 		return 0;
@@ -3516,7 +3558,14 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 		pRm->nTgtUnit = niu;
 		pRm->nTgtChn = nic;
 		pRm->nTgtDev = nir;
+
+		// 수신기 / 유닛 / 계통 / 회로의 삭제로 패턴 아이템이 삭제되는 경우는 모두 LK_TYPE_RELEAY이므로 고정 값을 넣음
+		// TB_PATTERN_ITEM Scheme에는 Link Type이 없음
+		pRm->btLinkType = LK_TYPE_RELEAY;	
+											
 		m_ptrDeleteRelationPatternItems.AddTail(pRm);
+
+		pDB->MoveNext();
 	}
 	if (pDB->ExecuteSql(strDelPattern) == FALSE)
 		return 0;
@@ -3549,6 +3598,8 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 		pRm->nTgtChn = nic;
 		pRm->nTgtDev = nir;
 		m_ptrDeleteRelationPumpItems.AddTail(pRm);
+
+		pDB->MoveNext();
 	}
 	if (pDB->ExecuteSql(strDelPump) == FALSE)
 		return 0;
@@ -3584,6 +3635,8 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 		pRm->nTgtChn = nic;
 		pRm->nTgtDev = nir;
 		m_ptrDeleteRelationPSwitchItems.AddTail(pRm);
+
+		pDB->MoveNext();
 	}
 	if (pDB->ExecuteSql(strDelPSwich) == FALSE)
 		return 0;

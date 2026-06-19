@@ -209,6 +209,8 @@ public:
 	CDataLinked * GetLink(int nLnkType
 		, int nFacpID, int nUnitID, int nChnID, int nRelayID
 		, BOOL bCheckLnkType = TRUE);
+
+	void UpdateFullName();
 };
 
 
