@@ -7,6 +7,7 @@ class CXDataDev;
 class CXDataLogicMst;
 class CXDataLogicItem;
 class CXDataEqType;
+class CXDataRangeLogic;
 
 class CXDataBuild : public CObject
 {
@@ -41,16 +42,22 @@ public:
 
 	int IsIncluded(CString strNamePart);
 
-	// [2025/8/1 8:07:56 KHS] 
-	// 입력 조건에 맞는 Device 목록 가져오기
-	BOOL GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem);
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(
-		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic);
+		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst);
 
 	BOOL GetBuildAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
 
 	BOOL CopyData(CXDataBuild* pSrc);
+
+
+	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange);
+
+	BOOL GetRangeOutputDevice(
+		CXDataDev * pInDev,CXMapLink * pMapOutDev
+		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	);
+
 };
 

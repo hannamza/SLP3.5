@@ -75,12 +75,36 @@ void CXDataDev::RemoveAllData()
 	}
 }
 
-int CXDataDev::GetInType()
+int CXDataDev::GetInTypeID()
 {
 	if(m_pRefEqInput == nullptr)
 		return 0; 
 
 	return m_pRefEqInput->GetEquipID();
+}
+
+int CXDataDev::GetOutTypeID()
+{
+	if(m_pRefEqOutput == nullptr)
+		return 0;
+
+	return m_pRefEqOutput->GetEquipID();
+}
+
+int CXDataDev::GetEqNameID()
+{
+	if(m_pRefEqName == nullptr)
+		return 0;
+
+	return m_pRefEqName->GetEquipID();
+}
+
+int CXDataDev::GetOutContID()
+{
+	if(m_pRefEqOutContents == nullptr)
+		return 0;
+
+	return m_pRefEqOutContents->GetEquipID();
 }
 // CXDataDev ¸â¹ö ÇÔ¼ö
 BOOL CXDataDev::CopyData(CDataDevice * pSrc)

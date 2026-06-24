@@ -25,9 +25,7 @@ public:
 	POSITION FindTypeData(int nType,int nName);
 
 	BOOL GetAllTypeLocDevList(CXMapDev * pDevList,BOOL bRemoveDev);
-	// [2025/8/1 8:07:56 KHS] 
-	// 입력 조건에 맞는 Device 목록 가져오기
-	BOOL GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicMst * pMst,CXDataLogicItem * pItem);
+
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(
@@ -35,5 +33,10 @@ public:
 		,int nRangeLogic);
 
 	CXDataEqType *  GetCopyTypeData(int nType,int nName);
+
+	BOOL GetRangeOutputDevice(
+		CXDataDev * pInDev,CXMapLink * pMapOutDev
+		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	);
 };
 

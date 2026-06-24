@@ -7,6 +7,7 @@ class CXDataDev;
 class CXListDev;
 class CXDataLogicMst;
 class CXDataLogicItem;
+class CXDataRangeLogic;
 
 class CXDataEqType : public CObject
 {
@@ -48,15 +49,18 @@ public:
 	BOOL GetTypeAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
 
 	//BOOL GetDeviceList(CXListDev * pDevList,CDataAutoLogic * pLg,BOOL bInputItem);
-	// [2025/8/1 8:07:56 KHS] 
-	// 입력 조건에 맞는 Device 목록 가져오기
-	BOOL GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem);
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(
-		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst
-		,int nRangeLogic);
+		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst);
 
 	BOOL CopyData(CXDataEqType * pSrc);
+
+	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange);
+
+	BOOL GetRangeOutputDevice(
+		CXDataDev * pDev,CXMapLink * pMapOutDev
+		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	);
 };
 

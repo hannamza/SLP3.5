@@ -179,27 +179,8 @@ BOOL CXListEqTypeLocDev::GetLogicOutputConditionDevice(
 	if(pType == nullptr)
 		return FALSE;
 
-	if(pType->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic) == FALSE)
+	if(pType->GetLogicOutputConditionDevice(pDev,pDevList,pMst) == FALSE)
 		return FALSE;
-	return TRUE;
-}
-
-
-BOOL CXListEqTypeLocDev::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicMst * pMst,CXDataLogicItem * pItem)
-{
-	CXDataEqType * pType = nullptr;
-	CXMapDev retList;
-	if(pMst == nullptr)
-		return FALSE;
-	pType = GetTypeData(pMst->GetInType(),pMst->GetEqName());
-	if(pType == nullptr)
-		return FALSE;
-	if(pItem == nullptr)
-		return FALSE;
-	if(pType->GetLogicInputConditionDevice(&retList,pItem) == FALSE)
-		return FALSE;
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
 	return TRUE;
 }
 
@@ -236,4 +217,19 @@ CXDataEqType * CXListEqTypeLocDev::GetCopyTypeData(int nType,int nName)
 	pCopyType = new CXDataEqType;
 	pCopyType->CopyData(pRetData);
 	return pCopyType;
+}
+
+BOOL CXListEqTypeLocDev::GetRangeOutputDevice(
+	CXDataDev * pInDev,CXMapLink * pMapOutDev
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+)
+{
+	CXDataEqType * pType = nullptr;
+
+	pType = GetTypeData(pMst->GetOutType(),pMst->GetOutContents());
+	if(pType == nullptr)
+		return FALSE;
+	if(pType->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst) == FALSE)
+		return FALSE;
+	return TRUE;
 }

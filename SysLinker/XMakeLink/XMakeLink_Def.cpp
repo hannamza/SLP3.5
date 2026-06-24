@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "../../include/Common_def.h"
 #include "XMakeLink_Def.h"
-
 GFX_SubSet_Fn g_subset = GFX_SubSetScalar;
 CXLocStrMap	g_MapIdxBuild;
 CXLocStrMap	g_MapIdxBtype;
@@ -9,7 +8,7 @@ CXLocStrMap	g_MapIdxFloor;
 CXLocStrMap	g_MapIdxStair;
 CXLocStrMap	g_MapIdxRoom;
 CXLinkBuildMap	g_MapIdxLinkedBuild;
-
+//CXMapRangeType	g_MapRangeType;
 
 BOOL Less_than(int a,int b) { return a < b; }
 BOOL Greater_than(int a,int b) { return a > b; }
@@ -78,7 +77,6 @@ BOOL GF_GetBit(uint64_t * pBuf,int nIdx)
 
 	return (pBuf[wordIndex] >> offset) & 1ULL;
 }
-
 
 void WriteXMakeLinkLog(const WCHAR * szFmt,...)
 {

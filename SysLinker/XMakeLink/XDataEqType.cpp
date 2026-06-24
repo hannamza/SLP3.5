@@ -16,6 +16,7 @@
 #include "XListRoom.h"
 #include "XDataLogicMst.h"
 #include "XDataLogicItem.h"
+#include "XDataRangeLogic.h"
 
 CXDataEqType::CXDataEqType()
 {
@@ -179,12 +180,12 @@ int CXDataEqType::CompareData(int nType,int nName)
 }
 
 BOOL CXDataEqType::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
 {
 	POSITION pos;
 	CXDataBuild * pBuild;
 	BYTE btCheck = 0;
-	int nParkBuild = 0;
+	int nParkBuild = 0;	
 	if(m_pListBuild == nullptr)
 	{
 		return FALSE;
@@ -199,71 +200,10 @@ BOOL CXDataEqType::GetLogicOutputConditionDevice(
 
 		if(pBuild == nullptr)
 			continue;
-		pBuild->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic);
+		pBuild->GetLogicOutputConditionDevice(pDev,pDevList,pMst);
 	}
 	return TRUE;
 }
-
-
-BOOL CXDataEqType::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem)
-{
-	CXMapDev retList;
-	POSITION pos;
-	int nSize,i;
-	CXDataBuild * pBuild;
-	CXLocStrMap::iterator it;
-
-	// [2025/8/1 8:28:43 KHS] 
-	// 향후 추가될 입력 범위설정을 위해 Flag 생성
-	// 아래 플래그를 CDataAutoLogic에 포함시켜 입력타입 범위를 체크한다.
-	CString strBuildName = L"";
-	CStringArray * pArr;
-	//
-	if(m_pListBuild == nullptr)
-	{
-		return FALSE;
-	}
-	pos = m_pListBuild->GetHeadPosition();
-	while(pos)
-	{
-		pBuild = m_pListBuild->GetNext(pos);
-		if(pBuild == nullptr)
-			continue;
-		if(pItem == nullptr
-			|| pItem->GetBuildArray() == nullptr
-			|| pItem->GetBuildArray()->GetSize() <= 0)
-		{
-			pBuild->GetLogicInputConditionDevice(&retList,pItem);
-			continue;
-		}
-		// [2025/8/12 10:57:45 KHS] 
-		// 입력 조건에 맞는 건물 목록이 있으면 맞는것만 처리
-		// 없으면 전체 처리
-		pArr = pItem->GetBuildArray();
-		nSize = pArr->GetSize();
-		for(i = 0; i < nSize; i++)
-		{
-			strBuildName = pArr->GetAt(i);
-			if(strBuildName.GetLength() <= 0)
-				continue;
-			// [2025/8/1 8:35:05 KHS] 
-			// 건물 별로 할려면 로직에 건물 정보가 있어야 된다.
-			// 향 후 로직에 입력에 건물 범위를 넣으려면 건물 정보를 입력할 수 있게 한다.
-			it = g_MapIdxBuild.find(strBuildName);
-			if(it == g_MapIdxBuild.end())
-				continue;
-
-			if(pBuild->CompareData(it->second) != 0)
-				continue;
-			if(pBuild->GetLogicInputConditionDevice(&retList,pItem) == FALSE)
-				continue;
-		}
-	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
-	return TRUE;
-}
-
 
 BOOL CXDataEqType::GetTypeAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 {
@@ -309,3 +249,85 @@ BOOL CXDataEqType::CopyData(CXDataEqType * pSrc)
 	return TRUE;
 }
 
+// 
+// BOOL CXDataEqType::GetOutRangeFloor(CXMapOutFloor	* pMapOutFloor,CXDataRangeLogic * pRangeLogic)
+// {
+// 	if(m_pListBuild == nullptr)
+// 		return FALSE;
+// 	POSITION pos;
+// 	CXDataBuild * pData;
+// 	pos = m_pListBuild->GetHeadPosition();
+// 	while(pos)
+// 	{
+// 		pData = m_pListBuild->GetNext(pos);
+// 		if(pData == nullptr)
+// 			continue; 
+// 		if(pRangeLogic->CheckInputRangeBuild(pData->GetIndex()) == FALSE)
+// 			continue;
+// 		if(pData->GetOutRangeFloor(pMapOutFloor,pRangeLogic) == FALSE)
+// 		{
+// 			// eRROR MESSAGE
+// 		}
+// 	}
+// 	return TRUE;
+// }
+
+
+BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+{
+	CXMapDev retList;
+	POSITION pos;
+	CXDataBuild * pBuild;
+	CXLocStrMap::iterator it;
+	CString strBuildName = L"";
+
+	if(m_pListBuild == nullptr)
+	{
+		return FALSE;
+	}
+	pos = m_pListBuild->GetHeadPosition();
+	while(pos)
+	{
+		pBuild = m_pListBuild->GetNext(pos);
+		if(pBuild == nullptr)
+			continue;
+		
+		if(pRange->CheckInputRangeBuild(pBuild->GetIndex()))
+		{
+			pBuild->GetAppectingInputDev(&retList,pRange);
+			continue; 
+		}
+	}
+	pDevList->insert(retList.begin(),retList.end());
+	retList.clear();
+	return TRUE;
+}
+
+
+BOOL CXDataEqType::GetRangeOutputDevice(
+	CXDataDev * pInDev,CXMapLink * pMapOutDev
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+{
+	POSITION pos;
+	CXDataBuild * pBuild;
+	BYTE btCheck = 0;
+	int nParkBuild = 0;
+	if(m_pListBuild == nullptr)
+	{
+		return FALSE;
+	}
+
+	pos = m_pListBuild->GetHeadPosition();
+	while(pos)
+	{
+		pBuild = m_pListBuild->GetNext(pos);
+
+		if(pBuild == nullptr)
+			continue;
+		// 건물 범위 확인
+		if(pRange->CheckInputRangeBuild(pBuild->GetIndex()) == FALSE)
+			continue;
+		pBuild->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst);
+	}
+	return TRUE;
+}

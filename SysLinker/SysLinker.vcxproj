@@ -1196,6 +1196,7 @@
     <ClInclude Include="XMakeLink\XDataLink.h" />
     <ClInclude Include="XMakeLink\XDataLogicItem.h" />
     <ClInclude Include="XMakeLink\XDataLogicMst.h" />
+    <ClInclude Include="XMakeLink\XDataRangeLogic.h" />
     <ClInclude Include="XMakeLink\XDataRoom.h" />
     <ClInclude Include="XMakeLink\XDataStair.h" />
     <ClInclude Include="XMakeLink\XListBtype.h" />
@@ -1542,6 +1543,7 @@
     <ClCompile Include="XMakeLink\XDataLink.cpp" />
     <ClCompile Include="XMakeLink\XDataLogicItem.cpp" />
     <ClCompile Include="XMakeLink\XDataLogicMst.cpp" />
+    <ClCompile Include="XMakeLink\XDataRangeLogic.cpp" />
     <ClCompile Include="XMakeLink\XDataRoom.cpp" />
     <ClCompile Include="XMakeLink\XDataStair.cpp" />
     <ClCompile Include="XMakeLink\XListBtype.cpp" />

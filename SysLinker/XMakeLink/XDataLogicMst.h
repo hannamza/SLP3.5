@@ -42,7 +42,7 @@ protected:
 // 	BOOL CheckRangeBuild(CXDataDev * pInput,CXDataFloor * pFloor,CXDataLogicItem * pItem);
 // 	BOOL CheckRangeStair(CXDataDev * pInput,CXDataFloor * pFloor,CXDataLogicItem * pItem);
 	BOOL IsRangeIncluded(int nStartFloor,int nNfloor,CXDataLogicItem * pItem);
-	BOOL HasRangeIntersection(int nStartFloor,int nNfloor,CXDataLogicItem * pItem);
+	BOOL HasRangeIntersection(int nStartFloor,int nNEndFloor,CXDataLogicItem * pItem);
 	RANGE_RESULT CheckFloorPosition(int nFloor,CXDataLogicItem * pItem);
 };
 

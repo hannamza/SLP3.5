@@ -34,6 +34,7 @@
 
 #include "XMakeLink.h"
 #include "XDataEm.h"
+#include "XDataRangeLogic.h"
 
 CXMakeLink::CXMakeLink()
 {
@@ -112,6 +113,15 @@ void CXMakeLink::RemoveAllData()
 		delete pData;
 	}
 	m_MapDev.clear();
+	CXDataRangeLogic * pRange;
+	while(m_ptrRangeLogic.IsEmpty() == FALSE)
+	{
+		pRange = (CXDataRangeLogic *)m_ptrRangeLogic.RemoveHead();
+		if(pRange == nullptr)
+			continue;
+		delete pRange;
+		pRange = nullptr;
+	}
 	
 	g_MapIdxBuild.clear();
 	g_MapIdxBtype.clear();
@@ -119,6 +129,8 @@ void CXMakeLink::RemoveAllData()
 	g_MapIdxStair.clear();
 	g_MapIdxRoom.clear();
 	g_MapIdxLinkedBuild.clear();
+	
+	//RemoveMapRangeType();
 }
 int CXMakeLink::InitBasicLinkData(CWnd * pMakeWnd)
 {
@@ -625,15 +637,6 @@ int CXMakeLink::MakeBasicData()
 }
 
 
-BOOL CXMakeLink::MakeInputRangeRelay(CXMapDev * pDevList,CXDataLogicItem * pItem,CXDataEqType * pCopyType)
-{
-	if(pCopyType == nullptr)
-		return FALSE;
-	if(pCopyType->GetLogicInputConditionDevice(pDevList,pItem) == FALSE)
-		return FALSE;
-	return TRUE;
-}
-
 void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem)
 {
 	CXDataEm * pEm;
@@ -656,14 +659,15 @@ void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem)
 
 int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingArray)
 {
-	POSITION pos;
+	POSITION pos,rPos;
 	CXDataLogicMst * pMst;
 	CXDataDev dsRet;
 	CXDataDev * pDev;
 	CXMapDev mapInDev,mapAllDev;
 	CXMapLink mapOutDev;
 	CPtrList * pList;
-	int i = 0 , nCurLogic =0 ;
+	CXDataRangeLogic * pRange = nullptr;
+	int nCurLogic =0 ;
 	DWORD dwStart,dwEnd,dwSort,dwPtn;
 	BOOL bAllLink = FALSE;
 	CXDataEqType * pCopyType = nullptr;
@@ -694,70 +698,72 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 		// 전체 경보 방식인지 확인 필요
 		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]) == 0 ? TRUE : FALSE;
 
-		// [2026/4/23 15:46:05 KHS] 
-		// Type별 입력의 복사본 가져오기 
-		// --> 입력범위 밖의 입력 회로는 기본 로직으로 처리하는 방식이기 때문에
-		//     입력범위안의 입력회로를 처리하고 Type list에서 삭제하면
-		//     자연스럽게 범위 밖의 회로만 남는다 , 남는것은 기본로직으로 처리
-		// 여기서 문제점은 입력타입에 있는 입력 회로를 삭제하다 보니
-		// 입력타입에 여러 출력이 로직으로 걸려 있을 때
-		// 입력할 회로가 없어져 버린다
-		// 그래서 해당 타입의 복사 본을 가져온다
 		pCopyType = m_pInTypeLocDevList->GetCopyTypeData(pMst->GetInType(),pMst->GetEqName());
+		mapInDev.clear();
+//////////////////////////////////////////////////////////////////////////
+		// 범위에 영향을 주는 입력회로를 처리한다.
+		// 1. 출력 범위에 영향을 주는 입력 가져오기
+		// 2. 각 입력 별 출력회로 가져오기
+ 		rPos = m_ptrRangeLogic.GetHeadPosition();
+ 		while(rPos)
+ 		{
+ 			pRange = (CXDataRangeLogic*)m_ptrRangeLogic.GetNext(rPos);
+ 			if(pRange == nullptr)
+ 				continue; 
+ 			pRange->SetPlusNStart(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetPlusNStart());
+ 			pRange->SetPlusNEnd(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetPlusNEnd());
+ 			
+			// 범위 아래 있는 입력회로도 기본 로직으로 +N 했을 때 출력이 범위안 또는 범위를 초과하는 입력 포함
+ 			pCopyType->GetAppectingInputDev(&mapInDev,pRange);
+ 			for(auto it : mapInDev)
+ 			{
+ 				if(it.second == nullptr)
+ 					continue;
+ 				pDev = it.second;
+ 				mapOutDev.clear();
+ 				
+  				if(GetRangeOutDevice(pDev,&mapOutDev,pRange,pMst))
+  				{
+  					//	continue;
+  					pDev->AddLinkMap(&mapOutDev);
+  				}
+   				if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutType() == nEBOutType
+   					&& pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutContents() == nEBOutContents)
+   				{
+   					AddEMergency(pDev,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
+   				}
+ 			}
+ 
+ 			// Debug를 위해 Input Item 리스트를 저장한다
+ 			mapAllDev.insert(mapInDev.begin(),mapInDev.end());
+ 			mapInDev.clear();
+ 		}
 
-		/// Logic Item은 1이 기본값이다.
-		for(i = MAX_LOGIC_ITEM_CNT; i >= 0; i--)
+//////////////////////////////////////////////////////////////////////////
+		// 범위에 영향을 주지 않는 회로를 처리한다.
+		pCopyType->GetTypeAllDevList(&mapInDev,TRUE);
+		for(auto it : mapInDev)
 		{
-			if(pMst->m_pArrLgItem[i] == nullptr)
+			if(it.second == nullptr)
 				continue;
-
-			// [2026/4/14 16:48:43 KHS] 
-			// 전체 경보 방식일 때 주로직 만 실행 시키기 위해 다른 범위로직은 추가하지 않는다.
-			if(bAllLink == TRUE && i != MAINLOGIC_PRIORITYID)
-				continue; 
-			
-			mapInDev.clear();
-			//lstInList.RemoveAll();
-			// 로직의 입력 부분에 해당하는 회로목록을 가져온다.
-			// InputTypeList의 항목의 내용을 조건별로 삭제하면서 진행한다.
-			if(MakeInputRangeRelay(&mapInDev,pMst->m_pArrLgItem[i],pCopyType) == FALSE)
-				continue;
-
-			// [2026/5/11 11:25:14 KHS] 
-			// 범위 로직일 때 , pDev(입력회로)가 범위로직에 의한건지 확인 index가 MAINLOGIC_PRIORITY가 아닌경우
-			// 아래 로직에서 m_pArrLgItem을 선택해서 넘겨준다.
-
-			for(auto it : mapInDev)
+			pDev = it.second;
+			mapOutDev.clear();
+			if(m_pOutTypeLocDevList->GetLogicOutputConditionDevice(
+				pDev,&mapOutDev,pMst,MAINLOGIC_PRIORITYID) == TRUE)
 			{
-				if(it.second == nullptr)
-					continue;
-				pDev = it.second;
-				mapOutDev.clear();
-				// Logic 처리
-//--> 수정전
-// 				if(m_pOutTypeLocDevList->GetLogicOutputConditionDevice(
-//					pDev,&mapOutDev,pMst->m_pArrLgItem[i]) == FALSE)
-// 					continue;
-// 				pDev->AddLinkMap(&mapOutDev);
-// 				if(pMst->m_pArrLgItem[i]->GetUseEmergency() == 1)
-// 					AddEMergency(pDev,pMst->m_pArrLgItem[i]);
-// --> 수정후
-
-				if(m_pOutTypeLocDevList->GetLogicOutputConditionDevice(
-					pDev,&mapOutDev,pMst,i) == TRUE)
-				{
 				//	continue;
-					pDev->AddLinkMap(&mapOutDev);
-				}
-				if((nEBOutType == pMst->m_pArrLgItem[i]->GetOutType())
-					&& (nEBOutContents == pMst->m_pArrLgItem[i]->GetOutContents()))
-					AddEMergency(pDev,pMst->m_pArrLgItem[i]);
+				pDev->AddLinkMap(&mapOutDev);
 			}
-
-			// Debug를 위해 Input Item 리스트를 저장한다
-			mapAllDev.insert(mapInDev.begin(),mapInDev.end());
-			//lstAllInItem.ListAdd(&lstInList);
+			if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutType() == nEBOutType
+				&& pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutContents() == nEBOutContents)
+			{
+				AddEMergency(pDev,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
+			}
 		}
+
+		// Debug를 위해 Input Item 리스트를 저장한다
+		mapAllDev.insert(mapInDev.begin(),mapInDev.end());
+
 
 		if(pCopyType)
 		{
@@ -831,76 +837,76 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 	//WriteXMakeLinkLog(L"==================== end ======================");
 	return 0;
 }
-
-int CXMakeLink::ConvertOutput2Pattern2(CXMapDev * pDevMap)
-{
-	CXDataDev * pDev;
-	SU_LOGICAL_ADDR suAddr;
-	std::vector<uint32_t> out;
-	uint64_t * pUllAllLink = new uint64_t[BITCNT_FACPITEM];
-	uint64_t * pUllPtn = new uint64_t[BITCNT_FACPITEM];
-	uint64_t * pUllRemain = new uint64_t[BITCNT_FACPITEM];
-
-	for(auto it : (*pDevMap))
-	{
-		pDev = it.second;
-		TRACE(L"ConvertOutput2Pattern :Input %s(%d)\n",pDev->GetDevAddress(),pDev->m_MapLink.size());
-
-		if(pDev->m_MapLink.size() == 0)
-			continue;
-
-		GFX_MemSet_AVX2(pUllAllLink,BITCNT_FACPITEM,0);
-		GFX_MemSet_AVX2(pUllPtn,BITCNT_FACPITEM,0);
-
-		for(auto In : pDev->m_MapLink)
-		{
-			GF_SetBit(pUllAllLink,In.first,1);
-		}
-
-		for(auto pPtn : (*m_pVtPatterns))
-		{
-			if(pPtn == nullptr)
-				continue;
-			pPtn->m_nCheckCount = FALSE;
-			if(GFX_SubSet_AVX2(pUllAllLink,pPtn->m_ullItem,BITCNT_FACPITEM))
-			{
-				pPtn->m_nCheckCount = TRUE;
-				GFX_ORBit_AVX2(pUllPtn,pPtn->m_ullItem,BITCNT_FACPITEM);
-			}
-		}
-
-		for(auto pPtn : (*m_pVtPatterns))
-		{
-			if(pPtn == nullptr)
-				continue;
-			if(pPtn->m_nCheckCount == FALSE)
-			{
-				pPtn->m_nCheckCount = 0;
-				continue;
-			}
-
-			pPtn->m_nCheckCount = 0;
-			pDev->AddLinkPattern(pPtn);
-			TRACE(L"Pattern : %s - %s(%d)\n"
-				,pDev->GetDevAddress(),pPtn->m_strPatternName,pPtn->m_nPatternID);
-		}
-		out.clear();
-		GFX_RemoveBit_AVX2(pUllAllLink,pUllPtn,BITCNT_FACPITEM);
-		out = GFX_ExtractSetBit(pUllAllLink,BITCNT_FACPITEM);
-		for(auto addr : out)
-		{
-			suAddr.dwAddr = addr;
-			TRACE(L"Output : %s - %d.%d.%d.%d\n"
-				,pDev->GetDevAddress()
-				,suAddr.stAddr.dwFacpID
-				,suAddr.stAddr.dwUnitID
-				,suAddr.stAddr.dwChnID
-				,suAddr.stAddr.dwDevID
-			);
-		}
-	}
-	return 0;
-}
+// 
+// int CXMakeLink::ConvertOutput2Pattern2(CXMapDev * pDevMap)
+// {
+// 	CXDataDev * pDev;
+// 	SU_LOGICAL_ADDR suAddr;
+// 	std::vector<uint32_t> out;
+// 	uint64_t * pUllAllLink = new uint64_t[BITCNT_FACPITEM];
+// 	uint64_t * pUllPtn = new uint64_t[BITCNT_FACPITEM];
+// 	uint64_t * pUllRemain = new uint64_t[BITCNT_FACPITEM];
+// 
+// 	for(auto it : (*pDevMap))
+// 	{
+// 		pDev = it.second;
+// 		TRACE(L"ConvertOutput2Pattern :Input %s(%d)\n",pDev->GetDevAddress(),pDev->m_MapLink.size());
+// 
+// 		if(pDev->m_MapLink.size() == 0)
+// 			continue;
+// 
+// 		GFX_MemSet_AVX2(pUllAllLink,BITCNT_FACPITEM,0);
+// 		GFX_MemSet_AVX2(pUllPtn,BITCNT_FACPITEM,0);
+// 
+// 		for(auto In : pDev->m_MapLink)
+// 		{
+// 			GF_SetBit(pUllAllLink,In.first,1);
+// 		}
+// 
+// 		for(auto pPtn : (*m_pVtPatterns))
+// 		{
+// 			if(pPtn == nullptr)
+// 				continue;
+// 			pPtn->m_nCheckCount = FALSE;
+// 			if(GFX_SubSet_AVX2(pUllAllLink,pPtn->m_ullItem,BITCNT_FACPITEM))
+// 			{
+// 				pPtn->m_nCheckCount = TRUE;
+// 				GFX_ORBit_AVX2(pUllPtn,pPtn->m_ullItem,BITCNT_FACPITEM);
+// 			}
+// 		}
+// 
+// 		for(auto pPtn : (*m_pVtPatterns))
+// 		{
+// 			if(pPtn == nullptr)
+// 				continue;
+// 			if(pPtn->m_nCheckCount == FALSE)
+// 			{
+// 				pPtn->m_nCheckCount = 0;
+// 				continue;
+// 			}
+// 
+// 			pPtn->m_nCheckCount = 0;
+// 			pDev->AddLinkPattern(pPtn);
+// 			TRACE(L"Pattern : %s - %s(%d)\n"
+// 				,pDev->GetDevAddress(),pPtn->m_strPatternName,pPtn->m_nPatternID);
+// 		}
+// 		out.clear();
+// 		GFX_RemoveBit_AVX2(pUllAllLink,pUllPtn,BITCNT_FACPITEM);
+// 		out = GFX_ExtractSetBit(pUllAllLink,BITCNT_FACPITEM);
+// 		for(auto addr : out)
+// 		{
+// 			suAddr.dwAddr = addr;
+// 			TRACE(L"Output : %s - %d.%d.%d.%d\n"
+// 				,pDev->GetDevAddress()
+// 				,suAddr.stAddr.dwFacpID
+// 				,suAddr.stAddr.dwUnitID
+// 				,suAddr.stAddr.dwChnID
+// 				,suAddr.stAddr.dwDevID
+// 			);
+// 		}
+// 	}
+// 	return 0;
+// }
 
 int CXMakeLink::ConvertOutput2Pattern(std::vector<std::pair<DWORD,CXDataDev*>> sortingArray)
 {
@@ -1010,7 +1016,7 @@ int CXMakeLink::MakeBasicLogic()
 		pLg = pList->GetNext(pos);
 		if(pLg == nullptr)
 			continue;
-		nIdx = 1;
+		nIdx = MAINLOGIC_PRIORITYID;
 		pMst = new CXDataLogicMst;
 		pMst->SetLogicMst(pLg->GetLgId(),pLg->GetInType(),pLg->GetOutType(),pLg->GetEqName(),pLg->GetOutContents());
 
@@ -1072,10 +1078,8 @@ int CXMakeLink::MakeRangeLogicItem()
 	if(m_pRefRelayData == nullptr)
 		return 0;
 	CString strSql;
-	int nCnt,i,nIdx;
-	POSITION pos;
-	CXDataLogicMst * pMst;
-	CXDataLogicItem * pItem,*pMain;
+	int nCnt,i;
+	CXDataRangeLogic * pRangeLogic = nullptr;
 	int nId,nPriority;
 	int nPlusNStart,nPlusNEnd,nRangeStartFloor,nRangeEndFloor;
 	BYTE btUseRangeBuild,btUseRangeStair,btUseRangeFloor;
@@ -1100,15 +1104,8 @@ int CXMakeLink::MakeRangeLogicItem()
 	YAdoDatabase * pDb = m_pRefRelayData->GetPrjDB();
 	if(pDb == nullptr)
 		return 0;
-	// SQL문에서 ORDER BY RG_PRIORITY DESC 이유
-	// Priority 낮은 순으로(Priority 숫자가 낮을 수록 우선 순위가 높다) 
-	// 범위중에 중복되는 경우도 발생 할 수가 있음 --> 우선순위가 높은것(숫자가 낮은)부터 처리
-	// MakeLinkList에서 우선순위가 높은 입력회로를 전체 입력 회로(입력타입+설비명의 전체회로)에서 삭제하고 
-	// 남은 입력회로는 일반 로직을 적용한다.
-	// 따라서 pMst->m_pArrLgItem[i]에 숫자가 높은 priority넘버 순으로 입력하면
-	// 나중에 pMst->m_pArrLgItem[i]의 역순으로 연동데이터를 만들면 된다.
-	// 참고로 DB에 있는 Priority는 이곳 이외는 사용하지 않는다.
-	strSql.Format(L"SELECT * FROM TB_AUTORANGE ORDER BY RG_PRIORITY DESC");
+	
+	strSql.Format(L"SELECT * FROM TB_AUTORANGE ORDER BY RG_PRIORITY");
 	if(pDb->OpenQuery(strSql) == FALSE)
 	{
 		return 0;
@@ -1175,103 +1172,64 @@ int CXMakeLink::MakeRangeLogicItem()
 		GF_SplitString2(strRangeBuild,STR_LINKEDBUILD_SEPERATOR,&saBuild);
 		GF_SplitString2(strRangeStair,STR_LINKEDBUILD_SEPERATOR,&saStair);
 
-		pos = m_ptrLogicList.GetHeadPosition();
-		while(pos)
+		// [2026/6/23 17:20:12 KHS] 
+		// 정상적인 범위인지 확인
+		if(
+			saBuild.GetSize() <= 0
+			&& saStair.GetSize() <= 0
+			&& (nRangeStartFloor == 0 && nRangeEndFloor == 0)
+			)
 		{
-			pMst = (CXDataLogicMst *)m_ptrLogicList.GetNext(pos);
-			if(pMst == nullptr)
-				continue;
-			nIdx = pMst->GetEmptyIdx();
-			if(nIdx < 0)
-				continue;
-			if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID] == nullptr)
-				continue;
-
-			pItem = new CXDataLogicItem;
-
-//////////////////////////////////////////////////////////////////////////////////////////////			
-// [2026/3/26 16:10:49 KHS] 기본로직에서 조건 Copy
-// 아래 부분은 현재 버전에 맞게 사용하지 않는 예비 부분을 기본 로직에서 copy해오는 부분
-// 향후 다른 조건들(지하 건물 일치 ,주차장 건물일치 등...)을 사용하게 되면 
-// 사용되는 조건 부분은 주석 처리한다.
-// 현재 사용중 : 비상방송 , 건물,계단 
-			pMain = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];// 숫자 1 은 주로직 --> 기본로직
-			//btEmergency = pMain->GetUseEmergency();
-			btOutput = pMain->GetUseSameAddrOutput();
-			nPlusNStart = pMain->GetPlusNStart();
-			nPlusNEnd = pMain->GetPlusNEnd();
-			btUseUnderLogic = pMain->GetUseUnderLogic();
-			btUseParkingLogic = pMain->GetUseParkLogic();
-			btGround1F = pMain->GetUnder1F();
-			btUnder1F = pMain->GetUnderB1F();
-
-			//btMatchGroundBuild = pMain->GetMatchGroundBuild();
-			btMatchGroundBType = pMain->GetMatchGroundBType();
-			//btMatchGroundStair = pMain->GetMatchGroundStair();
-			btMatchGroundFloor = pMain->GetMatchGroundFloor();
-			btMatchGroundRoom = pMain->GetMatchGroundRoom();
-
-			btMatchUnderBuild = pMain->GetMatchUnderBuild();
-			btMatchUnderBtype = pMain->GetMatchUnderBType();
-			btMatchUnderStair = pMain->GetMatchUnderStair();
-			btMatchUnderFloor = pMain->GetMatchUnderFloor();
-			btMatchUnderRoom = pMain->GetMatchUnderRoom();
-
-			btMatchParkingBuild = pMain->GetMatchParkBuild();
-			btMatchParkingBtype = pMain->GetMatchParkBType();
-			btMatchParkingStair = pMain->GetMatchParkStair();
-			btMatchParkingFloor = pMain->GetMatchParkFloor();
-			btMatchParkingRoom = pMain->GetMatchParkRoom();
-// End : 기본로직에서 조건 Copy
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-			pMst->m_pArrLgItem[nIdx] = pItem;
-			//L_OP_GREATEREQUAL : 범위 입력할 때 <,<= ,... 등등 구분하려고 --> 같거나 큰으로 통일
-			pItem->SetLogicMst(pMst->GetLgId(),pMst->GetInType(),pMst->GetOutType()
-				,pMst->GetEqName(),pMst->GetOutContents(),btUseRangeLogicOverfloor);
-			pItem->SetLogicInputLoc(
-				&saBuild,&saStair
-				,nRangeStartFloor,nRangeEndFloor,L_OP_GREATEREQUAL,L_OP_LESSEQUAL
-			);
-
-			pItem->SetLogicOutputCondition(
-				btEmergency,btOutput,nPlusNStart,nPlusNEnd
-				,btUseUnderLogic,btUseParkingLogic
-				,btGround1F,btUnder1F
-			);
-
-			pItem->SetMatchCondition(
-				MATCH_GROUND
-				,btMatchGroundBuild
-				,btMatchGroundBType
-				,btMatchGroundStair
-				,btMatchGroundFloor
-				,btMatchGroundRoom
-			);
-
-			pItem->SetMatchCondition(
-				MATCH_UNDER
-				,btMatchUnderBuild
-				,btMatchUnderBtype
-				,btMatchUnderStair
-				,btMatchUnderFloor
-				,btMatchUnderRoom
-			);
-
-			pItem->SetMatchCondition(
-				MATCH_PARK
-				,btMatchParkingBuild
-				,btMatchParkingBtype
-				,btMatchParkingStair
-				,btMatchParkingFloor
-				,btMatchParkingRoom
-			);
-			pItem->SetPriority(nIdx);
-			pMst->SetHaveRange(TRUE);
+			// 범위 정보가 없음
+			pDb->MoveNext();
+			continue; 
 		}
 
-		pDb->MoveNext();
+		pRangeLogic = new CXDataRangeLogic;
+		pRangeLogic->SetRangeID(nId,nPriority,btUseRangeLogicOverfloor
+			,btUseRangeBuild,btUseRangeStair,btUseRangeFloor
+		);
 
+		pRangeLogic->SetLogicInputLoc(
+			&saBuild,&saStair
+			,nRangeStartFloor,nRangeEndFloor
+		);
+		btMatchGroundFloor = pRangeLogic->GetMatchGroundFloor();
+
+		pRangeLogic->SetLogicOutputCondition(
+			btEmergency,btOutput,nPlusNStart,nPlusNEnd
+			,btUseUnderLogic,btUseParkingLogic
+			,btGround1F,btUnder1F
+		);
+
+		pRangeLogic->SetMatchCondition(
+			MATCH_GROUND
+			,btMatchGroundBuild
+			,btMatchGroundBType
+			,btMatchGroundStair
+			,btMatchGroundFloor
+			,btMatchGroundRoom
+		);
+
+		pRangeLogic->SetMatchCondition(
+			MATCH_UNDER
+			,btMatchUnderBuild
+			,btMatchUnderBtype
+			,btMatchUnderStair
+			,btMatchUnderFloor
+			,btMatchUnderRoom
+		);
+
+		pRangeLogic->SetMatchCondition(
+			MATCH_PARK
+			,btMatchParkingBuild
+			,btMatchParkingBtype
+			,btMatchParkingStair
+			,btMatchParkingFloor
+			,btMatchParkingRoom
+		);
+		m_ptrRangeLogic.AddTail(pRangeLogic);
+		pDb->MoveNext();
 	}
 }
 
@@ -1289,7 +1247,7 @@ int CXMakeLink::MakeLinkedBuild()
 	if(m_pRefRelayData == nullptr)
 			return 0;
 	CString strSql;
-	int i,nCnt,nSp,x,nID; 
+	int i,nCnt,x,nID; 
 	BOOL bFindParking = FALSE;
 	CXLocStrMap::iterator it;
 	int nSrcBuildIdx,nTgtBuildIdx;
@@ -1299,38 +1257,6 @@ int CXMakeLink::MakeLinkedBuild()
 	YAdoDatabase * pDb = m_pRefRelayData->GetPrjDB();
 	if(pDb == nullptr)
 		return 0;
-//  	for(auto &kv : g_MapIdxBuild)
-//  	{
-//  		strUpper = kv.first;
-//  		nSrcBuildIdx = kv.second;
-//  		if((strUpper.Find(NAME_PARKING_KOR) != -1) 
-//  			|| (strUpper.Find(NAME_PARKING_ENG) != -1))
-//  		{
-//  			vtBuild.clear();
-//  			for(auto &it : g_MapIdxBuild)
-//  			{
-//  				strtemp = it.first;
-//  				nTgtBuildIdx = it.second;
-//  				if(nSrcBuildIdx == nTgtBuildIdx)
-//  					continue; 
-//  				if((strUpper.Find(NAME_PARKING_KOR) != -1)
-//  					|| (strUpper.Find(NAME_PARKING_ENG) != -1))
-//  				{
-//  
-//  				}
-//  				else
-//  				{
-//  					if(ContainsDigit(strtemp) == FALSE)
-//  						continue;
-//  				}
-//  					
-//  				if(find(vtBuild.begin(),vtBuild.end(),nTgtBuildIdx) == vtBuild.end())
-//  					vtBuild.push_back(nTgtBuildIdx);
-//  			}
-//  			g_MapIdxLinkedBuild[nSrcBuildIdx] = vtBuild;
-//  		}
-//  	}
-
 	strSql.Format(L"SELECT * FROM TB_AUTOCONNECT ORDER BY CONN_ID DESC");
 	if(pDb->OpenQuery(strSql) == FALSE)
 	{
@@ -1482,69 +1408,10 @@ int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
 	return 0;
 }
 
-// 
-// int CXMakeLink::CheckAllAlertLogic()
-// {
-// 	// 전체 경보 방식 
-// 	// 1. 경종,시각,시각경보,음성,음성점멸
-// 	// 2. 실 일치 선택 안됨
-// 	// 3. +n == 0
-// 
-// 	BOOL bFound = FALSE;
-// 	int i;
-// 	int nContID;
-// 	CDataEquip * pCont;
-// 	CString strName,strtemp;
-// 	POSITION pos;
-// 	CXDataLogicMst * pMst;
-// 	CXDataLogicItem * pItem;
-// 	BYTE btCheck[4] = {  };
-// 	pos = m_ptrLogicList.GetHeadPosition();
-// 	while(pos)
-// 	{
-// 		pMst = (CXDataLogicMst*)m_ptrLogicList.GetNext(pos);
-// 		if(pMst == nullptr)
-// 			continue;
-// 		/// Logic Item은 1이 기본값이다.
-// 		if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID] == nullptr
-// 			|| pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetPriority() != MAINLOGIC_PRIORITYID)
-// 			continue;
-// 		pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
-// 
-// 		nContID = pItem->GetOutContents();
-// 		if(nContID <= 0)
-// 			continue;
-// 
-// 		pCont = m_pRefRelayData->GetEquipData(ET_OUTCONTENTS,nContID);
-// 		if(pCont == nullptr)
-// 			continue;
-// 		strName = pCont->GetEquipName();
-// 		if(strName.IsEmpty() == TRUE)
-// 			continue;
-// 		// 1. 경종,시각,시각경보,음성,음성점멸
-// 		strName.MakeUpper();
-// 		for(i = 0; g_pSzAllAlertEquip[i] != nullptr; i++)
-// 		{
-// 			strtemp = g_pSzAllAlertEquip[i];
-// 			strtemp.MakeUpper();
-// 			if(strName.Find(strtemp) >= 0)
-// 			{
-// 				bFound = TRUE;
-// 				break;
-// 			}
-// 		}
-// 		if(bFound == FALSE)
-// 		{
-// 
-// 			continue;
-// 		}
-// 		// 2. 실 일치 선택 안됨
-// 		if(pItem->GetMatchGroundFloor() != 0)
-// 			continue;
-// 
-// 		if(pItem->GetInEndLevelNum() != 0)
-// 			continue;
-// 	}
-// 
-// 	return 0;
-// }
+BOOL CXMakeLink::GetRangeOutDevice(
+	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+{
+	if(m_pOutTypeLocDevList->GetRangeOutputDevice(pInDev,pMapOutDev, pRange,pMst) == FALSE)
+		return FALSE; 
+	return TRUE;
+}

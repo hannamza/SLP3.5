@@ -8,6 +8,7 @@
 #include "XDataLogicMst.h"
 #include "XDataLogicItem.h"
 #include "XListFloor.h"
+#include "XDataRangeLogic.h"
 
 CXDataStair::CXDataStair()
 {
@@ -133,286 +134,191 @@ int CXDataStair::CompareData(int nIndex)
 		return -1;
 }
 
-
-/// 변환전 함수
-BOOL CXDataStair::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
+BOOL CXDataStair::CheckBasicLogicMatch(
+	CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataLogicMst * pMst)
 {
-	POSITION pos;
-	CXDataLogicItem * pItem;
 	int nTgtFlNum,nSrcFlNum;
-	CXDataFloor * pFloor;
-	int n1,n2,n3,n4,nParkBuild;
-#if _DEBUG
-	int nDebugTargetBuildIdx = 0,nDebugSrcBuildIdx;
-	nDebugTargetBuildIdx = g_MapIdxBuild[L"3111동"];
-	nDebugSrcBuildIdx = pDev->GetBuildIndex();
-#endif
-	if(m_pListFloor == nullptr)
+	CXDataLogicItem * pItem; 
+
+	if(pFloor == nullptr || pMst == nullptr)
 		return FALSE;
+	pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
+	nTgtFlNum = pFloor->GetFloorNumber();
+	nSrcFlNum = pInDev->GetLocFloorNumber();
 
-	//입력이 범위로직일 때는 범위로직 사용
-	// #ifdef _DEBUG
-	// 	if(m_pParent->GetParent()->GetName() != L"105동")
-	// 		return TRUE; 
-	// #endif
-	nParkBuild = g_MapIdxBuild[L"주차장"];
-	nSrcFlNum = pDev->GetLocFloorNumber();
-	pos = m_pListFloor->GetHeadPosition();
-	while(pos)
+	if(pItem->GetUseUnderLogic() == 0)
 	{
-		pFloor = m_pListFloor->GetNext(pos);
-		if(pFloor == nullptr)
-			continue;
+		if(pItem->MatchBuild(pInDev,pFloor,TRUE) == 0)
+			return FALSE;
+		if(pItem->MatchBType(pInDev,pFloor,TRUE) == 0)
+			return FALSE;
+		if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
+			return FALSE;
+		if(pItem->MatchFloorRange(pInDev,pFloor) == 0)
+			return FALSE;
+		pFloor->GetLogicOutputConditionDevice(pInDev,pDevList,pItem);
+		return TRUE;
+	}
 
-#if _DEBUG
-		if(nSrcFlNum == 2 
-			&& nDebugTargetBuildIdx == nDebugSrcBuildIdx
-			&& pFloor->GetBuildIndex() == nDebugTargetBuildIdx)
-			TRACE(L"");
-#endif
-		// 범위로직이 있을 때는 어떤 로직을 사용할 지 알 수 없음
-		// 층에 맞는 로직을 가져온다.
-		// 입력회로가 입력범위로직일 때는 그 로직 사용
-		if(nRangeLogic != MAINLOGIC_PRIORITYID)
+	if(nSrcFlNum < -1)
+	{
+		if(pItem->CheckMatchLinkedBuild(pInDev,pFloor))
 		{
-			pItem = pMst->GetLogicItem(nRangeLogic);
+			// 입력회로가 주차장 또는 출력이 주차장이면 
+			if(nTgtFlNum > -1) return FALSE;
 		}
 		else
 		{
-			pItem = pMst->GetFloorLogicItem(pDev,pFloor);
+			if(pItem->MatchBuild(pInDev,pFloor,FALSE) == 0)
+				return FALSE;
+			if(pItem->MatchBType(pInDev,pFloor,FALSE) == 0)
+				return FALSE;
+			if(pItem->MatchStair(pInDev,pFloor,FALSE) == 0)
+				return FALSE;
+			if(nTgtFlNum > -1) return FALSE;
 		}
-		
-		if(pItem == nullptr)
-			continue;
-		nTgtFlNum = pFloor->GetFloorNumber();
-
-		if(pItem->GetUseUnderLogic() == 0)
+	}
+	else if(nSrcFlNum == -1)
+	{
+		if(pItem->CheckMatchLinkedBuild(pInDev,pFloor))
 		{
-			n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-			n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-			n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-			n4 = pItem->MatchFloorRange(pDev,pFloor);
-			if(n1 && n2 && n3 && n4)
-				pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
-			continue;
+			if(nTgtFlNum > -1) return FALSE;
 		}
-
-		if(nSrcFlNum < -1)
+		else
 		{
-			if(pItem->CheckMatchLinkedBuild(pDev,pFloor))
+			if(nTgtFlNum <= -1)
 			{
-				// 입력회로가 주차장 또는 출력이 주차장이면 
-				n1 = n2 = n3 = n4 = (nTgtFlNum <= -1) ? 1 : 0;
+				if(pItem->MatchBuild(pInDev,pFloor,FALSE) == 0)
+					return FALSE;
+				if(pItem->MatchBType(pInDev,pFloor,FALSE) == 0)
+					return FALSE;
+				if(pItem->MatchStair(pInDev,pFloor,FALSE) == 0)
+					return FALSE;
 			}
 			else
 			{
-				n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
-				n2 = pItem->MatchBType(pDev,pFloor,FALSE);
-				n3 = pItem->MatchStair(pDev,pFloor,FALSE);
-				n4 = nTgtFlNum <= -1 ? 1 : 0;
-			}
-
-			if(n1 && n2 && n3 && n4)
-				pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
-		}
-		else if(nSrcFlNum == -1)
-		{
-			if(pItem->CheckMatchLinkedBuild(pDev,pFloor))
-			{
-				n1 = n2 = n3 = n4 = (nTgtFlNum <= 1) ? 1 : 0;
-			}
-			else
-			{
-				if(nTgtFlNum <= -1)
+				// 대상 층이 1층이상
+				if(pItem->MatchBuild(pInDev,pFloor,TRUE) == 0)
+					return FALSE;
+				if(pItem->MatchBType(pInDev,pFloor,TRUE) == 0)
+					return FALSE;
+				if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
+					return FALSE;
+				
+				if(pItem->GetUnderB1F() == 1 && nTgtFlNum == 1)
 				{
-					n1 = pItem->MatchBuild(pDev,pFloor,FALSE);
-					n2 = pItem->MatchBType(pDev,pFloor,FALSE);
-					n3 = pItem->MatchStair(pDev,pFloor,FALSE);
-					n4 = 1;
+				//	return TRUE;
 				}
 				else
 				{
-					// 대상 층이 1층이상
-					n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-					n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-					n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-					if(pItem->GetUnderB1F() == 1 && nTgtFlNum == 1)
-						n4 = 1;
-					else
-						n4 = pItem->MatchFloorRange(pDev,pFloor);
+					if(pItem->MatchFloorRange(pInDev,pFloor) == 0)
+						return FALSE;
 				}
 			}
-
-			if(n1 && n2 && n3 && n4)
-				pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
-
 		}
-		else if(nSrcFlNum == 1)
+	}
+	else if(nSrcFlNum == 1)
+	{
+		if(pItem->CheckMatchLinkedBuild(pInDev,pFloor))
 		{
-			if(pItem->CheckMatchLinkedBuild(pDev,pFloor))
-			{
-				n1 = n2 = n3 = n4 = (nTgtFlNum <= -1) ? 1 : 0;
-			}
-			else
-			{
-				if(nTgtFlNum < 0)
-				{
-					n1 = pItem->MatchBuild(pDev, pFloor, FALSE);
-					n2 = pItem->MatchBType(pDev, pFloor, FALSE);
-					n3 = pItem->MatchStair(pDev, pFloor, FALSE);
-					n4 = pItem->GetUnder1F() == 1 ? 1 : 0;
-				}
-				else
-				{
-					n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-					n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-					n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-					n4 = pItem->MatchFloorRange(pDev,pFloor);
-				}
-			}
-			if(n1 && n2 && n3 && n4)
-				pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
+			if(nTgtFlNum > -1) return FALSE;
 		}
-		else // nSrcFlNum > 1
+		else
 		{
 			if(nTgtFlNum < 0)
 			{
-				n1 = n2 = n3 = n4 = 0;
+				if(pItem->MatchBuild(pInDev,pFloor,FALSE) == 0)
+					return FALSE;
+				if(pItem->MatchBType(pInDev,pFloor,FALSE) == 0)
+					return FALSE;
+				if(pItem->MatchStair(pInDev,pFloor,FALSE) == 0)
+					return FALSE;
+				if(pItem->GetUnder1F() != 1)
+					return FALSE;
 			}
 			else
 			{
-				n1 = pItem->MatchBuild(pDev,pFloor,TRUE);
-				n2 = pItem->MatchBType(pDev,pFloor,TRUE);
-				n3 = pItem->MatchStair(pDev,pFloor,TRUE);
-				n4 = pItem->MatchFloorRange(pDev,pFloor);
+				if(pItem->MatchBuild(pInDev,pFloor,TRUE) == 0)
+					return FALSE;
+				if(pItem->MatchBType(pInDev,pFloor,TRUE) == 0)
+					return FALSE;
+				if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
+					return FALSE;
+				if(pItem->MatchFloorRange(pInDev,pFloor) == 0)
+					return FALSE;
 			}
-			if(n1 && n2 && n3 && n4)
-				pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
 		}
 	}
+	else // nSrcFlNum > 1
+	{
+		if(nTgtFlNum < 0)
+		{
+			return FALSE;
+		}
+		else
+		{
+			if(pItem->MatchBuild(pInDev,pFloor,TRUE) == 0)
+				return FALSE;
+			if(pItem->MatchBType(pInDev,pFloor,TRUE) == 0)
+				return FALSE;
+			if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
+				return FALSE;
+			if(pItem->MatchFloorRange(pInDev,pFloor) == 0)
+				return FALSE;
+		}
+	}
+	pFloor->GetLogicOutputConditionDevice(pInDev,pDevList,pItem);
 	return TRUE;
 }
 
-BOOL CXDataStair::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem)
+BOOL CXDataStair::CheckRangeLogicMatch(
+	CXDataDev * pInDev,CXMapLink * pDevList
+	,CXDataFloor *pFloor,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	,BOOL bCheckFloor
+)
 {
-	CXMapDev retList;
+	BOOL bGround = TRUE;
+	if(pInDev->GetLocFloorNumber() < 0)
+		bGround = FALSE;
+	if(pRange->MatchBuild(pInDev,pFloor,bGround) == FALSE)
+		return FALSE;
+	if(pRange->MatchStair(pInDev,pFloor,bGround) == FALSE)
+		return FALSE;
+	if(bCheckFloor)
+	{
+		if(pRange->MatchFloorRange(pInDev,pFloor) == FALSE)
+			return FALSE;
+	}
+	
+	if(pFloor->GetFloorAllOutputDevList(pDevList,pRange->GetRangeId()) == FALSE)
+		return FALSE;
+	return TRUE;
+}
+
+/// 변환전 함수
+BOOL CXDataStair::GetLogicOutputConditionDevice(
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
+{
 	POSITION pos;
+	CXDataLogicItem * pItem;
 	CXDataFloor * pFloor;
-	// [2025/8/1 8:28:43 KHS] 
-	// 향후 추가될 입력 범위설정을 위해 Flag 생성
-	// 아래 플래그를 CDataAutoLogic에 포함시켜 입력타입 범위를 체크한다.
-	CString strStairName = L"";
-	int nFlNum,nStart,nEnd;
 	if(m_pListFloor == nullptr)
 		return FALSE;
-	//
+	pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
 	pos = m_pListFloor->GetHeadPosition();
 	while(pos)
 	{
 		pFloor = m_pListFloor->GetNext(pos);
 		if(pFloor == nullptr)
 			continue;
-
-		if(pItem == nullptr)
-		{
-			pFloor->GetLogicInputConditionDevice(&retList,pItem);
-			continue;
-		}
-
-
-		if(pItem->GetUseLevelRange() != TRUE)
-		{
-			if(pFloor->GetLogicInputConditionDevice(&retList,pItem) == FALSE)
-				continue;
-			continue;
-		}
-
 		
-
-		nEnd = pItem->GetInEndLevelNum();
-		nStart = pItem->GetInStartLevelNum();
-		nFlNum = pFloor->GetFloorNumber();
-		if(pItem->GetInFromOperator() == L_OP_EQUALEQUAL) // ==
+		if(CheckBasicLogicMatch(pDev,pDevList,pFloor,pMst) == TRUE)
 		{
-			if(nFlNum == nStart)
-			{
-				// [2025/8/12 11:20:02 KHS] 
-				// 같은 층이면 Loop를 나간다.
-				break;
-			}
-			else
-				continue;
+			pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
 		}
-		else if(pItem->GetInFromOperator() == L_OP_GREATEREQUAL) // <=
-		{
-			if(nFlNum >= nStart)
-			{
-
-			}
-			else // 작으면 처리안함(nFLNum < nStart)
-				continue;
-		}
-		else if(pItem->GetInFromOperator() == L_OP_GREATER) // <
-		{
-			if(nFlNum > nStart)
-			{
-
-			}
-			else // 작거나 같으면 처리 안함(nFLNum <= nStart)
-				continue;
-		}
-		else
-		{
-			// 초기 값이 설정되지 않으면 모든 
-			//continue; 
-		}
-
-		if(pItem->GetInToOperator() == L_OP_EQUALEQUAL)
-		{
-			//
-			if(nFlNum == nEnd)
-			{
-				// [2025/8/12 11:20:02 KHS] 
-				// 같은 층이면 Loop를 나간다.
-				break;
-			}
-			else
-				continue;
-		}
-		else if(pItem->GetInToOperator() == L_OP_LESSEQUAL) // <=
-		{
-			if(nFlNum <= nEnd)
-			{
-
-			}
-			else
-				continue;
-		}
-		else if(pItem->GetInToOperator() == L_OP_LESS) // <
-		{
-			if(nFlNum < nEnd)
-			{
-
-			}
-			else
-				continue;
-		}
-		else
-		{
-			//continue;
-		}
-
-		if(pFloor->GetLogicInputConditionDevice(&retList,pItem) == FALSE)
-			continue;
-
 	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
 	return TRUE;
 }
-
-
 
 BOOL CXDataStair::GetStairAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 {
@@ -459,5 +365,376 @@ BOOL CXDataStair::CopyData(CXDataStair * pSrc)
 
 	m_pListFloor = new CXListFloor;
 	m_pListFloor->CopyData(pList);
+	return TRUE;
+}
+
+// 
+// BOOL CXDataStair::GetOutRangeFloor(CXMapOutFloor * pMapOutFloor,CXDataRangeLogic * pRangeLogic)
+// {
+// 	if(m_pListFloor == nullptr)
+// 		return FALSE;
+// 	POSITION pos;
+// 	CXDataFloor * pData;
+// 	SU_OUTFLOOR_KEY suKey;
+// 	RANGE_RESULT nRet;
+// 	int nRangeStart,nRangeEnd,nFlNum , nPlusN;
+// 	nRangeStart = pRangeLogic->GetRangeStartLevelNum();
+// 	nRangeEnd = pRangeLogic->GetRangeEndLevelNum();
+// 	nPlusN = pRangeLogic->GetPlusNEnd();
+// 	pos = m_pListFloor->GetHeadPosition();
+// 	while(pos)
+// 	{
+// 		pData = m_pListFloor->GetNext(pos);
+// 		if(pData == nullptr)
+// 			continue;
+// 		nFlNum = pData->GetFloorNumber();
+// 		nRet = pRangeLogic->CheckFloorPosition(nFlNum);
+// 		// 출력 층의 범위는 
+// 		// 범위 아래 - (+N층) ~ 범위 위 + (+N층)
+// 		switch(nRet)
+// 		{
+// 		case RET_RANGE_BELOW:
+// 			// 직상 +N층 범위가 5층 부터 이고 +N층이 4일때 2층부터 
+// 			if(nRangeStart - nPlusN > nFlNum)
+// 				continue; 
+// 			break;
+// 		case RET_RANGE_INSIDE:
+// 			break;
+// 		case RET_RANGE_OVER:
+// 			if(nRangeEnd + nPlusN < nFlNum)
+// 				continue;
+// 			break;
+// 		}
+// 		suKey.dwKey = 0; 
+// 		suKey.stKey.dwBIdx = pData->GetBuildIndex();
+// 		suKey.stKey.dwTIdx = pData->GetBtypeIndex();
+// 		suKey.stKey.dwSIdx = pData->GetStairIndex();
+// 		suKey.stKey.dwFIdx = pData->GetIndex();
+// 		(*pMapOutFloor)[suKey.dwKey] = pData;
+// 	}
+// 	return TRUE;
+// }
+
+BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+{
+	CXMapDev retList;
+	POSITION pos;
+	CXDataFloor * pFloor;
+	RANGE_RESULT nResult = RET_RANGE_OVER;
+	int nFlNum;
+	if(m_pListFloor == nullptr)
+		return FALSE;
+	//
+	pos = m_pListFloor->GetHeadPosition();
+	while(pos)
+	{
+		pFloor = m_pListFloor->GetNext(pos);
+		if(pFloor == nullptr)
+			continue;
+		nFlNum = pFloor->GetFloorNumber();
+		nResult = pRange->CheckFloorPosition(nFlNum);
+		if(nResult == RET_RANGE_INSIDE)
+		{
+			// 해당하는 입력회로는 삭제 한다.
+			// 남은 입력회로만 기본로직 적용하기 위해
+			pFloor->GetFloorAllDevList(&retList,TRUE);
+		}
+		else if(nResult == RET_RANGE_BELOW)
+		{
+			// +N층 적용 시 출력회로가 포함되면 출력범위에 영향을 주는 회로로 추가한다.
+			if(nFlNum + pRange->GetPlusNEnd() >= pRange->GetRangeStartLevelNum())
+				pFloor->GetFloorAllDevList(&retList,TRUE);
+		}
+	}
+	pDevList->insert(retList.begin(),retList.end());
+	retList.clear();
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// ※ 범위에서 로직에서 층의 범위를 확인 하지 않는경우
+//   1) 기본 로직이 층 일치 조건 없음 , 
+/// 입력회로가 범위에 영향을 줄 수 있는 회로
+BOOL CXDataStair::GetRangeOutputDevice(
+	CXDataDev * pInDev,CXMapLink * pMapOutDev
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+{
+	POSITION pos;
+	CXDataLogicItem * pItem;
+	CXDataFloor * pFloor;
+	int nSrcFl,nTargetFl,nPlusN;
+	int nRangeStart,nRangeEnd;
+	RANGE_RESULT nResult;
+	if(m_pListFloor == nullptr)
+		return FALSE;
+
+
+
+	if(pRange->GetUseFloorRange() == 0)
+	{
+		pos = m_pListFloor->GetHeadPosition();
+		while(pos)
+		{
+			pFloor = m_pListFloor->GetNext(pos);
+			if(pFloor == nullptr)
+				continue;
+
+			// 층범위가 없으면 건물,계단만 확인한다.
+			if(pRange->GetUseFloorRange() == 0)
+			{
+				if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+					continue;
+			}
+		}
+		return TRUE;
+	}
+
+	nPlusN = pRange->GetPlusNEnd();
+	nRangeStart = pRange->GetRangeStartLevelNum();
+	nRangeEnd = pRange->GetRangeEndLevelNum();
+	pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
+
+	// 입력 회로와 설정된 범위와의 관계를 확인
+	nSrcFl = pInDev->GetLocFloorNumber();
+	nResult = pRange->CheckFloorPosition(nSrcFl);
+
+	pos = m_pListFloor->GetHeadPosition();
+	while(pos)
+	{
+		pFloor = m_pListFloor->GetNext(pos);
+		if(pFloor == nullptr)
+			continue;
+
+		nTargetFl = pFloor->GetFloorNumber();
+		switch(nResult)
+		{
+		case RET_RANGE_BELOW:
+// 			if(nSrcFl <= nTargetFl
+// 				&&
+// 				(((nRangeEnd < nTargetFl) && pRange->GetUseRangeLogicOverFloor())
+// 					|| (nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd)
+// 					)
+// 				)
+// 			{
+// 				if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+// 					continue;
+// 			}
+// 			else
+// 			{
+// 				if(pItem->GetMatchGroundFloor())
+// 				{
+// 					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+// 						continue;
+// 				}
+// 				else
+// 				{
+// 					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+// 						continue;
+// 				}
+// 			}
+
+			//////////////////////////////////////////////////////////////////////////
+			// 위의 내용을 풀어서
+			if(nSrcFl <= nTargetFl)
+			{
+			 	// 1) 범위 아래 출력은 기본로직
+			 	if(nTargetFl < nRangeStart)
+			 	{
+					// 기본 로직 적용
+					// 층일치가 없으면 Option에 따라 기본 또는 범위로직(층일치 무시)
+					if(pItem->GetMatchGroundFloor() == 1)
+					{
+						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(pRange->GetUseRangeLogicOverFloor() == 1)
+						{
+							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+								continue;
+						}
+						else
+						{
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+								continue;
+						}
+					}
+			 	}
+				else if(nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd)
+				{
+					// 입력이 범위 아래 이고 , 대상이 범위 안 --> 범위 로직
+					// 기본로직에 층일치가 없으면 층 일치 무시
+					if(pItem->GetMatchGroundFloor() == 1)
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+				}
+			 	else if(nRangeEnd < nTargetFl)
+			 	{
+					// 기본 로직 
+					// 기본로직의 층일치가 없으면 option따라 기본 또는 범위로직
+					if(pItem->GetMatchGroundFloor() == 1)
+					{
+						if(pRange->GetUseRangeLogicOverFloor())
+						{
+							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+								continue;
+						}
+						else
+						{
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+								continue;
+						}
+					}
+					else
+					{
+						if(pRange->GetUseRangeLogicOverFloor())
+						{
+							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+								continue;
+						}
+						else
+						{
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+								continue;
+						}
+					}
+			 	}
+			}
+			else if(nSrcFl > nTargetFl)
+			{
+				if(pItem->GetMatchGroundFloor() == 1)
+				{
+					if(pRange->GetUseRangeLogicOverFloor())
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							continue;
+					}
+				}
+				else
+				{
+					if(pRange->GetUseRangeLogicOverFloor())
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							continue;
+					}
+				}
+			}
+			// 			
+			break;
+		case RET_RANGE_INSIDE:
+			if(nTargetFl < nRangeStart)
+			{
+				// 입력 회로가 범위 안이고 출력이 범위 아래 일때 기본 로직을 사용해야되지만
+				// 기본 로직에서 층일치가 없으면 범위 로직을 사용한다
+				//  ex) 1. 조건 : 
+				//		  - 기본 로직 : 건물,계단 (층 일치 없음)
+				//		  - 범위 로직 : 조건 없음
+				//      2. 결과 
+				//		  - 범위가 101,102동일 15 ~17 층 일때
+				//		  - 101동 1계단 15층 입력 시
+				//		    -- > 101동 전체 + 102동 전체 (범위 내에서 층 구분 무시)
+				if(pItem->GetMatchGroundFloor())
+				{
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						continue;
+				}
+				else
+				{
+					// 범위 로직에서 층 무시
+					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+						continue;
+				}
+			}
+			if(nRangeStart <= nTargetFl && nRangeEnd >= nTargetFl)
+			{
+				// 입력이 범위 아래 이고 , 대상이 범위 안 --> 범위 로직
+				// 기본 로직에서 층일치가 없으면 범위 로직 --> 층 무시
+				if(pItem->GetMatchGroundFloor() == 1)
+				{
+					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+						continue;
+				}
+				else
+				{
+					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+						continue;
+				}
+			}
+			else if(nRangeEnd < nTargetFl)
+			{
+				// 입력이 범위 아래 이고 , 대상이 범위 초과 --> 옵션에 따라 범위 로직 또는 기본 로직
+				if(pRange->GetUseRangeLogicOverFloor())
+				{
+					if(pItem->GetMatchGroundFloor())
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+				}
+				else
+				{
+					// 기본로직을 사용해야된다
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						continue;
+// 					if(pItem->GetMatchGroundFloor())
+// 					{
+// 						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+// 							continue;
+// 					}
+// 					else
+// 					{
+// 						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+// 							continue;
+// 					}
+				}
+			}
+
+			break;
+		case RET_RANGE_OVER:
+			// 기본 로직
+			if(pItem->GetMatchGroundFloor())
+			{
+				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+					continue;
+			}
+			else
+			{
+				if(pRange->GetUseRangeLogicOverFloor() == 1)
+				{
+					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+						continue;
+				}
+				else
+				{
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						continue;
+				}
+			}
+			break;
+		}
+	}
 	return TRUE;
 }

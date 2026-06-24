@@ -2,6 +2,7 @@
 #include "DataEquip.h"
 #include "DataLocBase.h"
 #include "XMakeLink_Def.h"
+#include "XDataLink.h"
 
 class CXListDev;
 class CDataDevice;
@@ -9,6 +10,8 @@ class CDataLocBase;
 class CDataEquip;
 class CXPatternMst;
 class CXDataEm;
+class CXDataLink;
+
 class CXDataDev : public CObject
 {
 public:
@@ -85,8 +88,10 @@ public:
 		if(m_pRefInputLoc)return m_pRefInputLoc->GetFloorNumber(); return 0;
 	}
 
-	int GetInType();
-
+	int GetInTypeID();
+	int GetOutTypeID();
+	int GetEqNameID();
+	int GetOutContID();
 
 public:
 	BOOL		m_bInput; // 해당 회로가 설비명인지 출력설명인지 구분

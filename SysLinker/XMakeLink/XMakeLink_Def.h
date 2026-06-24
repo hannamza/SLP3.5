@@ -1,7 +1,8 @@
 #pragma once
 
 #include <unordered_map>
-
+#include <tuple>
+#include <map>
 #include <immintrin.h>
 #include <cstdint>
 
@@ -20,8 +21,11 @@
 
 
 #define N_INPUTID_MAX				64 * 32 * 4 * 256	
-#define	MAX_LOGIC_ITEM_CNT	99
-#define	MAX_LOGIC_PRIORITY	99
+
+// [2026/6/18 9:53:07 KHS] 
+// 세부로직 삭제  --> CXDataRangeLogic으로 대체
+#define	MAX_LOGIC_ITEM_CNT	2
+#define	MAX_LOGIC_PRIORITY	1
 
 
 
@@ -113,14 +117,21 @@ union SU_RANGE
 };
 
 #pragma pack(pop)
-
+/*
+① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨ ⑩
+*/
 class CXDataDev;
 class CXDataLink;
+class CXDataFloor;
 typedef std::unordered_map<DWORD,CXDataDev*> CXMapDev;
 typedef std::unordered_map<DWORD,CXDataLink*> CXMapLink;
 typedef std::map<CString,int> CXLocStrMap;
 typedef std::map<int,std::vector<int>> CXLinkBuildMap; // 연계 건물 컨테이너
 
+// [2026/6/19 13:32:10 KHS] 
+// 타입(=입력+출력+설비명+출력설명 묶음) 별로 출력 층 저장
+// multimap ==> 범위로직 여러개 일 수 있음
+typedef std::map<DWORD,CXDataFloor*> CXMapOutFloor;
 inline void cpuid(int out[4],int op,int sub = 0) {
 #if defined(_MSC_VER)
 	__cpuidex(out,op,sub);
@@ -366,6 +377,7 @@ extern CXLocStrMap	g_MapIdxStair;
 extern CXLocStrMap	g_MapIdxRoom;
 extern CXLinkBuildMap	g_MapIdxLinkedBuild;// 연계 건물의 Source의 Index
 
+//extern CXMapRangeType	g_MapRangeType; // 출력 층을 타입(입력,출력,설비명,출력설명)별로 저장
 // [2025/8/1 11:12:00 KHS] 
 // 로직 처리를 위해 Define
 #define NAME_PARKING_KOR	L"주차장"	

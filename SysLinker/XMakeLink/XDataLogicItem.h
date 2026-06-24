@@ -88,10 +88,12 @@ protected:
 	// m_btPriority --> 
 	// 99은 기본 조건 : 건물,층,계단,지하에 대한 입력범위조건을 다 적용하고 남은 부분에 적용되는 범위
 	BYTE						m_btPriority; // 로직안에서 Logic Item의 우선순위
-	std::vector<int>			m_vtInputBuildIds;
 	CStringArray				m_arrBuildName;
-	std::vector<int>			m_vtInputStairs;
 	CStringArray				m_arrStairName;
+	// [2026/6/16 13:36:11 KHS] 
+	// 속도 문제로 건물/계단의 String Array을 Vector로 바꾸는게 좋을 듯함
+	std::vector<int>			m_vtInputBuildIds;
+	std::vector<int>			m_vtInputStairs;
 	BYTE						m_btUseLevelRange; // 입력 범위 사용
 	BYTE						m_btInFromOperator; // 이상 >= , 초과 >
 	BYTE						m_btInToOperator; // 이하 <= , 미만 <
@@ -210,7 +212,7 @@ public:
 
 	BYTE SetMatchCondition(BYTE btType,BYTE btMatchBuild,BYTE btMatchBType,BYTE btMatchStair,BYTE btMatchFloor,BYTE btMatchRoom);
 
-	void CopyArray(CStringArray * pTarget,CStringArray * pSource);
+	void CopyArray(CStringArray * pTarget,CStringArray * pSource , BOOL bBuild);
 
 	BOOL MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground);
 	BOOL MatchBType(CXDataDev* src,CXDataFloor* tgt,BOOL ground);

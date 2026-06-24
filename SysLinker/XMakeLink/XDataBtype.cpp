@@ -9,6 +9,7 @@
 #include "XDataBtype.h"
 #include "XDataLogicItem.h"
 #include <unordered_map>
+#include "XDataRangeLogic.h"
 
 CXDataBtype::CXDataBtype()
 {
@@ -136,7 +137,7 @@ int CXDataBtype::CompareData(int nIndex)
 
 
 BOOL CXDataBtype::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
 {
 	POSITION pos;
 	CXDataStair * pStair;
@@ -150,75 +151,12 @@ BOOL CXDataBtype::GetLogicOutputConditionDevice(
 		pStair = m_pListStair->GetNext(pos);
 		if(pStair == nullptr)
 			continue;
-		pStair->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic);
+		pStair->GetLogicOutputConditionDevice(pDev,pDevList,pMst);
 	}
 
 	//pDevList->insert(retList.begin(),retList.end());
 	return TRUE;
 }
-
-
-BOOL CXDataBtype::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem)
-{
-	CXMapDev retList;
-	POSITION pos;
-	CXDataStair * pStair;
-	// [2025/8/1 8:28:43 KHS] 
-	// 향후 추가될 입력 범위설정을 위해 Flag 생성
-	// 아래 플래그를 CDataAutoLogic에 포함시켜 입력타입 범위를 체크한다.
-	CString strStairName = L"";
-	CStringArray * pArr;
-	int nSize,i;
-	CXLocStrMap::iterator it;
-	if(m_pListStair == nullptr)
-	{
-		m_pListStair = new CXListStair;
-		return FALSE;
-	}
-	//
-	pos = m_pListStair->GetHeadPosition();
-	while(pos)
-	{
-		pStair = m_pListStair->GetNext(pos);
-		if(pStair == nullptr)
-			continue;
-		if(pItem == nullptr
-			|| pItem->GetStairArray() == nullptr
-			|| pItem->GetStairArray()->GetSize() <= 0)
-		{
-			pStair->GetLogicInputConditionDevice(&retList,pItem);
-			continue;
-		}
-
-		// [2025/8/12 10:57:45 KHS] 
-		// 입력 조건에 맞는 건물 목록이 있으면 맞는것만 처리
-		// 없으면 전체 처리
-		pArr = pItem->GetStairArray();
-
-		nSize = pArr->GetSize();
-		for(i = 0; i < nSize; i++)
-		{
-			strStairName = pArr->GetAt(i);
-			if(strStairName.GetLength() <= 0)
-				continue;
-			it = g_MapIdxStair.find(strStairName);
-			if(it == g_MapIdxStair.end())
-				continue;
-			// [2025/8/1 8:35:05 KHS] 
-			// 건물 별로 할려면 로직에 건물 정보가 있어야 된다.
-			// 향 후 로직에 입력에 건물 범위를 넣으려면 건물 정보를 입력할 수 있게 한다.
-			if(pStair->CompareData(it->second) != 0)
-				continue;
-			if(pStair->GetLogicInputConditionDevice(&retList,pItem) == FALSE)
-				continue;
-		}
-
-	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
-	return TRUE;
-}
-
 
 BOOL CXDataBtype::GetBtypeAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 {
@@ -274,5 +212,61 @@ BOOL CXDataBtype::CopyData(CXDataBtype * pSrc)
 		return TRUE;
 	m_pListStair = new CXListStair;
 	m_pListStair->CopyData(pList);
+	return TRUE;
+}
+
+BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+{
+	CXMapDev retList;
+	POSITION pos;
+	CXDataStair * pStair;
+	CString strStairName = L"";
+	CXLocStrMap::iterator it;
+	if(m_pListStair == nullptr)
+	{
+		m_pListStair = new CXListStair;
+		return FALSE;
+	}
+	//
+	pos = m_pListStair->GetHeadPosition();
+	while(pos)
+	{
+		pStair = m_pListStair->GetNext(pos);
+		if(pStair == nullptr)
+			continue;
+		
+		if(pRange->CheckInputRangeStair(pStair->GetIndex()))
+		{
+			pStair->GetAppectingInputDev(&retList,pRange);
+			continue; 
+		}
+	}
+	pDevList->insert(retList.begin(),retList.end());
+	retList.clear();
+	return TRUE;
+}
+
+
+BOOL CXDataBtype::GetRangeOutputDevice(
+	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+{
+	POSITION pos;
+	CXDataStair * pStair;
+	BYTE btCheck = 0;
+
+	if(m_pListStair == nullptr)
+		return FALSE;
+	pos = m_pListStair->GetHeadPosition();
+	while(pos)
+	{
+		pStair = m_pListStair->GetNext(pos);
+		if(pStair == nullptr)
+			continue;
+		if(pRange->CheckInputRangeStair(pStair->GetIndex()) == FALSE)
+			continue;
+		pStair->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst);
+	}
+
+	//pDevList->insert(retList.begin(),retList.end());
 	return TRUE;
 }

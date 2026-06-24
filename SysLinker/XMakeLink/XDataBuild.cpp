@@ -7,7 +7,7 @@
 #include "XDataBtype.h"
 #include "XListBtype.h"
 #include "XDataBuild.h"
-
+#include "XDataRangeLogic.h"
 
 CXDataBuild::CXDataBuild()
 {
@@ -132,11 +132,12 @@ int CXDataBuild::CompareData(int nIdx)
 }
 
 BOOL CXDataBuild::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst,int nRangeLogic)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
 {
 	POSITION pos;
 	BYTE btCheck = 0;
 	CXDataBtype * pBtype;
+
 	if(m_pListBtype == nullptr)
 		return FALSE;
 	pos = m_pListBtype->GetHeadPosition();
@@ -145,44 +146,10 @@ BOOL CXDataBuild::GetLogicOutputConditionDevice(
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetLogicOutputConditionDevice(pDev,pDevList,pMst,nRangeLogic);
+		pBtype->GetLogicOutputConditionDevice(pDev,pDevList,pMst);
 	}
 	return TRUE;
 }
-
-
-BOOL CXDataBuild::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem)
-{
-	// [2025/8/12 11:00:42 KHS] 
-	// 향후 건물종류는 사용하지 않는다.
-
-	CXMapDev retList;
-	POSITION pos;
-	CXDataBtype * pBtype;
-	if(m_pListBtype == nullptr)
-	{
-		m_pListBtype = new CXListBtype;
-		return FALSE;
-	}
-	pos = m_pListBtype->GetHeadPosition();
-	while(pos)
-	{
-		pBtype = m_pListBtype->GetNext(pos);
-		if(pBtype == nullptr)
-			continue;
-		//if(pItem == nullptr)
-		{
-			pBtype->GetLogicInputConditionDevice(&retList,pItem);
-			continue;
-		}
-
-	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
-	return TRUE;
-}
-
-
 
 BOOL CXDataBuild::GetBuildAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 {
@@ -234,4 +201,70 @@ BOOL CXDataBuild::CopyData(CXDataBuild* pSrc)
 	bRet = m_pListBtype->CopyData(pList);
 
 	return bRet;
+}
+
+// 
+// BOOL CXDataBuild::GetOutRangeFloor(CXMapOutFloor	* pMapOutFloor,CXDataRangeLogic * pRangeLogic)
+// {
+// 	if(m_pListBtype == nullptr)
+// 		return FALSE;
+// 	POSITION pos;
+// 	CXDataBtype * pData;
+// 	pos = m_pListBtype->GetHeadPosition();
+// 	while(pos)
+// 	{
+// 		pData = m_pListBtype->GetNext(pos);
+// 		if(pData == nullptr)
+// 			continue;
+// 
+// 
+// 		if(pData->GetOutRangeFloor(pMapOutFloor,pRangeLogic) == FALSE)
+// 		{
+// 			// eRROR MESSAGE
+// 		}
+// 	}
+// 	return TRUE;
+// }
+
+BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+{
+	CXMapDev retList;
+	POSITION pos;
+	CXDataBtype * pBtype;
+	if(m_pListBtype == nullptr)
+	{
+		m_pListBtype = new CXListBtype;
+		return FALSE;
+	}
+	pos = m_pListBtype->GetHeadPosition();
+	while(pos)
+	{
+		pBtype = m_pListBtype->GetNext(pos);
+		if(pBtype == nullptr)
+			continue;
+		pBtype->GetAppectingInputDev(&retList,pRange);
+	}
+	pDevList->insert(retList.begin(),retList.end());
+	retList.clear();
+	return TRUE;
+}
+
+
+BOOL CXDataBuild::GetRangeOutputDevice(
+	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+{
+	POSITION pos;
+	BYTE btCheck = 0;
+	CXDataBtype * pBtype;
+	if(m_pListBtype == nullptr)
+		return FALSE;
+	pos = m_pListBtype->GetHeadPosition();
+	while(pos)
+	{
+		pBtype = m_pListBtype->GetNext(pos);
+		if(pBtype == nullptr)
+			continue;
+		pBtype->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst);
+	}
+	return TRUE;
 }

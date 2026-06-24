@@ -190,45 +190,13 @@ BOOL CXDataFloor::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 			}
 		}
 		else
-			pRm->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
-
-	}
-	return TRUE;
-}
-
-
-BOOL CXDataFloor::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem)
-{
-	CXMapDev retList;
-	POSITION pos;
-	CXDataRoom * pRm;
-	// [2025/8/1 8:28:43 KHS] 
-	// 향후 추가될 입력 범위설정을 위해 Flag 생성
-	// 아래 플래그를 CDataAutoLogic에 포함시켜 입력타입 범위를 체크한다.
-	CString strStairName = L"";
-	if(m_pListRoom == nullptr)
-		return FALSE;
-	//
-	pos = m_pListRoom->GetHeadPosition();
-	while(pos)
-	{
-		pRm = m_pListRoom->GetNext(pos);
-		if(pRm == nullptr)
-			continue;
-		if(pItem == nullptr)
 		{
-			pRm->GetLogicInputConditionDevice(&retList,pItem);
-			continue;
+			pRm->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
 		}
-		if(pRm->GetLogicInputConditionDevice(&retList,pItem) == FALSE)
-			continue;
 
 	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
 	return TRUE;
 }
-
 
 BOOL CXDataFloor::GetFloorAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 {
@@ -280,4 +248,27 @@ BOOL CXDataFloor::CopyData(CXDataFloor * pSrc)
 
 	BOOL bRet = m_pListRoom->CopyData(pList);
 	return bRet;
+}
+
+
+BOOL CXDataFloor::GetFloorAllOutputDevList(CXMapLink * pDevList,int nLogicID)
+{
+	CXMapLink mapRet;
+	POSITION pos;
+	CXDataRoom * pRm;
+	CString strStairName = L"";
+	if(m_pListRoom == nullptr)
+		return FALSE;
+	//
+	pos = m_pListRoom->GetHeadPosition();
+	while(pos)
+	{
+		pRm = m_pListRoom->GetNext(pos);
+		if(pRm == nullptr)
+			continue;
+		pRm->RetriveAllLink(&mapRet,nLogicID);
+		pDevList->insert(mapRet.begin(),mapRet.end());
+		mapRet.clear();
+	}
+	return TRUE;
 }

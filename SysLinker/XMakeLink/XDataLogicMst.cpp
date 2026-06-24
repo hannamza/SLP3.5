@@ -74,9 +74,10 @@ BOOL CXDataLogicMst::IsRangeIncluded(int nStartFloor,int nNfloor,CXDataLogicItem
 }
 
 
-BOOL CXDataLogicMst::HasRangeIntersection(int nStartFloor,int nNfloor,CXDataLogicItem * pItem)
+BOOL CXDataLogicMst::HasRangeIntersection(int nStartFloor,int nNEndFloor,CXDataLogicItem * pItem)
 {
-	return (((nStartFloor + nNfloor) >= pItem->GetInStartLevelNum()) && (pItem->GetInEndLevelNum() >= nStartFloor));
+	return ((nStartFloor <= pItem->GetInEndLevelNum()) && (pItem->GetInStartLevelNum() <= nNEndFloor));
+	//return (((nStartFloor + nNfloor) >= pItem->GetInStartLevelNum()) && (pItem->GetInEndLevelNum() >= nStartFloor));
 	//return (pItem->GetInStartLevelNum() >= nStartFloor && pItem->GetInEndLevelNum() <= nStartFloor + nNfloor);
 }
 
@@ -122,6 +123,8 @@ CXDataLogicItem* CXDataLogicMst::GetFloorLogicItem(CXDataDev * pInput,CXDataFloo
 		if(m_pArrLgItem[i] == nullptr)
 			continue;
 
+		// [2026/6/17 8:08:41 KHS] 
+		// 입력 회로의 정보가 같은 
 // 		// 입력된 건물이 입력 범위에 있는 건물 목록과 같은가
 // 		if(m_pArrLgItem[i]->CheckInputRangeBuild(pFloor->GetBuildIndex()) == FALSE)
 // 			continue;
@@ -130,18 +133,21 @@ CXDataLogicItem* CXDataLogicMst::GetFloorLogicItem(CXDataDev * pInput,CXDataFloo
 // 			continue;
 
 		// 입력층 ~ +N층까지 안에 범위 로직을 전체(또는 일부분)을 포함하는가?
+		// +N층 확인
 		if(HasRangeIntersection(nStartFloor,nEndFloor,m_pArrLgItem[i]))
 		{
 			// 범위의 건물,계단 확인
 			// 입력층 ~ +N층까지 안에 범위 로직이 있는것만 
+			// 출력 회로의 위치 : 층 범위 아래 , 층 범위 안 , 층 범위 초과
 			ret = CheckFloorPosition(pFloor->GetFloorNumber(),m_pArrLgItem[i]);
-			if(ret == RET_RANGE_BELOW)
+			if(ret == RET_RANGE_BELOW) // 범위 아래 --> 기본 로직 적용
 				return m_pArrLgItem[MAINLOGIC_PRIORITYID];
-			else if(ret == RET_RANGE_INSIDE)
+			else if(ret == RET_RANGE_INSIDE) // 범위안 
 			{
-				//범위 로직인지 아직 모름
+				//범위 로직인지 아직 모름 --> 입력 범위 안의 건물 인지 확인
 				if(m_pArrLgItem[i]->CheckInputRangeBuild(pFloor->GetBuildIndex()))
 				{
+					// 입력 범위 안의 계단인지 확인
 					if(m_pArrLgItem[i]->CheckInputRangeStair(pFloor->GetStairIndex()))
 					{
 						return m_pArrLgItem[i];
@@ -150,9 +156,11 @@ CXDataLogicItem* CXDataLogicMst::GetFloorLogicItem(CXDataDev * pInput,CXDataFloo
 				return m_pArrLgItem[MAINLOGIC_PRIORITYID];
 				
 			}
-			else
-			{
-				//범위 로직인지 아직 모름
+			else // floor는 범위 밖이지만 사용자가 범위를 포함 하는 경우 처리 방안에 대해 선택했을 때를 위해 
+			{    // ex) +N은 5층 이고 범위는 4,5층일 때 3층화재 시 6,7,8층의 로직 선택
+
+
+				// 층은 범위로직에 해당하지만 건물,계단이 해당되는지 체크
 				if(m_pArrLgItem[i]->CheckInputRangeBuild(pFloor->GetBuildIndex()))
 				{
 					if(m_pArrLgItem[i]->CheckInputRangeStair(pFloor->GetStairIndex()))

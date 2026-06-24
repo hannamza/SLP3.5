@@ -46,14 +46,12 @@ public:
 	int CompareData(CXDataDev * pPnt);
 	int CompareData(int nFlNum);
 
-	// [2025/8/1 8:07:56 KHS] 
-	// 입력 조건에 맞는 Device 목록 가져오기
-	BOOL GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem);
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicItem * pItem);
 
 	BOOL GetFloorAllDevList(CXMapDev * pDevList,BOOL bRemoveDev);
+	BOOL GetFloorAllOutputDevList(CXMapLink * pDevList,int nLogicID);
 	BOOL CopyData(CXDataFloor * pSrc);
 };
 

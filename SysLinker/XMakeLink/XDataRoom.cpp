@@ -198,38 +198,6 @@ BOOL CXDataRoom::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDev
 	return TRUE;
 }
 
-BOOL CXDataRoom::GetLogicInputConditionDevice(CXMapDev * pDevList,CXDataLogicItem * pItem)
-{
-	if(pDevList == nullptr)
-		return FALSE;
-	pDevList->insert(m_pMapDev->begin(),m_pMapDev->end());
-	
-	// [2026/4/6 8:13:04 KHS] 
-	// 입력 회로의 경우 입력범위가 중복되는것을 대비해 
-	// 한번 사용한 입력회로는 삭제 한다.
-	// 우선 순위에 따라 
-	m_pMapDev->clear();
-	
-	
-	// [2025/9/4 10:03:54 KHS] 
-	// Room이 가지고 있는것들을 하나씩 제거 한다.
-	// 입력일 때 Return 리스트에는 추가하고 가지고 있는건 삭제 한다.
-	// 입력 조건에 맞는 것들을 하나 씩 제거 하고  
-	// 마지막에 남은 것들은 기본 설정로직으로 처리한다.
-
-	// 	CXDataDev * pData;
-	// 	while(m_pListDev->IsEmpty() == FALSE)
-	// 	{
-	// 		pData = m_pListDev->RemoveHead();
-	// 		if(pData == nullptr)
-	// 			continue;
-	// 		pDevList->SortedAddData(pData);
-	// 	}
-
-	//pDevList->ListAdd(m_pListDev);
-	return TRUE;
-}
-
 int CXDataRoom::CompareData(int nIndex)
 {
 	if(m_nNameIndex == nIndex)

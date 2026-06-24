@@ -6,6 +6,7 @@
 #include "XDataLogicItem.h"
 #include "XDataFloor.h"
 #include "XDataEm.h"
+
 CXDataLogicItem::CXDataLogicItem()
 {
 	m_nLgId = 0;
@@ -43,11 +44,11 @@ CXDataLogicItem::~CXDataLogicItem()
 	m_arrStairName.RemoveAll();
 }
 
-void CXDataLogicItem::CopyArray(CStringArray * pTarget,CStringArray * pSource)
+void CXDataLogicItem::CopyArray(CStringArray * pTarget,CStringArray * pSource,BOOL bBuild)
 {
 
 	int nSize;
-	int i;
+	int i,nIdx=0;
 	CString str;
 
 	if(pTarget == nullptr || pSource == nullptr)
@@ -61,6 +62,16 @@ void CXDataLogicItem::CopyArray(CStringArray * pTarget,CStringArray * pSource)
 		str = pSource->GetAt(i);
 		if(str.GetLength() <= 0)
 			continue;
+		if(bBuild)
+		{
+			nIdx = g_MapIdxBuild[str];
+			m_vtInputBuildIds.push_back(nIdx);
+		}
+		else
+		{
+			nIdx = g_MapIdxStair[str];
+			m_vtInputStairs.push_back(nIdx);
+		}
 		pTarget->Add(str);
 	}
 }
@@ -76,9 +87,9 @@ BYTE CXDataLogicItem::SetMatchCondition(
 	suData.stLoctype.btBType = btMatchBType;
 	suData.stLoctype.btStair = btMatchStair;
 	// +N층일 때는 무조건 층일치 들어가야된다.
-	if(m_nPlusNStart != 0 || m_nPlusNEnd != 0)
-		suData.stLoctype.btFloor = 1;
-	else
+// 	if(m_nPlusNStart != 0 || m_nPlusNEnd != 0)
+// 		suData.stLoctype.btFloor = 1;
+// 	else
 		suData.stLoctype.btFloor = btMatchFloor;
 
 // 	if(m_nPluseNFloor != 0)
@@ -117,8 +128,8 @@ void CXDataLogicItem::SetAutoLogic(
 	m_nEqName = nEqName;
 	m_nOutContents = nOutCond;
 
-	CopyArray(&m_arrBuildName,pArrBuild);
-	CopyArray(&m_arrStairName,pArrStair);
+	CopyArray(&m_arrBuildName,pArrBuild,TRUE);
+	CopyArray(&m_arrStairName,pArrStair,FALSE);
 
 	m_nInEndLevelNum = nEndLevelNum;
 	m_nInStartLevelNum = nStartLevelNum;
@@ -190,8 +201,8 @@ void CXDataLogicItem::SetAutoLogic(
 	m_nEqName = nEqName;
 	m_nOutContents = nOutCond;
 
-	CopyArray(&m_arrBuildName,pArrBuild);
-	CopyArray(&m_arrStairName,pArrStair);
+	CopyArray(&m_arrBuildName,pArrBuild,TRUE);
+	CopyArray(&m_arrStairName,pArrStair,FALSE);
 
 	m_nInEndLevelNum = nEndLevelNum;
 	m_nInStartLevelNum = nStartLevelNum;
@@ -257,8 +268,8 @@ void CXDataLogicItem::SetLogicInputLoc(CStringArray * pArrBuild,CStringArray * p
 	,int nStartLevelNum,int nEndLevelNum,BYTE btFromOperator,BYTE btToOperator
 	)
 {
-	CopyArray(&m_arrBuildName,pArrBuild);
-	CopyArray(&m_arrStairName,pArrStair);
+	CopyArray(&m_arrBuildName,pArrBuild,TRUE);
+	CopyArray(&m_arrStairName,pArrStair,FALSE);
 
 	m_nInEndLevelNum = nEndLevelNum;
 	m_nInStartLevelNum = nStartLevelNum;
@@ -338,7 +349,7 @@ BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tg
 	if(pInputDev == nullptr || tgt == nullptr)
 		return 0;
 
-	int nInBuild,nOutBuild,nParkBuild;
+	int nInBuild,nOutBuild;
 	std::vector<int> vtTarget;
 	nInBuild = pInputDev->GetBuildIndex();
 	nOutBuild = tgt->GetBuildIndex();
@@ -392,30 +403,38 @@ BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tg
 
 BOOL CXDataLogicItem::MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
+	// 기본 로직이 아니고 , 범위안에 건물이 아니면 FALSE를 리턴
+// 	if((m_btPriority != MAINLOGIC_PRIORITYID)
+// 		&&(CheckInputRangeBuild(tgt->GetBuildIndex()) == FALSE))
+// 		return FALSE;
 	if(ground)
-		return GetMatchGroundBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : true;
+		return GetMatchGroundBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : TRUE;
 	else
-		return GetMatchUnderBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : true;
+		return GetMatchUnderBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : TRUE;
 }
 
 BOOL CXDataLogicItem::MatchBType(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
 	if(ground)
-		return GetMatchGroundBType() ? (src->GetBTypeIndex() == tgt->GetBtypeIndex()) : true;
+		return GetMatchGroundBType() ? (src->GetBTypeIndex() == tgt->GetBtypeIndex()) : TRUE;
 	else
-		return GetMatchUnderBType() ? (src->GetBTypeIndex() == tgt->GetBtypeIndex()) : true;
+		return GetMatchUnderBType() ? (src->GetBTypeIndex() == tgt->GetBtypeIndex()) : TRUE;
 }
 
 BOOL CXDataLogicItem::MatchStair(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
+	// 기본 로직이 아니고 , 범위안에 계단이 아니면 FALSE를 리턴
+// 	if((m_btPriority != MAINLOGIC_PRIORITYID)
+// 		&& (CheckInputRangeStair(tgt->GetStairIndex()) == FALSE))
+// 		return FALSE;
 	if(ground)
-		return GetMatchGroundStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : true;
+		return GetMatchGroundStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : TRUE;
 	else
-		return GetMatchUnderStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : true;
+		return GetMatchUnderStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : TRUE;
 }
 
 BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
-{
+{ 
 	// [2026/6/10 10:07:16 KHS] 
 	// 발생 층이 지하 일때도 범위 적용
 	// 지하 로직 - 사용 때 : ?
@@ -423,6 +442,8 @@ BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 	BOOL bRet = FALSE;
 	int nSrcFlNum = src->GetLocFloorNumber();
 	int nTgtFlNum = tgt->GetFloorNumber();
+	// [2026/6/16 15:20:08 KHS] 
+	// 범위로직에 층이 있으면 층일치 조건 1
 	if(GetMatchGroundFloor() == 1)
 	{
 		if(nTgtFlNum >= nSrcFlNum + m_nPlusNStart
@@ -477,50 +498,77 @@ BOOL CXDataLogicItem::MatchEmergency(CXDataDev* src,CXDataEm* tgt)
 
 BOOL CXDataLogicItem::CheckInputRangeBuild(int nBuildIdx)
 {
-	int nSize,i;
-	CString strBuildName;
-	CXLocStrMap::iterator it;
-	
-	nSize = m_arrBuildName.GetSize();
-	if(nSize <= 0)
+	size_t sz;
+
+	sz = m_vtInputBuildIds.size();
+	// 입력 범위 로직의 건물 목록이 없으면 모든 건물 포함
+	if(sz <= 0)
 		return TRUE;
-	for(i = 0; i < nSize; i++)
+	for(int x : m_vtInputBuildIds) 
 	{
-		strBuildName = m_arrBuildName.GetAt(i);
-		if(strBuildName.GetLength() <= 0)
-			continue;
-
-		it = g_MapIdxBuild.find(strBuildName);
-		if(it == g_MapIdxBuild.end())
-			continue;
-
-		if(nBuildIdx == it->second)
+		if(x == nBuildIdx)
 			return TRUE;
 	}
 	return FALSE;
+
+// 	int nSize,i;
+// 	CString strBuildName;
+// 	CXLocStrMap::iterator it;
+// 	
+// 	nSize = m_arrBuildName.GetSize();
+// 	// 입력 범위 로직의 건물 목록이 없으면 모든 건물 포함
+// 	if(nSize <= 0)
+// 		return TRUE;
+// 	for(i = 0; i < nSize; i++)
+// 	{
+// 		strBuildName = m_arrBuildName.GetAt(i);
+// 		if(strBuildName.GetLength() <= 0)
+// 			continue;
+// 
+// 		it = g_MapIdxBuild.find(strBuildName);
+// 		if(it == g_MapIdxBuild.end())
+// 			continue;
+// 
+// 		if(nBuildIdx == it->second)
+// 			return TRUE;
+// 	}
+// 	return FALSE;
 }
 
 
 BOOL CXDataLogicItem::CheckInputRangeStair(int nStairIndex)
 {
-	int nSize,i;
-	CString strStairName;
-	CXLocStrMap::iterator it;
-	nSize = m_arrStairName.GetSize();
-	if(nSize <= 0)
+	size_t sz;
+
+	sz = m_vtInputStairs.size();
+	// 입력 범위 로직의 건물 목록이 없으면 모든 건물 포함
+	if(sz <= 0)
 		return TRUE;
-	for(i = 0; i < nSize; i++)
+	for(int x : m_vtInputStairs)
 	{
-		strStairName = m_arrStairName.GetAt(i);
-		if(strStairName.GetLength() <= 0)
-			continue;
-
-		it = g_MapIdxStair.find(strStairName);
-		if(it == g_MapIdxStair.end())
-			continue;
-
-		if(nStairIndex == it->second)
+		if(x == nStairIndex)
 			return TRUE;
 	}
 	return FALSE;
+
+// 	int nSize,i;
+// 	CString strStairName;
+// 	CXLocStrMap::iterator it;
+// 	nSize = m_arrStairName.GetSize();
+// 	if(nSize <= 0)
+// 		return TRUE;
+// 	for(i = 0; i < nSize; i++)
+// 	{
+// 		strStairName = m_arrStairName.GetAt(i);
+// 		if(strStairName.GetLength() <= 0)
+// 			continue;
+// 
+// 		it = g_MapIdxStair.find(strStairName);
+// 		if(it == g_MapIdxStair.end())
+// 			continue;
+// 
+// 		if(nStairIndex == it->second)
+// 			return TRUE;
+// 	}
+// 	return FALSE;
 }
