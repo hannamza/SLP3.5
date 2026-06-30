@@ -316,8 +316,8 @@ BOOL CXDataRangeLogic::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 	int nSrcFlNum = src->GetLocFloorNumber();
 	int nTgtFlNum = tgt->GetFloorNumber();
 
-	if(m_btUseFloorRange == FALSE)
-		return TRUE;
+// 	if(m_btUseFloorRange == FALSE)
+// 		return TRUE;
 	// [2026/6/16 15:20:08 KHS] 
 	// 범위로직에 층이 있으면 층일치 조건 1
 	//if(GetMatchGroundFloor() == 1)
@@ -351,11 +351,23 @@ BOOL CXDataRangeLogic::InRange(CXDataDev * pInDev)
 
 BOOL CXDataRangeLogic::MatchEmergency(CXDataDev * pInDev,CXDataEm * pEm)
 {
-	if(CheckInputRangeBuild(pEm->GetBuildIndex()) == FALSE)
-		return FALSE;
-	if(CheckInputRangeStair(pEm->GetStairIndex()) == FALSE)
-		return FALSE;
-	if(pEm->GetFloorIndex() != pInDev->GetFloorIndex())
-		return FALSE;
+	if (m_btEmergency == 1)
+	{
+		if (pInDev->GetBuildIndex() != pEm->GetBuildIndex())
+			return FALSE;
+		if (pInDev->GetStairIndex() != pEm->GetStairIndex())
+			return FALSE;
+		if (pInDev->GetFloorIndex() != pEm->GetFloorIndex())
+			return FALSE;
+	}
+	else
+	{
+		if (CheckInputRangeBuild(pEm->GetBuildIndex()) == FALSE)
+			return FALSE;
+		if (CheckInputRangeStair(pEm->GetStairIndex()) == FALSE)
+			return FALSE;
+		if (pEm->GetFloorIndex() != pInDev->GetFloorIndex())
+			return FALSE;
+	}
 	return TRUE;
 }
