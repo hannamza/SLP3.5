@@ -415,9 +415,9 @@ BOOL CXDataStair::CopyData(CXDataStair * pSrc)
 // 	return TRUE;
 // }
 
-BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,BOOL bAlertEqType)
 {
-	CXMapDev retList;
+	//CXMapDev retList;
 	POSITION pos;
 	CXDataFloor * pFloor;
 	RANGE_RESULT nResult = RET_RANGE_OVER;
@@ -432,22 +432,40 @@ BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 		if(pFloor == nullptr)
 			continue;
 		nFlNum = pFloor->GetFloorNumber();
+		if(pItem->GetMatchGroundFloor() == 0)
+		{
+			//if(bAlertEqType == TRUE)
+			nResult = pRange->CheckFloorPosition(nFlNum);
+			if(bAlertEqType)
+			{
+				pFloor->GetFloorAllDevList(pDevList,TRUE);
+			}
+			else
+			{
+				if(nResult == RET_RANGE_INSIDE)
+					pFloor->GetFloorAllDevList(pDevList,TRUE);
+			}
+			continue;
+		}
 		nResult = pRange->CheckFloorPosition(nFlNum);
 		if(nResult == RET_RANGE_INSIDE)
 		{
 			// 해당하는 입력회로는 삭제 한다.
 			// 남은 입력회로만 기본로직 적용하기 위해
-			pFloor->GetFloorAllDevList(&retList,TRUE);
+			pFloor->GetFloorAllDevList(pDevList,TRUE);
 		}
 		else if(nResult == RET_RANGE_BELOW)
 		{
 			// +N층 적용 시 출력회로가 포함되면 출력범위에 영향을 주는 회로로 추가한다.
 			if(nFlNum + pRange->GetPlusNEnd() >= pRange->GetRangeStartLevelNum())
-				pFloor->GetFloorAllDevList(&retList,TRUE);
+			{
+				if(bAlertEqType == TRUE)
+					pFloor->GetFloorAllDevList(pDevList,TRUE);
+			}
 		}
 	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
+	//pDevList->insert(retList.begin(),retList.end());
+	//retList.clear();
 	return TRUE;
 }
 
@@ -457,7 +475,8 @@ BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 /// 입력회로가 범위에 영향을 줄 수 있는 회로
 BOOL CXDataStair::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
-	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	,BOOL bAlertTypeEq)
 {
 	POSITION pos;
 	CXDataLogicItem * pItem;
@@ -478,12 +497,18 @@ BOOL CXDataStair::GetRangeOutputDevice(
 			pFloor = m_pListFloor->GetNext(pos);
 			if(pFloor == nullptr)
 				continue;
-
-			// 층범위가 없으면 건물,계단만 확인한다.
-			if(pRange->GetUseFloorRange() == 0)
+			if(bAlertTypeEq)
 			{
 				if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
 					continue;
+			}
+			else
+			{
+				if(pRange->CheckFloorPosition(pFloor->GetFloorNumber()) == RET_RANGE_INSIDE)
+				{
+					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+						continue;
+				}
 			}
 		}
 		return TRUE;
@@ -509,45 +534,109 @@ BOOL CXDataStair::GetRangeOutputDevice(
 		switch(nResult)
 		{
 		case RET_RANGE_BELOW:
-// 			if(nSrcFl <= nTargetFl
-// 				&&
-// 				(((nRangeEnd < nTargetFl) && pRange->GetUseRangeLogicOverFloor())
-// 					|| (nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd)
-// 					)
-// 				)
-// 			{
-// 				if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
-// 					continue;
-// 			}
-// 			else
-// 			{
-// 				if(pItem->GetMatchGroundFloor())
-// 				{
-// 					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-// 						continue;
-// 				}
-// 				else
-// 				{
-// 					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-// 						continue;
-// 				}
-// 			}
-
-			//////////////////////////////////////////////////////////////////////////
-			// 위의 내용을 풀어서
-			if(nSrcFl <= nTargetFl)
+			/*
+			1. 입력 아래 출력
+				기본로직
+			2. 입력 ~ 범위 사이 출력
+				1) 출력이 경보 타입이 아니면 - 옵션 사용 불가 : 주로직
+				- 층일치가 없을 때 - 주로직
+				- 층일치가 있을 때 - 주로직
+				2) 출력이 경보 타입 이면 - 옵션 사용가능
+				- 층일치가 없을 때 - 옵션에 주로직,범위로직
+				- 층일치가 있을 때 - 주로직
+			3. 범위 내 출력
+				1) 출력이 경보 타입이 아니면 - 주로직
+				- 층일치가 없을 때 - 주로직
+				- 층일치가 있을 때 - 주로직
+				2) 출력이 경보 타입이면
+				- 층일치가 없을 때 - 범위로직
+				- 층일치가 있을 때 - 범위로직
+			4. 범위 초과 출력
+				1) 출력이 경보 타입이 아니면 - 주로직
+					- 층일치가 없을 때 - 주로직
+					- 층일치가 있을 때 - 주로직
+				2) 출력이 경보 타입이면 - 옵션에 따라
+					- 층일치가 없을 때 - 옵션에 따라 주로직,범위로직
+					- 층일치가 이을 때 - 옵션에 따라 주로직,범위로직
+			*/
+			if(nTargetFl < nRangeStart)
 			{
-			 	// 1) 범위 아래 출력은 기본로직
-			 	if(nTargetFl < nRangeStart)
-			 	{
-					// 기본 로직 적용
-					// 층일치가 없으면 Option에 따라 기본 또는 범위로직(층일치 무시)
-					if(pItem->GetMatchGroundFloor() == 1)
+				// 1. 입력 아래 출력
+				// 2. 입력 ~ 범위 사이 출력
+				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+					continue;
+				//if(bAlertTypeEq == FALSE)
+				//{
+				//	if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+				//		continue;
+				//}
+				//else
+				//{
+				//	if(pItem->GetMatchGroundFloor() == 0)
+				//	{
+				//		if(pRange->GetUseRangeLogicOverFloor() == 1)
+				//		{
+				//			if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+				//				continue;
+				//		}
+				//		else
+				//		{
+				//			if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+				//				continue;
+				//		}
+				//	}
+				//	else
+				//	{
+				//		if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+				//			continue;
+				//	}
+				//}
+			}
+			else if(nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd)
+			{
+				//3. 범위 내 출력
+				//	1) 출력이 경보 타입이 아니면 - 주로직
+				//		- 층일치가 없을 때 - 주로직
+				//		- 층일치가 있을 때 - 주로직
+				//	2) 출력이 경보 타입이면
+				//		- 층일치가 없을 때 - 범위로직
+				//		- 층일치가 있을 때 - 범위로직
+				if(bAlertTypeEq == FALSE)
+				{
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						continue;
+				}
+				else
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
 					{
-						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
 							continue;
 					}
 					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+				}
+			}
+			else if(nRangeEnd < nTargetFl)
+			{
+				//4. 범위 초과 출력
+				//	1) 출력이 경보 타입이 아니면 - 주로직
+				//		- 층일치가 없을 때 - 주로직
+				//		- 층일치가 있을 때 - 주로직
+				//	2) 출력이 경보 타입이면 - 옵션에 따라
+				//		- 층일치가 없을 때 - 옵션에 따라 주로직,범위로직
+				//		- 층일치가 이을 때 - 옵션에 따라 주로직,범위로직
+				if(bAlertTypeEq == FALSE)
+				{
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						continue;
+				}
+				else
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
 					{
 						if(pRange->GetUseRangeLogicOverFloor() == 1)
 						{
@@ -560,29 +649,9 @@ BOOL CXDataStair::GetRangeOutputDevice(
 								continue;
 						}
 					}
-			 	}
-				else if(nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd)
-				{
-					// 입력이 범위 아래 이고 , 대상이 범위 안 --> 범위 로직
-					// 기본로직에 층일치가 없으면 층 일치 무시
-					if(pItem->GetMatchGroundFloor() == 1)
-					{
-						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
-							continue;
-					}
 					else
 					{
-						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-							continue;
-					}
-				}
-			 	else if(nRangeEnd < nTargetFl)
-			 	{
-					// 기본 로직 
-					// 기본로직의 층일치가 없으면 option따라 기본 또는 범위로직
-					if(pItem->GetMatchGroundFloor() == 1)
-					{
-						if(pRange->GetUseRangeLogicOverFloor())
+						if(pRange->GetUseRangeLogicOverFloor() == 1)
 						{
 							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
 								continue;
@@ -593,9 +662,133 @@ BOOL CXDataStair::GetRangeOutputDevice(
 								continue;
 						}
 					}
+				}
+			}
+			// 			
+			break;
+		case RET_RANGE_INSIDE:
+			/*
+			1. 출력이 범위 미만
+				1) 출력이 경보 타입이 아니면 - 주로직
+					- 층일치가 없을 때 - 범위로직(층 X)
+					- 층일치가 있을 때 - 기본로직(범위밖 , 처리할 필요 없음)
+				2) 출력이 경보 타입이면 - 
+					- 층일치가 없을 때 - 범위로직(층 X)
+					- 층일치가 있을 때 - 기본로직(범위밖, 처리할 필요 없음)
+			2. 출력이 범위 내
+				1) 출력이 경보 타입이 아니면 - 범위로직
+					- 층일치가 없을 때 - 범위로직(층 X)
+					- 층일치가 있을 때 - 범위로직(층 O)
+				2) 출력이 경보 타입이면
+					- 층일치가 없을 때 - 범위로직(층 X)
+					- 층일치가 있을 때 - 범위로직(층 O)
+			3. 출력이 범위 초과
+				1) 출력이 경보 타입이 아니면 - 범위로직
+					- 층일치가 없을 때 - 범위로직(층 X)
+					- 층일치가 있을 때 - 범위로직(층 O)
+				2) 출력이 경보 타입이면 - 옵션에 따라 
+					- 층일치가 없을 때 - 옵션에 따라 범위(층 X),주 로직
+					- 층일치가 있을 때 - 옵션에 따라 범위(층 O), 주로직
+			*/
+			if(nTargetFl < nRangeStart)
+			{
+				//1. 출력이 범위 미만
+				//	1) 출력이 경보 타입이 아니면 - 주로직
+				//	- 층일치가 없을 때 - 범위로직(층 X)
+				//	- 층일치가 있을 때 - 기본로직(범위밖 , 처리할 필요 없음)
+				//	2) 출력이 경보 타입이면 -
+				//	- 층일치가 없을 때 - 범위로직(층 X)
+				//	- 층일치가 있을 때 - 기본로직(범위밖 , 처리할 필요 없음)
+				if(bAlertTypeEq == FALSE)
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
 					else
 					{
-						if(pRange->GetUseRangeLogicOverFloor())
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+				}
+				else
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+				}
+			}
+			else if(nRangeStart <= nTargetFl && nRangeEnd >= nTargetFl)
+			{
+				//2. 출력이 범위 내
+				//	1) 출력이 경보 타입이 아니면 - 범위로직
+				//	- 층일치가 없을 때 - 범위로직(층 X)
+				//	- 층일치가 있을 때 - 범위로직(층 O)
+				//	2) 출력이 경보 타입이면
+				//	- 층일치가 없을 때 - 범위로직(층 X)
+				//	- 층일치가 있을 때 - 범위로직(층 O)
+				if(bAlertTypeEq == FALSE)
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+				}
+				else
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+				}
+			}
+			else if(nRangeEnd < nTargetFl)
+			{
+				//3. 출력이 범위 초과
+				//	1) 출력이 경보 타입이 아니면 - 범위로직
+				//	- 층일치가 없을 때 - 범위로직(층 X)
+				//	- 층일치가 있을 때 - 범위로직(층 O)
+				//	2) 출력이 경보 타입이면 - 옵션에 따라
+				//	- 층일치가 없을 때 - 옵션에 따라 범위(층 X),주 로직
+				//	- 층일치가 있을 때 - 옵션에 따라 범위(층 O),주로직
+				if(bAlertTypeEq == FALSE)
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+							continue;
+					}
+					else
+					{
+						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+							continue;
+					}
+				}
+				else
+				{
+					if(pItem->GetMatchGroundFloor() == 0)
+					{
+						if(pRange->GetUseRangeLogicOverFloor() == 1)
 						{
 							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
 								continue;
@@ -606,135 +799,367 @@ BOOL CXDataStair::GetRangeOutputDevice(
 								continue;
 						}
 					}
-			 	}
-			}
-			else if(nSrcFl > nTargetFl)
-			{
-				if(pItem->GetMatchGroundFloor() == 1)
-				{
-					if(pRange->GetUseRangeLogicOverFloor())
-					{
-						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
-							continue;
-					}
 					else
 					{
-						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-							continue;
-					}
-				}
-				else
-				{
-					if(pRange->GetUseRangeLogicOverFloor())
-					{
-						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-							continue;
-					}
-					else
-					{
-						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-							continue;
+						if(pRange->GetUseRangeLogicOverFloor() == 1)
+						{
+							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+								continue;
+						}
+						else
+						{
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+								continue;
+						}
 					}
 				}
 			}
-			// 			
-			break;
-		case RET_RANGE_INSIDE:
-			if(nTargetFl < nRangeStart)
-			{
-				// 입력 회로가 범위 안이고 출력이 범위 아래 일때 기본 로직을 사용해야되지만
-				// 기본 로직에서 층일치가 없으면 범위 로직을 사용한다
-				//  ex) 1. 조건 : 
-				//		  - 기본 로직 : 건물,계단 (층 일치 없음)
-				//		  - 범위 로직 : 조건 없음
-				//      2. 결과 
-				//		  - 범위가 101,102동일 15 ~17 층 일때
-				//		  - 101동 1계단 15층 입력 시
-				//		    -- > 101동 전체 + 102동 전체 (범위 내에서 층 구분 무시)
-				if(pItem->GetMatchGroundFloor())
-				{
-					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-						continue;
-				}
-				else
-				{
-					// 범위 로직에서 층 무시
-					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-						continue;
-				}
-			}
-			if(nRangeStart <= nTargetFl && nRangeEnd >= nTargetFl)
-			{
-				// 입력이 범위 아래 이고 , 대상이 범위 안 --> 범위 로직
-				// 기본 로직에서 층일치가 없으면 범위 로직 --> 층 무시
-				if(pItem->GetMatchGroundFloor() == 1)
-				{
-					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
-						continue;
-				}
-				else
-				{
-					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-						continue;
-				}
-			}
-			else if(nRangeEnd < nTargetFl)
-			{
-				// 입력이 범위 아래 이고 , 대상이 범위 초과 --> 옵션에 따라 범위 로직 또는 기본 로직
-				if(pRange->GetUseRangeLogicOverFloor())
-				{
-					if(pItem->GetMatchGroundFloor())
-					{
-						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
-							continue;
-					}
-					else
-					{
-						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-							continue;
-					}
-				}
-				else
-				{
-					// 기본로직을 사용해야된다
-					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-						continue;
-// 					if(pItem->GetMatchGroundFloor())
-// 					{
-// 						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-// 							continue;
-// 					}
-// 					else
-// 					{
-// 						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-// 							continue;
-// 					}
-				}
-			}
-
 			break;
 		case RET_RANGE_OVER:
 			// 기본 로직
-			if(pItem->GetMatchGroundFloor())
-			{
-				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-					continue;
-			}
-			else
-			{
-				if(pRange->GetUseRangeLogicOverFloor() == 1)
-				{
-					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
-						continue;
-				}
-				else
-				{
-					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
-						continue;
-				}
-			}
+			if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+				continue;
 			break;
 		}
 	}
 	return TRUE;
 }
+
+
+/// Backup
+
+////////////////////////////////////////////////////////////////////////////
+//// ※ 범위에서 로직에서 층의 범위를 확인 하지 않는경우
+////   1) 기본 로직이 층 일치 조건 없음 , 
+///// 입력회로가 범위에 영향을 줄 수 있는 회로
+//BOOL CXDataStair::GetRangeOutputDevice(
+//	CXDataDev * pInDev,CXMapLink * pMapOutDev
+//	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+//	,BOOL bAlertTypeEq)
+//{
+//	POSITION pos;
+//	CXDataLogicItem * pItem;
+//	CXDataFloor * pFloor;
+//	int nSrcFl,nTargetFl,nPlusN;
+//	int nRangeStart,nRangeEnd;
+//	RANGE_RESULT nResult;
+//	if(m_pListFloor == nullptr)
+//		return FALSE;
+//
+//
+//
+//	if(pRange->GetUseFloorRange() == 0)
+//	{
+//		pos = m_pListFloor->GetHeadPosition();
+//		while(pos)
+//		{
+//			pFloor = m_pListFloor->GetNext(pos);
+//			if(pFloor == nullptr)
+//				continue;
+//			if(bAlertTypeEq)
+//			{
+//				if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//					continue;
+//			}
+//			else
+//			{
+//				if(pRange->CheckFloorPosition(pFloor->GetFloorNumber()) == RET_RANGE_INSIDE)
+//				{
+//					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//						continue;
+//				}
+//			}
+//		}
+//		return TRUE;
+//	}
+//
+//	nPlusN = pRange->GetPlusNEnd();
+//	nRangeStart = pRange->GetRangeStartLevelNum();
+//	nRangeEnd = pRange->GetRangeEndLevelNum();
+//	pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
+//
+//	// 입력 회로와 설정된 범위와의 관계를 확인
+//	nSrcFl = pInDev->GetLocFloorNumber();
+//	nResult = pRange->CheckFloorPosition(nSrcFl);
+//
+//	pos = m_pListFloor->GetHeadPosition();
+//	while(pos)
+//	{
+//		pFloor = m_pListFloor->GetNext(pos);
+//		if(pFloor == nullptr)
+//			continue;
+//
+//		nTargetFl = pFloor->GetFloorNumber();
+//		switch(nResult)
+//		{
+//		case RET_RANGE_BELOW:
+//			if(nSrcFl <= nTargetFl)
+//			{
+//				/*
+//				1. 입력 아래 출력
+//				1) 출력이 경보 타입이 아니면 - 옵션 사용 불가 : 주로직
+//				- 층일치가 없을 때 - 주로직
+//				- 층일치가 있을 때 - 주로직
+//				2) 출력이 경보 타입이면 - 옵션 사용가능
+//				- 층일치가 없을 때 - 옵션에 따라 주로직,범위로직
+//				- 층일치가 있을 때 - 주로직
+//				2. 입력 ~ 범위 사이 출력
+//				1) 출력이 경보 타입이 아니면 - 옵션 사용 불가 : 주로직
+//				- 층일치가 없을 때 - 주로직
+//				- 층일치가 있을 때 - 주로직
+//				2) 출력이 경보 타입 이면 - 옵션 사용가능
+//				- 층일치가 없을 때 - 옵션에 주로직,범위로직
+//				- 층일치가 있을 때 - 주로직
+//				3. 범위 내 출력
+//				1) 출력이 경보 타입이 아니면 - 주로직
+//				- 층일치가 없을 때 - 주로직
+//				- 층일치가 있을 때 - 주로직
+//				2) 출력이 경보 타입이면
+//				- 층일치가 없을 때 - 범위로직
+//				- 층일치가 있을 때 - 범위로직
+//				4. 범위 초과 출력
+//				1) 출력이 경보 타입이 아니면 - 주로직
+//				- 층일치가 없을 때 - 주로직
+//				- 층일치가 있을 때 - 주로직
+//				2) 출력이 경보 타입이면 - 옵션에 따라
+//				- 층일치가 없을 때 - 옵션에 따라 주로직,범위로직
+//				- 층일치가 이을 때 - 옵션에 따라 주로직,범위로직
+//				*/
+//				// 1) 범위 아래 출력은 기본로직
+//				if(nTargetFl < nRangeStart)
+//				{
+//					// 기본 로직 적용
+//					// 층일치가 없으면 Option에 따라 기본 또는 범위로직(층일치 무시)
+//					if(pItem->GetMatchGroundFloor() == 1)
+//					{
+//						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//							continue;
+//					}
+//					else
+//					{
+//						// 소스 - 범위 아래 , nTargetFl < nRangeStart
+//						if(pRange->GetUseRangeLogicOverFloor() == 1)
+//						{
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//					}
+//				}
+//				else if(nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd)
+//				{
+//					// 입력이 범위 아래 이고 , 대상이 범위 안 --> 범위 로직
+//					// 기본로직에 층일치가 없으면 층 일치 무시
+//					if(pItem->GetMatchGroundFloor() == 1)
+//					{
+//						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+//							continue;
+//					}
+//					else
+//					{
+//						// 소스 - 범위 아래 , nRangeStart <= nTargetFl && nTargetFl <= nRangeEnd
+//						if(pRange->GetUseRangeLogicOverFloor() == 1)
+//						{
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//					}
+//				}
+//				else if(nRangeEnd < nTargetFl)
+//				{
+//					// 기본 로직 
+//					// 기본로직의 층일치가 없으면 option따라 기본 또는 범위로직
+//					if(pItem->GetMatchGroundFloor() == 1)
+//					{
+//						if(pRange->GetUseRangeLogicOverFloor())
+//						{
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//					}
+//					else
+//					{
+//						// 소스 - 범위 아래 , nRangeEnd < nTargetFl
+//						if(pRange->GetUseRangeLogicOverFloor())
+//						{
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//					}
+//				}
+//			}
+//			else if(nSrcFl > nTargetFl)
+//			{
+//				if(pItem->GetMatchGroundFloor() == 1)
+//				{
+//					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//						continue;
+//				}
+//				else
+//				{
+//					// 소스 - 범위 아래 , nSrcFl > nTargetFl
+//					if(pRange->GetUseRangeLogicOverFloor())
+//					{
+//						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//							continue;
+//					}
+//					else
+//					{
+//						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//							continue;
+//					}
+//				}
+//			}
+//			// 			
+//			break;
+//		case RET_RANGE_INSIDE:
+//			if(nTargetFl < nRangeStart)
+//			{
+//				// 입력 회로가 범위 안이고 출력이 범위 아래 일때 기본 로직을 사용해야되지만
+//				// 기본 로직에서 층일치가 없으면 범위 로직을 사용한다
+//				//  ex) 1. 조건 : 
+//				//		  - 기본 로직 : 건물,계단 (층 일치 없음)
+//				//		  - 범위 로직 : 조건 없음
+//				//      2. 결과 
+//				//		  - 범위가 101,102동일 15 ~17 층 일때
+//				//		  - 101동 1계단 15층 입력 시
+//				//		    -- > 101동 전체 + 102동 전체 (범위 내에서 층 구분 무시)
+//				if(pItem->GetMatchGroundFloor())
+//				{
+//					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//						continue;
+//				}
+//				else
+//				{
+//					// 소스 - 범위 안 , nTargetFl < nRangeStart
+//					if(pRange->GetUseRangeLogicOverFloor())
+//					{
+//						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//							continue;
+//					}
+//					else
+//					{
+//						if(bAlertTypeEq)
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//								continue;
+//						}
+//					}
+//				}
+//			}
+//			if(nRangeStart <= nTargetFl && nRangeEnd >= nTargetFl)
+//			{
+//				// 입력이 범위 아래 이고 , 대상이 범위 안 --> 범위 로직
+//				// 기본 로직에서 층일치가 없으면 범위 로직 --> 층 무시
+//				if(pItem->GetMatchGroundFloor() == 1)
+//				{
+//					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+//						continue;
+//				}
+//				else
+//				{
+//					// 소스 - 범위 안 , nRangeStart <= nTargetFl && nRangeEnd >= nTargetFl
+//					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//						continue;
+//				}
+//			}
+//			else if(nRangeEnd < nTargetFl)
+//			{
+//				if(pItem->GetMatchGroundFloor())
+//				{
+//					if(pRange->GetUseRangeLogicOverFloor())
+//					{
+//						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,TRUE) == FALSE)
+//							continue;
+//					}
+//					else
+//					{
+//						if(bAlertTypeEq)
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							// 소스 - 범위 안 , nRangeStart <= nTargetFl && nRangeEnd >= nTargetFl
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//								continue;
+//						}
+//					}
+//				}
+//				else
+//				{
+//					// 소스 - 범위 안 , nRangeEnd < nTargetFl
+//					if(pRange->GetUseRangeLogicOverFloor())
+//					{
+//
+//						if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//							continue;
+//					}
+//					else
+//					{
+//						if(bAlertTypeEq)
+//						{
+//							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//								continue;
+//						}
+//						else
+//						{
+//							if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//								continue;
+//						}
+//					}
+//				}
+//			}
+//
+//			break;
+//		case RET_RANGE_OVER:
+//			// 기본 로직
+//			if(pItem->GetMatchGroundFloor())
+//			{
+//				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//					continue;
+//			}
+//			else
+//			{
+//				// 소스 - 범위 밖
+//				if(pRange->GetUseRangeLogicOverFloor() == 1)
+//				{
+//					if(CheckRangeLogicMatch(pInDev,pMapOutDev,pFloor,pRange,pMst,FALSE) == FALSE)
+//						continue;
+//				}
+//				else
+//				{
+//					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+//						continue;
+//				}
+//			}
+//			break;
+//		}
+//	}
+//	return TRUE;
+//}

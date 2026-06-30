@@ -172,6 +172,7 @@ public:
 	// 2) 출력이 연계 건물의 대상일 때
 	// 3) 입력이 연계 건물의 주차장 일때
 	BYTE CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tgt);
+	BYTE CheckMatchLinkedBuild(CXDataDev* pInputDev,int nTgtBuildIdx);
 
 	// 주어진 층이 로직 범위에 있는지 확인한다.
 	//BOOL CheckOutputRange(CXDataFloor * pFloor);

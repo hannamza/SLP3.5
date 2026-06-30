@@ -4,6 +4,7 @@
 #include "XDataRangeLogic.h"
 #include "XDataDev.h"
 #include "XDataFloor.h"
+#include "XDataEm.h"
 
 CXDataRangeLogic::CXDataRangeLogic()
 {
@@ -232,6 +233,9 @@ BOOL CXDataRangeLogic::CheckInputRangeBuild(int nBuildIdx)
 
 	if(m_btUseBuildRange == 0)
 		return TRUE;
+
+
+
 	sz = m_vtInputBuildIds.size();
 	// 입력 범위 로직의 건물 목록이 없으면 모든 건물 포함
 	if(sz <= 0)
@@ -250,6 +254,7 @@ BOOL CXDataRangeLogic::CheckInputRangeStair(int nStairIndex)
 	size_t sz;
 	if(m_btUseStairRange == 0)
 		return TRUE;
+
 	sz = m_vtInputStairs.size();
 	// 입력 범위 로직의 건물 목록이 없으면 모든 건물 포함
 	if(sz <= 0)
@@ -283,6 +288,7 @@ BOOL CXDataRangeLogic::MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
 	if(m_btUseBuildRange == FALSE)
 		return TRUE;
+
 	if(ground)
 		return GetMatchGroundBuild() ? (src->GetBuildIndex() == tgt->GetBuildIndex()) : TRUE;
 	else
@@ -293,6 +299,7 @@ BOOL CXDataRangeLogic::MatchStair(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
 	if(m_btUseStairRange == FALSE)
 		return TRUE;
+
 	if(ground)
 		return GetMatchGroundStair() ? (src->GetStairIndex() == tgt->GetStairIndex()) : TRUE;
 	else
@@ -329,4 +336,26 @@ BOOL CXDataRangeLogic::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 // 		bRet = TRUE;
 // 	}
 	return bRet;
+}
+
+BOOL CXDataRangeLogic::InRange(CXDataDev * pInDev)
+{
+	if(CheckInputRangeBuild(pInDev->GetBuildIndex()) == FALSE)
+		return FALSE;
+	if(CheckInputRangeStair(pInDev->GetStairIndex()) == FALSE)
+		return FALSE;
+	if(CheckFloorPosition(pInDev->GetLocFloorNumber()) != RET_RANGE_INSIDE)
+		return FALSE;
+	return TRUE;
+}
+
+BOOL CXDataRangeLogic::MatchEmergency(CXDataDev * pInDev,CXDataEm * pEm)
+{
+	if(CheckInputRangeBuild(pEm->GetBuildIndex()) == FALSE)
+		return FALSE;
+	if(CheckInputRangeStair(pEm->GetStairIndex()) == FALSE)
+		return FALSE;
+	if(pEm->GetFloorIndex() != pInDev->GetFloorIndex())
+		return FALSE;
+	return TRUE;
 }

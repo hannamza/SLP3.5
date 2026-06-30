@@ -37,6 +37,7 @@ public:
 	BOOL GetRangeOutputDevice(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+		,BOOL bAlertTypeEq
 	);
 };
 

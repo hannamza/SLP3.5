@@ -273,9 +273,9 @@ BOOL CXDataEqType::CopyData(CXDataEqType * pSrc)
 // }
 
 
-BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType)
 {
-	CXMapDev retList;
+//	CXMapDev retList;
 	POSITION pos;
 	CXDataBuild * pBuild;
 	CXLocStrMap::iterator it;
@@ -291,32 +291,44 @@ BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * p
 		pBuild = m_pListBuild->GetNext(pos);
 		if(pBuild == nullptr)
 			continue;
-		
-		if(pRange->CheckInputRangeBuild(pBuild->GetIndex()))
+		if(pItem->GetMatchGroundBuild() == 0)
 		{
-			pBuild->GetAppectingInputDev(&retList,pRange);
-			continue; 
+			pBuild->GetAppectingInputDev(pDevList,pRange , pItem,bAlertEqType);
+			continue;
 		}
+		else
+		{
+			if(pRange->CheckInputRangeBuild(pBuild->GetIndex()))
+			{
+				pBuild->GetAppectingInputDev(pDevList,pRange,pItem,bAlertEqType);
+				continue;
+			}
+		}
+		
 	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
+	//pDevList->insert(retList.begin(),retList.end());
+	//retList.clear();
 	return TRUE;
 }
 
 
 BOOL CXDataEqType::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
-	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	,BOOL bAlertTypeEq
+)
 {
 	POSITION pos;
 	CXDataBuild * pBuild;
 	BYTE btCheck = 0;
 	int nParkBuild = 0;
+	CXDataLogicItem * pItem; 
+
 	if(m_pListBuild == nullptr)
 	{
 		return FALSE;
 	}
-
+	pItem = pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID];
 	pos = m_pListBuild->GetHeadPosition();
 	while(pos)
 	{
@@ -324,10 +336,15 @@ BOOL CXDataEqType::GetRangeOutputDevice(
 
 		if(pBuild == nullptr)
 			continue;
-		// 건물 범위 확인
-		if(pRange->CheckInputRangeBuild(pBuild->GetIndex()) == FALSE)
-			continue;
-		pBuild->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst);
+		
+		// 건물 범위 확인 -
+		if((pRange->CheckInputRangeBuild(pBuild->GetIndex()) == TRUE)
+			|| (pBuild->GetIndex() == g_nEmptyBuildIdx) == TRUE
+			//|| (pItem->CheckMatchLinkedBuild(pInDev,pBuild->GetIndex() // 연결건물 확인
+			)
+		{
+			pBuild->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq);
+		}
 	}
 	return TRUE;
 }

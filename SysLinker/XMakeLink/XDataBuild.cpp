@@ -226,9 +226,9 @@ BOOL CXDataBuild::CopyData(CXDataBuild* pSrc)
 // 	return TRUE;
 // }
 
-BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange)
+BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType)
 {
-	CXMapDev retList;
+	//CXMapDev retList;
 	POSITION pos;
 	CXDataBtype * pBtype;
 	if(m_pListBtype == nullptr)
@@ -242,16 +242,17 @@ BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetAppectingInputDev(&retList,pRange);
+		pBtype->GetAppectingInputDev(pDevList,pRange,pItem,bAlertEqType);
 	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
+	//pDevList->insert(retList.begin(),retList.end());
+	//retList.clear();
 	return TRUE;
 }
 
 
 BOOL CXDataBuild::GetRangeOutputDevice(
-	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	,BOOL bAlertTypeEq)
 {
 	POSITION pos;
 	BYTE btCheck = 0;
@@ -264,7 +265,7 @@ BOOL CXDataBuild::GetRangeOutputDevice(
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst);
+		pBtype->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq);
 	}
 	return TRUE;
 }

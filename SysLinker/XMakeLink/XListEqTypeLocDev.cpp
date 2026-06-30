@@ -222,6 +222,7 @@ CXDataEqType * CXListEqTypeLocDev::GetCopyTypeData(int nType,int nName)
 BOOL CXListEqTypeLocDev::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+	,BOOL bAlertTypeEq
 )
 {
 	CXDataEqType * pType = nullptr;
@@ -229,7 +230,7 @@ BOOL CXListEqTypeLocDev::GetRangeOutputDevice(
 	pType = GetTypeData(pMst->GetOutType(),pMst->GetOutContents());
 	if(pType == nullptr)
 		return FALSE;
-	if(pType->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst) == FALSE)
+	if(pType->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq) == FALSE)
 		return FALSE;
 	return TRUE;
 }

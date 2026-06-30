@@ -377,11 +377,17 @@ extern CXLocStrMap	g_MapIdxStair;
 extern CXLocStrMap	g_MapIdxRoom;
 extern CXLinkBuildMap	g_MapIdxLinkedBuild;// 연계 건물의 Source의 Index
 
+extern int			g_nEmptyBuildIdx;
+extern int			g_nEmptyStairIdx;
 //extern CXMapRangeType	g_MapRangeType; // 출력 층을 타입(입력,출력,설비명,출력설명)별로 저장
 // [2025/8/1 11:12:00 KHS] 
 // 로직 처리를 위해 Define
 #define NAME_PARKING_KOR	L"주차장"	
 #define NAME_PARKING_ENG	L"PARKING"	
+
+// 범위로직에서 건물,계단 이름이 비어 있는경우 '-' 일때
+// 범위로직에서 CHECK하지 않는다.
+#define NAME_EMPTY_STRING		L"-"
 
 #define STR_LINKEDBUILD_SEPERATOR		L";"
 //#define LOGIC_PRIORITY_ID				1

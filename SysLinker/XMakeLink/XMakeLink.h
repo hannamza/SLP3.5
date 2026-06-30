@@ -66,7 +66,7 @@ public:
 	//	    주차장C-주차장A,주차장B
 	int MakeLinkedBuild();
 	int	MakeEmBcData();
-	void AddEMergency(CXDataDev * pDev ,CXDataLogicItem * pItem);
+	void AddEMergency(CXDataDev * pDev ,CXDataLogicItem * pItem,CXDataRangeLogic * pRange);
 	// [2025/7/31 7:56:41 KHS] 
 	// 로직에 해당하는 출력을 만든다.
 	int MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingArray);
@@ -85,8 +85,11 @@ public:
 	// 2 : 출력이 경종,시각,시각경보,음성,음성점멸 아님
 	int CheckAllAlertLogic(CXDataLogicItem * pItem);
 
+	BOOL IsAlertEqType(CXDataLogicItem * pItem);
+
 	// [2026/6/19 13:06:59 KHS] 
 	// 출력 범위에 영향을 미치는 pInDev만 다른 로직을 적용하기 위한 함수
-	BOOL GetRangeOutDevice(CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst);
+	BOOL GetRangeOutDevice(CXDataDev * pInDev,CXMapLink *pMapOutDev
+		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst,BOOL bAlertTypeEq);
 };
 

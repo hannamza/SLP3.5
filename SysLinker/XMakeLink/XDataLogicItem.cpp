@@ -401,6 +401,54 @@ BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,CXDataFloor* tg
 	return 0;
 }
 
+BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,int nTgtBuildIdx)
+{
+	if(pInputDev == nullptr || nTgtBuildIdx <=0 )
+		return 0;
+
+	int nInBuild,nOutBuild;
+	std::vector<int> vtTarget;
+	nInBuild = pInputDev->GetBuildIndex();
+	nOutBuild = nTgtBuildIdx;
+
+	if(nInBuild <= 0 || nOutBuild <= 0)
+		return 0;
+	// 1. 입력이 연계건물의 Source , 출력이 연계건물의 대상 일 때 
+	//     -->출력건물에 대상건물이 포함되는지 확인 : 포함될 때 Return 1
+	// 2. 입력이 연계건물의 Source , 출력이 연계건물의 대상이 아닐 때
+	//     --> 출력 건물에 대상 건물이 포함 되는지 확인 : 포함될 때 Return 1
+	// 3. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 일 때
+	// 4. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 아닐 때
+
+	if(g_MapIdxLinkedBuild.find(nInBuild) != g_MapIdxLinkedBuild.end())
+	{
+		// 1. 입력이 연계건물의 Source , 출력이 연계건물의 대상 일 때 
+		//     -->출력건물에 대상건물이 포함되는지 확인
+		// 2. 입력이 연계건물의 Source , 출력이 연계건물의 대상이 아닐 때
+		//     --> 출력 건물에 대상 건물이 포함 되는지 확인
+		vtTarget = g_MapIdxLinkedBuild[nInBuild];
+		// 대상건물에 출력 건물이 포함 되는지 확인
+		if(std::find(vtTarget.begin(),vtTarget.end(),nOutBuild) != vtTarget.end())
+			return 1;
+		else
+			return 0;
+	}
+
+	if(g_MapIdxLinkedBuild.find(nOutBuild) != g_MapIdxLinkedBuild.end())
+	{
+		// 3. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 일 때
+		// 4. 입력이 연계건물의 Source가 아니고 , 출력이 연계건물의 대상 아닐 때
+		vtTarget = g_MapIdxLinkedBuild[nOutBuild];
+		// 대상건물에 출력 건물이 포함 되는지 확인
+		if(std::find(vtTarget.begin(),vtTarget.end(),nInBuild) != vtTarget.end())
+			return 1;
+		else
+			return 0;
+	}
+
+	return 0;
+}
+
 BOOL CXDataLogicItem::MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
 	// 기본 로직이 아니고 , 범위안에 건물이 아니면 FALSE를 리턴

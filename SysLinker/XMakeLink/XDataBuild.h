@@ -52,11 +52,12 @@ public:
 	BOOL CopyData(CXDataBuild* pSrc);
 
 
-	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange);
+	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType);
 
 	BOOL GetRangeOutputDevice(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
+		,BOOL bAlertTypeEq
 	);
 
 };

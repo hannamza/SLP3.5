@@ -162,10 +162,16 @@ BOOL  GF_SplitString2(CString strString,CString strToken , CStringArray *pArr)
 
 	if(pArr == nullptr)
 		return FALSE;
+	if (strString.IsEmpty())
+		return FALSE;
+
 	while(AfxExtractSubString(str,strString,pos,strToken.GetAt(0)))
 	{
 		// Prepare to move to the next substring
 		pos++;
+		if (str.IsEmpty())
+			continue;
+		
 		pArr->Add(str);
 	}
 	return TRUE;

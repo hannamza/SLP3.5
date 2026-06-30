@@ -8,6 +8,9 @@ CXLocStrMap	g_MapIdxFloor;
 CXLocStrMap	g_MapIdxStair;
 CXLocStrMap	g_MapIdxRoom;
 CXLinkBuildMap	g_MapIdxLinkedBuild;
+
+int			g_nEmptyBuildIdx = 0;
+int			g_nEmptyStairIdx = 0;
 //CXMapRangeType	g_MapRangeType;
 
 BOOL Less_than(int a,int b) { return a < b; }

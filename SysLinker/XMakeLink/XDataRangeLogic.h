@@ -1,6 +1,6 @@
 #pragma once
 #include <map>
-
+class CXDataEm;
 class CXDataRangeLogic : public CObject
 {
 public:
@@ -127,5 +127,8 @@ public:
 	BOOL MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground);
 	BOOL MatchStair(CXDataDev* src,CXDataFloor* tgt,BOOL ground);
 	BOOL MatchFloorRange(CXDataDev* src,CXDataFloor* tgt);
+
+	BOOL InRange(CXDataDev * pInDev);
+	BOOL MatchEmergency(CXDataDev * pInDev,CXDataEm * pEm);
 };
 

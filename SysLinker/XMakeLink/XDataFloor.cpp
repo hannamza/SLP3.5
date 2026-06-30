@@ -200,7 +200,7 @@ BOOL CXDataFloor::GetLogicOutputConditionDevice(CXDataDev * pDev,CXMapLink * pDe
 
 BOOL CXDataFloor::GetFloorAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 {
-	CXMapDev retList;
+//	CXMapDev retList;
 	POSITION pos;
 	CXDataRoom * pRm;
 	// [2025/8/1 8:28:43 KHS] 
@@ -217,10 +217,10 @@ BOOL CXDataFloor::GetFloorAllDevList(CXMapDev * pDevList,BOOL bRemoveDev)
 		if(pRm == nullptr)
 			continue;
 
-		pRm->GetRoomAllDevList(&retList,bRemoveDev);
+		pRm->GetRoomAllDevList(pDevList,bRemoveDev);
 	}
-	pDevList->insert(retList.begin(),retList.end());
-	retList.clear();
+	//pDevList->insert(retList.begin(),retList.end());
+	//retList.clear();
 	return TRUE;
 }
 

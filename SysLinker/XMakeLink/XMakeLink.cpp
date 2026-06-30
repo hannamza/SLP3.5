@@ -134,25 +134,26 @@ void CXMakeLink::RemoveAllData()
 }
 int CXMakeLink::InitBasicLinkData(CWnd * pMakeWnd)
 {
-	int nCnt; 
-	int nRet = 0; 
+	int nInDevCnt; // Input Device Count
+
+	int nRet = 0, nLogicCnt = 0;
 
 	RemoveAllData();
 	m_pVtPatterns = new std::vector<CXPatternMst *>(10);
 
-	nCnt = MakeBasicData();
+	nInDevCnt = MakeBasicData();
 	MakeLocStringIndex();
-	nRet = MakeBasicLogic(); // CDataAutoLogic에서 CXDataLogicMst로 변경
-	if(nRet == 0)
+	nLogicCnt = MakeBasicLogic(); // CDataAutoLogic에서 CXDataLogicMst로 변경
+	if (nLogicCnt == 0)
 	{
-		return 0; 
+		return 0;
 	}
 	MakeRangeLogicItem();
 	MakeBasicPattern();
 	MakeLinkedBuild();
 	MakeEmBcData();
 	m_pMakeWnd = pMakeWnd;
-	return nRet;
+	return nLogicCnt;
 }
 
 BOOL CXMakeLink::RunMakeLink(std::vector<std::pair<DWORD,CXDataDev*>> & linksort)
@@ -231,6 +232,9 @@ int CXMakeLink::MakeLocStringIndex()
 				nLastBidx = it->second;
 			}
 
+			if(strUpper.IsEmpty() || strUpper.CompareNoCase(NAME_EMPTY_STRING) == 0)
+				g_nEmptyBuildIdx = nLastBidx;
+
 			pTlist = pBuild->GetListBtype();
 			tPos = pTlist->GetHeadPosition();
 			while(tPos)
@@ -282,6 +286,8 @@ int CXMakeLink::MakeLocStringIndex()
 						pStair->SetIndex(it->second);
 						nLastSidx = it->second;
 					}
+					if(strUpper.IsEmpty() || strUpper.CompareNoCase(NAME_EMPTY_STRING) == 0)
+						g_nEmptyStairIdx = nLastSidx;
 
 					pFlist = pStair->GetListFloor();
 					fPos = pFlist->GetHeadPosition();
@@ -637,11 +643,14 @@ int CXMakeLink::MakeBasicData()
 }
 
 
-void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem)
+void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem,CXDataRangeLogic * pRange)
 {
 	CXDataEm * pEm;
 	POSITION pos;
 	int nBuild,nStair,nFloor;
+	BOOL bMatchRange = FALSE;
+	if(pRange != nullptr && pRange->InRange(pDev))
+		bMatchRange = TRUE;
 	pos = m_ptrEmList.GetHeadPosition();
 	while(pos)
 	{
@@ -649,6 +658,13 @@ void CXMakeLink::AddEMergency(CXDataDev * pDev,CXDataLogicItem * pItem)
 		if(pEm == nullptr)
 			continue;
 		nBuild = nStair = nFloor = 0; 
+		// 입력 회로가 범위 안이면
+		if(bMatchRange)
+		{
+			if(pRange->MatchEmergency(pDev,pEm))
+				pDev->AddLinkEtc(pEm,pItem->GetLgId());
+			continue; 
+		}
 		if(pItem->MatchEmergency(pDev,pEm))
 		{
 			pDev->AddLinkEtc(pEm, pItem->GetLgId());
@@ -670,6 +686,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 	int nCurLogic =0 ;
 	DWORD dwStart,dwEnd,dwSort,dwPtn;
 	BOOL bAllLink = FALSE;
+	BOOL bAlertEq = FALSE;
 	CXDataEqType * pCopyType = nullptr;
 
 	sortingArray.clear();
@@ -697,6 +714,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 		// [2026/4/14 16:47:10 KHS] 
 		// 전체 경보 방식인지 확인 필요
 		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]) == 0 ? TRUE : FALSE;
+		bAlertEq = IsAlertEqType(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
 
 		pCopyType = m_pInTypeLocDevList->GetCopyTypeData(pMst->GetInType(),pMst->GetEqName());
 		mapInDev.clear();
@@ -714,7 +732,8 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
  			pRange->SetPlusNEnd(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetPlusNEnd());
  			
 			// 범위 아래 있는 입력회로도 기본 로직으로 +N 했을 때 출력이 범위안 또는 범위를 초과하는 입력 포함
- 			pCopyType->GetAppectingInputDev(&mapInDev,pRange);
+			// 
+ 			pCopyType->GetAppectingInputDev(&mapInDev,pRange,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID],bAlertEq);
  			for(auto it : mapInDev)
  			{
  				if(it.second == nullptr)
@@ -722,7 +741,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
  				pDev = it.second;
  				mapOutDev.clear();
  				
-  				if(GetRangeOutDevice(pDev,&mapOutDev,pRange,pMst))
+  				if(GetRangeOutDevice(pDev,&mapOutDev,pRange,pMst,bAlertEq))
   				{
   					//	continue;
   					pDev->AddLinkMap(&mapOutDev);
@@ -730,7 +749,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
    				if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutType() == nEBOutType
    					&& pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutContents() == nEBOutContents)
    				{
-   					AddEMergency(pDev,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
+   					AddEMergency(pDev,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID],pRange);
    				}
  			}
  
@@ -757,7 +776,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 			if(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutType() == nEBOutType
 				&& pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]->GetOutContents() == nEBOutContents)
 			{
-				AddEMergency(pDev,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
+				AddEMergency(pDev,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID],nullptr);
 			}
 		}
 
@@ -1077,7 +1096,7 @@ int CXMakeLink::MakeRangeLogicItem()
 {
 	if(m_pRefRelayData == nullptr)
 		return 0;
-	CString strSql;
+	CString strSql, strError;
 	int nCnt,i;
 	CXDataRangeLogic * pRangeLogic = nullptr;
 	int nId,nPriority;
@@ -1174,6 +1193,16 @@ int CXMakeLink::MakeRangeLogicItem()
 
 		// [2026/6/23 17:20:12 KHS] 
 		// 정상적인 범위인지 확인
+		if (btUseRangeBuild == 0 && btUseRangeStair == 0 && btUseRangeFloor == 0)
+		{
+			// 오류 
+			pDb->MoveNext();
+			strError.Format(L"범위로직[%s]의 범위가 설정되지 않았습니다.", strName);
+			AfxMessageBox(strError);
+			GF_AddLog(strError);
+			return 0;
+
+		}
 		if(
 			saBuild.GetSize() <= 0
 			&& saStair.GetSize() <= 0
@@ -1182,7 +1211,10 @@ int CXMakeLink::MakeRangeLogicItem()
 		{
 			// 범위 정보가 없음
 			pDb->MoveNext();
-			continue; 
+			strError.Format(L"범위로직[%s]의 범위가 설정되지 않았습니다.", strName);
+			AfxMessageBox(strError);
+			GF_AddLog(strError);
+			return 0;
 		}
 
 		pRangeLogic = new CXDataRangeLogic;
@@ -1409,9 +1441,53 @@ int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
 }
 
 BOOL CXMakeLink::GetRangeOutDevice(
-	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst)
+	CXDataDev * pInDev,CXMapLink *pMapOutDev
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst,BOOL bAlertTypeEq)
 {
-	if(m_pOutTypeLocDevList->GetRangeOutputDevice(pInDev,pMapOutDev, pRange,pMst) == FALSE)
+	if(m_pOutTypeLocDevList->GetRangeOutputDevice(pInDev,pMapOutDev, pRange,pMst,bAlertTypeEq) == FALSE)
 		return FALSE; 
 	return TRUE;
+}
+
+
+BOOL CXMakeLink::IsAlertEqType(CXDataLogicItem * pItem)
+{
+	// 전체 경보 방식 
+	// 1. 경종,시각,시각경보,음성,음성점멸
+	// 2. 실 일치 선택 안됨
+	// 3. +n == 0
+
+	BOOL bFound = FALSE;
+	int i;
+	int nContID;
+	CDataEquip * pCont;
+	CString strName,strtemp;
+
+	nContID = pItem->GetOutContents();
+	if(nContID <= 0)
+		return FALSE;
+
+
+	pCont = m_pRefRelayData->GetEquipData(ET_OUTCONTENTS,nContID);
+	if(pCont == nullptr)
+		return FALSE;
+
+
+	strName = pCont->GetEquipName();
+	if(strName.IsEmpty() == TRUE)
+		return FALSE;
+
+
+	// 1. 경종,시각,시각경보,음성,음성점멸
+	strName.MakeUpper();
+	for(i = 0; g_pSzAllAlertEquip[i] != nullptr; i++)
+	{
+		strtemp = g_pSzAllAlertEquip[i];
+		strtemp.MakeUpper();
+		if(strName.Find(strtemp) >= 0)
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
