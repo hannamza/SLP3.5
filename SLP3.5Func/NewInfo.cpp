@@ -94,6 +94,8 @@ BOOL CNewInfo::IsExistingEquipment(int nType, CString strEquipment)
 
 void CNewInfo::CheckAndSetRomFileVersion()
 {
+	//20260710 GBM start - 구 ROM 파일 버전으로 고정 - 사유 : 수신기와 DLD에 패턴 증설 버전이 준비되지 않음
+#if 0
 	int nRet = PATTERN_EXPANSION_VERSION;
 
 	// F3가 있는 지 여부
@@ -122,6 +124,10 @@ void CNewInfo::CheckAndSetRomFileVersion()
 
 	if (bF3FacpExist || bF3UnitExist)
 		nRet = ORIGINAL_VERSION;
+#else
+	int nRet = ORIGINAL_VERSION;
+#endif
+	//20260710 GBM end
 
 	// ROM 파일 버전을 기준으로 패턴/패턴 아이템/연동 최대 개수 세팅
 	if (nRet == ORIGINAL_VERSION)
