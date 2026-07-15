@@ -182,7 +182,16 @@ BOOL CXDataStair::CheckBasicLogicMatch(
 	{
 		if(pItem->CheckMatchLinkedBuild(pInDev,pFloor))
 		{
-			if(nTgtFlNum > -1) return FALSE;
+			// [2026/7/15 10:00:24 KHS] 
+			// 수정 : 지하 1층이 화재 시 지상 1층 출력 안나가는 오류 수정
+			if (pItem->GetUnderB1F())
+			{
+				// 지하 1층 화재 시 지상 1층 초과하면 출력 나가지 않음
+				if (nTgtFlNum > 1)
+					return FALSE;
+			}
+			else
+				if (nTgtFlNum > -1) return FALSE;
 		}
 		else
 		{
