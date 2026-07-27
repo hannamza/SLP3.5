@@ -1078,7 +1078,7 @@ void CDlgPumpEditPane::OnRadioFacpClicked(UINT nID)
 	}
 
 
-	m_pCustomListCtrl->SetCurSelIndex(0);
+	m_pCustomListCtrl->SetCurSelIndex(0, TRUE);
 }
 
 int CDlgPumpEditPane::InitFacpBtn()

@@ -1369,15 +1369,23 @@ void CSysLinkerView::SetSelectTreeItem(CPtrList * pPtrSelectItems, ST_TREEITEM* 
 	m_pPage[m_pRefCurData->nDataType]->DisplayItem(m_pRefCurData, m_pNewData);
 	m_pPage[m_pRefCurData->nDataType]->SetAddFlag(FALSE);
 	ShowChildPage(pItem->nDataType);
+
+	//회로 정보 표시 시 추가/저장 버튼 비활성화
 	if (pItem->nDataType != TTYPE_DEV_DEVICE)
 	{
 		DisplayLinkData(nullptr);
+
+		m_btnAdd.EnableWindow(TRUE);
+		m_btnSave.EnableWindow(TRUE);
 	}
 	else
 	{
 		CDataSystem * pData;
 		pData = (CDataSystem*)pItem->pData;
 		DisplayLinkData((CDataDevice*)pData->GetSysData());
+
+		m_btnAdd.EnableWindow(FALSE);
+		m_btnSave.EnableWindow(FALSE);
 	}
 }
 

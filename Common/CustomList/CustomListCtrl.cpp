@@ -906,7 +906,7 @@ int CCustomListCtrl::GetCurSelIndex()
 	return m_Manager.FindItem(m_pCurrentItem);
 }
 
-BOOL CCustomListCtrl::SetCurSelIndex(int nSel)
+BOOL CCustomListCtrl::SetCurSelIndex(int nSel, BOOL bFacpChanged)
 {
 	if(nSel < 0 || nSel >= m_Manager.size())
 		return FALSE;
@@ -915,7 +915,7 @@ BOOL CCustomListCtrl::SetCurSelIndex(int nSel)
 	if(pItem == nullptr)
 		return FALSE;
 	
-	if(m_pCurrentItem != pItem)
+	if(m_pCurrentItem != pItem || bFacpChanged)
 	{
 		if(m_pCurrentItem)
 			m_pCurrentItem->SetSelected(FALSE);

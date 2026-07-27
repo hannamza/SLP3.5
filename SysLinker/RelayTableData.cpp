@@ -6549,7 +6549,7 @@ int CRelayTableData::FillDeviceTreeByEquipName(CTreeCtrl* pCtrl, CPtrList * pIte
 		if (pDev == nullptr)
 			continue;
 
-		pEq = pDev->GetEqOutput();
+		pEq = pDev->GetEqName();
 		if (pEq == nullptr)
 			pTData = arr.GetAt(0);
 		else
@@ -10948,13 +10948,15 @@ int CRelayTableData::MakeAutoRangeTable()
 	{
 		// COLUMN 정보 확인 -> 이름만 확인
 		// 컬럼 정보 틀리면 DROP
-		CString strCol[37];
-		for(int i = 0; i < 37; i++)
+		CString strCol;
+		for(int i = 0; i < nCnt; i++)
 		{
-			m_pDB->GetFieldValue(L"COLUMN_NAME",strCol[i]);
+			strCol = _T("");
+
+			m_pDB->GetFieldValue(L"COLUMN_NAME",strCol);
 			m_pDB->MoveNext();
 
-			if(strCol[i].CompareNoCase(szColumn[i]) != 0)
+			if(strCol.CompareNoCase(szColumn[i]) != 0)
 			{
 				m_pDB->RSClose();
 				strSql.Format(L"DROP TABLE TB_AUTORANGE");

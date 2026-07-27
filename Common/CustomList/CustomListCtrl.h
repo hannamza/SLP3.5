@@ -143,7 +143,7 @@ public:
 	int GetCurSelIndex();
 	CCustomBaseItem * GetCurSelData() { return m_pCurrentItem; }
 
-	BOOL SetCurSelIndex(int nSel);
+	BOOL SetCurSelIndex(int nSel, BOOL bFacpChanged = FALSE);
 	BOOL SetCurSelData(CCustomBaseItem * pItem);
 protected:
 	// [2025/9/18 17:26:18 KHS] 
