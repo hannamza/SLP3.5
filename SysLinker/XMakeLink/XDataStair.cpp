@@ -358,9 +358,12 @@ BOOL CXDataStair::CheckBasicLogicMatch(
 				if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
 					return FALSE;
 				
-				if(pItem->GetUnderB1F() == 1 && nTgtFlNum == 1)
+				if(pItem->GetUnderB1F() == 1)
 				{
-				//	return TRUE;
+					if (nTgtFlNum != 1)
+					{
+						return FALSE;
+					}
 				}
 				else
 				{
@@ -467,10 +470,22 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(
 		if(pFloor == nullptr)
 			continue;
 		
-		if(CheckBasicLogicMatch(pDev,pDevList,pFloor,pMst) == TRUE)
+		//20260811 GBM start - 메모리 누수 수정
+		//CheckBasicLogicMatch 내부에서도 pFloor->GetLogicOutputConditionDevice(pDev, pDevList, pItem)를 실행해서 
+		//최종 CXDataRoom::RetriveAllLink()에서 CXMapLink* pDevList에 동일한 key로 두 번 삽입이 되어
+		//앞서 들어간 CXDataLink*가 추후 삭제되지 않고 동적 생성된 채로 남아있게 됨 
+#if 1
+		if(CheckBasicLogicMatch(pDev,pDevList,pFloor,pMst) == FALSE)
 		{
-			pFloor->GetLogicOutputConditionDevice(pDev,pDevList,pItem);
+			continue;
 		}
+#else
+		if (CheckBasicLogicMatch(pDev, pDevList, pFloor, pMst) == TRUE)
+		{
+			pFloor->GetLogicOutputConditionDevice(pDev, pDevList, pItem);
+		}
+#endif
+		//20260811 GBM end
 	}
 	return TRUE;
 }
