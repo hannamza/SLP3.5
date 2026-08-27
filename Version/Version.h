@@ -9,7 +9,7 @@
 #else
 #define GFSP_PRODUCT_VERSION		"2.04"
 #define GFSP_PRODUCT_VERSION_NUM	2.04
-#define GFSP_PRODUCT_UPDATE_DATE	"SLP4 v2.4 , Last Updated On 11 July August"
+#define GFSP_PRODUCT_UPDATE_DATE	"SLP4 v2.4 , Last Updated On 27 August 2026"
 #define GFSP_PRODUCT_NAME			"SLP4"
 #define GFSP_PROGRAM_NAME			"SLP4.EXE"
 #endif

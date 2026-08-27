@@ -164,6 +164,7 @@ BEGIN_MESSAGE_MAP(CFormEditLogic, CFormView)
 	ON_BN_CLICKED(IDC_BTN_LOGIC_EXPORT, &CFormEditLogic::OnBnClickedBtnLogicExport)
 	ON_BN_CLICKED(IDC_CHK_ALLFLOOR, &CFormEditLogic::OnBnClickedChkAllfloor)
 	ON_BN_CLICKED(IDC_CHK_UNDERFLOOR, &CFormEditLogic::OnBnClickedChkUnderfloor)
+	ON_BN_CLICKED(IDC_BUTTON_LOGIC_TYPE, &CFormEditLogic::OnBnClickedButtonLogicType)
 END_MESSAGE_MAP()
 
 
@@ -482,12 +483,12 @@ int CFormEditLogic::DataAdd()
 		L",LG_USE_EMER_MAKE,LG_USE_ALL_OUTPUT,LG_USE_OUTPUT,LG_USE_UPPER_FLOOR " //4개
 		L",LG_USE_LOC_BUILD_MATCH,LG_USE_LOC_BTYPE_MATCH,LG_USE_LOC_STAIR_MATCH,LG_USE_LOC_FLOOR_MATCH ,LG_USE_LOC_ROOM_MATCH " //5개
 		L",LG_USE_UNDER_BASIC,LG_USE_UNDER_BUILD_CLASSIFY,LG_USE_UNDER_BTYPE_CLASSIFY,LG_USE_UNDER_STAIR_CLASSIFY, LG_USE_UNDER_GROUND_FLOOR,LG_USE_UNDER_B1_FLOOR " //6개
-		L",LG_USE_PARKING_BASIC,LG_USE_PARKING_BUILD,LG_USE_PARKING_STAIR,LG_USE_PARKING_GROUND_FLOOR,LG_USE_PARKING_B1_FLOOR )  " //5개
+		L",LG_USE_PARKING_BASIC,LG_USE_PARKING_BUILD,LG_USE_PARKING_STAIR,LG_USE_PARKING_GROUND_FLOOR,LG_USE_PARKING_B1_FLOOR, LG_USE_UPPER_FLOOR_START )  " //6개 (+N층 시작층 추가, 기존 로직에서는 기본 값 0으로만 넣음)
 		L" VALUES(%d,%d,%d,%d,%d"
 		L",%d,%d,%d,%d"
 		L",%d,%d,%d,%d,%d"
 		L",%d,%d,%d,%d,%d,%d"
-		L",%d,0,0,0,0) "
+		L",%d,0,0,0,0,0) "
  		, nID, nInType, nOutType, nName, nCont
 		, m_bEmergency, m_bAllFloor, m_bOutput, m_nPluseNFloor
 		, m_bMatchBuild, m_bMatchBType, m_bMatchStair, m_bMatchFloor, m_bMatchRoom
@@ -518,7 +519,7 @@ int CFormEditLogic::DataAdd()
  	nCnt = m_ctrlLogic.GetItemCount();
  		
  	strEqName = strInType = strOutType = strCont = L"";
- 	str.Format(L"%d", pLogic->GetLgId());
+ 	str.Format(L"%03d", pLogic->GetLgId());
  	pEq = pTable->GetEquipData(ET_INPUTTYPE, pLogic->GetInType());
  	if (pEq)
  		strInType = pEq->GetEquipName();
@@ -572,8 +573,6 @@ int CFormEditLogic::DataAdd()
 	m_ctrlLogic.SetItemText(nCnt, 19, str);
 	str = pLogic->GetUseUnderParking() == 1 ? L"O" : L"X";
 	m_ctrlLogic.SetItemText(nCnt, 20, str);
-	str.Format(L"%d",pLogic->GetPlusNFloorStart());
-	m_ctrlLogic.SetItemText(nCnt,21,str);
  	m_ctrlLogic.SetItemData(nCnt, (DWORD_PTR)pLogic);
  	AddCancel();
 
@@ -682,6 +681,7 @@ int CFormEditLogic::DataSave()
 		L",LG_USE_LOC_BUILD_MATCH=%d,LG_USE_LOC_BTYPE_MATCH=%d,LG_USE_LOC_STAIR_MATCH=%d ,LG_USE_LOC_FLOOR_MATCH=%d , LG_USE_LOC_ROOM_MATCH=%d  " //6개
 		L",LG_USE_UNDER_BASIC=%d,LG_USE_UNDER_BUILD_CLASSIFY=%d,LG_USE_UNDER_BTYPE_CLASSIFY=%d ,LG_USE_UNDER_STAIR_CLASSIFY=%d , LG_USE_UNDER_GROUND_FLOOR=%d ,LG_USE_UNDER_B1_FLOOR=%d  " //6개
 		L",LG_USE_PARKING_BASIC=%d  " //5개
+		L",LG_USE_UPPER_FLOOR_START=0 "	//주 로직 +N층 시작층은 기본 값 0으로만 입력
  		L" WHERE LG_INTYPE_ID=%d AND LG_OUTTYPE_ID=%d "
  		L" AND LG_EQNAME_ID=%d AND LG_OUTCONT_ID=%d "
 		, m_bEmergency, m_bAllFloor, m_bOutput, m_nPluseNFloor
@@ -742,8 +742,6 @@ int CFormEditLogic::DataSave()
 	m_ctrlLogic.SetItemText(nIdx, 19, str);
 	str = pData->GetUseUnderParking() == 1 ? L"O" : L"X";
 	m_ctrlLogic.SetItemText(nIdx, 20, str);
-	str.Format(L"%d",pData->GetPlusNFloorStart());
-	m_ctrlLogic.SetItemText(nIdx,21,str);
  	m_ctrlLogic.SetItemData(nIdx, (DWORD_PTR)pData);
 	return 1;
 }
@@ -1090,8 +1088,6 @@ int CFormEditLogic::InitForm()
 
 		str = pData->GetUseUnderParking() == 1 ? L"O" : L"X";
 		m_ctrlLogic.SetItemText(nIdx, 20, str);
-		str.Format(L"%d",pData->GetPlusNFloorStart());
-		m_ctrlLogic.SetItemText(nIdx,21,str);
  		m_ctrlLogic.SetItemData(nIdx, (DWORD_PTR)pData);
  		nIdx++;
  	}
@@ -1618,8 +1614,8 @@ int CFormEditLogic::WriteOutput(CRelayTableData * pRelayTable , CDataAutoLogic *
 
 	str = pAuto->GetUseUnderParking() == 1 ? L"O" : L"X";
 	pXls->SetItemText(nStartRow, 20 + 1, str);
-	str.Format(L"%d",pAuto->GetPlusNFloorStart());
-	pXls->SetItemText(nStartRow,21 + 1,str);
+// 	str.Format(L"%d",pAuto->GetPlusNFloorStart());
+// 	pXls->SetItemText(nStartRow,21 + 1,str);
 	return nStartRow + 1;
 }
 
@@ -1629,4 +1625,35 @@ void CFormEditLogic::OnBnClickedChkUnderfloor()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	UpdateData();
 	SetCheckUnderFloor(m_bUnderBasic);
+}
+
+
+void CFormEditLogic::OnBnClickedButtonLogicType()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+#ifndef ENGLISH_MODE
+	CString strMsg1 = _T("로직 타입을 변경 시 돌아갈 수 없습니다.\n변경하시겠습니까?");
+	CString strMsg2 = _T("로직 타입을 변경합니다.");
+#else
+	CString strMsg1 = _T("You cannot revert the change once the logic type is modified.\nDo you want to proceed?");
+	CString strMsg2 = _T("Changes the logic type.");
+#endif
+	if (AfxMessageBox(strMsg1, MB_YESNO | MB_ICONWARNING) == IDYES)
+	{
+		if (AfxMessageBox(strMsg2, MB_OKCANCEL | MB_ICONWARNING) == IDOK)
+		{
+			CRelayTableData * pRelayTable = theApp.GetRelayTableData();
+			pRelayTable->m_bUseUILogic = TRUE;
+
+			CString strFullPath;
+			CString strPrjPath = g_stConfig.szPrjPath;
+			if (strPrjPath.Right(1) != '\\')
+				strPrjPath += "\\";
+
+			strFullPath = strPrjPath + pRelayTable->GetPrjName();
+			theApp.SaveProjectInfoFile(strFullPath);
+
+			theApp.CloseFormView(FV_LOGICEDIT);
+		}
+	}
 }

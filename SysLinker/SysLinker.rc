@@ -1624,6 +1624,7 @@ BEGIN
     GROUPBOX        "위치(입력과 출력 위치 정보가 동일)",IDC_STATIC,147,62,146,56
     CONTROL         "지하주차장 포함",IDC_CHK_UNDER_PARKING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,303,97,97,10
     LTEXT           "(지하 또는 주차장 발화 시 로직 적용)",IDC_STATIC,304,108,100,8
+    PUSHBUTTON      "UI타입 변경",IDC_BUTTON_LOGIC_TYPE,358,134,50,14
 END
 
 IDD_FORMCONTACTFACP DIALOGEX 0, 0, 320, 200
@@ -4313,6 +4314,7 @@ BEGIN
     CONTROL         "Include Basement Parking Lot",IDC_CHK_UNDER_PARKING,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,140,107,10
     LTEXT           "(Apply logic in case of fire on the basement floor or parking lot)",IDC_STATIC,277,141,208,8
+    PUSHBUTTON      "CHANGE LOGIC TYPE",IDC_BUTTON_LOGIC_TYPE,485,158,75,14
 END
 
 IDD_FORMEMERGENCY_EN DIALOGEX 0, 0, 289, 196

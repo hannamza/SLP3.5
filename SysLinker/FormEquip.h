@@ -79,6 +79,8 @@ public:
 	afx_msg void OnCbnSelchangeCmbEquiptype();
 
 	BOOL CheckEditableEquipment(int nEditType, int nEquimentType, int nID);
+
+	int SelectItem(int nItemType, DWORD_PTR dwData);
 };
 
 

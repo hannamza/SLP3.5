@@ -1551,7 +1551,7 @@ int CFormPattern::ChangeTreeItem(int nAddType , int nType, CDataPattern* pPtn)
 	{
 		pItem = new ST_TREEITEM;
 		nType = pPtn->GetPatternType();
-		hItem = m_ctrlPtnTree.InsertItem(pPtn->GetPatternName(), PTN_PATTERN, PTN_PATTERN, hParent);
+		hItem = m_ctrlPtnTree.InsertItem(pPtn->GetPatternName(), PTN_DEVICE, PTN_DEVICE, hParent);
 		pItem->hItem = hItem;
 		pItem->hParent = hParent;
 		pItem->nDataType = TIMG_DEV_PATTERN;

@@ -245,6 +245,7 @@ enum
 	CHK_PATTERN_ITEM_CNT,
 	CHK_TEXT_CNT,
 	CHK_LEVEL_DUP,
+	CHK_EMPTY_OUTPUT_TYPE_ID,
 	CHK_NOINPUT,
 	CHK_OUTPUT_CNT,
 	CHK_NOUSE_OUTPUT,
@@ -260,11 +261,12 @@ static CString g_strErrChkText[CHK_CNT] = {
 	L"패턴내 출력개수 초과",
 	L"글자 수 초과",
 	L"층번호 중복",
+	L"빠진 출력타입 ID",
 	L"입력타입 없음",
 	L"연동 출력개수 초과",
 	L"사용되지 않는 출력",
 	L"출력없는 입력",
-	L"가스, 밸브 중복 검사"
+	L"가스/밸브 중복 검사"
 };
 #else
 static CString g_strErrChkText[CHK_CNT] = {
@@ -273,6 +275,7 @@ static CString g_strErrChkText[CHK_CNT] = {
 	L"EXCEEDED THE OUTPUT COUNT FOR THE PATTERN",
 	L"CHARACTER LIMIT EXCEEDED",
 	L"DUPLICATE FLOOR NUMBER",
+	L"MISSING OUTPUT TYPE ID"
 	L"NO INPUT TYPE",
 	L"EXCEEDED THE INTERLOCK OUTPUT COUNT",
 	L"UNUSED OUTPUT",

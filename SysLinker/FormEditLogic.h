@@ -96,6 +96,7 @@ public:
 	int WriteOutput(CRelayTableData * pRelayTable, CDataAutoLogic * pAuto
 		, CExcelWrapper * pXls, int nStartRow);
 	afx_msg void OnBnClickedChkUnderfloor();
+	afx_msg void OnBnClickedButtonLogicType();
 };
 
 

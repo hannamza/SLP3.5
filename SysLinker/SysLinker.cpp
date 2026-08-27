@@ -2276,45 +2276,48 @@ void CSysLinkerApp::OnBasicSetLogicEdit()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
 
-	//20250805 GBM start - 별도의 로직 편집기 프로그램을 사용하는 방식으로 변경
-#ifdef SLP4_MODE
-	CString strPath = CCommonFunc::GetCurrentPath();
-	CString strExe = _T("LogicEditor.exe");
-	strPath += _T("\\") + strExe;
-	HANDLE hHandle = nullptr;
-	BOOL bFind = FALSE;
-	//bFind = CCommonFunc::FindProcess(strExe, hHandle);	// FindWindow보다 확실한 방법이지만 실행 중인 전체 프로세스 스냅샷을 찍다보니 시간이 걸림
-#ifndef ENGLISH_MODE
-	CString strLogicEditorCaption = L"로직 편집기";
-#else
-	CString strLogicEditorCaption = L"Logic Editor";
-#endif
-	HWND hwnd = FindWindow(NULL, strLogicEditorCaption);		//캡션명으로 해야 할 듯
-	if (hwnd != nullptr)
-		bFind = TRUE;
-	if (!bFind)
+	if (m_pFasSysData->m_bUseUILogic)
 	{
-		// 실행 중이 아니라면 실행
-		CString strProjectName;
-		strProjectName = m_pFasSysData->GetPrjName();
-		CString strCaption;
-		m_pMainWnd->GetWindowTextW(strCaption);
-		strCaption = _T("\"") + strCaption + _T("\"");
-		ShellExecuteW(NULL, L"open", strPath, strCaption, NULL, SW_SHOWNORMAL);
+		//20250805 GBM start - 별도의 로직 편집기 프로그램을 사용하는 방식으로 변경
+		CString strPath = CCommonFunc::GetCurrentPath();
+		CString strExe = _T("LogicEditor.exe");
+		strPath += _T("\\") + strExe;
+		HANDLE hHandle = nullptr;
+		BOOL bFind = FALSE;
+		//bFind = CCommonFunc::FindProcess(strExe, hHandle);	// FindWindow보다 확실한 방법이지만 실행 중인 전체 프로세스 스냅샷을 찍다보니 시간이 걸림
+#ifndef ENGLISH_MODE
+		CString strLogicEditorCaption = L"로직 편집기";
+#else
+		CString strLogicEditorCaption = L"Logic Editor";
+#endif
+		HWND hwnd = FindWindow(NULL, strLogicEditorCaption);		//캡션명으로 해야 할 듯
+		if (hwnd != nullptr)
+			bFind = TRUE;
+		if (!bFind)
+		{
+			// 실행 중이 아니라면 실행
+			CString strProjectName;
+			strProjectName = m_pFasSysData->GetPrjName();
+			CString strCaption;
+			m_pMainWnd->GetWindowTextW(strCaption);
+			strCaption = _T("\"") + strCaption + _T("\"");
+			ShellExecuteW(NULL, L"open", strPath, strCaption, NULL, SW_SHOWNORMAL);
+		}
+		else
+		{
+#ifndef ENGLISH_MODE
+			CString strMsg = strLogicEditorCaption + "가 이미 실행 중입니다.";
+#else
+			CString strMsg = _T("The ") + strLogicEditorCaption + "is already running.";
+#endif
+			AfxMessageBox(strMsg);
+		}
+		//20250805 GBM end
 	}
 	else
 	{
-#ifndef ENGLISH_MODE
-		CString strMsg = strLogicEditorCaption + "가 이미 실행 중입니다.";
-#else
-		CString strMsg = _T("The ") + strLogicEditorCaption + "is already running.";
-#endif
-		AfxMessageBox(strMsg);
+		OpenFormView(FV_LOGICEDIT);
 	}
-#else
-	OpenFormView(FV_LOGICEDIT);
-#endif
-	//20250805 GBM end
 }
 // 
 // void CSysLinkerApp::OnFacpCreateLink()
@@ -3336,6 +3339,7 @@ int CSysLinkerApp::CreateProjectFolder()
 	//20251014 GBM end
 
 	CopyBaseFile(m_pFasSysData->GetPrjName(),strPrjSymbolFolder, strPrjRelayTableFolder, strPrjDBFolder);
+	m_pFasSysData->m_bUseUILogic = TRUE;	// 새 프로젝트 생성은 무조건 UI기반 로직 편집을 사용
 	SaveProjectInfoFile(strPrjNameFolder);
 	SaveVersionInfoFile(1, 0, strPrjNameFolder);
 	return 1;
@@ -3763,6 +3767,14 @@ int CSysLinkerApp::SaveProjectInfoFile(CString strCurrentPrjRootFolder)
 	//
 // 	file.WriteString(m_pFasSysData->GetPrjModifyDate().Format(L"%Y-%m-%d %H:%M:%S") + L"\n");	
 // 	file.WriteString(m_pFasSysData->GetPrjModifier() + L"\n");
+
+	//20260824 GBM start - UI 로직 사용 여부 추가
+	CString strUseUILogic = _T("");
+	if (m_pFasSysData->m_bUseUILogic)
+		strUseUILogic = _T("UseUILogic");
+	file.WriteString(strUseUILogic + L"\n");
+	//20260824 GBM end
+		
 	file.Close();
 
 	return 1;
@@ -3852,8 +3864,13 @@ int CSysLinkerApp::OpenProjectInfoFile(CRelayTableData * pFasSysData , CString s
 	file.ReadString(strtemp); //GetPrjCreateDate
 	strCreateDate = strtemp;
 	dtCreate.ParseDateTime(strCreateDate);
+	file.ReadString(strtemp);	// UI 로직 사용 여부
+	BOOL bUseUILogic = FALSE;
+	if (!strtemp.IsEmpty())
+		bUseUILogic = TRUE;
+
 	m_pFasSysData->SetProjectInfo(strPrjName, strSiteName, dtCreate
-		, strPrjMaker, strSitePhone, strDBName);
+		, strPrjMaker, strSitePhone, strDBName, bUseUILogic);
 
 	file.Close();
 	return 1;
@@ -4906,6 +4923,9 @@ int CSysLinkerApp::ViewFormSelectItem(FormViewStyle nViewType , int nItemType , 
 		break;
 	case FV_PUMP:
 		//((CFormPump*)pView)->SelectItem((CDataLinked*)pItem);
+		break;
+	case FV_EQUIP:
+		((CFormEquip*)pView)->SelectItem(nItemType, dwData);
 		break;
 	case FV_EMERGENCY:
 		((CFormEmergency*)pView)->SelectItem(nItemType , dwData);

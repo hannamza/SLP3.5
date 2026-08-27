@@ -1157,3 +1157,15 @@ BOOL CFormEquip::CheckEditableEquipment(int nEditType, int nEquimentType, int nI
 
 	return TRUE;
 }
+
+int CFormEquip::SelectItem(int nItemType, DWORD_PTR dwData)
+{
+	HTREEITEM hFind = nullptr;
+	hFind = GF_FindTreeByData(&m_ctrlTree, m_ctrlTree.GetRootItem(), dwData);
+	if (hFind == nullptr)
+		return 0;
+
+	m_ctrlTree.SelectItem(hFind);
+
+	return 1;
+}

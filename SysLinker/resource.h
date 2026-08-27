@@ -724,6 +724,8 @@
 #define IDC_BTN_INITFACP                1251
 #define IDC_BTN_ADDTEMPLETE             1252
 #define IDC_EDIT_EMAIL                  1253
+#define IDC_BUTTON_LOGIC_TYPE           1254
+#define IDC_BUTTON1                     1255
 #define ID_WRITE_PASTEASHYPERLINK       32770
 #define ID_HOME_PROJECT_NEW             32772
 #define ID_HOME_PROJECT_OPEN            32773
@@ -809,7 +811,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        544
 #define _APS_NEXT_COMMAND_VALUE         32856
-#define _APS_NEXT_CONTROL_VALUE         1254
+#define _APS_NEXT_CONTROL_VALUE         1256
 #define _APS_NEXT_SYMED_VALUE           371
 #endif
 #endif

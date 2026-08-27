@@ -225,6 +225,11 @@ void CDlgErrorCheck::OnBnClickedBtnView()
 			strType = g_strErrChkText[pData->btType];
 			strDesc = pData->strDesc;
 			break;
+		case CHK_EMPTY_OUTPUT_TYPE_ID:
+			strErr = L"ERROR";
+			strType = g_strErrChkText[pData->btType];
+			strDesc = pData->strDesc;
+			break;
 		case CHK_NOINPUT:
 			strErr = L"ERROR";
 			strType = g_strErrChkText[pData->btType];
@@ -500,8 +505,8 @@ int CDlgErrorCheck::ProcErrorCheck()
 					strDesc.Format(L"Number of patterns exceeded - %d", nPatternCount);
 #endif
 					InsertErrorList(CHK_PATTERN_CNT, nPatternCount, (LPVOID)pPtn, strDesc);
+				}
 			}
-		}
 			SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
 			nOffset++;
 			//20251210 GBM end
@@ -533,7 +538,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 				nOffset++;
 				SendMessage(CSWM_PROGRESS_STEP, nOffset, PROG_RESULT_STEP);
 			}
-	}
+		}
 		else
 		{
 			nOffset += nPtnCnt;
@@ -581,6 +586,51 @@ int CDlgErrorCheck::ProcErrorCheck()
 			pDBUtil->RSClose();
 		}
 	}
+
+	//20260826 GBM start - 출력 타입 번호 체크
+
+	nAllCnt += 1;			// 출력 타입 번호 체크 추가
+
+	//출력타입 포인터 가져옴
+	std::shared_ptr <CManagerEquip> spManager = nullptr;
+	CDataEquip* pEq = nullptr;
+	std::vector<int> eqIDVec;
+	std::map<int, CDataEquip*> dataEquipMap;
+	spManager = m_pRefFasSysData->GetEquipManager(ET_OUTPUTTYPE);
+	pos = spManager->GetHeadPosition();
+	while (pos)
+	{
+		pEq = spManager->GetNext(pos);
+		if (pEq == nullptr)
+			continue;
+
+		eqIDVec.push_back(pEq->GetEquipID());
+		dataEquipMap[pEq->GetEquipID()] = pEq;
+	}
+	//순회하면서 이웃한 번호인지 확인
+	if (eqIDVec.size() >= 2)
+	{
+		std::vector<int> sortedNumbers = eqIDVec;
+		std::sort(sortedNumbers.begin(), sortedNumbers.end());
+		for (size_t i = 1; i < sortedNumbers.size(); ++i)
+		{
+			int prev = sortedNumbers[i - 1];
+			int curr = sortedNumbers[i];
+
+			if (curr - prev > 1)
+			{
+#ifndef ENGLISH_MODE
+				strDesc.Format(L"[출력 타입 ID %d] - [출력 타입 ID %d] 사이에 빠진 출력 타입 ID가 있습니다.", prev, curr);
+#else
+				strDesc.Format(L"There is a missing output type ID between [Output Type ID %d] and [Output Type ID %d].", prev, curr);
+#endif
+				CDataEquip* pDE = dataEquipMap[curr];
+				InsertErrorList(CHK_EMPTY_OUTPUT_TYPE_ID, 0, pDE, strDesc);
+			}
+		}
+	}
+
+	//20260826 GBM end
 
 	for(it = pRefMap->begin(); it != pRefMap->end(); it++)
 	{
@@ -991,6 +1041,11 @@ void CDlgErrorCheck::OnNMDblclkListReport(NMHDR *pNMHDR,LRESULT *pResult)
 	case CHK_LEVEL_DUP:
 		theApp.ViewFormSelectItem(FV_LOCATION,0,(DWORD_PTR)pData->lpData);
 		break;
+	case CHK_EMPTY_OUTPUT_TYPE_ID:
+	{
+		theApp.ViewFormSelectItem(FV_EQUIP, 0, (DWORD_PTR)pData->lpData);
+	}
+		break;
 	case CHK_NOINPUT:
 	{
 		AfxGetMainWnd()->SendMessage(UWM_VIEWFORM_RELAY,SE_RELAY,(LPARAM)pData->lpData);
@@ -1060,6 +1115,12 @@ void CDlgErrorCheck::InsertErrorList(BYTE btType,int nErrorCnt,LPVOID lpData,CSt
 		m_nWarningCnt ++;
 		//pErr->btError = 1;
 		//m_nErrorCnt ++;
+		break;
+	case CHK_EMPTY_OUTPUT_TYPE_ID:
+		strErr = L"ERROR";
+		strType = g_strErrChkText[btType];
+		pErr->btError = 1;
+		m_nErrorCnt++;
 		break;
 	case CHK_NOINPUT:
 		strErr = L"ERROR";

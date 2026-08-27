@@ -5515,7 +5515,8 @@ int CRelayTableData::SplitLocation(CString strKey, CString &strBuild, CString &s
 
 void CRelayTableData::SetProjectInfo(CString strPrjName, CString strSiteName
 	, COleDateTime dtCreate, CString strMaker, CString strSitePhone
-	, CString strDBName)
+	, CString strDBName
+	, BOOL bUseUILogic)
 {
 	m_strPrjName = strPrjName;
 	m_strSiteName = strSiteName;
@@ -5528,6 +5529,7 @@ void CRelayTableData::SetProjectInfo(CString strPrjName, CString strSiteName
 	m_dtCreate = dtCreate;
 	m_dtModify = dtCreate;
 	m_strPrjModifier = strMaker;
+	m_bUseUILogic = bUseUILogic;
 }
 
 

@@ -92,6 +92,7 @@ public:
 	COleDateTime	m_dtCreate;
 	COleDateTime	m_dtModify;
 	CString			m_strPrjModifier;
+	BOOL			m_bUseUILogic;
 
 	// global Data info
 	// equip
@@ -349,6 +350,7 @@ public:
 	void SetProjectInfo(CString strPrjName, CString strSiteName, COleDateTime dtCreate
 		, CString strMaker, CString strSitePhone
 		, CString strDBName
+		, BOOL bUseUILogic = FALSE
 	);
 	HTREEITEM InsertTreeRoot(CTreeCtrl* pCtrl, CPtrList * pItemList);
 
