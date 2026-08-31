@@ -363,8 +363,23 @@ BOOL GF_IsExistFile(CString strFullPath)
 #endif
 }
 
+//20260831 GBM start - 폴더 복사 전 소스 폴더의 존재 여부 확인
+BOOL GF_IsDirectoryExist(const CString& strPath)
+{
+	DWORD dwAttr = ::GetFileAttributes(strPath);
+
+	if (dwAttr == INVALID_FILE_ATTRIBUTES)
+		return FALSE;
+
+	return (dwAttr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
+//20260831 GBM end
+
 CString  GF_CopyDir(CString strTo, CString strFrom)
 {
+	if (!GF_IsDirectoryExist(strFrom))
+		return L"";
+
 	CString strError = L"";
 	SHFILEOPSTRUCT shStruct;
 	TCHAR pszFrom[4096] = { 0 }, pszTo[4096] = { 0 };

@@ -717,6 +717,14 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 		bAlertEq = IsAlertEqType(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
 
 		pCopyType = m_pInTypeLocDevList->GetCopyTypeData(pMst->GetInType(),pMst->GetEqName());
+
+		// 매우 희박하지만 기존 프로젝트를 불러와서 중계기 일람표의 어떤 회로 입력타입을 수정한 후
+		// 로직도 그 회로의 연동에 맞게 수정해야 하지만 기존 로직으로 자동 생성을 할 때
+		// pCopyType이 nullptr일 수 있는데 이에 대한 예외처리
+		// 그런 경우 연동데이터 자동 생성 후 미리보기 트리에서 해당 입력타입의 회로 자체가 트리에 노드로 표시되지 않음
+		if(pCopyType == nullptr)
+			continue;
+
 		mapInDev.clear();
 //////////////////////////////////////////////////////////////////////////
 		// 범위에 영향을 주는 입력회로를 처리한다.
