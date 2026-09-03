@@ -61,6 +61,9 @@ public:
 	CXListCtrl					m_ctrlList;
 	CProgressCtrl				m_ctrlProg;
 	CRelayTableData			*	m_pRefFasSysData;
+	std::shared_ptr<CManagerAutoLogic> m_spRefAutoLogic;
+	CMapAutoSystem				m_MapIDAuto;
+	CPtrList					m_ptrSortedDevice; //< Location 정보로 정렬된 Deivce 데이터
 
 	int						m_nAllCnt;
 	int						m_nTimePrgCnt; ///< SQL Stored Procedure를 실행할 때는 Timer로 Progress Step을 설정
@@ -87,7 +90,6 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	afx_msg LRESULT OnErrorCheckEnd(WPARAM wp,LPARAM lp);
-
 
 	// [2026/2/9 10:51:05 KHS] 
 	// 자동 생성 속도 개선
@@ -119,6 +121,23 @@ public:
 	bool EnsureDirectoryExistsA(const CString& dir);
 	CString GetDefaultBulkCsvPathA();
 	bool EnsureStageTableA(YAdoDatabase* pDb);
+
+	int AutoMakeStart();
+	void RemoveAllData();
+	int InitAutoSystemData();
+	int GenerateAutoLinkData2();
+	int AddIndividaulEmergency(CDataAutoMake * pSourceAuto);
+	int DisplayList(HTREEITEM hItem);
+	int MakeAutoSystemData();
+	int DisplayAutoMake();
+	BOOL CheckMatchEmergencyLoc(CDataDevice * pSrcDev, CDataEmBc * pEm
+		, BYTE btBuild, BYTE btStair, BYTE btLevel);
+	int ProcessSaveAutoLink();
+	int SaveAutoLink();
+	int SaveIndividualAutoLink(YAdoDatabase * pDb, CDataAutoMake * pSourceAuto, CDataDevice *pOriginalDev, BOOL bCross);
+	BOOL IsSameRoom(CDataDevice * pSrcDev, CDataDevice * pTargetDev);
+	int SaveIndividualEmergency(YAdoDatabase * pDb, CDataAutoMake * pSourceAuto, CDataDevice *pOriginalDev);
+	int SaveIndividualPattern(YAdoDatabase * pDb, CDataAutoMake * pSourceAuto, CDataDevice *pOriginalDev);
 };
 
 
