@@ -124,7 +124,7 @@ BOOL CDlgPumpEditPane::OnInitDialog()
 
 	int i = 0;
 	CPumpItem * pItem = nullptr;
-	for(i = 0; i < D_MAX_PUMP_COUNT; i ++)
+	for(i = 0; i < D_MAX_PUMP_PER_FACP_COUNT; i ++)
 	{
 		pItem = new CPumpItem(i + 1,IDB_PUMPITEM_UNASSIGN,m_pCustomListCtrl);
 		pItem->CreateControl(m_pCustomListCtrl);
@@ -367,7 +367,7 @@ void CDlgPumpEditPane::OnLButtonUp(UINT nFlags,CPoint point)
 				if(pTypeData == nullptr)
 					continue;
 
-				for(i = nIdx; i < D_MAX_PUMP_COUNT; i ++)
+				for(i = nIdx; i < D_MAX_PUMP_PER_FACP_COUNT; i ++)
 				{
 					pItem = (CPumpItem*)m_pCustomListCtrl->GetItem(i);
 					if(pItem == nullptr)
@@ -399,7 +399,7 @@ void CDlgPumpEditPane::OnLButtonUp(UINT nFlags,CPoint point)
 					// Overwrite 허용하지 않으면 다음 번호로 이동
 					break;
 				}
-				if(pItem == nullptr || i == D_MAX_PUMP_COUNT)
+				if(pItem == nullptr || i == D_MAX_PUMP_PER_FACP_COUNT)
 					continue;
 
 				pPmp = new CDataPump;
@@ -991,7 +991,7 @@ void CDlgPumpEditPane::OnRadioFacpClicked(UINT nID)
 			int i = 0;
 			CPumpItem * pItem;
 			LRESULT lRet = 1;
-			for(i = 0; i < D_MAX_PUMP_COUNT; i ++)
+			for(i = 0; i < D_MAX_PUMP_PER_FACP_COUNT; i ++)
 			{
 				pItem = (CPumpItem*)m_pCustomListCtrl->GetItem(i);
 				if(pItem == nullptr)
@@ -1660,7 +1660,7 @@ BOOL CDlgPumpEditPane::SaveCustomControlChangeData()
 	int i = 0;
 	CPumpItem * pItem;
 	LRESULT lRet = 1;
-	for(i = 0; i < D_MAX_PUMP_COUNT; i ++)
+	for(i = 0; i < D_MAX_PUMP_PER_FACP_COUNT; i ++)
 	{
 		pItem = (CPumpItem*)m_pCustomListCtrl->GetItem(i);
 		if(pItem == nullptr)
@@ -1766,7 +1766,7 @@ void CDlgPumpEditPane::OnBnClickedBtnAddtemplete()
 		if(pTemp->pArrPumpType[i] == nullptr)
 			continue; 
 
-		for(x = nIdx; x < D_MAX_PUMP_COUNT; x ++)
+		for(x = nIdx; x < D_MAX_PUMP_PER_FACP_COUNT; x ++)
 		{
 			pItem = (CPumpItem*)m_pCustomListCtrl->GetItem(x);
 			if(pItem == nullptr)
@@ -1798,7 +1798,7 @@ void CDlgPumpEditPane::OnBnClickedBtnAddtemplete()
 			break;
 		}
 
-		if(pItem == nullptr || x == D_MAX_PUMP_COUNT)
+		if(pItem == nullptr || x == D_MAX_PUMP_PER_FACP_COUNT)
 			continue;
 		pPs = nullptr;
 		pPmp = new CDataPump;
