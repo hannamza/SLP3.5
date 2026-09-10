@@ -744,14 +744,14 @@ void CSysLinkerView::OnTvnPatternDropedItem(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			pLink = InsertMultiInputLink(FALSE
 				, (int)pPtn->GetPatternID(), 0, 0, 0
-				, LK_TYPE_PATTERN, LOGIC_MANUAL, 0
+				, LK_TYPE_PATTERN, LOGIC_MANUAL, D_NUM_AUTO_PTN_LOGIC_ID
 			);
 		}
 		else
 		{
 			pLink = new CDataLinked;
 			pLink->SetLinkData((int)pPtn->GetPatternID(), 0, 0, 0
-				, LK_TYPE_PATTERN, LOGIC_MANUAL, 0
+				, LK_TYPE_PATTERN, LOGIC_MANUAL, D_NUM_AUTO_PTN_LOGIC_ID
 				, m_pDevice->GetFacpID(), m_pDevice->GetUnitID(), m_pDevice->GetChnID(), m_pDevice->GetDeviceID()
 			);
 			m_pRefFasSysData->InsertLinkedTable(m_pDevice, pLink);

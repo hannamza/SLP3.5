@@ -114,7 +114,7 @@ public:
 
 	// [2026/3/4] Bulk insert using CSV + staging table
 	int SaveAutoLink_XMake_BulkInsert();
-	int SaveIndividualAutoLink_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev, BOOL bCross);
+	int SaveIndividualAutoLink_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
 	int SaveIndividualEmergency_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
 	int SaveIndividualPattern_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
 
@@ -138,6 +138,12 @@ public:
 	BOOL IsSameRoom(CDataDevice * pSrcDev, CDataDevice * pTargetDev);
 	int SaveIndividualEmergency(YAdoDatabase * pDb, CDataAutoMake * pSourceAuto, CDataDevice *pOriginalDev);
 	int SaveIndividualPattern(YAdoDatabase * pDb, CDataAutoMake * pSourceAuto, CDataDevice *pOriginalDev);
+
+	void RemoveLinkAllByAutoGeneration();
+	void SaveAutoLinkAllInMemory(DWORD nMapKey, CXDataDev* pInputDev);
+	void SaveAutoLinkCircuitInMemory(CDataDevice* pDataDevice, CXDataDev* pInputDev);
+	void SaveAutoLinkEmergencyInMemory(CDataDevice* pDataDevice, CXDataDev* pInputDev);
+	void SaveAutoLinkPatternInMemory(CDataDevice* pDataDevice, CXDataDev* pInputDev);
 };
 
 

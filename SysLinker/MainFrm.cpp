@@ -215,6 +215,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_COMMAND(ID_CHK_SHOWHELPMSG, &CMainFrame::OnChkShowhelpmsg)
 	ON_UPDATE_COMMAND_UI(ID_CHK_SHOWHELPMSG, &CMainFrame::OnUpdateChkShowhelpmsg)
 	ON_WM_GETMINMAXINFO()
+	ON_MESSAGE(INPUT_TYPE_TREE_SEL_UPDATE_MESSAGE, &CMainFrame::OnInputTypeTreeSelUpdate)
 END_MESSAGE_MAP()
 
 // CMainFrame 생성/소멸
@@ -1893,4 +1894,20 @@ void CMainFrame::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	lpMMI->ptMinTrackSize.y = 720;
 
 	CMDIFrameWndEx::OnGetMinMaxInfo(lpMMI);
+}
+
+LRESULT CMainFrame::OnInputTypeTreeSelUpdate(WPARAM wParam, LPARAM lParam)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	HTREEITEM hSel = m_wndDkInputRelay.m_ctrlRelayTree.GetSelectedItem();
+	if (hSel)
+	{
+		ST_TREEITEM * pItem = (ST_TREEITEM*)m_wndDkInputRelay.m_ctrlRelayTree.GetItemData(hSel);
+		if (pItem)
+		{
+			SendMessage(UWM_DKP_INPUTVIEW_ITEMCHANGE, 0, (LPARAM)pItem);
+		}
+	}
+
+	return 0;
 }

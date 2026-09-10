@@ -168,6 +168,8 @@ public:
 	afx_msg void OnChkShowhelpmsg();
 	afx_msg void OnUpdateChkShowhelpmsg(CCmdUI *pCmdUI);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+
+	afx_msg LRESULT OnInputTypeTreeSelUpdate(WPARAM wParam, LPARAM lParam);
 };
 
 

@@ -992,18 +992,32 @@ int CFormAutoMake::ProcessSaveAutoLink_XMake()
 	if (SaveAutoLink_XMake_BulkInsert() > 0)
 	{
 #ifndef ENGLISH_MODE
-		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다.\n프로그램이 재시작됩니다.",MB_OK | MB_ICONINFORMATION);
+		AfxMessageBox(L"연동데이터 저장에 성공했습니다.",MB_OK | MB_ICONINFORMATION);
 #else
-		AfxMessageBox(L"Saving of the created linked data has been completed.\nThe program will restart.", MB_OK | MB_ICONINFORMATION);
+		AfxMessageBox(L"Linked data has been successfully saved.", MB_OK | MB_ICONINFORMATION);
 #endif
-		theApp.CloseProject();	// 사용자가 다시 현재 프로젝트를 열거라는 전제에서는 할 필요없지만 꼭 그렇다고 볼 수는 없으므로 프로젝트 DB 파일을 Detach하기 위해 실행
-		theApp.RequestRestart();
-		return 0;
+	}
+	else
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(L"연동데이터 저장에 실패했습니다.", MB_OK | MB_ICONINFORMATION);
+#else
+		AfxMessageBox(L"Failed to save the linked data.", MB_OK | MB_ICONINFORMATION);
+#endif
 	}
 
 	GetDlgItem(IDC_BTN_MAKE)->EnableWindow(TRUE);
 	GetDlgItem(IDC_BTN_SAVE)->EnableWindow(TRUE);
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(TRUE);
+
+	// 만약 입력 회로 트리에서 입력 회로가 선택되어 기존 연동데이터가 표시된 상태라면 
+	// 새 연동데이터 내용으로 갱신하도록 메인 프레임에서 UWM_DKP_INPUTVIEW_ITEMCHANGE 메세지를 다시 보냄
+	CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+	if (pMainFrame != nullptr)
+	{
+		pMainFrame->SendMessage(INPUT_TYPE_TREE_SEL_UPDATE_MESSAGE, NULL, NULL);
+	}	
+
 	return 1;
 }
 
@@ -1235,7 +1249,7 @@ bool CFormAutoMake::EnsureStageTableA(YAdoDatabase* pDb)
     return true;
 }
 
-int CFormAutoMake::SaveIndividualAutoLink_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev, BOOL /*bCross*/)
+int CFormAutoMake::SaveIndividualAutoLink_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev)
 {
     for(auto it : pInputDev->m_MapLink)
     {
@@ -1314,9 +1328,7 @@ int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
     }
 
     int nIdx = 0, nRet = 0;
-    int n1, n2;
     int nProgOffset = 0;
-    BOOL bCross = FALSE;
     CString strSql;
     YAdoDatabase* pDb = m_pRefFasSysData->GetPrjDB();
 
@@ -1355,6 +1367,9 @@ int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
         pDb->RollbackTransaction();
         return 0;
     }
+
+	// map의 모든 CDataDevice의 연동데이터 중 자동생성을 모두 없앰
+	RemoveLinkAllByAutoGeneration();
 
     // Stage table
     if(!EnsureStageTableA(pDb))
@@ -1396,6 +1411,7 @@ int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
             return -1;
         }
 
+		DWORD nMapKey = it.first;
         CXDataDev* pInputDev = it.second;
         if(pInputDev == nullptr)
         {
@@ -1406,17 +1422,10 @@ int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
             return 0;
         }
 
-        bCross = FALSE;
-        n1 = n2 = 0;
-        if(pInputDev->GetEqInput())
-            n1 = pInputDev->GetEqInput()->GetEquipID();
+		//자동 생성된 연동 출력을 메모리에 반영
+		SaveAutoLinkAllInMemory(nMapKey, pInputDev);
 
-        if(n1 == INTYPE_CROSSA || n1 == INTYPE_CROSSB
-            || n1 == INTYPE_CROSS16_A || n1 == INTYPE_CROSS17_B
-            || n1 == INTYPE_CROSS18_A || n1 == INTYPE_CROSS19_B)
-            bCross = TRUE;
-
-        nRet = SaveIndividualAutoLink_XMake_Csv(writer, pInputDev, bCross);
+        nRet = SaveIndividualAutoLink_XMake_Csv(writer, pInputDev);
         if(nRet <= 0) 
 		{ 
 			Log::Trace("SaveIndividualAutoLink_XMake_Csv failed.");
@@ -3069,4 +3078,137 @@ int CFormAutoMake::SaveIndividualPattern(YAdoDatabase * pDb, CDataAutoMake * pSo
 		nCnt = 0;
 	}
 	return 1;
+}
+
+void CFormAutoMake::RemoveLinkAllByAutoGeneration()
+{
+	std::map<CString, CDataSystem*>::iterator iter;
+	iter = m_pRefFasSysData->m_MapSystemData.begin();
+	for (; iter != m_pRefFasSysData->m_MapSystemData.end(); iter++)
+	{
+		CDataSystem* pDataSystem = iter->second;
+		if (pDataSystem->GetDataType() != SE_RELAY)
+			continue;
+
+		CDataDevice* pDataDevice = (CDataDevice*)pDataSystem->GetSysData();
+		pDataDevice->RemoveLinkByType(LOGIC_ALL_AUTO);
+	}
+}
+
+void CFormAutoMake::SaveAutoLinkAllInMemory(DWORD nMapKey, CXDataDev* pInputDev)
+{
+	std::map<CString, CDataSystem*>::iterator iter;
+	UINT nFacpID = GF_GetFacpID(nMapKey);
+	UINT nUnitID = GF_GetUnitID(nMapKey);
+	UINT nChnID = GF_GetChnID(nMapKey);
+	UINT nDevID = GF_GetDevID(nMapKey);
+	CString strKey = GF_GetIDSysDataKey(SE_RELAY, nFacpID, nUnitID, nChnID, nDevID);
+	iter = m_pRefFasSysData->m_MapIDSystemData.find(strKey);
+	if (iter != m_pRefFasSysData->m_MapIDSystemData.end())
+	{
+		CDataDevice* pDataDevice = (CDataDevice*)iter->second->GetSysData();
+		if (pDataDevice != nullptr)
+		{
+			SaveAutoLinkCircuitInMemory(pDataDevice, pInputDev);
+			SaveAutoLinkEmergencyInMemory(pDataDevice, pInputDev);
+			SaveAutoLinkPatternInMemory(pDataDevice, pInputDev);
+		}
+	}
+}
+
+void CFormAutoMake::SaveAutoLinkCircuitInMemory(CDataDevice* pDataDevice, CXDataDev* pInputDev)
+{
+	std::map<CString, CDataSystem*>::iterator iter;
+	BOOL bCross = FALSE;
+	int nInputType = -1;
+	if (pInputDev->GetEqInput())
+		nInputType = pInputDev->GetEqInput()->GetEquipID();
+
+	if (nInputType == INTYPE_CROSSA || nInputType == INTYPE_CROSSB
+		|| nInputType == INTYPE_CROSS16_A || nInputType == INTYPE_CROSS17_B
+		|| nInputType == INTYPE_CROSS18_A || nInputType == INTYPE_CROSS19_B)
+		bCross = TRUE;
+
+	for (auto it : pInputDev->m_MapLink)
+	{
+		CXDataLink* pLink = it.second;
+		if (pLink == nullptr || pLink->GetFacpID() < 0 || pLink->GetUnitID() < 0 || pLink->GetChnID() < 0 || pLink->GetDeviceID() < 0)
+			continue;
+
+		CDataLinked* pDataLinked = new CDataLinked;
+		pDataLinked->SetLinkData(pLink->GetFacpID(), pLink->GetUnitID(), pLink->GetChnID(), pLink->GetDeviceID(), pLink->m_nLinkType, LOGIC_ALL_AUTO, pLink->m_nLogicID, pDataDevice->GetFacpID(), pDataDevice->GetUnitID(), pDataDevice->GetChnID(), pDataDevice->GetDeviceID());
+
+		// 수동으로 중복으로 들어가 있으면 제거
+		pDataDevice->DeleteLink(pDataLinked);
+
+		// cross 대상이면 나머지 조건을 검사하고 그렇지 않으면 무조건 뒤에 넣음
+		if (bCross && (pLink->m_nLinkType == LK_TYPE_RELEAY))
+		{
+			BOOL bFirst = FALSE;
+			CString strKey = GF_GetIDSysDataKey(SE_RELAY, pLink->GetFacpID(), pLink->GetUnitID(), pLink->GetChnID(), pLink->GetDeviceID());
+			iter = m_pRefFasSysData->m_MapIDSystemData.find(strKey);
+			if (iter != m_pRefFasSysData->m_MapIDSystemData.end())
+			{
+				CDataDevice* pDataDeviecLink = (CDataDevice*)iter->second->GetSysData();
+				if (pDataDeviecLink != nullptr)
+				{
+					int nOutputType = (int)pDataDeviecLink->GetEqOutput()->GetEquipID();
+					int nOutputContent = (int)pDataDeviecLink->GetEqOutContents()->GetEquipID();
+
+					if ((nOutputType == OUTTYPE_PREACTION) && (nOutputContent == OUTCONT_VALVE) && IsSameRoom(pDataDevice, pDataDeviecLink))
+					{
+						bFirst = TRUE;
+					}
+
+					pDataDevice->AddLink(bFirst, pDataLinked);
+				}
+			}
+		}
+		else
+		{
+			pDataDevice->AddLink(FALSE, pDataLinked);
+		}
+	}
+}
+
+void CFormAutoMake::SaveAutoLinkEmergencyInMemory(CDataDevice* pDataDevice, CXDataDev* pInputDev)
+{
+	POSITION pos;
+	CPtrList* pList = &pInputDev->m_ptrEtcList;
+	pos = pList->GetHeadPosition();
+	while (pos)
+	{
+		CXDataLink* pLink = (CXDataLink*)pList->GetNext(pos);
+		if (pLink == nullptr)
+			continue;
+
+		CDataLinked* pDataLinked = new CDataLinked;
+		pDataLinked->SetLinkData(pLink->GetEmID(), 0, 0, 0, LK_TYPE_EMERGENCY, LOGIC_ALL_AUTO, pLink->m_nLogicID, pDataDevice->GetFacpID(), pDataDevice->GetUnitID(), pDataDevice->GetChnID(), pDataDevice->GetDeviceID());
+
+		// 수동으로 중복으로 들어가 있으면 제거
+		pDataDevice->DeleteLink(pDataLinked);
+
+		pDataDevice->AddLink(FALSE, pDataLinked);
+	}
+}
+
+void CFormAutoMake::SaveAutoLinkPatternInMemory(CDataDevice* pDataDevice, CXDataDev* pInputDev)
+{
+	POSITION pos;
+	CPtrList* pList = &pInputDev->m_ptrPatternList;
+	pos = pList->GetHeadPosition();
+	while (pos)
+	{
+		CXPatternMst* pMst = (CXPatternMst*)pList->GetNext(pos);
+		if (pMst == nullptr)
+			continue;
+
+		CDataLinked* pDataLinked = new CDataLinked;
+		pDataLinked->SetLinkData(pMst->m_nPatternID, 0, 0, 0, LK_TYPE_PATTERN, LOGIC_ALL_AUTO, D_NUM_AUTO_PTN_LOGIC_ID, pDataDevice->GetFacpID(), pDataDevice->GetUnitID(), pDataDevice->GetChnID(), pDataDevice->GetDeviceID());
+
+		// 수동으로 중복으로 들어가 있으면 제거
+		pDataDevice->DeleteLink(pDataLinked);
+
+		pDataDevice->AddLink(FALSE, pDataLinked);
+	}
 }
