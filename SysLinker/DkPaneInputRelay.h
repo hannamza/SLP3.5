@@ -34,6 +34,7 @@ public:
 	//VT_HITEM			m_vtCheckItems;
 	CPtrList		m_ptrSelectItems;
 	BOOL			m_bMultiSelectInput;
+	BOOL			m_bCallFromInitTree;
 protected:
 	DECLARE_MESSAGE_MAP()
 public:

@@ -171,7 +171,7 @@ POSITION CXListEqTypeLocDev::FindTypeData(int nType,int nName)
 
 BOOL CXListEqTypeLocDev::GetLogicOutputConditionDevice(
 	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst
-	,int nRangeLogic)
+	,int nAlertEqType)
 {
 	CXDataEqType * pType = nullptr;
 
@@ -179,7 +179,7 @@ BOOL CXListEqTypeLocDev::GetLogicOutputConditionDevice(
 	if(pType == nullptr)
 		return FALSE;
 
-	if(pType->GetLogicOutputConditionDevice(pDev,pDevList,pMst) == FALSE)
+	if(pType->GetLogicOutputConditionDevice(pDev,pDevList,pMst, nAlertEqType) == FALSE)
 		return FALSE;
 	return TRUE;
 }
@@ -222,7 +222,7 @@ CXDataEqType * CXListEqTypeLocDev::GetCopyTypeData(int nType,int nName)
 BOOL CXListEqTypeLocDev::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-	,BOOL bAlertTypeEq
+	,int nAlertEqType
 )
 {
 	CXDataEqType * pType = nullptr;
@@ -230,7 +230,7 @@ BOOL CXListEqTypeLocDev::GetRangeOutputDevice(
 	pType = GetTypeData(pMst->GetOutType(),pMst->GetOutContents());
 	if(pType == nullptr)
 		return FALSE;
-	if(pType->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq) == FALSE)
+	if(pType->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst, nAlertEqType) == FALSE)
 		return FALSE;
 	return TRUE;
 }

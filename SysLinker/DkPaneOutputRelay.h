@@ -28,6 +28,7 @@ public:
 	CRelayTableData * m_pRefFasSysData;
 	CPtrList		m_ptrItemList;
 	int				m_nLastTreeType;
+	BOOL			m_bCallFromInitTree;
 protected:
 	DECLARE_MESSAGE_MAP()
 

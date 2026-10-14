@@ -15,6 +15,7 @@
 #include "DataLocFloor.h"
 #include "DataLocStair.h"
 #include "../Common/Utils/YAdoDatabase.h"
+#include "DataLocRoom.h"
 // CFormLocation
 
 IMPLEMENT_DYNCREATE(CFormLocation, CFormView)
@@ -454,6 +455,18 @@ int CFormLocation::SaveLevelInfo()
 		nFNum = _wtoi(strtemp);
 		pLoc->SetFloorNumber(nFNum);
 		pLoc->SetFloorName(m_ctrlDeviceList.GetItemText(i,0));
+
+		//20261002 GBM start - 자동 로직 적용 시 room 레벨의 CDataLocRoom의 층번호 변경이 적용되지 않았던 오류 수정
+		std::map<CString, CDataLocRoom*>::iterator iter;
+		iter = pLoc->m_mapRoom.begin();
+		for (; iter != pLoc->m_mapRoom.end(); iter++)
+		{
+			CDataLocRoom* pDataLocRoom = iter->second;
+			if(pDataLocRoom == nullptr)
+				continue;
+			pDataLocRoom->SetFloorNumber(nFNum);
+		}
+		//20261002 GBM end
 	}
 	m_bModified = FALSE;
 	return 1; 

@@ -44,11 +44,11 @@ CXDataDev::CXDataDev()
 	m_bNeedMakeID = TRUE;
 
 
-	m_nBuildIndex = -1;
-	m_nBTypeIndex = -1;
-	m_nStairIndex = -1;
-	m_nFloorIndex = -1;
-	m_nRoomIndex = -1;
+m_nBuildIndex = -1;
+m_nBTypeIndex = -1;
+m_nStairIndex = -1;
+m_nFloorIndex = -1;
+m_nRoomIndex = -1;
 }
 
 
@@ -60,16 +60,16 @@ CXDataDev::~CXDataDev()
 void CXDataDev::RemoveAllData()
 {
 	RemoveMapLink();
-	
+
 
 	m_ptrPatternList.RemoveAll();
 	//m_ptrEtcList.RemoveAll();
 	CXDataLink * pLink;
-	while(m_ptrEtcList.IsEmpty() == FALSE)
+	while (m_ptrEtcList.IsEmpty() == FALSE)
 	{
 		pLink = (CXDataLink *)m_ptrEtcList.RemoveHead();
-		if(pLink == nullptr)
-			continue; 
+		if (pLink == nullptr)
+			continue;
 		delete pLink;
 		pLink = nullptr;
 	}
@@ -77,15 +77,15 @@ void CXDataDev::RemoveAllData()
 
 int CXDataDev::GetInTypeID()
 {
-	if(m_pRefEqInput == nullptr)
-		return 0; 
+	if (m_pRefEqInput == nullptr)
+		return 0;
 
 	return m_pRefEqInput->GetEquipID();
 }
 
 int CXDataDev::GetOutTypeID()
 {
-	if(m_pRefEqOutput == nullptr)
+	if (m_pRefEqOutput == nullptr)
 		return 0;
 
 	return m_pRefEqOutput->GetEquipID();
@@ -93,7 +93,7 @@ int CXDataDev::GetOutTypeID()
 
 int CXDataDev::GetEqNameID()
 {
-	if(m_pRefEqName == nullptr)
+	if (m_pRefEqName == nullptr)
 		return 0;
 
 	return m_pRefEqName->GetEquipID();
@@ -101,7 +101,7 @@ int CXDataDev::GetEqNameID()
 
 int CXDataDev::GetOutContID()
 {
-	if(m_pRefEqOutContents == nullptr)
+	if (m_pRefEqOutContents == nullptr)
 		return 0;
 
 	return m_pRefEqOutContents->GetEquipID();
@@ -109,21 +109,21 @@ int CXDataDev::GetOutContID()
 // CXDataDev ¸â¹ö ÇÔ¼ö
 BOOL CXDataDev::CopyData(CDataDevice * pSrc)
 {
-	if(pSrc == nullptr)
+	if (pSrc == nullptr)
 		return 0;
 	//SetUnitData(pSrc->GetFacpID(), pSrc->GetUnitNum(), pSrc->GetUnitID(), pSrc->GetUnitName(), pSrc->GetUnitType());
 	m_suAddr.dwAddr = 0;
-	m_suAddr.dwAddr = GF_SetAddr(pSrc->GetFacpID(),pSrc->GetUnitID(),pSrc->GetChnID(),pSrc->GetDeviceID());
+	m_suAddr.dwAddr = GF_SetAddr(pSrc->GetFacpID(), pSrc->GetUnitID(), pSrc->GetChnID(), pSrc->GetDeviceID());
 	// 	m_suAddr.stAddr.dwFacpID = pSrc->GetFacpID();
 	// 	m_suAddr.stAddr.dwUnitID = pSrc->GetUnitID();
 	// 	m_suAddr.stAddr.dwChnID = pSrc->GetChnID();
 	// 	m_suAddr.stAddr.dwDevID = pSrc->GetDeviceID();
 	TRACE(L"%02d.%02d.%d.%03d-%010d\n"
-		,m_suAddr.stAddr.dwFacpID
-		,m_suAddr.stAddr.dwUnitID
-		,m_suAddr.stAddr.dwChnID
-		,m_suAddr.stAddr.dwDevID
-		,m_suAddr.dwAddr);
+		, m_suAddr.stAddr.dwFacpID
+		, m_suAddr.stAddr.dwUnitID
+		, m_suAddr.stAddr.dwChnID
+		, m_suAddr.stAddr.dwDevID
+		, m_suAddr.dwAddr);
 	m_strAddress = pSrc->GetDevAddress();
 	m_strKey = pSrc->GetDevKey();
 	m_sFacpNum = pSrc->GetFacpNum();

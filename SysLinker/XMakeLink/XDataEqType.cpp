@@ -180,7 +180,7 @@ int CXDataEqType::CompareData(int nType,int nName)
 }
 
 BOOL CXDataEqType::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst, int nAlertEqType)
 {
 	POSITION pos;
 	CXDataBuild * pBuild;
@@ -200,7 +200,7 @@ BOOL CXDataEqType::GetLogicOutputConditionDevice(
 
 		if(pBuild == nullptr)
 			continue;
-		pBuild->GetLogicOutputConditionDevice(pDev,pDevList,pMst);
+		pBuild->GetLogicOutputConditionDevice(pDev,pDevList,pMst, nAlertEqType);
 	}
 	return TRUE;
 }
@@ -273,7 +273,7 @@ BOOL CXDataEqType::CopyData(CXDataEqType * pSrc)
 // }
 
 
-BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType)
+BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
 {
 //	CXMapDev retList;
 	POSITION pos;
@@ -293,14 +293,14 @@ BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * p
 			continue;
 		if(pItem->GetMatchGroundBuild() == 0)
 		{
-			pBuild->GetAppectingInputDev(pDevList,pRange , pItem,bAlertEqType);
+			pBuild->GetAppectingInputDev(pDevList, pRange, pItem, nAlertEqType);
 			continue;
 		}
 		else
 		{
 			if(pRange->CheckInputRangeBuild(pBuild->GetIndex()))
 			{
-				pBuild->GetAppectingInputDev(pDevList,pRange,pItem,bAlertEqType);
+				pBuild->GetAppectingInputDev(pDevList, pRange, pItem, nAlertEqType);
 				continue;
 			}
 		}
@@ -315,7 +315,7 @@ BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * p
 BOOL CXDataEqType::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-	,BOOL bAlertTypeEq
+	,int nAlertEqType
 )
 {
 	POSITION pos;
@@ -343,7 +343,7 @@ BOOL CXDataEqType::GetRangeOutputDevice(
 			//|| (pItem->CheckMatchLinkedBuild(pInDev,pBuild->GetIndex() // 연결건물 확인
 			)
 		{
-			pBuild->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq);
+			pBuild->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,nAlertEqType);
 		}
 	}
 	return TRUE;

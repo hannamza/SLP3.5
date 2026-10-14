@@ -275,7 +275,7 @@ int CXDataStair::CompareData(int nIndex)
 //}
 
 BOOL CXDataStair::CheckBasicLogicMatch(
-	CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataLogicMst * pMst)
+	CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataLogicMst * pMst, int nAlertEqType)
 {
 	int nTgtFlNum,nSrcFlNum;
 	CXDataLogicItem * pItem; 
@@ -290,8 +290,19 @@ BOOL CXDataStair::CheckBasicLogicMatch(
 	// 지하 로직을 사용하지 않았을 때 지상조건만으로 비교
 	if(pItem->GetUseUnderLogic() == 0)
 	{
-		if(pItem->MatchBuild(pInDev,pFloor,TRUE) == 0)
-			return FALSE;
+		//20261001 GBM start - 경보류 외에 연결 건물 로직이 적용되는 회로인지를 판단해서 분기
+		if (nAlertEqType == LINKED_BUILDING_TARGET_CURCUIT_TYPE)
+		{
+			if (pItem->CheckMatchLinkedBuild(pInDev, pFloor) == 0)
+				return FALSE;
+		}
+		else
+		{
+			if (pItem->MatchBuild(pInDev, pFloor, TRUE) == 0)
+				return FALSE;
+		}
+		//20261001 GBM end
+
 		if(pItem->MatchBType(pInDev,pFloor,TRUE) == 0)
 			return FALSE;
 		if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
@@ -455,7 +466,7 @@ BOOL CXDataStair::CheckRangeLogicMatch(
 
 /// 변환전 함수
 BOOL CXDataStair::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst, int nAlertEqType)
 {
 	POSITION pos;
 	CXDataLogicItem * pItem;
@@ -475,7 +486,7 @@ BOOL CXDataStair::GetLogicOutputConditionDevice(
 		//최종 CXDataRoom::RetriveAllLink()에서 CXMapLink* pDevList에 동일한 key로 두 번 삽입이 되어
 		//앞서 들어간 CXDataLink*가 추후 삭제되지 않고 동적 생성된 채로 남아있게 됨 
 #if 1
-		if(CheckBasicLogicMatch(pDev,pDevList,pFloor,pMst) == FALSE)
+		if(CheckBasicLogicMatch(pDev,pDevList,pFloor,pMst, nAlertEqType) == FALSE)
 		{
 			continue;
 		}
@@ -585,7 +596,7 @@ BOOL CXDataStair::CopyData(CXDataStair * pSrc)
 // 	return TRUE;
 // }
 
-BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,BOOL bAlertEqType)
+BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,int nAlertEqType)
 {
 	//CXMapDev retList;
 	POSITION pos;
@@ -606,7 +617,7 @@ BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 		{
 			//if(bAlertEqType == TRUE)
 			nResult = pRange->CheckFloorPosition(nFlNum);
-			if(bAlertEqType)
+			if(nAlertEqType == ALERT_CIRCUIT_TYPE)
 			{
 				pFloor->GetFloorAllDevList(pDevList,TRUE);
 			}
@@ -629,7 +640,7 @@ BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 			// +N층 적용 시 출력회로가 포함되면 출력범위에 영향을 주는 회로로 추가한다.
 			if(nFlNum + pRange->GetPlusNEnd() >= pRange->GetRangeStartLevelNum())
 			{
-				if(bAlertEqType == TRUE)
+				if(nAlertEqType == ALERT_CIRCUIT_TYPE)
 					pFloor->GetFloorAllDevList(pDevList,TRUE);
 			}
 		}
@@ -646,7 +657,7 @@ BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 BOOL CXDataStair::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-	,BOOL bAlertTypeEq)
+	,int nAlertEqType)
 {
 	POSITION pos;
 	CXDataLogicItem * pItem;
@@ -759,7 +770,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 				// [Sample] 1-2 , 3-2 ,4-2
 				// 1. 입력 아래 출력
 				// 2. 입력 ~ 범위 사이 출력
- 				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+ 				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
  					continue;
 // 				if(bAlertTypeEq == FALSE)
 // 				{
@@ -798,9 +809,9 @@ BOOL CXDataStair::GetRangeOutputDevice(
 				//	2) 출력이 경보 타입이면
 				//		- 층일치가 없을 때 - 범위로직
 				//		- 층일치가 있을 때 - 범위로직
-				if(bAlertTypeEq == FALSE)
+				if(nAlertEqType != ALERT_CIRCUIT_TYPE)
 				{
-					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 						continue;
 				}
 				else
@@ -829,9 +840,9 @@ BOOL CXDataStair::GetRangeOutputDevice(
 				//	2) 출력이 경보 타입이면 - 옵션에 따라
 				//		- 층일치가 없을 때 - 옵션에 따라 주로직,범위로직
 				//		- 층일치가 이을 때 - 옵션에 따라 주로직,범위로직
-				if(bAlertTypeEq == FALSE)
+				if(nAlertEqType != ALERT_CIRCUIT_TYPE)
 				{
-					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 						continue;
 				}
 				else
@@ -846,7 +857,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 						}
 						else
 						{
-							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 								continue;
 						}
 					}
@@ -860,7 +871,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 						}
 						else
 						{
-							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 								continue;
 						}
 					}
@@ -902,7 +913,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 				//	2) 출력이 경보 타입이면 -
 				//	- 층일치가 없을 때 - 범위로직(층 X)
 				//	- 층일치가 있을 때 - 기본로직(범위밖 , 처리할 필요 없음)
-				if(bAlertTypeEq == FALSE)
+				if(nAlertEqType != ALERT_CIRCUIT_TYPE)
 				{
 					if(pItem->GetMatchGroundFloor() == 0)
 					{
@@ -942,7 +953,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 				//	2) 출력이 경보 타입이면
 				//	- 층일치가 없을 때 - 범위로직(층 X)
 				//	- 층일치가 있을 때 - 범위로직(층 O)
-				if(bAlertTypeEq == FALSE)
+				if(nAlertEqType != ALERT_CIRCUIT_TYPE)
 				{
 					if(pItem->GetMatchGroundFloor() == 0)
 					{
@@ -982,7 +993,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 				//	2) 출력이 경보 타입이면 - 옵션에 따라
 				//	- 층일치가 없을 때 - 옵션에 따라 범위(층 X),주 로직
 				//	- 층일치가 있을 때 - 옵션에 따라 범위(층 O),주로직
-				if(bAlertTypeEq == FALSE)
+				if(nAlertEqType != ALERT_CIRCUIT_TYPE)
 				{
 					if(pItem->GetMatchGroundFloor() == 0)
 					{
@@ -1009,7 +1020,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 						}
 						else
 						{
-							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 								continue;
 						}
 					}
@@ -1023,7 +1034,7 @@ BOOL CXDataStair::GetRangeOutputDevice(
 						}
 						else
 						{
-							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+							if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 								continue;
 						}
 					}
@@ -1033,10 +1044,10 @@ BOOL CXDataStair::GetRangeOutputDevice(
 		case RET_RANGE_OVER:
 			// [Sample] 1-3,3-3,4-3,5-3
 			// 기본 로직
-			if(bAlertTypeEq == FALSE)
+			if(nAlertEqType != ALERT_CIRCUIT_TYPE)
 			{
 				// [Sample] 1-3,3-3,4-3
-				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+				if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 					continue;
 			}
 			else
@@ -1053,14 +1064,14 @@ BOOL CXDataStair::GetRangeOutputDevice(
 					}
 					else
 					{
-						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+						if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 							continue;
 					}
 				}
 				else
 				{
 					// [Sample] 1-3,3-3,4-3
-					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst) == FALSE)
+					if(CheckBasicLogicMatch(pInDev,pMapOutDev,pFloor,pMst, nAlertEqType) == FALSE)
 						continue;
 				}
 			}

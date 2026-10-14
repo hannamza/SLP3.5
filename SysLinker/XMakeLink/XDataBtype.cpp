@@ -137,7 +137,7 @@ int CXDataBtype::CompareData(int nIndex)
 
 
 BOOL CXDataBtype::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst, int nAlertEqType)
 {
 	POSITION pos;
 	CXDataStair * pStair;
@@ -151,7 +151,7 @@ BOOL CXDataBtype::GetLogicOutputConditionDevice(
 		pStair = m_pListStair->GetNext(pos);
 		if(pStair == nullptr)
 			continue;
-		pStair->GetLogicOutputConditionDevice(pDev,pDevList,pMst);
+		pStair->GetLogicOutputConditionDevice(pDev,pDevList,pMst, nAlertEqType);
 	}
 
 	//pDevList->insert(retList.begin(),retList.end());
@@ -215,7 +215,7 @@ BOOL CXDataBtype::CopyData(CXDataBtype * pSrc)
 	return TRUE;
 }
 
-BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType)
+BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
 {
 	//CXMapDev retList;
 	POSITION pos;
@@ -237,14 +237,14 @@ BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 		
 		if(pItem->GetMatchGroundStair() == 0)
 		{
-			pStair->GetAppectingInputDev(pDevList,pRange,pItem,bAlertEqType);
+			pStair->GetAppectingInputDev(pDevList,pRange,pItem,nAlertEqType);
 			continue;
 		}
 		else
 		{
 			if(pRange->CheckInputRangeStair(pStair->GetIndex()))
 			{
-				pStair->GetAppectingInputDev(pDevList,pRange,pItem,bAlertEqType);
+				pStair->GetAppectingInputDev(pDevList,pRange,pItem,nAlertEqType);
 				continue;
 			}
 		}
@@ -259,7 +259,7 @@ BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 BOOL CXDataBtype::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink *pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-	,BOOL bAlertTypeEq)
+	,int nAlertEqType)
 {
 	POSITION pos;
 	CXDataStair * pStair;
@@ -276,7 +276,7 @@ BOOL CXDataBtype::GetRangeOutputDevice(
 		if((pRange->CheckInputRangeStair(pStair->GetIndex()) == TRUE)
 			|| (pStair->GetIndex() == g_nEmptyStairIdx))
 		{
-			pStair->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq);
+			pStair->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst, nAlertEqType);
 
 		}
 	}

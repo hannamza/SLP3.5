@@ -13115,7 +13115,7 @@ int CRelayTableData::LoadChannel()
 	strSql.Format(L"SELECT * FROM TB_CHANNEL ORDER BY FACP_ID , UNIT_ID , CHN_NUM ");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_CHANNEL open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13284,7 +13284,7 @@ int CRelayTableData::LoadRelay()
 		L" ORDER BY FACP_ID, UNIT_ID, CHN_ID, RLY_NUM ");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"LoadRelay Query failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13428,7 +13428,7 @@ int CRelayTableData::LoadRelayAndLink()
 		L" ORDER BY FACP_ID, UNIT_ID, CHN_ID, RLY_NUM");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"LoadRelayAndLink Query failed");
 		return 0;
 	}
 	pSrcDev = nullptr;
@@ -13739,7 +13739,7 @@ int CRelayTableData::LoadLocBuild()
 		L"FROM     TB_LOC_BUILDING ORDER BY BD_NAME ");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_LOC_BUILDING open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13772,7 +13772,7 @@ int CRelayTableData::LoadLocBtype()
 	strSql.Format(L"SELECT  * FROM TB_LOC_BTYPE ORDER BY BD_ID,BTYPE_NAME");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_LOC_BTYPE open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13807,7 +13807,7 @@ int CRelayTableData::LoadLocStair()
 	strSql.Format(L"SELECT  * FROM TB_LOC_STAIR ORDER BY BD_ID,BTYPE_ID , STAIR_NAME");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_LOC_STAIR open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13851,7 +13851,7 @@ int CRelayTableData::LoadLocFloor()
 	strSql.Format(L"SELECT  * FROM TB_LOC_FLOOR ORDER BY BD_ID,BTYPE_ID , STAIR_ID,FL_NAME");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_LOC_FLOOR open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13910,7 +13910,7 @@ int CRelayTableData::LoadLocRoom()
 	strSql.Format(L"SELECT  * FROM TB_LOC_ROOM ORDER BY BD_ID,BTYPE_ID , STAIR_ID,FL_ID,RM_NAME ");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_LOC_ROOM open failed");
 		return 0;
 	}
 	nCnt = m_pDB->GetRecordCount();
@@ -13972,7 +13972,7 @@ int CRelayTableData::LoadPatternMst()
 		L"ORDER BY PT_ID");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_PATTERN_MST open failed");
 		return 0;
 	}
 
@@ -14053,7 +14053,7 @@ int CRelayTableData::LoadPatternItem()
 		L"ORDER BY PT_ID , FACP_ID , UNIT_ID , CHN_ID , RLY_ID");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_PATTERN_ITEM open failed");
 		return 0;
 	}
 	nPID = nLastPid = 0;
@@ -14192,7 +14192,7 @@ int CRelayTableData::LoadLinkRelay()
 		L", LG_TYPE , LG_ID , TGT_FACP,TGT_UNIT , TGT_CHN,TGT_RLY");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_LINK_RELAY open failed");
 		return 0;
 	}
 	nLastF = nLastU = nLastC = nLastR = 0;
@@ -14725,7 +14725,7 @@ int CRelayTableData::LoadEquip()
 		L"ORDER BY A.EQ_ID ,A.EQ_NAME , A.EQ_TYPE ");
 	if (m_pDB->OpenQuery(strSql) == FALSE)
 	{
-		USERLOG(L"table : TB_UNIT open failed");
+		USERLOG(L"table : TB_EQUIP_MST and TB_EQUIP_TYPE open failed");
 		return 0;
 	}
 

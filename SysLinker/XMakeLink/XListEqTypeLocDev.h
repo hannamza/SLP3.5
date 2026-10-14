@@ -30,14 +30,14 @@ public:
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(
 		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst
-		,int nRangeLogic);
+		,int nAlertEqType);
 
 	CXDataEqType *  GetCopyTypeData(int nType,int nName);
 
 	BOOL GetRangeOutputDevice(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-		,BOOL bAlertTypeEq
+		,int nAlertEqType
 	);
 };
 

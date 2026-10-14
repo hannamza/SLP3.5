@@ -49,6 +49,7 @@ CDkPaneInputRelay::CDkPaneInputRelay()
 	m_bPreventSelect = FALSE;
 	m_nLastTreeType = DKPTREE_ADDRESS_VIEW;
 	m_bMultiSelectInput = FALSE;
+	m_bCallFromInitTree = FALSE;
 }
 
 CDkPaneInputRelay::~CDkPaneInputRelay()
@@ -263,11 +264,24 @@ void CDkPaneInputRelay::OnSortAddress()
 
 void CDkPaneInputRelay::OnSortCustom()
 {
+	//20261007 GBM start - InitTree부터의 초기화 호출에서는 기존 조건대로 트리를 만들어 프로젝트 열기 시 정렬 조건 창이 열리지 않도록 하고, 
+	//정렬 버튼에 의한 호출은 정렬 조건 창을 띄우도록 수정
 	CDlgSetUserTreeView dlg(FALSE);
-	if (dlg.DoModal() != IDOK)
-		return;
-	if (AfxGetApp())
-		((CSysLinkerApp*)AfxGetApp())->SaveCustomTreeViewItem(FALSE);
+
+	if (!m_bCallFromInitTree)
+	{
+		if (dlg.DoModal() != IDOK)
+			return;
+		if (AfxGetApp())
+			((CSysLinkerApp*)AfxGetApp())->SaveCustomTreeViewItem(FALSE);
+	}
+
+	if (m_bCallFromInitTree)
+	{
+		m_bCallFromInitTree = FALSE;
+	}
+	//20261007 GBM end
+	
 	if (g_tvInput.size() <= 0)
 		return;
 	m_bPreventSelect = TRUE;
@@ -361,6 +375,7 @@ int CDkPaneInputRelay::InitTree()
 		OnSortEquip();
 		break;
 	case DKPTREE_CUSTOM_VIEW:
+		m_bCallFromInitTree = TRUE;
 		OnSortCustom();
 		break;
 	case DKPTREE_ADDRESS_VIEW:

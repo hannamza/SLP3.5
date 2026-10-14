@@ -132,7 +132,7 @@ int CXDataBuild::CompareData(int nIdx)
 }
 
 BOOL CXDataBuild::GetLogicOutputConditionDevice(
-	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst)
+	CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst, int nAlertEqType)
 {
 	POSITION pos;
 	BYTE btCheck = 0;
@@ -146,7 +146,7 @@ BOOL CXDataBuild::GetLogicOutputConditionDevice(
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetLogicOutputConditionDevice(pDev,pDevList,pMst);
+		pBtype->GetLogicOutputConditionDevice(pDev,pDevList,pMst, nAlertEqType);
 	}
 	return TRUE;
 }
@@ -226,7 +226,7 @@ BOOL CXDataBuild::CopyData(CXDataBuild* pSrc)
 // 	return TRUE;
 // }
 
-BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType)
+BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
 {
 	//CXMapDev retList;
 	POSITION pos;
@@ -242,7 +242,7 @@ BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetAppectingInputDev(pDevList,pRange,pItem,bAlertEqType);
+		pBtype->GetAppectingInputDev(pDevList,pRange,pItem, nAlertEqType);
 	}
 	//pDevList->insert(retList.begin(),retList.end());
 	//retList.clear();
@@ -252,7 +252,7 @@ BOOL CXDataBuild::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 
 BOOL CXDataBuild::GetRangeOutputDevice(
 	CXDataDev * pInDev,CXMapLink *pMapOutDev,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-	,BOOL bAlertTypeEq)
+	,int nAlertTypeEq)
 {
 	POSITION pos;
 	BYTE btCheck = 0;
@@ -265,7 +265,7 @@ BOOL CXDataBuild::GetRangeOutputDevice(
 		pBtype = m_pListBtype->GetNext(pos);
 		if(pBtype == nullptr)
 			continue;
-		pBtype->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,bAlertTypeEq);
+		pBtype->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,nAlertTypeEq);
 	}
 	return TRUE;
 }

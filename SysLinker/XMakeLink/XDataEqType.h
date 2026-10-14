@@ -52,16 +52,16 @@ public:
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(
-		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst);
+		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst, int nAlertEqType);
 
 	BOOL CopyData(CXDataEqType * pSrc);
 
-	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,BOOL bAlertEqType);
+	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,int nAlertEqType);
 
 	BOOL GetRangeOutputDevice(
 		CXDataDev * pDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-		,BOOL bAlertTypeEq
+		,int nAlertEqType
 	);
 };
 

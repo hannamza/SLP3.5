@@ -686,7 +686,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 	int nCurLogic =0 ;
 	DWORD dwStart,dwEnd,dwSort,dwPtn;
 	BOOL bAllLink = FALSE;
-	BOOL bAlertEq = FALSE;
+	int nAlertEqType = NORMAL_CIRCUIT_TYPE;
 	CXDataEqType * pCopyType = nullptr;
 
 	sortingArray.clear();
@@ -714,7 +714,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 		// [2026/4/14 16:47:10 KHS] 
 		// 전체 경보 방식인지 확인 필요
 		bAllLink = CheckAllAlertLogic(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]) == 0 ? TRUE : FALSE;
-		bAlertEq = IsAlertEqType(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
+		nAlertEqType = CheckEqType(pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID]);
 
 		pCopyType = m_pInTypeLocDevList->GetCopyTypeData(pMst->GetInType(),pMst->GetEqName());
 
@@ -741,7 +741,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
  			
 			// 범위 아래 있는 입력회로도 기본 로직으로 +N 했을 때 출력이 범위안 또는 범위를 초과하는 입력 포함
 			// 
- 			pCopyType->GetAppectingInputDev(&mapInDev,pRange,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID],bAlertEq);
+ 			pCopyType->GetAppectingInputDev(&mapInDev,pRange,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID], nAlertEqType);
  			for(auto it : mapInDev)
  			{
  				if(it.second == nullptr)
@@ -749,7 +749,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
  				pDev = it.second;
  				mapOutDev.clear();
  				
-  				if(GetRangeOutDevice(pDev,&mapOutDev,pRange,pMst,bAlertEq))
+  				if(GetRangeOutDevice(pDev,&mapOutDev,pRange,pMst, nAlertEqType))
   				{
   					//	continue;
   					pDev->AddLinkMap(&mapOutDev);
@@ -776,7 +776,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
 			pDev = it.second;
 			mapOutDev.clear();
 			if(m_pOutTypeLocDevList->GetLogicOutputConditionDevice(
-				pDev,&mapOutDev,pMst,MAINLOGIC_PRIORITYID) == TRUE)
+				pDev,&mapOutDev,pMst,nAlertEqType) == TRUE)
 			{
 				//	continue;
 				pDev->AddLinkMap(&mapOutDev);
@@ -1450,9 +1450,9 @@ int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
 
 BOOL CXMakeLink::GetRangeOutDevice(
 	CXDataDev * pInDev,CXMapLink *pMapOutDev
-	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst,BOOL bAlertTypeEq)
+	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst, int nAlertTypeEq)
 {
-	if(m_pOutTypeLocDevList->GetRangeOutputDevice(pInDev,pMapOutDev, pRange,pMst,bAlertTypeEq) == FALSE)
+	if(m_pOutTypeLocDevList->GetRangeOutputDevice(pInDev,pMapOutDev, pRange,pMst,nAlertTypeEq) == FALSE)
 		return FALSE; 
 	return TRUE;
 }
@@ -1498,4 +1498,42 @@ BOOL CXMakeLink::IsAlertEqType(CXDataLogicItem * pItem)
 		}
 	}
 	return FALSE;
+}
+
+int CXMakeLink::CheckEqType(CXDataLogicItem * pItem)
+{
+	if (IsAlertEqType(pItem))
+		return ALERT_CIRCUIT_TYPE;
+
+	int nLogicOutputType = pItem->GetOutType();
+	int nLogicOutputContent = pItem->GetOutContents();
+
+	BOOL bOutputMatched = FALSE;
+	int nTargetOutputTypeCount = sizeof(g_lpSzLinkedBuildingTargetOutputType) / sizeof(g_lpSzLinkedBuildingTargetOutputType[0]);
+	for (int i = 0; i < nTargetOutputTypeCount; i++)
+	{
+		CString strOutputType = g_lpSzLinkedBuildingTargetOutputType[i];
+		int nTargetOutputType = m_pRefRelayData->GetEquipIDByName(ET_OUTPUTTYPE, strOutputType);
+		if (nLogicOutputType == nTargetOutputType)
+		{
+			bOutputMatched = TRUE;
+			break;
+		}
+	}
+
+	if (!bOutputMatched)
+		return NORMAL_CIRCUIT_TYPE;
+
+	int nTargetOutputContentCount = sizeof(g_pSzLinkedBuildingTargetOutputContent) / sizeof(g_pSzLinkedBuildingTargetOutputContent[0]);
+	for (int j = 0; j < nTargetOutputTypeCount; j++)
+	{
+		CString strOutputContent = g_pSzLinkedBuildingTargetOutputContent[j];
+		int nTargetOutputContent = m_pRefRelayData->GetEquipIDByName(ET_OUTCONTENTS, strOutputContent);
+		if (nLogicOutputContent == nTargetOutputContent)
+		{
+			return LINKED_BUILDING_TARGET_CURCUIT_TYPE;
+		}
+	}
+
+	return NORMAL_CIRCUIT_TYPE;
 }

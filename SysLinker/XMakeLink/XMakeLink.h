@@ -87,9 +87,11 @@ public:
 
 	BOOL IsAlertEqType(CXDataLogicItem * pItem);
 
+	int CheckEqType(CXDataLogicItem * pItem);		//20261001 GBM - 연결 건물 대상 회로를 구분하기 위해 위에 IsAlertEqType대신 사용될 매서드
+
 	// [2026/6/19 13:06:59 KHS] 
 	// 출력 범위에 영향을 미치는 pInDev만 다른 로직을 적용하기 위한 함수
 	BOOL GetRangeOutDevice(CXDataDev * pInDev,CXMapLink *pMapOutDev
-		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst,BOOL bAlertTypeEq);
+		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst, int nAlertTypeEq);
 };
 

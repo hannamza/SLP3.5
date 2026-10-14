@@ -402,6 +402,24 @@ static TCHAR *g_pSzAllAlertEquip[] = {
 	nullptr
 };
 
+//20261001 GBM start - 경보류 외에 연결 건물 로직이 적용되는 대상
+static TCHAR* g_lpSzLinkedBuildingTargetOutputType[] = {
+	L"로비폰",
+	L"유도등정지",
+	L"비상등정지"
+};
+
+static TCHAR* g_pSzLinkedBuildingTargetOutputContent[] = {
+	L"로비폰",
+	L"비상등"
+};
+
+enum {
+	NORMAL_CIRCUIT_TYPE,					// 일반 회로 
+	ALERT_CIRCUIT_TYPE,						// 경보류 회로
+	LINKED_BUILDING_TARGET_CURCUIT_TYPE		// 경보류 회로처럼 연결 건물 로직을 적용받지만 그 외의 경보류 회로 로직을 적용하지 않는 회로
+};
+//20261001 GBM end
 
 extern BOOL Less_than(int a,int b);
 extern BOOL Greater_than(int a,int b);

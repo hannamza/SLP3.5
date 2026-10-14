@@ -51,7 +51,7 @@ public:
 	// [2025/8/1 8:08:14 KHS] 
 	// 출력 조건에 맞는 Device 목록 가져오기
 	BOOL GetLogicOutputConditionDevice(
-		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst);
+		CXDataDev * pDev,CXMapLink * pDevList,CXDataLogicMst * pMst, int nAlertEqType);
 
 
 
@@ -64,19 +64,19 @@ public:
 
 
 	// 범위 로직에 영향을 주는 입력 회로를 가져온다
-	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,BOOL bAlertEqType);
+	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType);
 
 	// [2026/6/23 17:27:55 KHS] 
 	// 범위에 영향을 미치는 입력 회로라 하더라도 기본 로직에 영향을 받는 출력 있다
 	// ex) +N층 : 범위 아래 입력 시 +N층이 범위로직 적용 영역과 기본로직 적용 영역에 걸쳐 있음
 	// ex) 같은 타입의 출력 모두를 검색 하기 때문에 다른 건물,다른 계단,다른 층 모두 확인
 	// 기본로직 사용
-	BOOL CheckBasicLogicMatch(CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataLogicMst * pMst);
+	BOOL CheckBasicLogicMatch(CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataLogicMst * pMst, int nAlertEqType);
 	BOOL CheckRangeLogicMatch(CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataRangeLogic * pRange,CXDataLogicMst * pMst,BOOL bCheckFloor);
 	BOOL GetRangeOutputDevice(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
-		,BOOL bAlertTypeEq
+		,int nAlertEqType
 	);
 	
 	BOOL GetRangeBelowOutputDevice(
