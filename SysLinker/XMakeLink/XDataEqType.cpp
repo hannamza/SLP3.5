@@ -273,7 +273,7 @@ BOOL CXDataEqType::CopyData(CXDataEqType * pSrc)
 // }
 
 
-BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
+BOOL CXDataEqType::GetAffectedInputDeviceByRangeLogic(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
 {
 //	CXMapDev retList;
 	POSITION pos;
@@ -293,14 +293,14 @@ BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * p
 			continue;
 		if(pItem->GetMatchGroundBuild() == 0)
 		{
-			pBuild->GetAppectingInputDev(pDevList, pRange, pItem, nAlertEqType);
+			pBuild->GetAffectedInputDeviceByRangeLogic(pDevList, pRange, pItem, nAlertEqType);
 			continue;
 		}
 		else
 		{
 			if(pRange->CheckInputRangeBuild(pBuild->GetIndex()))
 			{
-				pBuild->GetAppectingInputDev(pDevList, pRange, pItem, nAlertEqType);
+				pBuild->GetAffectedInputDeviceByRangeLogic(pDevList, pRange, pItem, nAlertEqType);
 				continue;
 			}
 		}
@@ -312,7 +312,7 @@ BOOL CXDataEqType::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * p
 }
 
 
-BOOL CXDataEqType::GetRangeOutputDevice(
+BOOL CXDataEqType::GetAffectedOutputDeviceByRangeLogic(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
 	,int nAlertEqType
@@ -343,7 +343,7 @@ BOOL CXDataEqType::GetRangeOutputDevice(
 			//|| (pItem->CheckMatchLinkedBuild(pInDev,pBuild->GetIndex() // 연결건물 확인
 			)
 		{
-			pBuild->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst,nAlertEqType);
+			pBuild->GetAffectedOutputDeviceByRangeLogic(pInDev,pMapOutDev,pRange,pMst,nAlertEqType);
 		}
 	}
 	return TRUE;

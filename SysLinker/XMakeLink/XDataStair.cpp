@@ -286,23 +286,23 @@ BOOL CXDataStair::CheckBasicLogicMatch(
 	nTgtFlNum = pFloor->GetFloorNumber();
 	nSrcFlNum = pInDev->GetLocFloorNumber();
 
+	//20261020 GBM start: 연결 건물 대상 로직 따로 처리
+	if (nAlertEqType == LINKED_BUILDING_TARGET_CURCUIT_TYPE)
+	{
+		if (CheckLinkedBuildingCircuitLogicMatched(pInDev, pFloor, pItem) == FALSE)
+			return FALSE;
+
+		pFloor->GetLogicOutputConditionDevice(pInDev, pDevList, pItem);
+		return TRUE;
+	}
+	//20261020 GBM end
+
 	// [2026/7/15 8:47:45 KHS] 
 	// 지하 로직을 사용하지 않았을 때 지상조건만으로 비교
 	if(pItem->GetUseUnderLogic() == 0)
 	{
-		//20261001 GBM start - 경보류 외에 연결 건물 로직이 적용되는 회로인지를 판단해서 분기
-		if (nAlertEqType == LINKED_BUILDING_TARGET_CURCUIT_TYPE)
-		{
-			if (pItem->CheckMatchLinkedBuild(pInDev, pFloor) == 0)
-				return FALSE;
-		}
-		else
-		{
-			if (pItem->MatchBuild(pInDev, pFloor, TRUE) == 0)
-				return FALSE;
-		}
-		//20261001 GBM end
-
+		if (pItem->MatchBuild(pInDev, pFloor, TRUE) == 0)
+			return FALSE;
 		if(pItem->MatchBType(pInDev,pFloor,TRUE) == 0)
 			return FALSE;
 		if(pItem->MatchStair(pInDev,pFloor,TRUE) == 0)
@@ -596,7 +596,7 @@ BOOL CXDataStair::CopyData(CXDataStair * pSrc)
 // 	return TRUE;
 // }
 
-BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,int nAlertEqType)
+BOOL CXDataStair::GetAffectedInputDeviceByRangeLogic(CXMapDev * pDevList,CXDataRangeLogic * pRange , CXDataLogicItem * pItem,int nAlertEqType)
 {
 	//CXMapDev retList;
 	POSITION pos;
@@ -654,7 +654,7 @@ BOOL CXDataStair::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 // ※ 범위에서 로직에서 층의 범위를 확인 하지 않는경우
 //   1) 기본 로직이 층 일치 조건 없음 , 
 /// 입력회로가 범위에 영향을 줄 수 있는 회로
-BOOL CXDataStair::GetRangeOutputDevice(
+BOOL CXDataStair::GetAffectedOutputDeviceByRangeLogic(
 	CXDataDev * pInDev,CXMapLink * pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
 	,int nAlertEqType)
@@ -1419,3 +1419,77 @@ BOOL CXDataStair::GetRangeOutputDevice(
 //	}
 //	return TRUE;
 //}
+
+BOOL CXDataStair::CheckLinkedBuildingCircuitLogicMatched(CXDataDev * pInDev, CXDataFloor *pFloor, CXDataLogicItem * pItem)
+{
+	//조건 시작
+	int nSrcBuildIndex = pInDev->GetBuildIndex();
+	int nTgtBuildindex = pFloor->GetBuildIndex();
+	BOOL bSrcIsApart = g_MapIsApartment[nSrcBuildIndex];
+	BOOL bTgtIsApart = g_MapIsApartment[nTgtBuildindex];
+
+	//입력이 일반 아파트일 때
+	if (bSrcIsApart)
+	{
+		//출력이 일반 아파트일 때
+		if (bTgtIsApart)
+		{
+			// 연결 건물로 묶여있는 지 확인
+			if (pItem->CheckMatchLinkedBuildForLinkedBuildTypeCircuit (nSrcBuildIndex, nTgtBuildindex) == FALSE)
+			{
+				// 연결 건물로 묶여있지 않지만 자기 자신이면 나머지 조건을 확인, 계단까지만 일치하면 TRUE
+				if (nSrcBuildIndex == nTgtBuildindex)
+				{
+					if (pItem->MatchBType(pInDev, pFloor, TRUE) == 0)
+						return FALSE;
+					if (pItem->MatchStair(pInDev, pFloor, TRUE) == 0)
+						return FALSE;
+				}
+				else
+				{
+					// 연결 건물로 묶여있지 않고 자기 자신도 아니면 FALSE
+					return FALSE;
+				}
+			}
+			else
+			{
+				// 연결 건물로 묶여있다면 나머지 조건을 확인, 계단까지만 일치하면 TRUE
+				if (pItem->MatchBType(pInDev, pFloor, TRUE) == 0)
+					return FALSE;
+				if (pItem->MatchStair(pInDev, pFloor, TRUE) == 0)
+					return FALSE;
+			}
+		}
+		// 출력이 일반 아파트가 아닐 때
+		else
+		{
+			// 연결 건물로 묶여있는 지 확인
+			if (pItem->CheckMatchLinkedBuildForLinkedBuildTypeCircuit(nSrcBuildIndex, nTgtBuildindex) == FALSE)
+			{
+				// 연결 건물로 묶여있지 않고 자기 자신도 아니면 FALSE
+				if (nSrcBuildIndex != nTgtBuildindex)
+				{
+					return FALSE;
+				}
+			}
+		}
+	}
+	// 입력이 일반 아파트가 아닐 때
+	else
+	{
+		//건물만 일치하면 무조건 다 나감
+
+		// 연결 건물로 묶여있는 지 확인
+		if (pItem->CheckMatchLinkedBuildForLinkedBuildTypeCircuit(nSrcBuildIndex, nTgtBuildindex) == FALSE)
+		{
+			// 연결 건물로 묶여있지 않고 자기 자신도 아니면 FALSE
+			if (nSrcBuildIndex != nTgtBuildindex)
+			{
+				return FALSE;
+			}
+		}
+	}
+	//조건 끝
+
+	return TRUE;
+}

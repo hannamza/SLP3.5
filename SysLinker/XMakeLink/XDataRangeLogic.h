@@ -128,6 +128,8 @@ public:
 	BOOL MatchStair(CXDataDev* src,CXDataFloor* tgt,BOOL ground);
 	BOOL MatchFloorRange(CXDataDev* src,CXDataFloor* tgt);
 
+	BOOL IsOutputFloor(int nSrcFlNum, int nTgtFlNum);		//20261027 GBM - +N층 적용 시 입력이 지하이고 출력이 지상일 경우 층번호 0까지 계산되어 출력 범위가 하나 줄어드는 오류 수정을 위한 매서드
+
 	BOOL InRange(CXDataDev * pInDev);
 	BOOL MatchEmergency(CXDataDev * pInDev,CXDataEm * pEm);
 };

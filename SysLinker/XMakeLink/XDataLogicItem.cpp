@@ -449,6 +449,29 @@ BYTE CXDataLogicItem::CheckMatchLinkedBuild(CXDataDev* pInputDev,int nTgtBuildId
 	return 0;
 }
 
+BOOL CXDataLogicItem::CheckMatchLinkedBuildForLinkedBuildTypeCircuit(int nSrcBuildIdx, int nTgtBuildIdx)
+{
+	std::vector<int> vtTarget;
+	if (nSrcBuildIdx <= 0 || nTgtBuildIdx <= 0)
+		return FALSE;
+
+	if (g_MapIdxLinkedBuild.find(nSrcBuildIdx) != g_MapIdxLinkedBuild.end())
+	{
+		vtTarget = g_MapIdxLinkedBuild[nSrcBuildIdx];
+		if (std::find(vtTarget.begin(), vtTarget.end(), nTgtBuildIdx) != vtTarget.end())
+			return TRUE;
+	}
+
+	if (g_MapIdxLinkedBuild.find(nTgtBuildIdx) != g_MapIdxLinkedBuild.end())
+	{
+		vtTarget = g_MapIdxLinkedBuild[nTgtBuildIdx];
+		if (std::find(vtTarget.begin(), vtTarget.end(), nSrcBuildIdx) != vtTarget.end())
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CXDataLogicItem::MatchBuild(CXDataDev* src,CXDataFloor* tgt,BOOL ground)
 {
 	// 기본 로직이 아니고 , 범위안에 건물이 아니면 FALSE를 리턴
@@ -494,6 +517,10 @@ BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 	// 범위로직에 층이 있으면 층일치 조건 1
 	if(GetMatchGroundFloor() == 1)
 	{
+		//20261027 GBM start - 범위 내 층번호 0번 때문에 출력이 1층 덜 포함되는 오류 수정
+#if 1
+		bRet = IsOutputFloor(nSrcFlNum, nTgtFlNum);
+#else
 		if(nTgtFlNum >= nSrcFlNum + m_nPlusNStart
 			&& nTgtFlNum <= nSrcFlNum + m_nPlusNEnd)
 		{
@@ -501,12 +528,32 @@ BOOL CXDataLogicItem::MatchFloorRange(CXDataDev* src,CXDataFloor* tgt)
 		}
 		else 
 			bRet = FALSE;
+#endif
+		//20261027 GBM end
 	}
 	else
 	{
 		bRet = TRUE;
 	}
 	return bRet;
+}
+
+BOOL CXDataLogicItem::IsOutputFloor(int nSrcFlNum, int nTgtFlNum)
+{
+	// 0층은 존재하지 않음
+	if (nSrcFlNum == 0 || nTgtFlNum == 0)
+		return FALSE;
+
+	// 입력층과 출력층을 연속된 층 번호로 변환
+	int nInput = (nSrcFlNum < 0) ? nSrcFlNum + 1 : nSrcFlNum;
+	int nOutput = (nTgtFlNum < 0) ? nTgtFlNum + 1 : nTgtFlNum;
+
+	// 출력 범위 계산 (A <= B 전제)
+	int nStartFloor = nInput + m_nPlusNStart;
+	int nEndFloor = nInput + m_nPlusNEnd;
+
+	// 출력층이 범위에 포함되는지 확인
+	return (nOutput >= nStartFloor && nOutput <= nEndFloor) ? TRUE : FALSE;
 }
 
 BOOL CXDataLogicItem::MatchEmergency(CXDataDev* src,CXDataEm* tgt)

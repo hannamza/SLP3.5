@@ -377,6 +377,8 @@ extern CXLocStrMap	g_MapIdxStair;
 extern CXLocStrMap	g_MapIdxRoom;
 extern CXLinkBuildMap	g_MapIdxLinkedBuild;// 연계 건물의 Source의 Index
 
+extern std::map<int, BOOL> g_MapIsApartment;	// key: g_MapIdxLinkedBuild의 value, value: 아파트 건물 여부
+
 extern int			g_nEmptyBuildIdx;
 extern int			g_nEmptyStairIdx;
 //extern CXMapRangeType	g_MapRangeType; // 출력 층을 타입(입력,출력,설비명,출력설명)별로 저장

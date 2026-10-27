@@ -8,6 +8,7 @@ CXLocStrMap	g_MapIdxFloor;
 CXLocStrMap	g_MapIdxStair;
 CXLocStrMap	g_MapIdxRoom;
 CXLinkBuildMap	g_MapIdxLinkedBuild;
+std::map<int, BOOL> g_MapIsApartment;
 
 int			g_nEmptyBuildIdx = 0;
 int			g_nEmptyStairIdx = 0;

@@ -91,7 +91,9 @@ public:
 
 	// [2026/6/19 13:06:59 KHS] 
 	// 출력 범위에 영향을 미치는 pInDev만 다른 로직을 적용하기 위한 함수
-	BOOL GetRangeOutDevice(CXDataDev * pInDev,CXMapLink *pMapOutDev
+	BOOL GetAffectedOutputDeviceByRangeLogic(CXDataDev * pInDev,CXMapLink *pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst, int nAlertTypeEq);
+
+	BOOL IsApartmentBuilding(const CString& strBuildingName);
 };
 

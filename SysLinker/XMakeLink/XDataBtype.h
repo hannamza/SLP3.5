@@ -55,8 +55,8 @@ public:
 
 	BOOL CopyData(CXDataBtype * pSrc);
 
-	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType);
-	BOOL GetRangeOutputDevice(
+	BOOL GetAffectedInputDeviceByRangeLogic(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType);
+	BOOL GetAffectedOutputDeviceByRangeLogic(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
 		,int nAlertEqType

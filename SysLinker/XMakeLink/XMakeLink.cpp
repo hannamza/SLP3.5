@@ -200,6 +200,7 @@ int CXMakeLink::MakeLocStringIndex()
 	g_MapIdxStair.clear();
 	g_MapIdxFloor.clear();
 	g_MapIdxRoom.clear();
+	g_MapIsApartment.clear();
 	iPos = m_pInTypeLocDevList->GetHeadPosition();
 	while(iPos)
 	{
@@ -221,6 +222,10 @@ int CXMakeLink::MakeLocStringIndex()
 			it = g_MapIdxBuild.find(strUpper);
 			if(it == g_MapIdxBuild.end())
 			{
+				//20261020 GBM start - 아파트 여부 map 정보 추가
+				BOOL bIsApart = IsApartmentBuilding(strUpper);
+				g_MapIsApartment[nBidx] = bIsApart;
+				//20261020 GBM end
 				g_MapIdxBuild[strUpper] = nBidx;
 				pBuild->SetIndex(nBidx);
 				nLastBidx = nBidx;
@@ -741,7 +746,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
  			
 			// 범위 아래 있는 입력회로도 기본 로직으로 +N 했을 때 출력이 범위안 또는 범위를 초과하는 입력 포함
 			// 
- 			pCopyType->GetAppectingInputDev(&mapInDev,pRange,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID], nAlertEqType);
+ 			pCopyType->GetAffectedInputDeviceByRangeLogic(&mapInDev,pRange,pMst->m_pArrLgItem[MAINLOGIC_PRIORITYID], nAlertEqType);
  			for(auto it : mapInDev)
  			{
  				if(it.second == nullptr)
@@ -749,7 +754,7 @@ int CXMakeLink::MakeLinkList(std::vector<std::pair<DWORD,CXDataDev*>> & sortingA
  				pDev = it.second;
  				mapOutDev.clear();
  				
-  				if(GetRangeOutDevice(pDev,&mapOutDev,pRange,pMst, nAlertEqType))
+  				if(GetAffectedOutputDeviceByRangeLogic(pDev,&mapOutDev,pRange,pMst, nAlertEqType))
   				{
   					//	continue;
   					pDev->AddLinkMap(&mapOutDev);
@@ -1362,7 +1367,7 @@ int CXMakeLink::MakeLinkedBuild()
 			if(it == g_MapIdxBuild.end() || it->second <= 0 )
 				continue;
 			nTgtBuildIdx = it->second;
-			if(find(vtBuild.begin(),vtBuild.end(),nTgtBuildIdx) == vtBuild.end())
+			if (find(vtBuild.begin(), vtBuild.end(), nTgtBuildIdx) == vtBuild.end())
 				vtBuild.push_back(nTgtBuildIdx);
 		}
 
@@ -1448,11 +1453,11 @@ int CXMakeLink::CheckAllAlertLogic(CXDataLogicItem * pItem)
 	return 0;
 }
 
-BOOL CXMakeLink::GetRangeOutDevice(
+BOOL CXMakeLink::GetAffectedOutputDeviceByRangeLogic(
 	CXDataDev * pInDev,CXMapLink *pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst, int nAlertTypeEq)
 {
-	if(m_pOutTypeLocDevList->GetRangeOutputDevice(pInDev,pMapOutDev, pRange,pMst,nAlertTypeEq) == FALSE)
+	if(m_pOutTypeLocDevList->GetAffectedOutputDeviceByRangeLogic(pInDev,pMapOutDev, pRange,pMst,nAlertTypeEq) == FALSE)
 		return FALSE; 
 	return TRUE;
 }
@@ -1536,4 +1541,29 @@ int CXMakeLink::CheckEqType(CXDataLogicItem * pItem)
 	}
 
 	return NORMAL_CIRCUIT_TYPE;
+}
+
+BOOL CXMakeLink::IsApartmentBuilding(const CString& strBuildingName)
+{
+	CString strName = strBuildingName;
+	strName.Trim();
+
+	int nLength = strName.GetLength();
+
+	// 최소 2글자 이상 (예: 1동)
+	if (nLength < 2)
+		return FALSE;
+
+	// 마지막 글자가 '동'인지 확인
+	if (strName[nLength - 1] != L'동')
+		return FALSE;
+
+	// '동' 앞의 문자가 모두 숫자인지 확인
+	for (int i = 0; i < nLength - 1; i++)
+	{
+		if (strName[i] < L'0' || strName[i] > L'9')
+			return FALSE;
+	}
+
+	return TRUE;
 }

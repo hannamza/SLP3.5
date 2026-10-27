@@ -64,7 +64,7 @@ public:
 
 
 	// 범위 로직에 영향을 주는 입력 회로를 가져온다
-	BOOL GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType);
+	BOOL GetAffectedInputDeviceByRangeLogic(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType);
 
 	// [2026/6/23 17:27:55 KHS] 
 	// 범위에 영향을 미치는 입력 회로라 하더라도 기본 로직에 영향을 받는 출력 있다
@@ -73,7 +73,10 @@ public:
 	// 기본로직 사용
 	BOOL CheckBasicLogicMatch(CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataLogicMst * pMst, int nAlertEqType);
 	BOOL CheckRangeLogicMatch(CXDataDev * pInDev,CXMapLink * pDevList,CXDataFloor *pFloor,CXDataRangeLogic * pRange,CXDataLogicMst * pMst,BOOL bCheckFloor);
-	BOOL GetRangeOutputDevice(
+	
+	BOOL CheckLinkedBuildingCircuitLogicMatched(CXDataDev * pInDev, CXDataFloor *pFloor, CXDataLogicItem * pItem);
+	
+	BOOL GetAffectedOutputDeviceByRangeLogic(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
 		,int nAlertEqType

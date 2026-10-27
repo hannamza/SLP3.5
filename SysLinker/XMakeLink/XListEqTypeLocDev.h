@@ -34,7 +34,7 @@ public:
 
 	CXDataEqType *  GetCopyTypeData(int nType,int nName);
 
-	BOOL GetRangeOutputDevice(
+	BOOL GetAffectedOutputDeviceByRangeLogic(
 		CXDataDev * pInDev,CXMapLink * pMapOutDev
 		,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
 		,int nAlertEqType

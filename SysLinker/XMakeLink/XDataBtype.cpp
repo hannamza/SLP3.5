@@ -215,7 +215,7 @@ BOOL CXDataBtype::CopyData(CXDataBtype * pSrc)
 	return TRUE;
 }
 
-BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
+BOOL CXDataBtype::GetAffectedInputDeviceByRangeLogic(CXMapDev * pDevList,CXDataRangeLogic * pRange,CXDataLogicItem * pItem,int nAlertEqType)
 {
 	//CXMapDev retList;
 	POSITION pos;
@@ -237,14 +237,14 @@ BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 		
 		if(pItem->GetMatchGroundStair() == 0)
 		{
-			pStair->GetAppectingInputDev(pDevList,pRange,pItem,nAlertEqType);
+			pStair->GetAffectedInputDeviceByRangeLogic(pDevList,pRange,pItem,nAlertEqType);
 			continue;
 		}
 		else
 		{
 			if(pRange->CheckInputRangeStair(pStair->GetIndex()))
 			{
-				pStair->GetAppectingInputDev(pDevList,pRange,pItem,nAlertEqType);
+				pStair->GetAffectedInputDeviceByRangeLogic(pDevList,pRange,pItem,nAlertEqType);
 				continue;
 			}
 		}
@@ -256,7 +256,7 @@ BOOL CXDataBtype::GetAppectingInputDev(CXMapDev * pDevList,CXDataRangeLogic * pR
 }
 
 
-BOOL CXDataBtype::GetRangeOutputDevice(
+BOOL CXDataBtype::GetAffectedOutputDeviceByRangeLogic(
 	CXDataDev * pInDev,CXMapLink *pMapOutDev
 	,CXDataRangeLogic * pRange,CXDataLogicMst * pMst
 	,int nAlertEqType)
@@ -276,7 +276,7 @@ BOOL CXDataBtype::GetRangeOutputDevice(
 		if((pRange->CheckInputRangeStair(pStair->GetIndex()) == TRUE)
 			|| (pStair->GetIndex() == g_nEmptyStairIdx))
 		{
-			pStair->GetRangeOutputDevice(pInDev,pMapOutDev,pRange,pMst, nAlertEqType);
+			pStair->GetAffectedOutputDeviceByRangeLogic(pInDev,pMapOutDev,pRange,pMst, nAlertEqType);
 
 		}
 	}
