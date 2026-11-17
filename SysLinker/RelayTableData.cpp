@@ -13679,8 +13679,6 @@ int CRelayTableData::LoadLocation()
 		m_pDB->GetFieldValue(L"FL_NAME", strFloor);
 		m_pDB->GetFieldValue(L"RM_NAME", strRoom);
 
-		if(nBID == 1 && nStair == 1 && nFloor == 25)
-			TRACE(L"\n");
 		m_spLocation->AddNewLocation(nLt
 			,strBuild,nBID
 			,strBtype,nBtype

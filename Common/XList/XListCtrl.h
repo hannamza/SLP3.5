@@ -186,6 +186,8 @@ public:
 	CUIntArray		m_arrDirection;
 	BOOL			m_bSorting;
 
+	BOOL			m_bSortEnable;		//20261112 GBM - BOOL m_bSorting와 별개의 플래그로 그룹 출력 리스트에서 소팅 일어나지 않도록 하기 위한 변수
+
 	// [2025/11/4 8:55:51 KHS] 
 	// Focus를 잃어도 선택된 항목의 색상을 표시
 	// LVS_SHOWSELALWAYS가  선택되어 있어야 한다.

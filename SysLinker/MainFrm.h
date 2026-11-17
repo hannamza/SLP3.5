@@ -105,6 +105,7 @@ public:
 	afx_msg LRESULT OnRegisterPumpViewTree(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRegisterPSwitchViewTree(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRegisterContactViewTree(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnRegisterInViewTree(WPARAM wp, LPARAM lp);			//20261105 GBM - 입력 회로 그룹 설정 기능을 위해 입력 회로를 DROP 윈도우에 추가
 
 	afx_msg LRESULT OnDkpInputViewItemChange(WPARAM wp, LPARAM lp);
 

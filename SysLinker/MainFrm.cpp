@@ -166,6 +166,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_MESSAGE(UWM_REG_CONTACTVIEW_DROPWND, &CMainFrame::OnRegisterContactViewTree)
 	ON_MESSAGE(UWM_REG_PSWITCHVIEW_DROPWND, &CMainFrame::OnRegisterPSwitchViewTree)
 	ON_MESSAGE(UWM_REG_EMVIEW_DROPWND, &CMainFrame::OnRegisterEmergencyViewTree)
+	ON_MESSAGE(UWM_REG_INVIEW_DROPWND, &CMainFrame::OnRegisterInViewTree)
 	ON_MESSAGE(UWM_DKP_INPUTVIEW_ITEMCHANGE, &CMainFrame::OnDkpInputViewItemChange)
 	ON_MESSAGE(UWM_DKP_INPUTVIEW_REFRESH, &CMainFrame::OnDkpInputRefresh)
 	ON_MESSAGE(UWM_DKP_OUTPUTVIEW_REFRESH, &CMainFrame::OnDkpOutputRefresh)
@@ -756,6 +757,12 @@ LRESULT CMainFrame::OnRegisterPSwitchViewTree(WPARAM wp, LPARAM lp)
 #if _USE_PSWITCH_
 	m_wndDkPSwitch.AddDropWnd((CWnd*)lp);
 #endif
+	return 0;
+}
+
+LRESULT CMainFrame::OnRegisterInViewTree(WPARAM wp, LPARAM lp)
+{
+	m_wndDkInputRelay.AddDropWnd((CWnd*)lp);
 	return 0;
 }
 

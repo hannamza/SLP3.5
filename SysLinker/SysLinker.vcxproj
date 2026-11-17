@@ -1082,6 +1082,8 @@
     <ClInclude Include="DlgAdminMode.h" />
     <ClInclude Include="DlgChildBasePage.h" />
     <ClInclude Include="DlgChildChangeView.h" />
+    <ClInclude Include="DlgChildDelay.h" />
+    <ClInclude Include="DlgChildDelayOutput.h" />
     <ClInclude Include="DlgChildEditChn.h" />
     <ClInclude Include="DlgChildEditEmpty.h" />
     <ClInclude Include="DlgChildEditFacp.h" />
@@ -1091,6 +1093,7 @@
     <ClInclude Include="DlgChildPSwitch.h" />
     <ClInclude Include="DlgChildPump.h" />
     <ClInclude Include="DlgChildRelayTree.h" />
+    <ClInclude Include="DlgDelayTreePane.h" />
     <ClInclude Include="DlgEnv.h" />
     <ClInclude Include="DlgErrorCheck.h" />
     <ClInclude Include="DlgInfoBasePage.h" />
@@ -1127,6 +1130,7 @@
     <ClInclude Include="FormAccess.h" />
     <ClInclude Include="FormAutoMake.h" />
     <ClInclude Include="FormContactFacp.h" />
+    <ClInclude Include="FormDelay.h" />
     <ClInclude Include="FormDoc.h" />
     <ClInclude Include="FormEditLogic.h" />
     <ClInclude Include="FormEmergency.h" />
@@ -1410,6 +1414,8 @@
     <ClCompile Include="DlgAdminMode.cpp" />
     <ClCompile Include="DlgChildBasePage.cpp" />
     <ClCompile Include="DlgChildChangeView.cpp" />
+    <ClCompile Include="DlgChildDelay.cpp" />
+    <ClCompile Include="DlgChildDelayOutput.cpp" />
     <ClCompile Include="DlgChildEditChn.cpp" />
     <ClCompile Include="DlgChildEditEmpty.cpp" />
     <ClCompile Include="DlgChildEditFacp.cpp" />
@@ -1419,6 +1425,7 @@
     <ClCompile Include="DlgChildPSwitch.cpp" />
     <ClCompile Include="DlgChildPump.cpp" />
     <ClCompile Include="DlgChildRelayTree.cpp" />
+    <ClCompile Include="DlgDelayTreePane.cpp" />
     <ClCompile Include="DlgEnv.cpp" />
     <ClCompile Include="DlgErrorCheck.cpp" />
     <ClCompile Include="DlgInfoBasePage.cpp" />
@@ -1455,6 +1462,7 @@
     <ClCompile Include="FormAccess.cpp" />
     <ClCompile Include="FormAutoMake.cpp" />
     <ClCompile Include="FormContactFacp.cpp" />
+    <ClCompile Include="FormDelay.cpp" />
     <ClCompile Include="FormDoc.cpp" />
     <ClCompile Include="FormEditLogic.cpp" />
     <ClCompile Include="FormEmergency.cpp" />

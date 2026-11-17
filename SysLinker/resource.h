@@ -322,6 +322,15 @@
 #define IDD_DIALOG_ROM_CREATE_OPTION_EN 541
 #define IDD_DIALOG_WEB_LOGIN            542
 #define IDD_DIALOG_WEB_LOGIN_EN         543
+#define IDD_FORM_DELAY                  544
+#define IDD_DIALOG_DELAY                546
+#define IDD_DIALOG_DELAY_TREE_PANE      548
+#define IDD_DIALOG_DELAY_OUTPUT         550
+#define IDR_MENU1                       552
+#define IDR_MENU2                       553
+#define IDR_POPUP_GROUP_INPUT           553
+#define IDR_MENU3                       554
+#define IDR_POPUP_GROUP_OUTPUT          554
 #define IDC_ST_LOC                      1000
 #define IDC_ED_NAME                     1001
 #define IDC_ED_SITE                     1002
@@ -350,6 +359,7 @@
 #define IDC_BTN_LOAD                    1006
 #define IDC_BTN_LOGIC_IMPORT            1006
 #define IDC_ST_PUMP_NUM                 1006
+#define IDC_TREE_DELAY                  1006
 #define IDC_ED_PRJ_VERSION              1007
 #define IDC_LIST1                       1007
 #define IDC_DEVICE_LIST                 1007
@@ -726,6 +736,14 @@
 #define IDC_EDIT_EMAIL                  1253
 #define IDC_BUTTON_LOGIC_TYPE           1254
 #define IDC_BUTTON1                     1255
+#define IDC_BUTTON_ADD                  1255
+#define IDC_BUTTON_ADD_DELAY_TIME       1255
+#define IDC_EDIT_GROUP_NUM              1256
+#define IDC_EDIT_GROUP_NAME             1257
+#define IDC_EDIT_DELAY_TIME             1257
+#define IDC_BUTTON_SAVE                 1258
+#define IDC_BUTTON_DEL                  1259
+#define IDC_EDIT_MEET_NUM               1260
 #define ID_WRITE_PASTEASHYPERLINK       32770
 #define ID_HOME_PROJECT_NEW             32772
 #define ID_HOME_PROJECT_OPEN            32773
@@ -781,6 +799,7 @@
 #define ID_BASIC_SET_LOGIC_EDIT         32825
 #define ID_BUTTON2                      32827
 #define ID_ERROR_CHECK                  32827
+#define ID_DELAY_TIME_SETTINGS          32827
 #define ID_BUTTON3                      32830
 #define ID_HOME_PROJECT_TABLE           32830
 #define ID_BUTTON4                      32831
@@ -804,14 +823,22 @@
 #define ID_LOAD_CONTACTFACP2            32853
 #define ID_LOAD_CONTACTFACP_EN          32853
 #define ID_CHK_SHOWHELPMSG              32855
+#define ID_POPUP_MENU_DELETE            32856
+#define ID_POPUP_MENU_MOVE_UP           32857
+#define ID_Menu                         32858
+#define ID_POPUP_MENU_MOVE_DOWN         32859
+#define ID_32860                        32860
+#define ID_POPUP_MENU_DEL_OUTPU         32861
+#define ID_POPUP_MENU_DEL_INPUT         32862
+#define ID_POPUP_MENU_DEL_OUTPUT        32863
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        544
-#define _APS_NEXT_COMMAND_VALUE         32856
-#define _APS_NEXT_CONTROL_VALUE         1256
+#define _APS_NEXT_RESOURCE_VALUE        555
+#define _APS_NEXT_COMMAND_VALUE         32864
+#define _APS_NEXT_CONTROL_VALUE         1258
 #define _APS_NEXT_SYMED_VALUE           371
 #endif
 #endif

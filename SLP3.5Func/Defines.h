@@ -119,6 +119,12 @@
 // 연동데이터 자동 생성 DB Bulk Insert csv 파일 이름
 #define BULK_INSERT_CSV_FILE	_T("TB_LINK_RELAY_STAGE.csv")
 
+// 입력 그룹 및 지연 시간 설정 구조체의 문자열 최대 길이
+#define MAX_GROUP_TEXT_LENGTH	100
+
+// 딜레이 타입 기본 값
+#define DEFAULT_DELAY_TIME		30
+
 // 수신기 타입
 enum {
 	UNDEFINED_FACP_TYPE = 0,
@@ -479,6 +485,18 @@ enum {
 	PATTERN_EXPANSION_VERSION
 }ROM_FILE_VERSION;
 
+// 입력그룹 및 지연시간 설정 회로 타입 정의
+enum {
+	DET_UNKNOWN_TYPE,
+	DET_CIRCUIT,
+	DET_PATTERN,
+	DET_EB,
+	DET_PUMP,
+	DET_PS,
+	DET_CONTACT,
+	DET_DELAY
+}DELAY_EQUIPMENT_TYPE;
+
 // GT1 추가 입력 타입 문자열 
 static const TCHAR* g_lpszEquipmentInputType[] = {
 	_T(""),						// 0 없음, 입력번호는 1베이스, 문자열은 0베이스	
@@ -730,5 +748,29 @@ typedef struct
 	CString email;
 	int grade;
 }ACCOUNT_INFO;
+
+// 그룹 설비 정보
+typedef struct  
+{
+	unsigned char type;
+	unsigned char facp;
+	unsigned char unit;
+	unsigned char chn;
+	unsigned short circuit;
+	unsigned char point;
+}GROUP_EQUIPMENT_INFO;
+
+typedef struct  
+{
+	char groupName[MAX_GROUP_TEXT_LENGTH];
+	char meetConditonCount;
+	std::vector<GROUP_EQUIPMENT_INFO*> inputEquipVec;
+	std::map<unsigned short, GROUP_EQUIPMENT_INFO*> outputEquipMap;	//key: seq 번호 - 의미대로라면 vector가 더 맞겠지만 편집 상 순서번호 수정이 일어날 경우 map이 더 가공에 유리
+}GROUP_INFO;
+
+typedef struct  
+{
+	std::map<unsigned short, GROUP_INFO*> giMap;	//key: group 번호
+}GROUP_MAP_INFO;
 
 #pragma pack(pop)

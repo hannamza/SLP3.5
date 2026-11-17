@@ -45,6 +45,8 @@
 
 #include "FormPumpEdit.h"
 
+#include "FormDelay.h"
+
 #include "PropSheetNewProject.h"
 #include "PropPageProjectInfo.h"
 
@@ -271,6 +273,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 
 	//	ON_COMMAND(ID_SORT_ADDRESS, &CAboutDlg::OnSortAddress)
 //	ON_COMMAND(ID_CHK_VIEWDKOUTPUT, &CAboutDlg::OnChkViewdkoutput)
+ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -309,6 +312,7 @@ BEGIN_MESSAGE_MAP(CSysLinkerApp, CWinAppEx)
 	ON_COMMAND(ID_FACP_PREVIEW_LINK, &CSysLinkerApp::OnFacpPreviewLink)
 	ON_COMMAND(ID_FACP_REVERSE_LINK, &CSysLinkerApp::OnFacpReverseLink)
 	ON_COMMAND(ID_FACP_SET_FACPPWD, &CSysLinkerApp::OnFacpSetFacppwd)
+	ON_COMMAND(ID_DELAY_TIME_SETTINGS, &CSysLinkerApp::OnDelayTimeSettings)
 	ON_UPDATE_COMMAND_UI(ID_HOME_LOGIN, &CSysLinkerApp::OnUpdateHomeLogin)
 	ON_UPDATE_COMMAND_UI(ID_HOME_PROJECT_CLOSE, &CSysLinkerApp::OnUpdateHomeProjectClose)
 	ON_UPDATE_COMMAND_UI(ID_HOME_PROJECT_NEW, &CSysLinkerApp::OnUpdateHomeProjectNew)
@@ -335,6 +339,7 @@ BEGIN_MESSAGE_MAP(CSysLinkerApp, CWinAppEx)
 	ON_UPDATE_COMMAND_UI(ID_FACP_PREVIEW_LINK, &CSysLinkerApp::OnUpdateFacpPreviewLink)
 	ON_UPDATE_COMMAND_UI(ID_FACP_REVERSE_LINK, &CSysLinkerApp::OnUpdateFacpReverseLink)
 	ON_UPDATE_COMMAND_UI(ID_FACP_SET_FACPPWD, &CSysLinkerApp::OnUpdateFacpSetFacppwd)
+	ON_UPDATE_COMMAND_UI(ID_DELAY_TIME_SETTINGS, &CSysLinkerApp::OnUpdateDelayTimeSettings)
 	ON_COMMAND(ID_FACP_RELAYEDIT, &CSysLinkerApp::OnFacpRelayedit)
 	ON_UPDATE_COMMAND_UI(ID_FACP_RELAYEDIT, &CSysLinkerApp::OnUpdateFacpRelayedit)
 	ON_COMMAND(ID_FILE_CLOSE, &CSysLinkerApp::OnFileClose)
@@ -372,6 +377,7 @@ CSysLinkerApp::CSysLinkerApp()
 	m_pTempleUnit = nullptr;
 	m_pTempleAutoMake = nullptr;
 	m_pTempleLogicEdit = nullptr;
+	m_pTempleDelay = nullptr;
 
 	m_pFasSysData = nullptr;
 	m_spInputEquipManager = nullptr;
@@ -415,7 +421,6 @@ BOOL CSysLinkerApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinAppEx::InitInstance();
-
 
 	// OLE 라이브러리를 초기화합니다.
 	if (!AfxOleInit())
@@ -937,6 +942,23 @@ int CSysLinkerApp::DocumentTemplateInit()
 	if(!m_pTempleErrorCheck)
 		return FALSE;
 
+	//20261102 GBM start - 지연 시간 설정 화면 추가
+#ifndef ENGLISH_MODE
+	m_pTempleDelay = new CMultiDocTemplate(IDR_SysLinkerTYPE,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame),
+		RUNTIME_CLASS(CFormDelay));
+#else
+	m_pTempleDelay = new CMultiDocTemplate(IDR_SysLinkerTYPE_EN,
+		RUNTIME_CLASS(CFormDoc),
+		RUNTIME_CLASS(CChildFrame),
+		RUNTIME_CLASS(CFormDelay));
+#endif
+	if (!m_pTempleDelay)
+		return FALSE;
+	AddDocTemplate(m_pTempleDelay);
+	//20261102 GBM end
+
 	AddDocTemplate(m_pTempleUnit);
 
 	//20240909 GBM start - 메모리 누수 오류 수정 : 누락 코드 반영
@@ -1117,6 +1139,17 @@ CView* CSysLinkerApp::OpenFormView(FormViewStyle iStyle)
 		strTitle = L"CHECK FOR ERROR";
 #endif
 	}
+	//20261102 GBM start - 지연 시간 설정 화면 추가
+	else if (iStyle == FV_DELAY)
+	{
+		pDocTemp = m_pTempleDelay;
+#ifndef ENGLISH_MODE
+		strTitle = L"입력 그룹 및 누적 시간 지연 설정";
+#else
+		strTitle = L"Input Group and Cumulative Time Delay Settings";
+#endif
+	}
+	//20261102 GBM
 
 	if (pDocTemp == NULL)
 		return NULL;
@@ -1134,6 +1167,14 @@ CView* CSysLinkerApp::OpenFormView(FormViewStyle iStyle)
 		if(pChild)
 		{ 
 			pChild->SetWindowTextW(strTitle);
+
+			//20261109 GBM start - test
+			if (pChild->GetActiveView() != pView)
+			{
+				pChild->SetActiveView(pView);
+			}
+			//20261109 GBM end
+
 			SetActiveView(pChild);
 			return pView;
 		}
@@ -1166,6 +1207,7 @@ BOOL CSysLinkerApp::PostMessageAllView(UINT uMsg, WPARAM wp, LPARAM lp)
 	PostMessageFormView(FV_AUTOMAKE, uMsg, wp, lp);
 	PostMessageFormView(FV_LOGICEDIT, uMsg, wp, lp);
 	PostMessageFormView(FV_LOADRELAYTABLE, uMsg, wp, lp);
+	PostMessageFormView(FV_DELAY, uMsg, wp, lp);
 	return TRUE;
 }
 BOOL CSysLinkerApp::PostMessageFormView(FormViewStyle iStyle, UINT uMsg, WPARAM wp, LPARAM lp)
@@ -1245,6 +1287,12 @@ BOOL CSysLinkerApp::PostMessageFormView(FormViewStyle iStyle, UINT uMsg, WPARAM 
 	{
 		pDocTemp = m_pTempleErrorCheck;
 	}
+	//20261102 GBM start - 지연 시간 설정 화면 추가
+	else if (iStyle == FV_DELAY)
+	{
+		pDocTemp = m_pTempleDelay;
+	}
+	//20261102 GBM end
 	else
 		return FALSE;
 
@@ -1333,6 +1381,12 @@ BOOL CSysLinkerApp::CloseFormView(FormViewStyle iStyle)
 	{
 		pDocTemp = m_pTempleErrorCheck;
 	}
+	//20261102 GBM start - 지연 시간 설정 화면 추가
+	else if (iStyle == FV_DELAY)
+	{
+		pDocTemp = m_pTempleDelay;
+	}
+	//20261102 GBM
 	else
 		return FALSE;
 
@@ -1995,6 +2049,70 @@ void CSysLinkerApp::OnHomeProjectOpen()
 #else
 		GF_AddLog(L"Failed to open the [%s] project.", dlg.GetOpenProjectName());
 #endif
+		//20261104 GBM start - DB열기에 실패했으면 프로젝트를 닫음
+		if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
+		{
+#ifndef ENGLISH_MODE
+			AfxMessageBox(L"프로젝트 DB 열기에 실패했기 때문에 프로젝트를 종료합니다.");
+#else
+			AfxMessageBox(L"The project is being closed because opening the project database failed.");
+#endif
+			//20240527 GBM start - 스레드로 전환
+#if 1
+			m_hThreadHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+			m_bThreadSucceeded = FALSE;
+#ifndef ENGLISH_MODE
+			CString strMsg = _T("프로젝트를 닫는 중입니다. 잠시 기다려 주세요.");
+#else
+			CString strMsg = _T("Closing the project. Wait for a moment.");
+#endif
+			CProgressBarDlg dlg(strMsg);
+			m_pProgressBarDlg = &dlg;
+
+			CWinThread* pThread = AfxBeginThread((AFX_THREADPROC)ThreadCloseProject, this);
+			dlg.DoModal();
+
+			DWORD dw = WaitForSingleObject(m_hThreadHandle, INFINITE);
+			if (dw != WAIT_OBJECT_0)
+			{
+				Log::Trace("스레드 대기 실패! dw : %d", dw);
+			}
+
+			if (m_bThreadSucceeded)
+			{
+#ifndef ENGLISH_MODE
+				GF_AddLog(L"프로젝트를 닫는 데에 성공했습니다.");
+#else
+				GF_AddLog(L"Successfully closed the project.");
+#endif
+				Log::Trace("The project was successfully closed.");
+			}
+			else
+			{
+#ifndef ENGLISH_MODE
+				GF_AddLog(L"프로젝트를 닫는 데에 실패했습니다.");
+#else
+				GF_AddLog(L"Failed to close the project.");
+#endif
+				Log::Trace("Failed to close the project.");
+			}
+
+			m_pProgressBarDlg = nullptr;
+
+			CString strName = _T("");
+			AfxGetMainWnd()->SetWindowTextW(strName);
+			//
+#else
+			CloseProject();
+
+			CString strName = _T("");
+			AfxGetMainWnd()->SetWindowTextW(strName);
+			GF_AddLog(L"프로젝트를 닫았습니다.");
+			Log::Trace("Project Closed!");
+#endif
+			//20240527 GBM end
+		}
+		//20261104 GBM end
 		return;
 	}
 
@@ -2521,6 +2639,13 @@ void CSysLinkerApp::OnFacpSetFacppwd()
 	dlg.DoModal();
 }
 
+void CSysLinkerApp::OnDelayTimeSettings()
+{
+	//AfxMessageBox(L"OnDelayTimeSettings()");
+
+	OpenFormView(FV_DELAY);
+}
+
 void CSysLinkerApp::OnFacpRelayedit()
 {
 	// TODO: 여기에 명령 처리기 코드를 추가합니다.
@@ -2882,7 +3007,17 @@ void CSysLinkerApp::OnUpdateFacpSetFacppwd(CCmdUI *pCmdUI)
 // 	}
 }
 
-
+void CSysLinkerApp::OnUpdateDelayTimeSettings(CCmdUI *pCmdUI)
+{
+	// TODO: 여기에 명령 업데이트 UI 처리기 코드를 추가합니다.
+	if (pCmdUI)
+	{
+		if (m_pFasSysData != nullptr && m_pFasSysData->GetProjectOpened())
+			pCmdUI->Enable(TRUE);
+		else
+			pCmdUI->Enable(FALSE);
+	}
+}
 
 void CSysLinkerApp::OnErrorCheck()
 {
@@ -4296,6 +4431,7 @@ int CSysLinkerApp::CloseProject()
 	CloseFormView(FV_AUTOMAKE);
 	CloseFormView(FV_LOGICEDIT);
 	CloseFormView(FV_LOADRELAYTABLE);
+	CloseFormView(FV_DELAY);
 
 	//AfxGetApp()->CloseAllDocuments(TRUE);
 	if (m_pFasSysData == nullptr)
@@ -4332,6 +4468,10 @@ int CSysLinkerApp::CloseProject()
 	//수동복사 입력회로 및 연동데이터 정보 초기화
 	CManualLinkManager::Instance()->InitManualCopyData();
 	//20250617 GBM end
+
+	//20261110 GBM start - 프로젝트를 닫으면 그룹 정보 초기화
+	CNewInfo::Instance()->InitGroupMapInfo();
+	//20261110 GBM end
 
 	return 1;
 }
@@ -4440,6 +4580,15 @@ int CSysLinkerApp::RemoveTemplate()
 		delete m_pTempleErrorCheck;
 		m_pTempleErrorCheck = nullptr;
 	}
+
+	//20261102 GBM start - 지연 시간 설정 화면 추가
+	if (m_pTempleDelay != nullptr)
+	{
+		delete m_pTempleDelay;
+		m_pTempleDelay = nullptr;
+	}
+	//20261102 GBM end
+
 	return 1;
 }
 int CSysLinkerApp::CopyProjectVersionTemp(CString strPrjName, CString strPrjFullPath, DWORD dwVer)
@@ -4846,6 +4995,12 @@ int CSysLinkerApp::ViewSelectItem()
 	{
 		pDocTemp = m_pTempleLogicEdit;
 	}
+	//20261102 GBM start - 지연 시간 설정 화면 추가
+	else if (g_stViewSelectItem.nViewType == FV_DELAY)
+	{
+		pDocTemp = m_pTempleDelay;
+	}
+	//20261102 GBM end
 	if (pDocTemp == NULL)
 		return 0;
 

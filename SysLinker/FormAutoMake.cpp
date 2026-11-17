@@ -1,6 +1,5 @@
 // FormAutoMake.cpp : 구현 파일입니다.
 //
-
 #include "stdafx.h"
 #include "SysLinker.h"
 #include "FormAutoMake.h"
@@ -1309,6 +1308,45 @@ int CFormAutoMake::SaveIndividualPattern_XMake_Csv(CCsvBulkWriter& w, CXDataDev*
     return 1;
 }
 
+BOOL CFormAutoMake::DeleteOverlappedManualLink_XMake(
+	YAdoDatabase* pDb)
+{
+	if (pDb == nullptr)
+		return FALSE;
+
+	CString strSql;
+	strSql.Format(
+		L"DELETE M "
+		L"FROM dbo.TB_LINK_RELAY AS M "
+		L"WHERE M.LG_TYPE = %d "
+		L"AND EXISTS ( "
+		L"  SELECT 1 "
+		L"  FROM dbo.TB_LINK_RELAY_STAGE AS S "
+		L"  WHERE M.SRC_FACP = S.SRC_FACP "
+		L"    AND M.SRC_UNIT = S.SRC_UNIT "
+		L"    AND M.SRC_CHN = S.SRC_CHN "
+		L"    AND M.SRC_RLY = S.SRC_RLY "
+		L"    AND M.TGT_FACP = S.TGT_FACP "
+		L"    AND M.TGT_UNIT = S.TGT_UNIT "
+		L"    AND M.TGT_CHN = S.TGT_CHN "
+		L"    AND M.TGT_RLY = S.TGT_RLY "
+		L"    AND M.LINK_TYPE = S.LINK_TYPE "
+		L");",
+		LOGIC_MANUAL
+	);
+
+	if (!pDb->ExecuteSql(strSql))
+	{
+		GF_AddLog(pDb->GetLastErrorString());
+		Log::Trace(
+			"DeleteOverlappedManualLink_XMake failed.");
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
 int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
 {
 	//20260304 GBM start - 시간 측정
@@ -1357,16 +1395,16 @@ int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
 	long nOldTimeout = pDb->m_pCommand->CommandTimeout;
 	pDb->m_pCommand->CommandTimeout = 0;
 
-    // Delete existing auto rows
-    strSql.Format(L"DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=%d", LOGIC_ALL_AUTO);
-    if(pDb->ExecuteSql(strSql) == FALSE)
-    {
+	// Delete existing auto rows
+	strSql.Format(L"DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=%d", LOGIC_ALL_AUTO);
+	if (pDb->ExecuteSql(strSql) == FALSE)
+	{
 		GF_AddLog(pDb->GetLastErrorString());
 		Log::Trace("DELETE FROM TB_LINK_RELAY WHERE LG_TYPE=3 failed.");
-        SendMessage(CSWM_PROGRESS_STEP,nProgOffset,PROG_RESULT_ERROR);
-        pDb->RollbackTransaction();
-        return 0;
-    }
+		SendMessage(CSWM_PROGRESS_STEP, nProgOffset, PROG_RESULT_ERROR);
+		pDb->RollbackTransaction();
+		return 0;
+	}
 
 	// map의 모든 CDataDevice의 연동데이터 중 자동생성을 모두 없앰
 	RemoveLinkAllByAutoGeneration();
@@ -1479,6 +1517,18 @@ int CFormAutoMake::SaveAutoLink_XMake_BulkInsert()
 
 	// csv 파일 삭제
 	DeleteFile(writer.GetPath());
+
+	// STAGE와 중복되는 기존 수동 연동을 먼저 삭제
+	if (!DeleteOverlappedManualLink_XMake(pDb))
+	{
+		SendMessage(
+			CSWM_PROGRESS_STEP,
+			nProgOffset,
+			PROG_RESULT_ERROR);
+
+		pDb->RollbackTransaction();
+		return 0;
+	}
 
     // Move into final table. ADD_DATE uses DEFAULT GETDATE() because we omit it.
     CString moveSql =
@@ -3091,6 +3141,7 @@ void CFormAutoMake::RemoveLinkAllByAutoGeneration()
 			continue;
 
 		CDataDevice* pDataDevice = (CDataDevice*)pDataSystem->GetSysData();
+
 		pDataDevice->RemoveLinkByType(LOGIC_ALL_AUTO);
 	}
 }
@@ -3145,6 +3196,8 @@ void CFormAutoMake::SaveAutoLinkCircuitInMemory(CDataDevice* pDataDevice, CXData
 		if (bCross && (pLink->m_nLinkType == LK_TYPE_RELEAY))
 		{
 			BOOL bFirst = FALSE;
+			BOOL bAdded = FALSE;
+
 			CString strKey = GF_GetIDSysDataKey(SE_RELAY, pLink->GetFacpID(), pLink->GetUnitID(), pLink->GetChnID(), pLink->GetDeviceID());
 			iter = m_pRefFasSysData->m_MapIDSystemData.find(strKey);
 			if (iter != m_pRefFasSysData->m_MapIDSystemData.end())
@@ -3161,7 +3214,15 @@ void CFormAutoMake::SaveAutoLinkCircuitInMemory(CDataDevice* pDataDevice, CXData
 					}
 
 					pDataDevice->AddLink(bFirst, pDataLinked);
+					bAdded = TRUE;
 				}
+			}
+
+			// 리스트에 등록되지 않은 객체는 직접 해제
+			if (!bAdded)
+			{
+				delete pDataLinked;
+				pDataLinked = nullptr;
 			}
 		}
 		else
@@ -3181,7 +3242,6 @@ void CFormAutoMake::SaveAutoLinkEmergencyInMemory(CDataDevice* pDataDevice, CXDa
 		CXDataLink* pLink = (CXDataLink*)pList->GetNext(pos);
 		if (pLink == nullptr)
 			continue;
-
 		CDataLinked* pDataLinked = new CDataLinked;
 		pDataLinked->SetLinkData(pLink->GetEmID(), 0, 0, 0, LK_TYPE_EMERGENCY, LOGIC_ALL_AUTO, pLink->m_nLogicID, pDataDevice->GetFacpID(), pDataDevice->GetUnitID(), pDataDevice->GetChnID(), pDataDevice->GetDeviceID());
 

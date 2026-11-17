@@ -145,3 +145,90 @@ void CNewInfo::CheckAndSetRomFileVersion()
 
 	m_gi.romVersion = nRet;
 }
+
+void CNewInfo::InitGroupMapInfo(unsigned short nGroupNum)
+{
+	// 그룹 정보 하나만 삭제
+	if (nGroupNum != 0)
+	{
+		GROUP_INFO* pGi = m_gmi.giMap[nGroupNum];
+
+		if (pGi == nullptr)
+			return;
+
+		// 입력 정보 해제
+		for (auto pInput : pGi->inputEquipVec)
+		{
+			delete pInput;
+		}
+
+		pGi->inputEquipVec.clear();
+
+		// 출력 정보 해제
+		for (auto& goeiPair : pGi->outputEquipMap)
+		{
+			delete goeiPair.second;
+		}
+
+		pGi->outputEquipMap.clear();
+
+		// 그룹 정보 해제
+		delete pGi;
+
+		// Map에서 제거
+		m_gmi.giMap.erase(nGroupNum);
+
+		return;
+	}
+
+	// 전체 삭제
+	for (auto& giPair : m_gmi.giMap)
+	{
+		GROUP_INFO* pGi = giPair.second;
+
+		if (pGi == nullptr)
+			continue;
+
+		// 입력 정보 해제
+		for (auto pInput : pGi->inputEquipVec)
+		{
+			delete pInput;
+		}
+
+		pGi->inputEquipVec.clear();
+
+		// 출력 정보 해제
+		for (auto& goeiPair : pGi->outputEquipMap)
+		{
+			delete goeiPair.second;
+		}
+
+		pGi->outputEquipMap.clear();
+
+		// 그룹 정보 해제
+		delete pGi;
+	}
+
+	// map 항목 전체 제거
+	m_gmi.giMap.clear();
+}
+
+unsigned short CNewInfo::GetNewGroupNum()
+{
+	unsigned short nNewKey = 1;
+
+	std::map<unsigned short, GROUP_INFO*>::iterator iter;
+	iter = m_gmi.giMap.begin();
+	for (; iter != m_gmi.giMap.end(); iter++)
+	{
+		if(iter->first < nNewKey)
+			continue;
+
+		if (iter->first != nNewKey)
+			break;
+
+		++nNewKey;
+	}
+
+	return nNewKey;
+}

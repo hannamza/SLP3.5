@@ -651,6 +651,18 @@
     <ClInclude Include="XMakeLink\XDataRangeLogic.h">
       <Filter>XMakeLink</Filter>
     </ClInclude>
+    <ClInclude Include="FormDelay.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgChildDelay.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgDelayTreePane.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgChildDelayOutput.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SysLinker.cpp">
@@ -1234,6 +1246,18 @@
     </ClCompile>
     <ClCompile Include="XMakeLink\XDataRangeLogic.cpp">
       <Filter>XMakeLink</Filter>
+    </ClCompile>
+    <ClCompile Include="FormDelay.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgChildDelay.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgDelayTreePane.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgChildDelayOutput.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

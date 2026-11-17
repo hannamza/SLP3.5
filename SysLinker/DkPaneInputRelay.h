@@ -69,6 +69,8 @@ public:
 	int DeleteTreeItem(int nType, ST_TREEITEM * pItem);
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
+
+	int AddDropWnd(CWnd* pWnd);
 };
 
 

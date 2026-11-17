@@ -141,7 +141,15 @@ int CDkPaneInputRelay::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// 모든 명령은 부모 프레임이 아닌 이 컨트롤을 통해 라우팅됩니다.
 	m_TbInputRelay.SetRouteCommandsViaFrame(FALSE);
+	//20261029 GBM start - 입력 그룹 및 출력 시간 지연 설정 기능 추후 활성화 예정 
+#if 0
+	m_ctrlRelayTree.SetCursorResourceID(IDC_DROPADD_CURSOR);
+	m_ctrlRelayTree.SetAllowDragFlag(TRUE);
+	m_ctrlRelayTree.SetSendEventContainer(TRUE);
+#else
 	m_ctrlRelayTree.SetClickCheckSelected(FALSE);
+#endif
+	//20261029 GBM end
 // 
 // 	CMenu menuSort;
 // 	menuSort.LoadMenu(IDR_TB_DKPRELAY_SORT);
@@ -992,4 +1000,10 @@ void CDkPaneInputRelay::OnDestroy()
 	{
 		m_ctrlRelayTree.DeleteAllItems();
 	}
+}
+
+int CDkPaneInputRelay::AddDropWnd(CWnd* pWnd)
+{
+	m_ctrlRelayTree.AddDropWnd(pWnd);
+	return 0;
 }

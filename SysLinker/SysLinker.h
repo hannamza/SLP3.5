@@ -73,6 +73,7 @@ public:
 	CMultiDocTemplate		*	m_pTempleLogicEdit;
 	CMultiDocTemplate		*	m_pTempleLoadRealy;
 	CMultiDocTemplate		*	m_pTempleErrorCheck;
+	CMultiDocTemplate		*	m_pTempleDelay;
 
 	// [KHS 2019-11-24 16:49:51] 
 	// data
@@ -146,6 +147,7 @@ public:
 	afx_msg void OnFacpPreviewLink();
 	afx_msg void OnFacpReverseLink();
 	afx_msg void OnFacpSetFacppwd();
+	afx_msg void OnDelayTimeSettings();
 
 	afx_msg void OnUpdateHomeLogin(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateHomeProjectClose(CCmdUI *pCmdUI);
@@ -173,6 +175,7 @@ public:
 	afx_msg void OnUpdateFacpPreviewLink(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFacpReverseLink(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFacpSetFacppwd(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateDelayTimeSettings(CCmdUI *pCmdUI);
 
 	afx_msg void OnUpdateSimpleErrorCheck(CCmdUI *pCmdUI);
 

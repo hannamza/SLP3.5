@@ -248,12 +248,48 @@ LRESULT CDTreeCtrl::SendTVNDropedItem(HTREEITEM hTreeItem, CWnd *pDropWnd, CWnd 
 			CWnd * pSendWnd = nullptr;
 			pSendWnd = pDropWnd->GetParent();
 
+			//20261109 GBM start - 기존 소스는 부모 창을 찾아 올라가 CFormView를 만나면 그 창에 메시지를 날리는 코드인데
+			//Drag&Drop 대상 트리는 CView에 있는 경우도 있음, 이런 경우 계산된 건지, 운이 좋은 지 모르겠지만
+			//Tree -> SplitterCtrl -> SplitterCtrl -> CView 로 마지막 루프에 CView를 선택하는 상황이 되서 올바르게 동작해 옴
+			//그래서 CFormView 뿐만 아니라 CView를 찾으면 더 이상 부모 창을 찾지 않도록 or 조건을 추가함
 			for (; i < 3; i++)
 			{
-				if (pSendWnd->IsKindOf(RUNTIME_CLASS(CFormView)))
+				if ((pSendWnd->IsKindOf(RUNTIME_CLASS(CFormView))) || (pSendWnd->IsKindOf(RUNTIME_CLASS(CView))))
 					break;
 				pSendWnd = pSendWnd->GetParent();
 			}
+			//20261109 GBM end
+
+			//20261109 GBM start - test
+#ifdef _DEBUG
+			CRuntimeClass* pClass = pSendWnd->GetRuntimeClass();
+
+			TRACE(L"Last Target Class = %s\n",
+				pClass ? CString(pClass->m_lpszClassName).GetString() : L"NULL");
+
+			CMDIChildWnd* pChildFrame = DYNAMIC_DOWNCAST(
+				CMDIChildWnd, pSendWnd);
+
+			if (pChildFrame != nullptr)
+			{
+				CView* pActiveView = pChildFrame->GetActiveView();
+
+				TRACE(_T("Target HWND = %p\n"), pSendWnd->GetSafeHwnd());
+				TRACE(_T("Active View HWND = %p\n"),
+					pActiveView ? pActiveView->GetSafeHwnd() : nullptr);
+
+				if (pActiveView != nullptr)
+				{
+					CString strViewName = pActiveView->GetRuntimeClass()->m_lpszClassName;
+					TRACE(_T("현재 활성 뷰 이름: %s\n"), strViewName);
+				}
+				else
+				{
+					TRACE(_T("현재 활성 뷰 없음\n"));
+				}
+			}
+#endif
+			//20261109 GBM end
 
 			if (0 != pSendWnd->SendMessage(WM_NOTIFY, (WPARAM)tvn.hdr.idFrom, (LPARAM)&tvn)
 				&& m_hTriggerItem == hTreeItem)

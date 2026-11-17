@@ -118,6 +118,8 @@ public:
 	int SaveIndividualEmergency_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
 	int SaveIndividualPattern_XMake_Csv(CCsvBulkWriter& w, CXDataDev* pInputDev);
 
+	BOOL DeleteOverlappedManualLink_XMake(YAdoDatabase* pDb);	//20261116 GBM - 자동 출력이 생성됐는데 기존 수동 출력과 중복될 경우 기존 ROW를 삭제하는 매서드
+
 	bool EnsureDirectoryExistsA(const CString& dir);
 	CString GetDefaultBulkCsvPathA();
 	bool EnsureStageTableA(YAdoDatabase* pDb);

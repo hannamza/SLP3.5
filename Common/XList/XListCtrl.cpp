@@ -101,6 +101,8 @@ CXListCtrl::CXListCtrl()
 	m_strWindowFont = _T("");
 	m_bSorting = FALSE;
 
+	m_bSortEnable = TRUE;
+
 	// [2025/11/4 8:57:38 KHS] 
 	// Focus를 읽어도 항상 선택 사항을 표시 - 
 	m_bAlwaysVisibleSelWhenLostFocus = FALSE;
@@ -2074,7 +2076,7 @@ BOOL CXListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	int nCheckedState = GetHeaderCheckedState(nSubItem);
 	LRESULT lresult = 0 ; 
 
-	nTempState = (nCheckedState == 1) ? 2 : 1;;
+	nTempState = (nCheckedState == 1) ? 2 : 1;
 	// 0 = no checkbox
 	if (nCheckedState != XHEADERCTRL_NO_IMAGE)
 	{
@@ -2122,14 +2124,17 @@ BOOL CXListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	else
 	{
-		// Sortting
-		int nAsc = m_arrDirection.GetAt(nSubItem);
-		if (nAsc <= 0)
-			nAsc = 1;
-		else
-			nAsc = 0;
-		if(m_bSorting == FALSE)
-			Sort(nSubItem, nAsc);
+		if (m_bSortEnable)
+		{
+			// Sortting
+			int nAsc = m_arrDirection.GetAt(nSubItem);
+			if (nAsc <= 0)
+				nAsc = 1;
+			else
+				nAsc = 0;
+			if (m_bSorting == FALSE)
+				Sort(nSubItem, nAsc);
+		}
 	}
 
 	//NMLISTVIEW* pnmlv = (NMLISTVIEW*)pNMHDR;
