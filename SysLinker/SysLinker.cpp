@@ -256,10 +256,10 @@ public:
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
 ,m_strVersion(_T(""))
 {
-#ifndef SLP4_MODE
-	m_strVersion = GFSP_PRODUCT_UPDATE_DATE;
-#else
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	m_strVersion.Format(_T("SLP4 Program Version Number : [%g]\nLast Build Time : [%s]"), GFSP_PRODUCT_VERSION_NUM, CCommonFunc::GetProgramVersion());
+#else
+	m_strVersion = GFSP_PRODUCT_UPDATE_DATE;
 #endif
 }
 
@@ -444,12 +444,12 @@ BOOL CSysLinkerApp::InitInstance()
 	// TODO: 이 문자열을 회사 또는 조직의 이름과 같은
 	// 적절한 내용으로 수정해야 합니다.
 
-#ifndef SLP4_MODE
-	SetRegistryKey(_T("GFS\\FICON3\\SLP3"));
-#else
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	CString key = _T("");
 	key.Format(_T("GFS\\%s\\SLP4"), ROOT_FOLDER);
 	SetRegistryKey(key);
+#else
+	SetRegistryKey(_T("GFS\\FICON3\\SLP3"));
 #endif
 
 	LoadStdProfileSettings(4);  // MRU를 포함하여 표준 INI 파일 옵션을 로드합니다.
@@ -5213,7 +5213,7 @@ BOOL CSysLinkerApp::WebServerLogin()
 		// 로그인 정보 메인 출력 창에 표시
 		CString strAccount = _T("");
 
-#ifdef SLP4_MODE
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 #ifndef ENGLISH_MODE
 		strAccount.Format(_T("[%s] 계정으로 로그인 되었습니다."), CWebConnManager::Instance()->m_ai.email);
 #else

@@ -381,10 +381,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetHelpMsgFunc(TRUE);	//20250825 GBM - 최초 실행 시 도움말 기능 활성화
 
 	CString strProgram;
-#ifndef SLP4_MODE
-	strProgram = _T("SLP3");
-#else
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	strProgram.Format(_T("SLP4(ver%.2f)"), GFSP_PRODUCT_VERSION_NUM);
+#else
+	strProgram = _T("SLP3");
 #endif
 
 #ifndef ENGLISH_MODE

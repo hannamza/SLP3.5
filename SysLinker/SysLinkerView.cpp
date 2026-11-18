@@ -2012,8 +2012,16 @@ void CSysLinkerView::OnBnClickedBtnDel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	int nRet = 0; 
-	if (m_pRefCurData == nullptr)
-	 	return;
+	if (m_pRefFasSysData == nullptr)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("프로젝트가 열리지 않았습니다."), MB_OK | MB_ICONERROR);
+#else
+		AfxMessageBox(_T("The project did not open."), MB_OK | MB_ICONERROR);
+#endif
+		AddCancel();
+		return;
+	}
 	m_nAction = DATA_DEL;
 	nRet = DataDelete();
 
@@ -3655,6 +3663,19 @@ int CSysLinkerView::MakeDeleteItem(YAdoDatabase * pDB)
 void CSysLinkerView::OnBnClickedBtnSave2()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (m_pRefFasSysData == nullptr)
+	{
+#ifndef ENGLISH_MODE
+		AfxMessageBox(_T("프로젝트가 열리지 않았습니다."), MB_OK | MB_ICONERROR);
+#else
+		AfxMessageBox(_T("The project did not open."), MB_OK | MB_ICONERROR);
+#endif
+		if (m_nAction == DATA_ADD)
+			AddCancel();
+
+		return;
+	}
+
 	int nRet = 0;
 	CString strAction, strMessage;
 	if (m_pPage[m_nCurType]->GetChangeData() == FALSE)
@@ -3706,13 +3727,15 @@ void CSysLinkerView::OnBnClickedBtnSave2()
 		{
 			strMessage = L"Failed to save.";
 		}
+
+		AfxMessageBox(strMessage, MB_OK | MB_ICONERROR);
 	}
 	else
 	{
 		if (m_nAction == DATA_ADD)
 		{
 			strMessage = L"Successfully added.";
-			AfxMessageBox(strMessage, MB_OK | MB_ICONERROR);
+			AfxMessageBox(strMessage, MB_OK | MB_ICONINFORMATION);
 		}
 		else
 		{

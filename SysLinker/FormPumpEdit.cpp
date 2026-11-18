@@ -462,7 +462,7 @@ int CFormPumpEdit::SavePumpTypeList()
 	ST_PUMPTYPE * pData;
 	POSITION pos;
 	CFile fRv;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize;
 
 	if(m_pRefFasSysData == nullptr)
@@ -479,7 +479,7 @@ int CFormPumpEdit::SavePumpTypeList()
 #else
 	strLine = L"#Pump Type(1:FAN 2:Pump 3:Utility Power 4:Generator),Type Name,Lcd Msg,Ps Type(1:Non-latching 2:Latching),PS USe OR Not(0:Use 1:Not Use 2:Not Available)\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 	fRv.Write(szBuff,nTempSize);
 	pos = m_pPtrTypeList->GetHeadPosition();
 	while(pos)
@@ -492,7 +492,7 @@ int CFormPumpEdit::SavePumpTypeList()
 			, pData->nPumpType,pData->strTypeName,pData->strLcdMsg,pData->nPsType,pData->nPsUse
 		);
 
-		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 		fRv.Write(szBuff,nTempSize);
 	}
 	fRv.Close();

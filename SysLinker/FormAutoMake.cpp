@@ -342,7 +342,7 @@ int CFormAutoMake::AutoMakeStart()
 	}
 
 	//20250827 GBM start - 기존에 프로세스 우선순위를 높이던 방식에서 스레드 우선순위를 높이는 방식으로 변경
-#ifdef SLP4_MODE
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	// Thread Start
 	m_pMakeThread = AfxBeginThread((AFX_THREADPROC)Thread_MakeProc,
 		(LPVOID)this, THREAD_PRIORITY_HIGHEST);
@@ -419,7 +419,7 @@ void CFormAutoMake::OnBnClickedBtnSave()
 	// 		AfxMessageBox(L"생성된 연동데이터 저장이 완료 되었습니다." , MB_OK|MB_ICONINFORMATION);
 
 	//20250827 GBM start - 기존에 프로세스 우선순위를 높이던 방식에서 스레드 우선순위를 높이는 방식으로 변경
-#ifdef SLP4_MODE
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	m_pMakeThread = AfxBeginThread((AFX_THREADPROC)Thread_SaveProc,
 		(LPVOID)this,THREAD_PRIORITY_HIGHEST);
 #else

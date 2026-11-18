@@ -124,7 +124,7 @@ void CDlgChildDelay::OnBnClickedButtonAdd()
 #ifndef ENGLISH_MODE
 	strTemp.Format(_T("»õ_±×·ì_%03d"), m_nCurGroupNum);
 #else
-	strTemp.Format(_T("NEW_GROUP_%03d"), nGroupNum);
+	strTemp.Format(_T("NEW_GROUP_%03d"), m_nCurGroupNum);
 #endif
 	pGroupName->SetWindowTextW(strTemp);
 

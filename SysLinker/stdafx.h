@@ -83,7 +83,10 @@ using namespace Gdiplus;
 #include "ManualLinkManager.h"
 //20250617 GBM end
 
-#define MAX_QUERY_STRING_SIZE	5000		
+#define MAX_QUERY_STRING_SIZE	5000	
+
+// 유니코드->ANSI 문자열 변환 시 사용되는 모든 버퍼에 적용되는 크기 (로그, 엑셀 파일생성 등)
+#define MAX_LOG_BUFFER_SIZE		6600	//산출 근거: (80(입력 회로 LCD 문자열 최대 길이) + 80(출력 회로 LCD 문자열 최대 길이) * 40(확장될 연동 최대 개수) + 20(,등 offset)) * 2
 
 // [KHS 2020-1-16 17:28:02] 
 // 윈도우 메세지
@@ -283,7 +286,7 @@ static CString g_strErrChkText[CHK_CNT] = {
 	L"EXCEEDED THE OUTPUT COUNT FOR THE PATTERN",
 	L"CHARACTER LIMIT EXCEEDED",
 	L"DUPLICATE FLOOR NUMBER",
-	L"MISSING OUTPUT TYPE ID"
+	L"MISSING OUTPUT TYPE ID",
 	L"NO INPUT TYPE",
 	L"EXCEEDED THE INTERLOCK OUTPUT COUNT",
 	L"UNUSED OUTPUT",

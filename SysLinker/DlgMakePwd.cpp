@@ -71,13 +71,13 @@ void CDlgMakePwd::OnBnClickedBtnMake()
 	UpdateData();
 
 	COleDateTime dtCur = COleDateTime::GetCurrentTime();
-	char szStrBuff[256] = { 0 };
+	char szStrBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	WORD wCrc = 0;
 	int i = 0,nSize =0; 
 	BYTE btTemp = 0 , btDiv=0 ,btRest=0; 
 	CString strtemp;
 	strtemp = dtCur.Format(L"%Y-%m-%d");
-	nSize = GF_Unicode2ASCII(strtemp.GetBuffer(), szStrBuff ,256);
+	nSize = GF_Unicode2ASCII(strtemp.GetBuffer(), szStrBuff , MAX_LOG_BUFFER_SIZE);
 	strtemp.ReleaseBuffer();
 
 	for (i = 9; i >=0 ; i--)

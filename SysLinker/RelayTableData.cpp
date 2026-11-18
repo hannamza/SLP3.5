@@ -16479,7 +16479,7 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 	int nRet = 1 , nTempRet =1; 
 	UINT uEmOffset = 3000 * 2;
 	BYTE btEmBuff[0x1FFFF] = { 0 };
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nPtnItemCount, nDldItemCnt;
 
 	ST_MAINROM* pMainRom;
@@ -16827,8 +16827,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 			, pDev->GetFacpNum() , pDev->GetUnitNum() , pDev->GetChnNum(),pDev->GetDeviceNum()
 			, strInput , strOutput
 		);
-		memset(szBuff, 0, 256);
-		nTempSize = GF_Unicode2ASCII(strRomTxt.GetBuffer(), szBuff, 256);
+		memset(szBuff, 0, MAX_LOG_BUFFER_SIZE);
+		nTempSize = GF_Unicode2ASCII(strRomTxt.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fnRom.Write(szBuff, nTempSize);
 		//fnRom.Write(CT2A(strRomTxt), strRomTxt.GetLength());
 
@@ -16858,6 +16858,14 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 			nLastFacp, pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum()
 			, nInType, nOutType, pDev->GetLinkedList(), pDev->GetEquipLocationName()
 			, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset);
+
+		//20261118 GBM start - 출력 개수가 초과되거나 재확인대상 출력이 중복일 경우는 즉시 롬생성 과정을 중단 
+		if (nTempRet == 0)
+		{
+			return nTempRet;
+		}
+		//20261118 GBM end
+
 		if (nRet != 0)
 			nRet = nTempRet;
 		strCrtTxt.Format(L"%02d%02d%d%03d,%02d,%02d,%s\n" 
@@ -16865,8 +16873,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 			, nInType, nOutType
 			, pDev->GetEquipLocationName()
 		);
-		memset(szBuff, 0, 256);
-		nTempSize = GF_Unicode2ASCII(strCrtTxt.GetBuffer(), szBuff, 256);
+		memset(szBuff, 0, MAX_LOG_BUFFER_SIZE);
+		nTempSize = GF_Unicode2ASCII(strCrtTxt.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fnCrt.Write(szBuff, nTempSize);
 
 		// [KHS 2020-12-3 14:17:20] 
@@ -16925,8 +16933,8 @@ int CRelayTableData::MakeX2RMainRom(CString strPath, void * pVoidRom
 			, pDev->GetFacpNum() , pDev->GetUnitNum() ,pDev->GetChnNum() , pDev->GetDeviceNum()
 			, str1,str2
 		);
-		memset(szBuff, 0, 256);
-		nTempSize = GF_Unicode2ASCII(strLocLine.GetBuffer(), szBuff, 256);
+		memset(szBuff, 0, MAX_LOG_BUFFER_SIZE);
+		nTempSize = GF_Unicode2ASCII(strLocLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fTxtLoc.Write(szBuff, nTempSize);
 
 		//20260526 GBM start - ROM 파일 역변환 기능을 사용하지 않음에 따른 주석 처리
@@ -17203,7 +17211,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 {
 	CString strFnEq, strEqLine;
 	CFile fRvEq;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize;
 	POSITION pos;
 	CDataEquip * pEq;
@@ -17215,7 +17223,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 
 	strEqLine = L"#ID,TYPE,NAME,DESCRIPTION,SYMBOL\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
+	nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 	fRvEq.Write(szBuff, nTempSize);
 
 	pos = m_spRefInputEquipManager->GetHeadPosition();
@@ -17231,7 +17239,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 		fRvEq.Write(strEqLine, strEqLine.GetLength());
 #else
-		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRvEq.Write(szBuff, nTempSize);
 #endif
 		//nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
@@ -17254,7 +17262,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 		fRvEq.Write(strEqLine, strEqLine.GetLength());
 #else
-		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRvEq.Write(szBuff, nTempSize);
 #endif
 	}
@@ -17276,7 +17284,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 		fRvEq.Write(strEqLine, strEqLine.GetLength());
 #else
-		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRvEq.Write(szBuff, nTempSize);
 #endif
 	}
@@ -17298,7 +17306,7 @@ int CRelayTableData::MakeRvEquipInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 		fRvEq.Write(strEqLine, strEqLine.GetLength());
 #else
-		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strEqLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRvEq.Write(szBuff, nTempSize);
 #endif
 	}
@@ -17312,7 +17320,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 {
 	CString strFn, strLine;
 	CFile fRv;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize ;
 
 	CDataLocBase * pData;
@@ -17334,7 +17342,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 #else
 	strLine = L"#TYPE,BUILDING,BUILDINGTYPE,LINE,FLOOR,ROOM,NAME,OTHER\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 	fRv.Write(szBuff,nTempSize);
 
 	pList = m_spLocation->GetBuildList();
@@ -17352,7 +17360,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 		fRv.Write(strLine,strLine.GetLength());
 #else
-		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 		fRv.Write(szBuff,nTempSize);
 #endif
 
@@ -17370,7 +17378,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 			fRv.Write(strLine,strLine.GetLength());
 #else
-			nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+			nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 			fRv.Write(szBuff,nTempSize);
 #endif
 			pBType = (CDataLocBType*)pData;
@@ -17387,7 +17395,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 				fRv.Write(strLine,strLine.GetLength());
 #else
-				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 				fRv.Write(szBuff,nTempSize);
 #endif
 				pStair = (CDataLocStair*)pData;
@@ -17405,7 +17413,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 					fRv.Write(strLine,strLine.GetLength());
 #else
-					nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+					nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 					fRv.Write(szBuff,nTempSize);
 #endif
 					pFloor = (CDataLocFloor*)pData;
@@ -17423,7 +17431,7 @@ int CRelayTableData::MakeRvLocationInfo(CString strPath)
 #if _USE_UNICODE_REVS_INFO_
 						fRv.Write(strLine,strLine.GetLength());
 #else
-						nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+						nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 						fRv.Write(szBuff,nTempSize);
 #endif
 					}
@@ -17491,7 +17499,7 @@ int CRelayTableData::MakeRvEmergencyInfo(CString strPath)
 {
 	CString strFn, strLine;
 	CFile fRv;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize;
 	POSITION pos;
 	CDataEmBc * pData;
@@ -17502,7 +17510,7 @@ int CRelayTableData::MakeRvEmergencyInfo(CString strPath)
 #else
 	strLine = L"#ID,ADDRESS,NAME\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 	fRv.Write(szBuff, nTempSize);
 	if (m_spEmergencyManager == nullptr)
 	{
@@ -17522,7 +17530,7 @@ int CRelayTableData::MakeRvEmergencyInfo(CString strPath)
 		fRv.Write(strLine, strLine.GetLength());
 #else
 		memset((void*)szBuff, 0, sizeof(szBuff) / sizeof(TCHAR));
-		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRv.Write(szBuff, nTempSize);
 #endif
 // 		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
@@ -17537,7 +17545,7 @@ int CRelayTableData::MakeRvPatternInfo(CString strPath)
 {
 	CString strFn, strLine;
 	CFile fRv;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize;
 	POSITION pos;
 	CDataPattern * pData;
@@ -17548,7 +17556,7 @@ int CRelayTableData::MakeRvPatternInfo(CString strPath)
 #else
 	strLine = L"#ID,TYPE,NAME\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 	fRv.Write(szBuff, nTempSize);
 	if (m_spUserAddPattern == nullptr)
 	{
@@ -17568,7 +17576,7 @@ int CRelayTableData::MakeRvPatternInfo(CString strPath)
 		fRv.Write(strLine, strLine.GetLength());
 #else
 		memset((void*)szBuff, 0, sizeof(szBuff) / sizeof(TCHAR));
-		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRv.Write(szBuff, nTempSize);
 #endif
 // 		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
@@ -17585,7 +17593,7 @@ int CRelayTableData::MakeRvContactInfo(CString strPath)
 {
 	CString strFn, strLine;
 	CFile fRv;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize;
 	POSITION pos;
 	CDataFacpRelay * pData;
@@ -17596,7 +17604,7 @@ int CRelayTableData::MakeRvContactInfo(CString strPath)
 #else
 	strLine = L"#FACPID,CONTACTID,CONTACTNUMBER,CONTACTNAME\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 	fRv.Write(szBuff, nTempSize);
 	if (m_spContactFacp == nullptr)
 	{
@@ -17616,7 +17624,7 @@ int CRelayTableData::MakeRvContactInfo(CString strPath)
 		fRv.Write(strLine, strLine.GetLength());
 #else
 		memset((void*)szBuff, 0, sizeof(szBuff) / sizeof(TCHAR));
-		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
+		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		fRv.Write(szBuff, nTempSize);
 #endif
 // 		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(), szBuff, 256);
@@ -17646,7 +17654,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 	CString strFn,strLine,strName,strType;
 	CFile fRv;
 
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	int nTempSize;
 	strFn.Format(L"%s%s(%s).csv",strPath,FN_MANUALOUTPUT,dt.Format(L"%Y%m%d%H%M%S"));
 	fRv.Open(strFn,CFile::modeCreate | CFile::modeReadWrite);
@@ -17655,7 +17663,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 #else
 	strLine = L"#INPUTTYPE,INPUTNAME,OUTPUTTYPE,OUTPUTNAME,INPUTNAME\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,MAX_LOG_BUFFER_SIZE);
 	fRv.Write(szBuff,nTempSize);
 	for(it = m_MapSystemData.begin(); it != m_MapSystemData.end(); it++)
 	{
@@ -17707,7 +17715,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					, pOut->GetInputFullName()
 				);
 #endif
-				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,MAX_LOG_BUFFER_SIZE);
 				fRv.Write(szBuff,nTempSize);
 			}
 			else
@@ -17808,7 +17816,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					,strName
 					,L""
 				);
-				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,MAX_LOG_BUFFER_SIZE);
 				fRv.Write(szBuff,nTempSize);
 			}
 		}
@@ -17866,7 +17874,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					, pOut->GetInputFullName()
 #endif
 				);
-				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,MAX_LOG_BUFFER_SIZE);
 				fRv.Write(szBuff,nTempSize);
 			}
 			else
@@ -17968,7 +17976,7 @@ int CRelayTableData::MakeManualOutput(CString strPath)
 					,strName
 					,L""
 				);
-				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,256);
+				nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,MAX_LOG_BUFFER_SIZE);
 				fRv.Write(szBuff,nTempSize);
 			}
 		}
@@ -17993,7 +18001,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	ST_YEONDONG stTemp;
 	int nType , nPtID , nPCnt =0 , nDevCnt =0, nSize , nTemp , nRet = 1 , nSrcFacpID=-1 , nLnkFacp=0;
 	int nTempNum = 0;
-	char szStrBuff[256] = { 0 };
+	char szStrBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	CString strPreFix = L"",strCode=L"";
 	BYTE btCmd =0,btDiv , btRest;
 	POSITION pos;
@@ -18193,8 +18201,8 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 
 	// 메세지 주소 : 초기값 30부터 시작 - size 최대 40
 	// 
-	memset(szStrBuff, 0, 256);
-	nSize = GF_Unicode2ASCII(strName.GetBuffer(), szStrBuff, 256);
+	memset(szStrBuff, 0, MAX_LOG_BUFFER_SIZE);
+	nSize = GF_Unicode2ASCII(strName.GetBuffer(), szStrBuff, MAX_LOG_BUFFER_SIZE);
 	strName.ReleaseBuffer();
 
 	//nSize += 1;	//20241016 GBM GT1 타입일 경우 문자열 뒷부분에 0으로 채워 넣도록 하기 위해 수신기 타입 판단 다음으로 하기 위해 아래로 이동
@@ -18216,7 +18224,7 @@ UINT CRelayTableData::AddPointerAddrX2MainRom(
 	{
 		nMaxSize = MAX_LCD_TEXT_LENGTH_GT1;
 		strFacpType = _T("GT1");
-		memset(szStrBuff + nSize, 0, 256 - nSize);
+		memset(szStrBuff + nSize, 0, MAX_LOG_BUFFER_SIZE - nSize);
 	}
 	else
 	{
@@ -18300,7 +18308,7 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 {
 	POSITION pos;
 	CDataPS * pData;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	CString strCrtTxt;
 	int nFacpID = 0, nFcvt = -1;
 	int nPs, nTempSize ,nTemp , nRet = 1;
@@ -18328,6 +18336,7 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 			, D_MAX_PUMP_COUNT, nTemp);
 #endif
 		nRet = 0;
+		return nRet;	// 오류가 있다면 아래 행정을 할 필요없다.
 	}
 
 	pos = m_spPresureSwitch->GetHeadPosition();
@@ -18359,16 +18368,23 @@ int CRelayTableData::Add63Unit0ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 			pMainRomPE->stPumpPointer[nPs].bt256Mod = (uRomOffset) % 0x100;
 		}
 
-		AddPointerAddrX2MainRom(nFNum,0,0,0
+		//20261118 GBM start - 출력 개수가 초과되거나 재확인대상 출력이 중복일 경우는 즉시 롬생성 과정을 중단 
+		nRet  = AddPointerAddrX2MainRom(nFNum,0,0,0
 			, pData->GetPSwitchType(), 0, pData->GetLinkList() , pData->GetPSwitchName()
 			,pRomBuff , pMsgBuff,uRomOffset,uMsgOffset
 		);
+		if (nRet == 0)
+		{
+			return nRet;
+		}
+		//20261118 GBM end
+
 		strCrtTxt.Format(L"%02d630%03d,%02d,0,%s\n"
 			, nFNum, nPs, pData->GetPSwitchType()
 			, pData->GetPSwitchName()
 		);
-		memset(szBuff, 0, 256);
-		nTempSize = GF_Unicode2ASCII(strCrtTxt.GetBuffer(), szBuff, 256);
+		memset(szBuff, 0, MAX_LOG_BUFFER_SIZE);
+		nTempSize = GF_Unicode2ASCII(strCrtTxt.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		pFnCrt->Write(szBuff, nTempSize);
 // 		strCrtTxt.Format(L"%02d%02d%d%03d,%02d,%02d,%s\n"
 // 			, pDev->GetFacpNum(), pDev->GetUnitNum(), pDev->GetChnNum(), pDev->GetDeviceNum()
@@ -18386,7 +18402,7 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 	POSITION pos;
 	int nFacpID = 0 , nFcvt = -1;
 	CDataPump * pData;
-	char szBuff[256] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	CString strCrtTxt;
 	int  nPmp, nTempSize, nTemp, nRet = 1;
 	ST_MAINROM* pMainRom;
@@ -18412,6 +18428,7 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 			, D_MAX_PUMP_COUNT, nTemp);
 #endif
 		nRet = 0;
+		return nRet;	// 오류가 있다면 아래 행정을 할 필요 없음
 	}
 	pos = m_spPump->GetHeadPosition();
 	while (pos)
@@ -18442,16 +18459,23 @@ int CRelayTableData::Add63Unit1ChnX2MainRom(int nFNum, CFile *pFnCrt, CFile *pFn
 			pMainRomPE->stRelayPointer[nPmp].bt256Mod = (uRomOffset) % 0x100;
 		}
 		
-		AddPointerAddrX2MainRom(nFNum,0,0,0
+		//20261118 GBM start - 출력 개수가 초과되거나 재확인대상 출력이 중복일 경우는 즉시 롬생성 과정을 중단 
+		nRet = AddPointerAddrX2MainRom(nFNum,0,0,0
 			, pData->GetPumpType(), 0, pData->GetLinkList(), pData->GetPumpName()
 			, pRomBuff, pMsgBuff, uRomOffset, uMsgOffset
 		);
+		if (nRet == 0)
+		{
+			return nRet;
+		}
+		//20261118 GBM end
+
 		strCrtTxt.Format(L"%02d631%03d,%02d,0,%s\n"
 			, nFNum, nPmp, pData->GetPumpType()
 			, pData->GetPumpName()
 		);
-		memset(szBuff, 0, 256);
-		nTempSize = GF_Unicode2ASCII(strCrtTxt.GetBuffer(), szBuff, 256);
+		memset(szBuff, 0, MAX_LOG_BUFFER_SIZE);
+		nTempSize = GF_Unicode2ASCII(strCrtTxt.GetBuffer(), szBuff, MAX_LOG_BUFFER_SIZE);
 		pFnCrt->Write(szBuff, nTempSize);
 	}
 	return 1;
@@ -18707,7 +18731,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  	CDataPump * pPmp;
  	CString strName;
  	int nCopyPos=0,nTemp=0; 
- 	char szStrBuff[256] = { 0 };
+ 	char szStrBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
  	std::shared_ptr<CManagerEquip>		spRefManager = nullptr;
 
 	//20241016 GBM start - GT1 ROM 생성 시 문자열 입력 후 32버퍼 나머지 부분을 0으로 채움 그러나 F3의 경우는 기존처럼 채우지 않아서 기존 ROM과 Hexa 값 비교시 불일치하지 않도록 함
@@ -18740,8 +18764,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		if(pEquip == nullptr)
  			continue;
  		strName = pEquip->GetEquipName();
- 		memset(szStrBuff,0,256);
- 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,256);
+ 		memset(szStrBuff,0,MAX_LOG_BUFFER_SIZE);
+ 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,MAX_LOG_BUFFER_SIZE);
  		nSize += 1;
  		if(nSize >= 32)
  		{
@@ -18751,7 +18775,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 
 		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
 		if(bGT1Type)
-			memset(szStrBuff + nSize, 0, 256 - nSize);
+			memset(szStrBuff + nSize, 0, MAX_LOG_BUFFER_SIZE - nSize);
 		//20241016 GBM end
 
 		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
@@ -18786,8 +18810,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  		strName = pEquip->GetEquipName();
  		//strName = pEquip->GetEquipName();
  
- 		memset(szStrBuff,0,256);
- 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,256);
+ 		memset(szStrBuff,0,MAX_LOG_BUFFER_SIZE);
+ 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff, MAX_LOG_BUFFER_SIZE);
  		nSize += 1;
  		if(nSize >= 32)
  		{
@@ -18797,7 +18821,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 
 		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
 		if(bGT1Type)
-			memset(szStrBuff + nSize, 0, 256 - nSize);
+			memset(szStrBuff + nSize, 0, MAX_LOG_BUFFER_SIZE - nSize);
 		//20241016 GBM end
 
 		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
@@ -18834,8 +18858,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			continue;
  		strName = pPmp->GetPumpLcd();
  
- 		memset(szStrBuff,0,256);
- 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,256);
+ 		memset(szStrBuff,0,MAX_LOG_BUFFER_SIZE);
+ 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,MAX_LOG_BUFFER_SIZE);
  		nSize += 1;
  		if(nSize >= 32)
  		{
@@ -18845,7 +18869,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 
 		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
 		if(bGT1Type)
-			memset(szStrBuff + nSize, 0, 256 - nSize);
+			memset(szStrBuff + nSize, 0, MAX_LOG_BUFFER_SIZE - nSize);
 		//20241016 GBM end
 
 		nTemp = pPmp->GetPumpID() - 1; 
@@ -18882,8 +18906,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			continue;
  		strName = pEquip->GetEquipName();
  
- 		memset(szStrBuff,0,256);
- 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,256);
+ 		memset(szStrBuff,0,MAX_LOG_BUFFER_SIZE);
+ 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,MAX_LOG_BUFFER_SIZE);
  		nSize += 1;
  		if(nSize >= 32)
  		{
@@ -18893,7 +18917,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 
 		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
 		if(bGT1Type)
-			memset(szStrBuff + nSize, 0, 256 - nSize);
+			memset(szStrBuff + nSize, 0, MAX_LOG_BUFFER_SIZE - nSize);
 		//20241016 GBM end
 
 		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
@@ -18926,8 +18950,8 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
  			continue;
  		strName = pEquip->GetEquipName();
  
- 		memset(szStrBuff,0,256);
- 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,256);
+ 		memset(szStrBuff,0,MAX_LOG_BUFFER_SIZE);
+ 		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,MAX_LOG_BUFFER_SIZE);
  		nSize += 1;
  		if(nSize >= 32)
  		{
@@ -18937,7 +18961,7 @@ UINT CRelayTableData::AddPatternPointerAddrX2MainRom(
 
 		//20241016 GBM start - 문자열 이후 빈칸 0으로 채움
 		if(bGT1Type)
-			memset(szStrBuff + nSize, 0, 256 - nSize);
+			memset(szStrBuff + nSize, 0, MAX_LOG_BUFFER_SIZE - nSize);
 		//20241016 GBM end
 
 		//편집에서는 최대 개수 이상을 막았지만 만약 프로젝트 생성 시 중계기 일람표 상 최대 개수를 넘거나 중계기 일람표 갱신으로 인해 최대 개수를 넘어 간다면 다른 메모리 침범하지 않도록 막는 코드
@@ -19230,7 +19254,7 @@ UINT CRelayTableData::AddEmergencyRom(BYTE * pEmBuff, UINT &uEmOffset)
 	POSITION pos;
 	int nIdx, nLength;
 	int nRet = 1, nCnt; 
-	char szStrBuff[256] = { 0 };
+	char szStrBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	if (m_spEmergencyManager == nullptr)
 		return 1;
 	nIdx = 1;
@@ -19277,7 +19301,7 @@ UINT CRelayTableData::AddEmergencyRom(BYTE * pEmBuff, UINT &uEmOffset)
 			pEmBuff[nIdx * 2 + 0] = uEmOffset / 0x100;
 			pEmBuff[nIdx * 2 + 1] = uEmOffset % 0x100;
 
-			nLength = GF_Unicode2ASCII(strAddr.GetBuffer(), szStrBuff, 256);
+			nLength = GF_Unicode2ASCII(strAddr.GetBuffer(), szStrBuff, MAX_LOG_BUFFER_SIZE);
 			nLength += 1;
 			if (nLength >= 30)
 			{

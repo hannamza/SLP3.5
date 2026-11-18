@@ -395,7 +395,7 @@ int CDlgErrorCheck::ProcErrorCheck()
 	YAdoDatabase * pDBUtil = nullptr;
 
 	POSITION pos;
-	char szStrBuff[256] = { 0 };
+	char szStrBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 
 	//20251209 GBM start - 가스A, 가스B, 밸브 중복 체크를 위한 변수
 	CDataDevice* pTemp;
@@ -740,8 +740,8 @@ int CDlgErrorCheck::ProcErrorCheck()
 		TRACE(L"=================1. %s\n" , pDev->GetInputFullName());
 		// 이름 길이
 		strName = pDev->GetEquipLocationName();
-		memset(szStrBuff,0,256);
-		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff,256);
+		memset(szStrBuff,0,MAX_LOG_BUFFER_SIZE);
+		nSize = GF_Unicode2ASCII(strName.GetBuffer(),szStrBuff, MAX_LOG_BUFFER_SIZE);
 		strName.ReleaseBuffer();
 		nSize += 1;
 		//sizeof(szStrBuff);
@@ -1193,7 +1193,7 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 		return ; 
 	}
 	int nTempSize = 0;
-	char szBuff[2048] = { 0 };
+	char szBuff[MAX_LOG_BUFFER_SIZE] = { 0 };
 	CFile file;
 	COleDateTime dtCur;
 	CString strtemp,strPrjName,strPath,strLine;
@@ -1232,9 +1232,9 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 #ifndef ENGLISH_MODE
 	strLine = L"#오류종류,오류분류,내용\n";
 #else
-	strLine = L"#errortype,errorclassification,content\n";
+	strLine = L"#ErrorType,ErrorClassification,Content\n";
 #endif
-	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,2048);
+	nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,MAX_LOG_BUFFER_SIZE);
 	file.Write(szBuff,nTempSize);
 	for(int i = 0; i < nCnt; i ++)
 	{
@@ -1243,7 +1243,7 @@ void CDlgErrorCheck::OnBnClickedBtnSave()
 			,m_ctrlReport.GetItemText(i,1)
 			,m_ctrlReport.GetItemText(i,2)
 		);
-		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff,2048);
+		nTempSize = GF_Unicode2ASCII(strLine.GetBuffer(),szBuff, MAX_LOG_BUFFER_SIZE);
 		file.Write(szBuff,nTempSize);
 	}
 	file.Close();

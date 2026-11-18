@@ -517,7 +517,7 @@ int CFormEquip::DataDelete()
 	int nID = m_nNum;
 
 	//20250612 GBM start - SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
-#ifdef SLP4_MODE
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_DELETE, nType, nID))
 		return 0;
 #endif
@@ -649,7 +649,7 @@ int CFormEquip::DataAdd()
 	//20240422 GBM start - 편집 여부 체크 -> 체크 안하도록 함 -> 다시 활성화
 
 	//20250612 GBM start - SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
-#ifdef SLP4_MODE
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 	if (!CheckEditableEquipment(EQUIPMENT_TYPE_ADD, nType, nID))
 		return 0;
 #endif
@@ -800,7 +800,7 @@ int CFormEquip::DataSave()
 		//20250612 GBM start - 새로 추가 설비 여부와는 상관없이 설비 정의 타입과 ID를 가져와서 유효성 검사
 
 		//SLP3와 SLP4의 설비정의가 다르므로 SLP4에서만 유효성 확인
-#ifdef SLP4_MODE
+#if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 		if (!CheckEditableEquipment(EQUIPMENT_TYPE_MODIFY, nType, nID))
 			return 0;
 #endif
