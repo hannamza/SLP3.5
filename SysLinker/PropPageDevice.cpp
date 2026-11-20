@@ -292,6 +292,7 @@ void CPropPageDevice::OnBnClickedBtnBrowser()
 	int nMaxFiles = 256;
 	int nBufferSz = nMaxFiles * 256 * sizeof(TCHAR) + sizeof(TCHAR);
 	FileDialog.GetOFN().lpstrFile = str.GetBuffer(nBufferSz);
+	FileDialog.GetOFN().nMaxFile = nBufferSz / sizeof(TCHAR);
 
 	if (FileDialog.DoModal() != IDOK)
 		return;
