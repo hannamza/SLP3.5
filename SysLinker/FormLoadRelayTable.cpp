@@ -556,10 +556,10 @@ void CFormLoadRelayTable::OnBnClickedBtnBrowser()
 #endif
 	CFileDialog FileDialog(TRUE, NULL, strDefault, OFN_HIDEREADONLY| OFN_ALLOWMULTISELECT, strFilter, this);
 	CString strFile,strPath;
-	TCHAR buffer[4096] = { 0 }; //버퍼
-	FileDialog.m_ofn.lpstrFile = buffer; //버퍼 포인터
+	CString str; //버퍼
 	int nMaxFiles = 256;
 	int nBufferSz = nMaxFiles * 256 * sizeof(TCHAR) + sizeof(TCHAR);
+	FileDialog.m_ofn.lpstrFile = str.GetBuffer(nBufferSz); //버퍼 포인터
 	FileDialog.m_ofn.nMaxFile = nBufferSz; //버퍼 크기 
 	int nListIndex = -1;
 	int nDotPos = -1;
