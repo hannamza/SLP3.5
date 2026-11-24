@@ -1422,9 +1422,15 @@ BOOL CXDataStair::GetAffectedOutputDeviceByRangeLogic(
 
 BOOL CXDataStair::CheckLinkedBuildingCircuitLogicMatched(CXDataDev * pInDev, CXDataFloor *pFloor, CXDataLogicItem * pItem)
 {
+	//입력이 아파트이고 2층 이상일 때는 연결 건물은 제외하고 입력이 발생한 아파트만 계단 일치 여부를 보고 출력 설정
+	//입력이 아파트이고 1층 이하일 때는 연결 건물 전체(보통 주차장, 주민센터이므로 1층 이하)와 입력이 발생한 아파트만 계단 일치 여부를 보고 출력 설정
+	//입력이 아파트가 아닌 경우는 연결 건물 전체(주차장, 주민센터, 모든 아파트 동)가 출력 설정
+
 	//조건 시작
 	int nSrcBuildIndex = pInDev->GetBuildIndex();
 	int nTgtBuildindex = pFloor->GetBuildIndex();
+	int nSrcFloor = pInDev->GetLocFloorNumber();
+	int nTgtFloor = pFloor->GetFloorNumber();
 	BOOL bSrcIsApart = g_MapIsApartment[nSrcBuildIndex];
 	BOOL bTgtIsApart = g_MapIsApartment[nTgtBuildindex];
 
@@ -1434,30 +1440,17 @@ BOOL CXDataStair::CheckLinkedBuildingCircuitLogicMatched(CXDataDev * pInDev, CXD
 		//출력이 일반 아파트일 때
 		if (bTgtIsApart)
 		{
-			// 연결 건물로 묶여있는 지 확인
-			if (pItem->CheckMatchLinkedBuildForLinkedBuildTypeCircuit (nSrcBuildIndex, nTgtBuildindex) == FALSE)
+			//자기 자신일 때
+			if (nSrcBuildIndex == nTgtBuildindex)
 			{
-				// 연결 건물로 묶여있지 않지만 자기 자신이면 나머지 조건을 확인, 계단까지만 일치하면 TRUE
-				if (nSrcBuildIndex == nTgtBuildindex)
-				{
-					if (pItem->MatchBType(pInDev, pFloor, TRUE) == 0)
-						return FALSE;
-					if (pItem->MatchStair(pInDev, pFloor, TRUE) == 0)
-						return FALSE;
-				}
-				else
-				{
-					// 연결 건물로 묶여있지 않고 자기 자신도 아니면 FALSE
-					return FALSE;
-				}
-			}
-			else
-			{
-				// 연결 건물로 묶여있다면 나머지 조건을 확인, 계단까지만 일치하면 TRUE
 				if (pItem->MatchBType(pInDev, pFloor, TRUE) == 0)
 					return FALSE;
 				if (pItem->MatchStair(pInDev, pFloor, TRUE) == 0)
 					return FALSE;
+			}
+			else
+			{
+				return FALSE;
 			}
 		}
 		// 출력이 일반 아파트가 아닐 때
@@ -1466,8 +1459,12 @@ BOOL CXDataStair::CheckLinkedBuildingCircuitLogicMatched(CXDataDev * pInDev, CXD
 			// 연결 건물로 묶여있는 지 확인
 			if (pItem->CheckMatchLinkedBuildForLinkedBuildTypeCircuit(nSrcBuildIndex, nTgtBuildindex) == FALSE)
 			{
-				// 연결 건물로 묶여있지 않고 자기 자신도 아니면 FALSE
-				if (nSrcBuildIndex != nTgtBuildindex)
+				return FALSE;
+			}
+			else
+			{
+				//소스 층이 2층 이상이고 타겟 층이 1층 이하이면 FALSE
+				if (nSrcFloor >= 2 && nTgtFloor <= 1)
 				{
 					return FALSE;
 				}

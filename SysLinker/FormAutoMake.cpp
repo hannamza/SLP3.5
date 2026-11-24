@@ -204,6 +204,9 @@ DWORD CFormAutoMake::Thread_SaveProc(LPVOID lpData)
 void CFormAutoMake::OnInitialUpdate()
 {
 	CFormView::OnInitialUpdate();
+
+	ModifyStyle(0, WS_CLIPCHILDREN);	// 뷰가 전환되어 돌아왔을 때 트리 컨트롤 갱신되지 않는 오류 수정
+
 	CRect rc,rcMain;
 	GetClientRect(&rc);
 	rc.DeflateRect(4, 4, 4, 4);

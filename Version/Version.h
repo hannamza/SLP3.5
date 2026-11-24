@@ -1,9 +1,9 @@
 // 배포 시 반드시 변경할 것
 #if defined(SLP4_MODE) || defined(ENGLISH_MODE)
 
-#define GFSP_PRODUCT_VERSION		"2.05"
-#define GFSP_PRODUCT_VERSION_NUM	2.05
-#define GFSP_PRODUCT_UPDATE_DATE	"SLP4 v2.5 , Last Updated On 18 November 2026"
+#define GFSP_PRODUCT_VERSION		"2.06"
+#define GFSP_PRODUCT_VERSION_NUM	2.06
+#define GFSP_PRODUCT_UPDATE_DATE	"SLP4 v2.6 , Last Updated On 24 November 2026"
 #define GFSP_PRODUCT_NAME			"SLP4"
 #define GFSP_PROGRAM_NAME			"SLP4.EXE"
 
